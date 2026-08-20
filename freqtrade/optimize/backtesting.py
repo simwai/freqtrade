@@ -709,9 +709,12 @@ class Backtesting:
                 current_time=current_date,
             )
 
-            if self.margin_mode == MarginMode.CROSS or not (
+            is_full_exit = (
                 order.ft_order_side == trade.exit_side and order.safe_amount == trade.amount
-            ):
+            )
+            is_partial_exit = order.ft_order_side == trade.exit_side and not is_full_exit
+            # Partial exits change the position size, so update liquidation after recalculation.
+            if not is_partial_exit and (self.margin_mode == MarginMode.CROSS or not is_full_exit):
                 # trade is still open or we are in cross margin mode and
                 # must update all liquidation prices
                 update_liquidation_prices(
@@ -721,7 +724,7 @@ class Backtesting:
                     stake_currency=self.config["stake_currency"],
                     dry_run=True,
                 )
-            if not (order.ft_order_side == trade.exit_side and order.safe_amount == trade.amount):
+            if not is_full_exit:
                 self._call_adjust_stop(current_date, trade, order.ft_price)
             return True
         return False
@@ -736,6 +739,13 @@ class Backtesting:
             sub_trade = order.safe_amount_after_fee != trade.amount
             if sub_trade:
                 trade.recalc_trade_from_orders()
+                update_liquidation_prices(
+                    trade,
+                    exchange=self.exchange,
+                    wallets=self.wallets,
+                    stake_currency=self.config["stake_currency"],
+                    dry_run=True,
+                )
             else:
                 trade.close_date = current_time
                 trade.close(order.ft_price, show_msg=False)
