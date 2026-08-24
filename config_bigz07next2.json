@@ -1,0 +1,110 @@
+{
+  "recursive_strategy_search": true,
+  "max_open_trades": 10,
+  "stake_currency": "USDT",
+  "stake_amount": "unlimited",
+  "amend_last_stake_amount ": true,
+  "tradable_balance_ratio": 0.99,
+  "fiat_display_currency": "EUR",
+  "dry_run": true,
+  "dry_run_wallet": 50,
+  "cancel_open_orders_on_exit": true,
+  "trading_mode": "futures",
+  "margin_mode": "isolated",
+  "dataformat_ohlcv": "feather",
+  "dataformat_trades": "feather",
+  "unfilledtimeout": {
+    "entry": 10,
+    "exit": 10,
+    "exit_timeout_count": 0,
+    "unit": "minutes"
+  },
+  "entry_pricing": {
+    "price_side": "other",
+    "use_order_book": true,
+    "order_book_top": 1,
+    "price_last_balance": 0.0,
+    "check_depth_of_market": {
+      "enabled": false,
+      "bids_to_ask_delta": 1
+    }
+  },
+  "exit_pricing": {
+    "price_side": "other",
+    "use_order_book": true,
+    "order_book_top": 1
+  },
+  "exchange": {
+    "name": "binance",
+    "key": "YOUR_BINANCE_API_KEY",
+    "secret": "YOUR_BINANCE_API_SECRET",
+    "ccxt_config": {
+      "enableRateLimit": true,
+      "rateLimit": 500
+    },
+    "ccxt_async_config": {
+      "enableRateLimit": true,
+      "rateLimit": 500
+    },
+    "pair_whitelist": [],
+    "pair_blacklist": [
+      "(BNB)/.*",
+      ".*(_PREMIUM|BEAR|BULL|HALF|HEDGE|UP|DOWN|[1235][SL])/.*",
+      "(AUD|BRZ|CAD|CHF|EUR|GBP|HKD|IDRT|JPY|NGN|RUB|SGD|TRY|UAH|USD|ZAR)/.*",
+      "(BUSD|CUSD|CUSDT|DAI|PAXG|SUSD|TUSD|USDC|USDN|USDP|USDT|VAI|UST|USTC|AUSD)/.*",
+      "(ACM|AFA|ALA|ALL|ALPINE|APL|ASR|ATM|BAR|CAI|CHZ|CITY|FOR|GAL|GOZ|IBFK|JUV|LEG|LOCK-1|NAVI|NMR|NOV|PFL|PSG|ROUSH|STV|TH|TRA|UCH|UFC|YBO)/.*",
+      "(1EARTH|ILA|BOBA|CTXC|CWAR|HBAR|OMG|ONG|ARDR|DMTR|MLS|TORN|LUNA|BTS|QKC|COS|ACA|FTT|SRM|YFII|SNM|ANC|AION|MIR|BNX|STG|HNT|WABI|QLC|NEBL|AUTO|VGX|PEPE|VITE|DREP|JASMY|PNT|PERL|AMB|OAX|LOOM|RAD|ID|NULS|MLN|MEME|TOKEN|TOMO|WTC|1000SATS|ORDI)/.*"
+    ]
+  },
+  "pairlists": [
+    {
+      "method": "VolumePairList",
+      "number_assets": 150,
+      "sort_key": "quoteVolume",
+      "refresh_period": 3600
+    },
+    {
+      "method": "DelistingFilter",
+      "refresh_period": 1800,
+      "read_timeout": 15,
+      "initial_scan": false,
+      "state_file": "user_data/delisting_state_config_bigz07next2.json"
+    },
+    {
+      "method": "VolatilityFilter",
+      "lookback_days": 5,
+      "min_volatility": 0.02,
+      "max_volatility": 0.75,
+      "refresh_period": 86400
+    },
+    {
+      "method": "PerformanceFilter"
+    },
+    {
+      "method": "ShuffleFilter"
+    }
+  ],
+  "telegram": {
+    "enabled": true,
+    "token": "YOUR_TELEGRAM_BOT_TOKEN",
+    "chat_id": "YOUR_TELEGRAM_CHAT_ID"
+  },
+  "api_server": {
+    "enabled": true,
+    "listen_ip_address": "127.0.0.1",
+    "listen_port": 8085,
+    "verbosity": "error",
+    "enable_openapi": false,
+    "jwt_secret_key": "CHANGE_ME_JWT_SECRET",
+    "ws_token": "CHANGE_ME_WS_TOKEN",
+    "CORS_origins": [],
+    "username": "freqtrader",
+    "password": "CHANGE_ME_API_PASSWORD"
+  },
+  "bot_name": "freqtradeBigZ07Next2",
+  "initial_state": "running",
+  "force_entry_enable": false,
+  "internals": {
+    "process_throttle_secs": 10
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "recursive_strategy_search": true,
+  "max_open_trades": 6,
+  "stake_currency": "USDC",
+  "stake_amount": "unlimited",
+  "dry_run": true,
+  "dry_run_wallet": 2000,
+  "trading_mode": "futures",
+  "margin_mode": "isolated",
+  "timeframe": "5m",
+  "dataformat_ohlcv": "feather",
+  "dataformat_trades": "feather",
+  "unfilledtimeout": {
+    "entry": 10,
+    "exit": 30,
+    "exit_timeout_count": 0,
+    "unit": "minutes"
+  },
+  "entry_pricing": {
+    "price_side": "other",
+    "use_order_book": true,
+    "order_book_top": 1
+  },
+  "exit_pricing": {
+    "price_side": "other",
+    "use_order_book": true,
+    "order_book_top": 1
+  },
+  "exchange": {
+    "name": "binance",
+    "pair_whitelist": [
+      "1000BONK/USDC:USDC",
+      "1000PEPE/USDC:USDC",
+      "1000SHIB/USDC:USDC",
+      "ARB/USDC:USDC",
+      "AVAX/USDC:USDC",
+      "BCH/USDC:USDC",
+      "BNB/USDC:USDC",
+      "BOME/USDC:USDC",
+      "BTC/USDC:USDC",
+      "CRV/USDC:USDC",
+      "DOGE/USDC:USDC",
+      "ENA/USDC:USDC",
+      "ETH/USDC:USDC",
+      "ETHFI/USDC:USDC",
+      "FIL/USDC:USDC",
+      "LINK/USDC:USDC",
+      "LTC/USDC:USDC",
+      "NEAR/USDC:USDC",
+      "NEO/USDC:USDC",
+      "ORDI/USDC:USDC",
+      "SOL/USDC:USDC",
+      "SUI/USDC:USDC",
+      "TIA/USDC:USDC",
+      "WIF/USDC:USDC",
+      "WLD/USDC:USDC",
+      "XRP/USDC:USDC"
+    ],
+    "pair_blacklist": []
+  },
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ]
+}

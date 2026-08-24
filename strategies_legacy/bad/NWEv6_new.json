@@ -1,0 +1,35 @@
+{
+  "strategy_name": "NWEv6_new",
+  "params": {
+    "roi": {
+      "0": 0.1,
+      "423": 0.03,
+      "751": 0.01
+    },
+    "stoploss": {
+      "stoploss": -0.99
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": 0.005,
+      "trailing_stop_positive_offset": 0.019,
+      "trailing_only_offset_is_reached": true
+    },
+    "buy": {
+      "bandwidth_buy": 13,
+      "marginselldw": 1.0163,
+      "mult_buy": 18.852,
+      "window_buy": 66
+    },
+    "sell": {
+      "pHSL": -0.059,
+      "pPF_1": 0.014,
+      "pPF_2": 0.062,
+      "pSL_1": 0.013,
+      "pSL_2": 0.069
+    },
+    "protection": {}
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2022-12-18 23:46:14.905240+00:00"
+}

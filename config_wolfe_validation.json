@@ -1,0 +1,39 @@
+{
+  "recursive_strategy_search": true,
+  "$schema": "https://schema.freqtrade.io/schema.json",
+  "max_open_trades": 5,
+  "stake_currency": "USDT",
+  "stake_amount": 1000,
+  "dry_run": true,
+  "dry_run_wallet": 10000,
+  "trading_mode": "futures",
+  "margin_mode": "isolated",
+  "timeframe": "5m",
+  "dataformat_ohlcv": "feather",
+  "unfilledtimeout": {
+    "entry": 1440,
+    "exit": 1440,
+    "exit_timeout_count": 0,
+    "unit": "minutes"
+  },
+  "entry_pricing": {
+    "price_side": "other",
+    "use_order_book": true,
+    "order_book_top": 1
+  },
+  "exit_pricing": {
+    "price_side": "other",
+    "use_order_book": true,
+    "order_book_top": 1
+  },
+  "exchange": {
+    "name": "binance",
+    "pair_whitelist": [],
+    "pair_blacklist": []
+  },
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ]
+}

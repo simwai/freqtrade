@@ -1,0 +1,38 @@
+{
+  "strategy_name": "OctopusNestStrategy",
+  "params": {
+    "roi": {
+      "0": 100.0
+    },
+    "stoploss": {
+      "stoploss": -0.99
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "bb_length": 20,
+      "ema_length": 100,
+      "length_kc": 20,
+      "mult_bb": 2.0,
+      "mult_kc": 1.5
+    },
+    "sell": {
+      "atr_length": 14,
+      "high_low_stop_loss_lookback": 20,
+      "high_low_stop_loss_multiplier": 0.98,
+      "max_trade_duration_days": 6,
+      "my_backup_multiplier": 1.1,
+      "risk_reward_ratio": 1.66,
+      "sl_size_or_atr_multiplier": 1.38
+    },
+    "protection": {}
+  },
+  "ft_stratparam_v": 1
+}

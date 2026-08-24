@@ -1,0 +1,239 @@
+import freqtrade.vendor.qtpylib.indicators as qtpylib
+import talib.abstract as ta
+from freqtrade.strategy.interface import IStrategy
+from pandas import DataFrame
+from datetime import datetime
+from freqtrade.strategy import DecimalParameter, merge_informative_pair
+
+from user_data.strategies.components.risk import RiskMixin, TimeCutStopManager
+
+
+###########################################################################################################
+##                CombinedBinHClucAndMADV3 by ilya                                                       ##
+##                                                                                                       ##
+##    https://github.com/i1ya/freqtrade-strategies                                                       ##
+##    The stratagy most inspired by iterativ (authors of the CombinedBinHAndClucV6)                      ##
+##                                                                                                       ##
+###########################################################################################################
+##                 GENERAL RECOMMENDATIONS                                                               ##
+##                                                                                                       ##
+##   For optimal performance, suggested to use between 2 and 4 open trades, with unlimited stake.        ##
+##   With my pairlist which can be found in this repo.                                                   ##
+##                                                                                                       ##
+##   Ensure that you don't override any variables in your config.json. Especially                        ##
+##   the timeframe (must be 5m).                                                                         ##
+##                                                                                                       ##
+##   sell_profit_only:                                                                                   ##
+##       True - risk more (gives you higher profit and higher Drawdown)                                  ##
+##       False (default) - risk less (gives you less ~10-15% profit and much lower Drawdown)             ##
+##                                                                                                       ##
+###########################################################################################################
+
+class CombinedBinHClucAndMADV3(RiskMixin, IStrategy):
+    INTERFACE_VERSION = 3
+
+    minimal_roi = {
+        "0": 0.021,
+    }
+
+    stoploss = -0.10
+
+    timeframe = '5m'
+    inf_1h = '1h'
+
+    # Sell signal
+    use_exit_signal = True
+    exit_profit_only = True
+    # it doesn't meant anything, just to guarantee there is a minimal profit.
+    exit_profit_offset = 0.001
+    ignore_roi_if_entry_signal = False
+
+    # Trailing stoploss
+    trailing_stop = False
+    trailing_only_offset_is_reached = False
+    trailing_stop_positive = 0.01
+    trailing_stop_positive_offset = 0.025
+
+    # Custom stoploss
+    use_custom_stoploss = True
+
+    # Run "populate_indicators()" only for new candle.
+    process_only_new_candles = False
+
+    # Number of candles the strategy requires before producing valid signals
+    startup_candle_count: int = 200
+    risk_per_trade = 0.005
+    risk_stop_distance = 0.10
+
+    # Hyperoptable entry thresholds (spaces="buy").
+    binhv45_bbdelta_close = DecimalParameter(
+        0.02, 0.05, default=0.031, decimals=3, space="buy", optimize=True
+    )
+    binhv45_closedelta_close = DecimalParameter(
+        0.01, 0.03, default=0.018, decimals=3, space="buy", optimize=True
+    )
+    binhv45_tail_ratio = DecimalParameter(
+        0.15, 0.35, default=0.233, decimals=3, space="buy", optimize=True
+    )
+    cluc_close_bblower = DecimalParameter(
+        0.95, 1.0, default=0.985, decimals=3, space="buy", optimize=True
+    )
+    macd_low_open_ratio = DecimalParameter(
+        0.01, 0.04, default=0.02, decimals=3, space="buy", optimize=True
+    )
+    macd_low_shift_ratio = DecimalParameter(
+        0.005, 0.02, default=0.01, decimals=3, space="buy", optimize=True
+    )
+
+    # Optional order type mapping.
+    order_types = {
+        'entry': 'limit',
+        'exit': 'limit',
+        'stoploss': 'market',
+        'stoploss_on_exchange': False
+    }
+
+    # Time-cut stop (components equivalent of the strategy_lib "Time Cut" engine):
+    # after 240 minutes in the red the stop tightens to 1%; otherwise
+    # ``self.stoploss`` (-0.10) acts as the hard loss floor.
+    stop_managers = [TimeCutStopManager(minutes=240, cut=0.01)]
+
+    def custom_stake_amount(
+        self,
+        pair: str,
+        current_time: datetime,
+        current_rate: float,
+        proposed_stake: float,
+        min_stake: float | None,
+        max_stake: float,
+        leverage: float,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float:
+        risk_stake = max_stake * self.risk_per_trade / (
+            self.risk_stop_distance * max(leverage, 1.0)
+        )
+        if min_stake is not None:
+            risk_stake = max(risk_stake, min_stake)
+        return min(risk_stake, max_stake)
+
+    def leverage(
+        self,
+        pair: str,
+        current_time: datetime,
+        current_rate: float,
+        proposed_leverage: float,
+        max_leverage: float,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float:
+        return 1.0
+
+    def informative_pairs(self):
+        pairs = self.dp.current_whitelist()
+        informative_pairs = [(pair, '1h') for pair in pairs]
+        return informative_pairs
+
+    def informative_1h_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        assert self.dp, "DataProvider is required for multiple timeframes."
+        # Get the informative pair
+        informative_1h = self.dp.get_pair_dataframe(pair=metadata['pair'], timeframe=self.inf_1h)
+        # EMA
+        informative_1h['ema_50'] = ta.EMA(informative_1h, timeperiod=50)
+        informative_1h['ema_200'] = ta.EMA(informative_1h, timeperiod=200)
+        # RSI
+        informative_1h['rsi'] = ta.RSI(informative_1h, timeperiod=14)
+
+        return informative_1h
+
+    def normal_tf_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+
+        # strategy BinHV45
+        bb_40 = qtpylib.bollinger_bands(dataframe['close'], window=40, stds=2)
+        dataframe['lower'] = bb_40['lower']
+        dataframe['mid'] = bb_40['mid']
+        dataframe['bbdelta'] = (bb_40['mid'] - dataframe['lower']).abs()
+        dataframe['closedelta'] = (dataframe['close'] - dataframe['close'].shift()).abs()
+        dataframe['tail'] = (dataframe['close'] - dataframe['low']).abs()
+
+        # strategy ClucMay72018
+        bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
+        dataframe['bb_lowerband'] = bollinger['lower']
+        dataframe['bb_middleband'] = bollinger['mid']
+        dataframe['bb_upperband'] = bollinger['upper']
+        dataframe['ema_slow'] = ta.EMA(dataframe, timeperiod=50)
+        dataframe['volume_mean_slow'] = dataframe['volume'].rolling(window=30).mean()
+
+        # EMA
+        dataframe['ema_50'] = ta.EMA(dataframe, timeperiod=50)
+        dataframe['ema_200'] = ta.EMA(dataframe, timeperiod=200)
+
+        dataframe['ema_26'] = ta.EMA(dataframe, timeperiod=26)
+        dataframe['ema_12'] = ta.EMA(dataframe, timeperiod=12)
+
+        # RSI
+        dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+
+        return dataframe
+
+    def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        # The indicators for the 1h informative timeframe
+        informative_1h = self.informative_1h_indicators(dataframe, metadata)
+        dataframe = merge_informative_pair(
+            dataframe, informative_1h, self.timeframe, self.inf_1h, ffill=True)
+
+        # The indicators for the normal (5m) timeframe
+        dataframe = self.normal_tf_indicators(dataframe, metadata)
+
+        return dataframe
+
+    def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        regime_long = (
+            (dataframe['close'] > dataframe['ema_200_1h'])
+            & (dataframe['ema_50_1h'] > dataframe['ema_200_1h'])
+        )
+        binhv45 = (
+            (dataframe['ema_50'] > dataframe['ema_200']) &
+            dataframe['lower'].shift().gt(0) &
+            dataframe['bbdelta'].gt(dataframe['close'] * self.binhv45_bbdelta_close.value) &
+            dataframe['closedelta'].gt(dataframe['close'] * self.binhv45_closedelta_close.value) &
+            dataframe['tail'].lt(dataframe['bbdelta'] * self.binhv45_tail_ratio.value) &
+            dataframe['close'].lt(dataframe['lower'].shift()) &
+            dataframe['close'].le(dataframe['close'].shift())
+        )
+        cluc = (
+            (dataframe['close'] < dataframe['ema_slow']) &
+            (dataframe['close'] < self.cluc_close_bblower.value * dataframe['bb_lowerband']) &
+            (dataframe['volume'] < (dataframe['volume_mean_slow'].shift(1) * 20)) &
+            (dataframe['volume'] < (dataframe['volume'].shift() * 4))
+        )
+        macd_low = (
+            (dataframe['ema_26'] > dataframe['ema_12']) &
+            ((dataframe['ema_26'] - dataframe['ema_12']) > (dataframe['open'] * self.macd_low_open_ratio.value)) &
+            (
+                (dataframe['ema_26'].shift() - dataframe['ema_12'].shift())
+                > (dataframe['open'] * self.macd_low_shift_ratio.value)
+            ) &
+            (dataframe['volume'] < (dataframe['volume'].shift() * 4)) &
+            (dataframe['close'] < dataframe['bb_lowerband'])
+        )
+        vol_ok = dataframe['volume'] > 0
+        dataframe.loc[regime_long & binhv45 & vol_ok, 'enter_long'] = 1
+        dataframe.loc[regime_long & binhv45 & vol_ok, 'enter_tag'] = 'binhv45'
+        dataframe.loc[regime_long & cluc & vol_ok, 'enter_long'] = 1
+        dataframe.loc[regime_long & cluc & vol_ok, 'enter_tag'] = 'cluc'
+        dataframe.loc[regime_long & macd_low & vol_ok, 'enter_long'] = 1
+        dataframe.loc[regime_long & macd_low & vol_ok, 'enter_tag'] = 'macd_low'
+        return dataframe
+
+    def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        dataframe.loc[
+            (
+                (dataframe['close'] > dataframe['bb_middleband'] * 1.01) &
+                (dataframe['volume'] > 0)  # Make sure Volume is not 0
+            ),
+            'exit_long'
+        ] = 1
+        return dataframe

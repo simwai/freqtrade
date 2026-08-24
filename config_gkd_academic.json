@@ -1,0 +1,114 @@
+{
+  "recursive_strategy_search": true,
+    "max_open_trades": 3,
+    "stake_currency": "USDT",
+    "stake_amount": 100,
+    "amend_last_stake_amount": true,
+    "tradable_balance_ratio": 0.99,
+    "fiat_display_currency": "USD",
+    "dry_run": true,
+    "dry_run_wallet": 1000,
+    "cancel_open_orders_on_exit": true,
+    "ignore_buying_expired_candle_after": 90,
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+    "unfilledtimeout": {
+        "entry": 30,
+        "exit": 10,
+        "unit": "seconds"
+    },
+    "order_types": {
+        "entry": "market",
+        "exit": "market",
+        "emergency_exit": "market",
+        "trailing_stop_loss": "market",
+        "stoploss": "market",
+        "stoploss_on_exchange": false,
+        "stoploss_on_exchange_interval": 60
+    },
+    "entry_pricing": {
+        "price_side": "other",
+        "use_order_book": true,
+        "order_book_top": 1,
+        "price_last_balance": 0.0,
+        "check_depth_of_market": {
+            "enabled": false,
+            "bids_to_ask_delta": 1
+        }
+    },
+    "exit_pricing": {
+        "price_side": "other",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "exchange": {
+        "name": "binance",
+        "key": "",
+        "secret": "",
+        "ccxt_config": {},
+        "ccxt_async_config": {},
+        "pair_whitelist": [
+            "DOGE/USDT:USDT",
+            "XRP/USDT:USDT",
+            "ENJ/USDT:USDT",
+            "DOT/USDT:USDT",
+            "CRV/USDT:USDT",
+            "MANA/USDT:USDT",
+            "SAND/USDT:USDT",
+            "ATOM/USDT:USDT",
+            "LTC/USDT:USDT",
+            "APE/USDT:USDT",
+            "ALGO/USDT:USDT",
+            "GRT/USDT:USDT",
+            "ANKR/USDT:USDT",
+            "ONT/USDT:USDT",
+            "SNX/USDT:USDT",
+            "MKR/USDT:USDT",
+            "REN/USDT:USDT",
+            "REEF/USDT:USDT",
+            "OMG/USDT:USDT",
+            "BAND/USDT:USDT"
+        ],
+        "pair_blacklist": []
+    },
+    "pairlists": [
+        {
+            "method": "StaticPairList"
+        }
+    ],
+    "telegram": {
+        "enabled": false,
+        "token": "",
+        "chat_id": ""
+    },
+    "api_server": {
+        "enabled": false,
+        "listen_ip_address": "127.0.0.1",
+        "listen_port": 8080,
+        "verbosity": "error",
+        "enable_openapi": false,
+        "jwt_secret_key": "08cdb0d47a1a9bd1c1e8cd83fbb3f9c2cd33a7deaa8ec925",
+        "ws_token": "f6ac63b35a5f6d2b5a2818a6f7ba2cb79fd82f7c",
+        "CORS_origins": [],
+        "username": "freqtrader",
+        "password": "academic"
+    },
+    "bot_name": "freqtrade",
+    "initial_state": "running",
+    "strategy": "GKDAdaptiveAcademicFinal",
+    "timeframe": "15m",
+    "hyperopt_loss": "ShortTradeDurHyperOptLoss",
+    "hyperopt_min_trades": 5,
+    "walk_forward": {
+        "enabled": true,
+        "train_days": 90,
+        "test_days": 7,
+        "step_days": 7,
+        "schedule": "sun 00:05",
+        "min_trades": 20,
+        "max_drawdown": 0.3
+    },
+    "internals": {
+        "process_throttle_secs": 5
+    }
+}

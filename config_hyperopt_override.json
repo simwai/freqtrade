@@ -1,0 +1,34 @@
+{
+  "recursive_strategy_search": true,
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ],
+  "exchange": {
+    "name": "binance",
+    "pair_whitelist": [
+      "XRP/USDT:USDT",
+      "LTC/USDT:USDT",
+      "ATOM/USDT:USDT",
+      "ALGO/USDT:USDT",
+      "DOGE/USDT:USDT",
+      "DOT/USDT:USDT",
+      "CRV/USDT:USDT",
+      "ENJ/USDT:USDT",
+      "GRT/USDT:USDT",
+      "SAND/USDT:USDT",
+      "MANA/USDT:USDT",
+      "APE/USDT:USDT",
+      "BCH/USDT:USDT",
+      "LINK/USDT:USDT",
+      "XTZ/USDT:USDT",
+      "ONT/USDT:USDT",
+      "IOTA/USDT:USDT",
+      "BAT/USDT:USDT",
+      "NEO/USDT:USDT",
+      "SNX/USDT:USDT"
+    ],
+    "pair_blacklist": []
+  }
+}

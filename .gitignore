@@ -1,0 +1,26 @@
+# Heavy / generated output - not versioned
+data/
+backtest_results/
+hyperopt_results/
+hyperopt_isolated/
+walk_forward/
+analysis/
+plot/
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Binary data
+*.feather
+*.pkl
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Secrets / runtime
+.env
+*_secret*.json
+delisting_state_config_*.json

@@ -1,0 +1,56 @@
+{
+  "strategy_name": "BigZ06",
+  "params": {
+    "roi": {
+      "0": 0.259,
+      "11": 0.088,
+      "25": 0.04,
+      "50": 0
+    },
+    "stoploss": {
+      "stoploss": -0.135
+    },
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.328,
+      "trailing_stop_positive_offset": 0.399,
+      "trailing_only_offset_is_reached": true
+    },
+    "buy": {
+      "buy_bb20_close_bblowerband_safe_1": 0.906,
+      "buy_bb20_close_bblowerband_safe_2": 0.958,
+      "buy_condition_0_enable": true,
+      "buy_condition_10_enable": true,
+      "buy_condition_11_enable": true,
+      "buy_condition_12_enable": false,
+      "buy_condition_13_enable": true,
+      "buy_condition_1_enable": true,
+      "buy_condition_2_enable": false,
+      "buy_condition_3_enable": true,
+      "buy_condition_4_enable": false,
+      "buy_condition_5_enable": true,
+      "buy_condition_6_enable": false,
+      "buy_condition_7_enable": true,
+      "buy_condition_8_enable": true,
+      "buy_condition_9_enable": false,
+      "buy_macd_1": 0.05,
+      "buy_macd_2": 0.08,
+      "buy_rsi_1": 21.2,
+      "buy_rsi_1h_1": 13.2,
+      "buy_rsi_1h_2": 38.5,
+      "buy_rsi_1h_3": 30.7,
+      "buy_rsi_1h_4": 15.7,
+      "buy_rsi_1h_5": 45.0,
+      "buy_rsi_2": 31.2,
+      "buy_rsi_3": 23.2,
+      "buy_volume_drop_1": 5.0,
+      "buy_volume_drop_2": 5.9,
+      "buy_volume_drop_3": 9.4,
+      "buy_volume_pump_1": 0.2
+    },
+    "sell": {},
+    "protection": {}
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2022-11-28 19:48:45.447728+00:00"
+}

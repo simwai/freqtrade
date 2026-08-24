@@ -1,0 +1,36 @@
+{
+  "strategy_name": "MfiEmaWaveTrend2",
+  "params": {
+    "roi": {
+      "0": 100
+    },
+    "stoploss": {
+      "stoploss": -0.05
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 4
+    },
+    "buy": {
+      "buy_wt_threshold": 55,
+      "ema_length": 10,
+      "wt_channel_length": 182,
+      "wt_length": 15,
+      "wt_sma_length": 168
+    },
+    "sell": {
+      "sell_wt_threshold": -55,
+      "atr_long_multiplier": 3.3,
+      "atr_short_multiplier": 9.1,
+      "is_timed_exit": false
+    },
+    "protection": {}
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2023-03-18 10:58:59.623180+00:00"
+}

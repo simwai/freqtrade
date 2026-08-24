@@ -1,0 +1,73 @@
+{
+  "strategy_name": "BigZ08",
+  "params": {
+    "roi": {},
+    "stoploss": {
+      "stoploss": -0.99
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "buy_bb20_close_bblowerband_safe_1": 0.989,
+      "buy_bb20_close_bblowerband_safe_2": 0.982,
+      "buy_condition_0_enable": false,
+      "buy_condition_10_enable": false,
+      "buy_condition_11_enable": false,
+      "buy_condition_12_enable": false,
+      "buy_condition_13_enable": false,
+      "buy_condition_1_enable": false,
+      "buy_condition_2_enable": false,
+      "buy_condition_3_enable": false,
+      "buy_condition_4_enable": false,
+      "buy_condition_5_enable": true,
+      "buy_condition_6_enable": true,
+      "buy_condition_7_enable": false,
+      "buy_condition_8_enable": false,
+      "buy_condition_9_enable": false,
+      "buy_macd_1": 0.02,
+      "buy_macd_2": 0.03,
+      "buy_rsi_1": 28.0,
+      "buy_rsi_1h_1": 16.5,
+      "buy_rsi_1h_2": 15.0,
+      "buy_rsi_1h_3": 20.0,
+      "buy_rsi_1h_4": 35.0,
+      "buy_rsi_1h_5": 39.0,
+      "buy_rsi_2": 10.0,
+      "buy_rsi_3": 14.2,
+      "buy_volume_drop_1": 3.6,
+      "buy_volume_drop_2": 2.1,
+      "buy_volume_drop_3": 7.2,
+      "buy_volume_pump_1": 0.6,
+      "automatic_high_low_take_profit_ratio": 1.28,
+      "high_low_stop_loss_backup_multiplier": 1.0,
+      "high_low_stop_loss_lookback": 50.0,
+      "high_low_stop_loss_multiplier": 0.84
+    },
+    "sell": {},
+    "protection": {
+      "low_profit_pairs_stop_duration": 40.0,
+      "low_profit_pairs_trade_limit": 1.0,
+      "stop_loss_guard_lookback": 243.0,
+      "stop_loss_guard_trade_limit": 1.0,
+      "use_stop_protection": true,
+      "cooldown_lookback": 205.0,
+      "low_profit_pairs_lookback": 199.0,
+      "max_allowed_drawdown": 0.19,
+      "max_drawdown_lookback": 141.0,
+      "max_drawdown_stop_duration": 60.0,
+      "max_drawdown_trade_limit": 3.0,
+      "required_profit_low_profit_pairs": 0.1,
+      "required_profit_stoploss_guard": 0.07,
+      "stop_loss_guard_stop_duration": 11.0
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-07-28 10:26:41.624311+00:00"
+}
