@@ -588,7 +588,8 @@
               "RangeStabilityFilter",
               "ShuffleFilter",
               "SpreadFilter",
-              "VolatilityFilter"
+              "VolatilityFilter",
+              "DelistingFilter"
             ]
           }
         },
@@ -1060,6 +1061,59 @@
         "sd_notify": {
           "description": "Enable systemd notify.",
           "type": "boolean"
+        }
+      }
+    },
+    "walk_forward": {
+      "description": "Walk-forward optimization and live parameter deployment settings.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Allow the trading bot to apply pending walk-forward parameters.",
+          "type": "boolean",
+          "default": false
+        },
+        "train_days": {
+          "description": "Number of historical days used for each optimization.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 90
+        },
+        "test_days": {
+          "description": "Number of days in each out-of-sample period.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 7
+        },
+        "step_days": {
+          "description": "Number of days between walk-forward periods.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 7
+        },
+        "schedule": {
+          "description": "Weekly UTC live optimization schedule.",
+          "type": "string",
+          "default": "sun 00:05"
+        },
+        "min_trades": {
+          "description": "Minimum training trades required before live deployment.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "max_drawdown": {
+          "description": "Maximum permitted account drawdown ratio for deployment.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "pending_file": {
+          "description": "Optional path for the pending parameter file.",
+          "type": "string"
         }
       }
     },

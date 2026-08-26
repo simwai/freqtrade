@@ -40,6 +40,7 @@ from freqtrade.commands.optimize_commands import (
     start_hyperopt,
     start_lookahead_analysis,
     start_recursive_analysis,
+    start_walk_forward,
 )
 from freqtrade.commands.pairlist_commands import start_test_pairlist
 from freqtrade.commands.plot_commands import start_plot_dataframe, start_plot_profit

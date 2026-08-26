@@ -257,10 +257,9 @@ AVAILABLE_CLI_OPTIONS = {
     "epochs": Arg(
         "-e",
         "--epochs",
-        help="Specify number of epochs (default: %(default)d).",
+        help=f"Specify number of epochs (default: {constants.HYPEROPT_EPOCH}).",
         type=check_int_positive,
         metavar="INT",
-        default=constants.HYPEROPT_EPOCH,
     ),
     "spaces": Arg(
         "--spaces",
@@ -277,11 +276,58 @@ AVAILABLE_CLI_OPTIONS = {
             "default",
         ],
         nargs="+",
-        default="default",
     ),
     "analyze_per_epoch": Arg(
         "--analyze-per-epoch",
         help="Run populate_indicators once per epoch.",
+        action="store_true",
+        default=False,
+    ),
+    # Walk-forward optimization
+    "walk_forward_live": Arg(
+        "--live",
+        help="Run walk-forward optimization on a weekly UTC schedule.",
+        action="store_true",
+        default=False,
+    ),
+    "walk_forward_train_days": Arg(
+        "--train-days",
+        help="Number of prior days used for each walk-forward hyperopt (default: 90).",
+        type=check_int_positive,
+        metavar="DAYS",
+    ),
+    "walk_forward_test_days": Arg(
+        "--test-days",
+        help="Number of days in each walk-forward out-of-sample period (default: 7).",
+        type=check_int_positive,
+        metavar="DAYS",
+    ),
+    "walk_forward_step_days": Arg(
+        "--step-days",
+        help="Number of days to move between walk-forward periods (default: 7).",
+        type=check_int_positive,
+        metavar="DAYS",
+    ),
+    "walk_forward_schedule": Arg(
+        "--schedule",
+        help="Weekly UTC schedule for live walk-forward runs (default: `sun 00:05`).",
+        metavar="DAY HH:MM",
+    ),
+    "walk_forward_min_trades": Arg(
+        "--walk-forward-min-trades",
+        help="Reject live walk-forward parameters with fewer trades than this.",
+        type=int,
+        metavar="INT",
+    ),
+    "walk_forward_max_drawdown": Arg(
+        "--walk-forward-max-drawdown",
+        help="Reject live walk-forward parameters above this account drawdown ratio.",
+        type=float,
+        metavar="FLOAT",
+    ),
+    "walk_forward_run_now": Arg(
+        "--run-now",
+        help="Run the first live walk-forward optimization immediately.",
         action="store_true",
         default=False,
     ),

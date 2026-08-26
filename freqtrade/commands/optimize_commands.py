@@ -123,6 +123,40 @@ def start_hyperopt(args: dict[str, Any]) -> None:
         # Same in Edge and Backtesting start() functions.
 
 
+def start_walk_forward(args: dict[str, Any]) -> None:
+    """Start historical or scheduled live walk-forward optimization."""
+    try:
+        from filelock import FileLock, Timeout
+
+        from freqtrade.optimize.hyperopt import Hyperopt
+        from freqtrade.optimize.walkforward import (
+            WalkForwardHistoricalRunner,
+            WalkForwardLiveRunner,
+        )
+    except ImportError as e:
+        raise OperationalException(
+            f"{e}. Please ensure that the hyperopt dependencies are installed."
+        ) from e
+
+    config = setup_optimize_configuration(args, RunMode.HYPEROPT)
+    logger.info("Starting freqtrade in Walk-forward mode")
+
+    try:
+        if args.get("walk_forward_live"):
+            runner = WalkForwardLiveRunner(config)
+            runner.run(run_now=args.get("walk_forward_run_now", False))
+            return
+
+        lock = FileLock(Hyperopt.get_lock_filename(config))
+        with lock.acquire(timeout=1):
+            WalkForwardHistoricalRunner(config).run()
+    except Timeout:
+        logger.info("Another running instance of freqtrade Hyperopt detected.")
+        logger.info("Simultaneous execution of multiple optimization commands is not supported.")
+    except ValueError as e:
+        raise ConfigurationError(str(e)) from e
+
+
 def start_edge(args: dict[str, Any]) -> None:
     """
     Start Edge script

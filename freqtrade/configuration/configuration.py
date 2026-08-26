@@ -313,6 +313,19 @@ class Configuration:
         ]
         self._args_to_config_loop(config, configurations)
 
+        walk_forward = config.setdefault("walk_forward", {})
+        walk_forward_arguments = {
+            "walk_forward_train_days": "train_days",
+            "walk_forward_test_days": "test_days",
+            "walk_forward_step_days": "step_days",
+            "walk_forward_schedule": "schedule",
+            "walk_forward_min_trades": "min_trades",
+            "walk_forward_max_drawdown": "max_drawdown",
+        }
+        for argument, setting in walk_forward_arguments.items():
+            if self.args.get(argument) is not None:
+                walk_forward[setting] = self.args[argument]
+
         # Edge section:
         if self.args.get("stoploss_range"):
             txt_range = ast.literal_eval(self.args["stoploss_range"])
@@ -334,6 +347,11 @@ class Configuration:
             ("print_all", "Parameter --print-all detected ..."),
         ]
         self._args_to_config_loop(config, configurations)
+
+        # Hyperopt settings may be provided via the config file. Only override them
+        # with the CLI default when neither the config file nor the CLI set them.
+        config.setdefault("spaces", ["default"])
+        config.setdefault("epochs", constants.HYPEROPT_EPOCH)
 
         configurations = [
             ("print_json", "Parameter --print-json detected ..."),

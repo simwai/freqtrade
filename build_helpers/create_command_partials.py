@@ -18,6 +18,7 @@ subcommands = [
     "backtesting-analysis",
     "edge",
     "hyperopt",
+    "walk-forward",
     "hyperopt-list",
     "hyperopt-show",
     "list-exchanges",

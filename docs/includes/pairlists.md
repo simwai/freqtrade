@@ -36,6 +36,7 @@ You may also use something like `.*DOWN/BTC` or `.*UP/BTC` to exclude leveraged 
 * [`SpreadFilter`](#spreadfilter)
 * [`RangeStabilityFilter`](#rangestabilityfilter)
 * [`VolatilityFilter`](#volatilityfilter)
+* [`DelistingFilter`](#delistingfilter)
 
 !!! Tip "Testing pairlists"
     Pairlist configurations can be quite tricky to get right. Best use the [`test-pairlist`](utils.md#test-pairlist) utility sub-command to test your configuration quickly.
@@ -404,6 +405,31 @@ in the first few days while the pair goes through its price-discovery period. Bo
 be caught out buying before the pair has finished dropping in price.
 
 This filter allows freqtrade to ignore pairs until they have been listed for at least `min_days_listed` days and listed before `max_days_listed`.
+
+#### DelistingFilter
+
+Removes pairs found in Binance delisting announcements. The filter polls Binance's public CMS API
+at the configured `refresh_period` (default `1800` seconds), matches symbols against the exchange
+markets loaded by Freqtrade, and stores processed article IDs and detected pairs in
+`user_data/delisting_state.json`.
+
+This filter is intended for dry-run and live trading only. It does not close existing trades;
+open trades remain in Freqtrade's active whitelist so their exits can still be managed.
+
+```json
+"pairlists": [
+    {"method": "StaticPairList"},
+    {
+        "method": "DelistingFilter",
+        "refresh_period": 1800,
+        "read_timeout": 15,
+        "initial_scan": true
+    }
+]
+```
+
+The initial scan processes announcements currently visible on the listing page. Set
+`initial_scan` to `false` to only process announcements that appear after the state file is created.
 
 #### FullTradesFilter
 

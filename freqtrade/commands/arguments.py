@@ -82,6 +82,17 @@ ARGS_HYPEROPT = [
 
 ARGS_EDGE = [*ARGS_COMMON_OPTIMIZE, "stoploss_range"]
 
+ARGS_WALK_FORWARD = [
+    "walk_forward_live",
+    "walk_forward_train_days",
+    "walk_forward_test_days",
+    "walk_forward_step_days",
+    "walk_forward_schedule",
+    "walk_forward_min_trades",
+    "walk_forward_max_drawdown",
+    "walk_forward_run_now",
+]
+
 ARGS_LIST_STRATEGIES = [
     "strategy_path",
     "print_one_column",
@@ -385,6 +396,7 @@ class Arguments:
             start_strategy_update,
             start_test_pairlist,
             start_trading,
+            start_walk_forward,
             start_webserver,
         )
 
@@ -517,6 +529,15 @@ class Arguments:
         )
         hyperopt_cmd.set_defaults(func=start_hyperopt)
         self._build_args(optionlist=ARGS_HYPEROPT, parser=hyperopt_cmd)
+
+        # Add walk-forward optimization subcommand
+        walk_forward_cmd = subparsers.add_parser(
+            "walk-forward",
+            help="Walk-forward hyperopt module.",
+            parents=[_common_parser, _strategy_parser],
+        )
+        walk_forward_cmd.set_defaults(func=start_walk_forward)
+        self._build_args(optionlist=ARGS_HYPEROPT + ARGS_WALK_FORWARD, parser=walk_forward_cmd)
 
         # Add hyperopt-list subcommand
         hyperopt_list_cmd = subparsers.add_parser(
