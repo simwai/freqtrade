@@ -109,3 +109,6 @@ target/
 !config_examples/config_freqai.example.json
 
 docker-compose-*.yml
+
+SESSION_STATE-*.md
+SESSION_STATE.md

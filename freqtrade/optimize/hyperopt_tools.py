@@ -114,6 +114,50 @@ class HyperoptTools:
             return any(s in config["spaces"] for s in [space, "all", "default"])
 
     @staticmethod
+    def apply_params(config: Config, strategy: Any, result: dict[str, Any]) -> None:
+        """Apply a hyperopt result to a strategy without writing its parameter file."""
+        params_dict = result.get("params_dict", {})
+
+        for category in ("buy", "sell", "protection"):
+            if not HyperoptTools.has_space(config, category):
+                continue
+            for attr_name, attr in strategy.enumerate_parameters(category):
+                if attr_name in params_dict:
+                    attr.value = params_dict[attr_name]
+
+        details = deepcopy(result.get("params_not_optimized", {}))
+        deep_merge_dicts(result.get("params_details", {}), details)
+
+        if roi := details.get("roi"):
+            strategy.minimal_roi = {int(key): value for key, value in roi.items()}
+            config["minimal_roi"] = strategy.minimal_roi
+
+        if stoploss := details.get("stoploss"):
+            strategy.stoploss = float(stoploss["stoploss"])
+            config["stoploss"] = strategy.stoploss
+
+        if trailing := details.get("trailing"):
+            strategy.trailing_stop = trailing["trailing_stop"]
+            strategy.trailing_stop_positive = trailing["trailing_stop_positive"]
+            strategy.trailing_stop_positive_offset = trailing["trailing_stop_positive_offset"]
+            strategy.trailing_only_offset_is_reached = trailing["trailing_only_offset_is_reached"]
+            config.update(
+                {
+                    "trailing_stop": strategy.trailing_stop,
+                    "trailing_stop_positive": strategy.trailing_stop_positive,
+                    "trailing_stop_positive_offset": strategy.trailing_stop_positive_offset,
+                    "trailing_only_offset_is_reached": strategy.trailing_only_offset_is_reached,
+                }
+            )
+
+        if (max_open_trades := details.get("max_open_trades")) is not None:
+            max_trades = max_open_trades["max_open_trades"]
+            if max_trades == -1:
+                max_trades = float("inf")
+            strategy.max_open_trades = max_trades
+            config["max_open_trades"] = max_trades
+
+    @staticmethod
     def _read_results(results_file: Path, batch_size: int = 10) -> Iterator[list[Any]]:
         """
         Stream hyperopt results from file

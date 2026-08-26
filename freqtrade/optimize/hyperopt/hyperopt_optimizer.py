@@ -7,6 +7,7 @@ import logging
 import sys
 import warnings
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from joblib import dump, load
@@ -86,9 +87,12 @@ class HyperOptimizer:
         )
         self.calculate_loss = self.custom_hyperoptloss.hyperopt_loss_function
 
-        self.data_pickle_file = (
-            self.config["user_data_dir"] / "hyperopt_results" / "hyperopt_tickerdata.pkl"
+        results_dir = Path(
+            self.config.get(
+                "hyperopt_results_dir", self.config["user_data_dir"] / "hyperopt_results"
+            )
         )
+        self.data_pickle_file = results_dir / "hyperopt_tickerdata.pkl"
 
         self.market_change = 0.0
 

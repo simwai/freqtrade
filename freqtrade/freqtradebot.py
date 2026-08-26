@@ -3,10 +3,12 @@ Freqtrade is the main module of this bot. It contains the class Freqtrade()
 """
 
 import logging
+import shutil
 import traceback
 from copy import deepcopy
 from datetime import datetime, time, timedelta, timezone
 from math import isclose
+from pathlib import Path
 from threading import Lock
 from time import sleep
 from typing import Any
@@ -47,6 +49,11 @@ from freqtrade.exchange.exchange_types import CcxtOrder
 from freqtrade.leverage.liquidation_price import update_liquidation_prices
 from freqtrade.misc import safe_value_fallback, safe_value_fallback2
 from freqtrade.mixins import LoggingMixin
+from freqtrade.optimize.walk_forward_tools import (
+    pending_parameter_file,
+    read_json,
+    write_json_atomic,
+)
 from freqtrade.persistence import Order, PairLocks, Trade, init_db
 from freqtrade.persistence.key_value_store import set_startup_time
 from freqtrade.plugins.pairlistmanager import PairListManager
@@ -96,6 +103,9 @@ class FreqtradeBot(LoggingMixin):
         remove_exchange_credentials(config["exchange"], True)
 
         self.strategy: IStrategy = StrategyResolver.load_strategy(self.config)
+        self._walk_forward_pending_file = pending_parameter_file(
+            self.config, self.strategy.get_strategy_name()
+        )
 
         # Check config consistency here since strategies can set certain options
         validate_config_consistency(config)
@@ -173,7 +183,7 @@ class FreqtradeBot(LoggingMixin):
             # This would be more efficient if scheduled in utc time, and performed at each
             # funding interval, specified by funding_fee_times on the exchange classes
             # However, this reduces the precision - and might therefore lead to problems.
-            for time_slot in range(0, 24):
+            for time_slot in range(24):
                 for minutes in [1, 31]:
                     t = str(time(time_slot, minutes, 2))
                     self._schedule.every().day.at(t).do(update)
@@ -259,6 +269,9 @@ class FreqtradeBot(LoggingMixin):
         :return: True if one or more trades has been created or closed, False otherwise
         """
 
+        if self._check_walk_forward_update():
+            return
+
         # Check whether markets have to be reloaded and reload them when it's needed
         self.exchange.reload_markets()
 
@@ -307,6 +320,75 @@ class FreqtradeBot(LoggingMixin):
         Trade.commit()
         self.rpc.process_msg_queue(self.dataprovider._msg_queue)
         self.last_process = datetime.now(timezone.utc)
+
+    def _read_walk_forward_candidate(self) -> dict[str, Any] | None:
+        """Load and validate the pending walk-forward parameter file."""
+        pending = self._walk_forward_pending_file
+        if not pending.is_file():
+            return None
+
+        try:
+            candidate = read_json(pending)
+        except (OSError, ValueError) as exc:
+            logger.warning("Unable to read pending walk-forward parameters: %s", exc)
+            return None
+
+        if candidate.get("strategy_name") != self.strategy.get_strategy_name():
+            logger.warning("Ignoring walk-forward parameters for a different strategy.")
+            return None
+        if not isinstance(candidate.get("params"), dict):
+            logger.warning("Ignoring invalid walk-forward parameter file '%s'.", pending)
+            return None
+
+        active_file = Path(self.strategy.__file__).with_suffix(".json")
+        try:
+            is_same_file = pending.resolve() == active_file.resolve()
+        except OSError:
+            is_same_file = False
+        if is_same_file:
+            logger.error("The pending walk-forward file must not be the active strategy file.")
+            # Remove the misconfigured pending file to avoid infinite loop
+            try:
+                pending.unlink(missing_ok=True)
+            except OSError as exc:
+                logger.warning("Unable to remove misconfigured pending file: %s", exc)
+            return None
+
+        return candidate
+
+    def _check_walk_forward_update(self) -> bool:
+        """Apply a pending walk-forward parameter file when the bot is flat."""
+        if not self.config.get("walk_forward", {}).get("enabled", False):
+            return False
+
+        if Trade.get_open_trade_count() != 0:
+            return False
+
+        pending = self._walk_forward_pending_file
+        candidate = self._read_walk_forward_candidate()
+        if candidate is None:
+            return False
+
+        active_file = Path(self.strategy.__file__).with_suffix(".json")
+
+        history_directory = pending.parent / "applied"
+        if active_file.is_file():
+            history_directory.mkdir(parents=True, exist_ok=True)
+            backup = history_directory / (
+                f"{active_file.stem}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}.json"
+            )
+            shutil.copy2(active_file, backup)
+
+        write_json_atomic(active_file, candidate)
+        try:
+            pending.unlink(missing_ok=True)
+        except OSError as exc:
+            logger.warning("Unable to remove applied pending walk-forward file: %s", exc)
+        self.notify_status(
+            f"Applying walk-forward parameters for {self.strategy.get_strategy_name()}"
+        )
+        self.state = State.RELOAD_CONFIG
+        return True
 
     def process_stopped(self) -> None:
         """

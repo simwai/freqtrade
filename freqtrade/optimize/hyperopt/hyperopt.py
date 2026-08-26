@@ -32,14 +32,16 @@ from freqtrade.util import get_progress_tracker
 
 logger = logging.getLogger(__name__)
 
+# Logging queue for joblib child processes. Must live at module scope because
+# run_optimizer_parallel is pickled by reference into the workers.
+log_queue: Any = None
+
 
 INITIAL_POINTS = 30
 
 # Keep no more than SKOPT_MODEL_QUEUE_SIZE models
 # in the skopt model queue, to optimize memory consumption
 SKOPT_MODEL_QUEUE_SIZE = 10
-
-log_queue: Any
 
 
 class Hyperopt:
@@ -67,14 +69,17 @@ class Hyperopt:
 
         time_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         strategy = str(self.config["strategy"])
-        self.results_file: Path = (
-            self.config["user_data_dir"]
-            / "hyperopt_results"
-            / f"strategy_{strategy}_{time_now}.fthypt"
+        results_dir = Path(
+            self.config.get(
+                "hyperopt_results_dir", self.config["user_data_dir"] / "hyperopt_results"
+            )
         )
-        self.data_pickle_file = (
-            self.config["user_data_dir"] / "hyperopt_results" / "hyperopt_tickerdata.pkl"
+        results_dir.mkdir(parents=True, exist_ok=True)
+        result_filename = self.config.get(
+            "hyperopt_result_filename", f"strategy_{strategy}_{time_now}.fthypt"
         )
+        self.results_file = results_dir / str(result_filename)
+        self.data_pickle_file = results_dir / "hyperopt_tickerdata.pkl"
         self.total_epochs = config.get("epochs", 0)
 
         self.current_best_loss = 100
@@ -83,6 +88,7 @@ class Hyperopt:
 
         self.num_epochs_saved = 0
         self.current_best_epoch: dict[str, Any] | None = None
+        self.interrupted = False
 
         if HyperoptTools.has_space(self.config, "sell"):
             # Make sure use_exit_signal is enabled
@@ -247,7 +253,8 @@ class Hyperopt:
         m = Manager()
         log_queue = m.Queue()
 
-    def start(self) -> None:
+    def start(self) -> dict[str, Any] | None:
+        self.interrupted = False
         self.random_state = self._set_random_state(self.config.get("hyperopt_random_state"))
         logger.info(f"Using optimizer random state: {self.random_state}")
         self.hyperopt_table_header = -1
@@ -303,6 +310,7 @@ class Hyperopt:
                         logging_mp_handle(log_queue)
 
         except KeyboardInterrupt:
+            self.interrupted = True
             print("User interrupted..")
 
         logger.info(
@@ -329,3 +337,5 @@ class Hyperopt:
             # This is printed when Ctrl+C is pressed quickly, before first epochs have
             # a chance to be evaluated.
             print("No epochs evaluated yet, no best result.")
+
+        return self.current_best_epoch

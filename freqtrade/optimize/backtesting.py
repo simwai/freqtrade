@@ -387,22 +387,27 @@ class Backtesting:
     def disable_database_use(self):
         disable_database_use(self.timeframe)
 
-    def prepare_backtest(self, enable_protections):
+    def prepare_backtest(self, enable_protections, preserve_state: bool = False):
         """
         Backtesting setup method - called once for every call to "backtest()".
+
+        When ``preserve_state`` is enabled, the in-memory trades, wallet and pair locks are
+        retained. This is used by walk-forward evaluation to continue a simulated account across
+        adjacent test windows.
         """
         self.disable_database_use()
-        PairLocks.reset_locks()
-        Trade.reset_trades()
-        CustomDataWrapper.reset_custom_data()
-        self.rejected_trades = 0
-        self.timedout_entry_orders = 0
-        self.timedout_exit_orders = 0
-        self.canceled_trade_entries = 0
-        self.canceled_entry_orders = 0
-        self.replaced_entry_orders = 0
-        self.canceled_exit_orders = 0
-        self.replaced_exit_orders = 0
+        if not preserve_state:
+            PairLocks.reset_locks()
+            Trade.reset_trades()
+            CustomDataWrapper.reset_custom_data()
+            self.rejected_trades = 0
+            self.timedout_entry_orders = 0
+            self.timedout_exit_orders = 0
+            self.canceled_trade_entries = 0
+            self.canceled_entry_orders = 0
+            self.replaced_entry_orders = 0
+            self.canceled_exit_orders = 0
+            self.replaced_exit_orders = 0
         self.dataprovider.clear_cache()
         if enable_protections:
             self._load_protections(self.strategy)
@@ -1626,7 +1631,12 @@ class Backtesting:
             self.progress.increment()
 
     def backtest(
-        self, processed: dict, start_date: datetime, end_date: datetime
+        self,
+        processed: dict,
+        start_date: datetime,
+        end_date: datetime,
+        preserve_state: bool = False,
+        finalize: bool = True,
     ) -> BacktestContentTypeIcomplete:
         """
         Implement backtesting functionality
@@ -1639,9 +1649,11 @@ class Backtesting:
         optimize memory usage!
         :param start_date: backtesting timerange start datetime
         :param end_date: backtesting timerange end datetime
+        :param preserve_state: Keep simulated trades, wallet and pair locks from a previous window.
+        :param finalize: Force-close trades left open at the end of this call.
         :return: DataFrame with trades (results of backtesting)
         """
-        self.prepare_backtest(self.enable_protections)
+        self.prepare_backtest(self.enable_protections, preserve_state=preserve_state)
         # Ensure wallets are up-to-date (important for --strategy-list)
         self.wallets.update()
         # Use dict of lists with data for performance
@@ -1669,7 +1681,8 @@ class Backtesting:
                         # the trade didn't close or position change is in the same direction
                         break
 
-        self.handle_left_open(LocalTrade.bt_trades_open_pp, data=data)
+        if finalize:
+            self.handle_left_open(LocalTrade.bt_trades_open_pp, data=data)
         self.wallets.update()
 
         results = trade_list_to_dataframe(LocalTrade.bt_trades)
