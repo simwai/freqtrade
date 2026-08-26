@@ -8,15 +8,16 @@ https://creativecommons.org/licenses/by-nc-sa/4.0/
 This is a Freqtrade adaptation. Freqtrade fills entries using its configured
 pricing mode, so risk levels are anchored to the actual filled entry price.
 
-The indicator and risk-management logic lives in the reusable ``strategy_lib``
-package (``strategy_lib.indicators`` and ``strategy_lib.risk``) so it can be
-shared with other strategies.
+Indicators (TTM squeeze, PSAR, higher-timeframe EMA) and the SL/TP risk engine
+are computed by the reusable ``components`` package (fully migrated from
+``strategy_lib.risk``).
 """
 
 import math
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 from pandas import DataFrame
 
 from freqtrade.exchange.exchange_utils_timeframe import timeframe_to_prev_date
@@ -25,10 +26,14 @@ from freqtrade.strategy import (
     DecimalParameter,
     IntParameter,
     IStrategy,
-    stoploss_from_absolute,
 )
-from strategy_lib import indicators, risk
-from strategy_lib.risk import SlTpConfig, TradeLevelsManager
+from user_data.strategies.components import indicators as ind
+from user_data.strategies.components.risk import (
+    octopus_duration_exceeded,
+    octopus_exit_cross_signal,
+    octopus_trade_levels,
+)
+from user_data.strategies.components.signals import crossed_above, crossed_below
 
 
 class OctopusNestStrategy(IStrategy):
@@ -49,11 +54,14 @@ class OctopusNestStrategy(IStrategy):
     # The Pine strategy uses a 25% position size and no independent ROI exit.
     risk_percent_of_equity = 25.0
     minimal_roi = {"0": 100.0}
+    # Catastrophic floor only. SL/TP exits are close-cross decisions handled in
+    # custom_exit (Pine parity); a mirrored dynamic stoploss would exit intrabar
+    # on wick touches before the close confirms, shadowing the EXIT_*_SL tags.
     stoploss = -0.99
     use_exit_signal = True
     exit_profit_only = False
     ignore_roi_if_entry_signal = False
-    use_custom_stoploss = True
+    use_custom_stoploss = False
 
     order_types = {
         "entry": "market",
@@ -147,17 +155,44 @@ class OctopusNestStrategy(IStrategy):
         },
     }
 
-    def _risk_config(self) -> SlTpConfig:
-        """Snapshot of the current SL/TP hyperopt parameters."""
-        return SlTpConfig(
-            mode=self.sl_tp_mode,
-            sl_size_or_atr_multiplier=float(self.sl_size_or_atr_multiplier.value),
-            risk_reward_ratio=float(self.risk_reward_ratio.value),
-            my_backup_multiplier=float(self.my_backup_multiplier.value),
-            max_trade_duration_days=int(self.max_trade_duration_days.value),
-            high_low_stop_loss_lookback=int(self.high_low_stop_loss_lookback.value),
-            high_low_stop_loss_multiplier=float(self.high_low_stop_loss_multiplier.value),
-            atr_length=int(self.atr_length.value),
+    def _risk_config(self) -> dict:
+        """Snapshot of the current SL/TP hyperopt parameters (components parity)."""
+        return {
+            "mode": self.sl_tp_mode,
+            "sl_size_or_atr_multiplier": float(self.sl_size_or_atr_multiplier.value),
+            "risk_reward_ratio": float(self.risk_reward_ratio.value),
+            "my_backup_multiplier": float(self.my_backup_multiplier.value),
+            "max_trade_duration_days": int(self.max_trade_duration_days.value),
+            "high_low_stop_loss_lookback": int(self.high_low_stop_loss_lookback.value),
+            "high_low_stop_loss_multiplier": float(self.high_low_stop_loss_multiplier.value),
+            "atr_length": int(self.atr_length.value),
+        }
+
+    def _octopus_levels(self, dataframe: DataFrame, trade: Trade) -> dict | None:
+        """Compute full Octopus SL/TP level arrays via components (strategy_lib parity)."""
+        if dataframe is None or dataframe.empty:
+            return None
+        cfg = self._risk_config()
+        # Find entry index same as strategy_lib.indicators.find_entry_index
+        entry_date = timeframe_to_prev_date(self.timeframe, trade.open_date_utc)
+        dates = dataframe["date"]
+        # Match strategy_lib: flatnonzero(dates <= entry_date), fallback 0
+        dts = pd.to_datetime(dates, utc=True)
+        matches = np.flatnonzero((dts <= entry_date).to_numpy())
+        entry_index = int(matches[-1]) if len(matches) else 0
+        return octopus_trade_levels(
+            dataframe,
+            float(trade.open_rate),
+            entry_index,
+            mode=cfg["mode"],
+            sl_size_or_atr_multiplier=cfg["sl_size_or_atr_multiplier"],
+            sl_size_or_atr_multiplier_short=None,
+            risk_reward_ratio=cfg["risk_reward_ratio"],
+            my_backup_multiplier=cfg["my_backup_multiplier"],
+            max_trade_duration_days=cfg["max_trade_duration_days"],
+            high_low_stop_loss_lookback=cfg["high_low_stop_loss_lookback"],
+            high_low_stop_loss_multiplier=cfg["high_low_stop_loss_multiplier"],
+            atr_length=cfg["atr_length"],
         )
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -169,7 +204,7 @@ class OctopusNestStrategy(IStrategy):
 
         # Merge the informative EMA first so the source series below always
         # shares the post-merge dataframe index.
-        dataframe = indicators.higher_timeframe_ema(
+        dataframe = ind.higher_timeframe_ema(
             dataframe,
             metadata,
             self.dp,
@@ -182,9 +217,9 @@ class OctopusNestStrategy(IStrategy):
         low = dataframe["low"].to_numpy(dtype=float)
         close = dataframe["close"].to_numpy(dtype=float)
 
-        dataframe["hann_atr"] = indicators.hann_atr(high, low, close, atr_length)
-        kc_atr = indicators.hann_atr(high, low, close, kc_length) if self.use_true_range else None
-        indicators.squeeze_bands(
+        dataframe["hann_atr"] = ind.hann_atr(dataframe, atr_length)
+        kc_atr = ind.hann_atr(dataframe, kc_length) if self.use_true_range else None
+        ind.squeeze_bands(
             dataframe,
             bb_length,
             mult_bb,
@@ -198,7 +233,7 @@ class OctopusNestStrategy(IStrategy):
             market = getattr(self.dp, "market", lambda _pair: None)(metadata["pair"])
             precision = ((market or {}).get("precision") or {}).get("price", 8)
             base_unit = 10.0 ** (-precision) if isinstance(precision, int) else 1e-8
-            dataframe["psar"] = indicators.adaptive_psar(
+            dataframe["psar"] = ind.adaptive_psar(
                 high,
                 low,
                 close,
@@ -214,9 +249,7 @@ class OctopusNestStrategy(IStrategy):
                 min_change=self.min_change,
             )
         else:
-            dataframe["psar"] = indicators.classic_psar(
-                high, low, self.psar_start, self.psar_inc, self.psar_max
-            )
+            dataframe["psar"] = ind.sar(dataframe, self.psar_start, self.psar_inc, self.psar_max)
 
         return dataframe
 
@@ -228,16 +261,16 @@ class OctopusNestStrategy(IStrategy):
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         long_signal = (
             (dataframe["close"] > dataframe["ema"])
-            & indicators.crossed_above(dataframe["close"], dataframe["psar"])
-            & indicators.crossed_above(dataframe["osc"], 0.0)
+            & crossed_above(dataframe["close"], dataframe["psar"])
+            & crossed_above(dataframe["osc"], 0.0)
         )
         dataframe.loc[long_signal, ["enter_long", "enter_tag"]] = (1, "ENTER_LONG")
 
         if self.enable_shorts:
             short_signal = (
                 (dataframe["close"] < dataframe["ema"])
-                & indicators.crossed_below(dataframe["close"], dataframe["psar"])
-                & indicators.crossed_below(dataframe["osc"], 0.0)
+                & crossed_below(dataframe["close"], dataframe["psar"])
+                & crossed_below(dataframe["osc"], 0.0)
             )
             dataframe.loc[short_signal, ["enter_short", "enter_tag"]] = (1, "ENTER_SHORT")
 
@@ -247,6 +280,17 @@ class OctopusNestStrategy(IStrategy):
         # SL/TP and the duration exit are evaluated from the live Trade object
         # in custom_exit, preserving the Pine strategy's per-trade state.
         return dataframe
+
+    def _percentual_levels(self, entry_price: float) -> dict[str, float]:
+        """Entry-constant SL/TP levels for the Percentual mode (components parity)."""
+        percent = float(self.sl_size_or_atr_multiplier.value) / 100.0
+        ratio = float(self.risk_reward_ratio.value)
+        return {
+            "long_stop": entry_price * (1.0 - percent),
+            "short_stop": entry_price * (1.0 + percent),
+            "long_tp": entry_price * (1.0 + percent * ratio),
+            "short_tp": entry_price * (1.0 - percent * ratio),
+        }
 
     def custom_exit(
         self,
@@ -260,38 +304,37 @@ class OctopusNestStrategy(IStrategy):
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) < 2:
             return None
-
         current_index = len(dataframe) - 1
         previous_index = current_index - 1
-        config = self._risk_config()
-
-        if config.mode == "Percentual":
+        if self.sl_tp_mode == "Percentual":
             entry_date = timeframe_to_prev_date(self.timeframe, trade.open_date_utc)
             if dataframe["date"].iloc[current_index] <= entry_date:
                 return None
-            levels = risk.percentual_trade_levels(float(trade.open_rate), config)
-            if levels is None:
-                return None
+            levels = self._percentual_levels(float(trade.open_rate))
             previous_levels = current_levels = levels
         else:
-            manager = getattr(self, "_risk_manager", None)
-            if manager is None:
-                manager = TradeLevelsManager(config)
-                self._risk_manager = manager
-            else:
-                manager.config = config
-            levels = manager.cached_trade_level_series(pair, dataframe, trade, self.timeframe)
+            levels = self._octopus_levels(dataframe, trade)
             if levels is None:
                 return None
             entry_index = int(levels["entry_index"][0])
             if current_index <= entry_index:
                 return None
-            previous_levels = risk.levels_at(levels, previous_index)
-            current_levels = risk.levels_at(levels, current_index)
-
+            # Inline levels_at to avoid strategy_lib import
+            previous_levels = {
+                "long_stop": float(levels["long_stop"][previous_index]),
+                "short_stop": float(levels["short_stop"][previous_index]),
+                "long_tp": float(levels["long_tp"][previous_index]),
+                "short_tp": float(levels["short_tp"][previous_index]),
+            }
+            current_levels = {
+                "long_stop": float(levels["long_stop"][current_index]),
+                "short_stop": float(levels["short_stop"][current_index]),
+                "long_tp": float(levels["long_tp"][current_index]),
+                "short_tp": float(levels["short_tp"][current_index]),
+            }
         previous_close = float(dataframe["close"].iloc[previous_index])
         current_close = float(dataframe["close"].iloc[current_index])
-        signal = risk.exit_cross_signal(
+        signal = octopus_exit_cross_signal(
             previous_close,
             current_close,
             previous_levels,
@@ -300,45 +343,12 @@ class OctopusNestStrategy(IStrategy):
         )
         if signal:
             return signal
-
         direction = "SHORT" if trade.is_short else "LONG"
-        if risk.duration_exceeded(
-            trade.open_date_utc, current_time, int(config.max_trade_duration_days)
+        if octopus_duration_exceeded(
+            trade.open_date_utc, current_time, int(self.max_trade_duration_days.value)
         ):
             return f"EXIT_{direction}_TIME"
         return None
-
-    def custom_stoploss(
-        self,
-        pair: str,
-        trade: Trade,
-        current_time: datetime,
-        current_rate: float,
-        current_profit: float,
-        after_fill: bool,
-        **kwargs,
-    ) -> float | None:
-        config = self._risk_config()
-        manager = getattr(self, "_risk_manager", None)
-        if manager is None:
-            manager = TradeLevelsManager(config)
-            self._risk_manager = manager
-        else:
-            manager.config = config
-
-        if config.mode == "Percentual":
-            dataframe = None
-        else:
-            dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
-        levels = manager.current_trade_levels(pair, dataframe, trade, self.timeframe)
-        if levels is None:
-            return self.stoploss
-        stop = levels["short_stop"] if trade.is_short else levels["long_stop"]
-        if not np.isfinite(stop) or stop <= 0.0:
-            return self.stoploss
-        return stoploss_from_absolute(
-            stop, current_rate, is_short=trade.is_short, leverage=trade.leverage
-        )
 
     def custom_stake_amount(
         self,
