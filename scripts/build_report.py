@@ -26,6 +26,8 @@ from pathlib import Path
 USER_DATA = Path(__file__).resolve().parents[1]
 ANALYSIS_DIR = USER_DATA / "analysis"
 
+from datetime import datetime  # noqa: E402
+
 # ---------------------------------------------------------------- scorecard ---
 
 SCORECARD = {
@@ -35,6 +37,7 @@ SCORECARD = {
     "max_drawdown_account": {"pass": 0.2, "warn": 0.4, "higher_is_better": False, "label": "Max drawdown"},
     "winrate": {"pass": 0.45, "warn": 0.35, "higher_is_better": True, "label": "Win rate"},
     "total_trades": {"pass": 100, "warn": 30, "higher_is_better": True, "label": "Trades"},
+    "worst_trade": {"pass": -0.08, "warn": -0.15, "higher_is_better": True, "label": "Worst trade"},
 }
 
 GRADE_EXPLANATION = {
@@ -89,28 +92,293 @@ def score_strategy(row: dict) -> dict:
     }
 
 
+# ------------------------------------------------------- derived + recommendations ---
+
+def _compute_derived(trades: list[dict]) -> dict:
+    """Compute streaks, payoff, MFE/MAE, capture from a list of trades sorted by close_date."""
+    if not trades:
+        return {
+            "max_win_streak": None, "max_loss_streak": None,
+            "avg_mfe": None, "avg_mae": None,
+            "payoff_ratio": None, "avg_win": None, "avg_loss": None,
+            "avg_profit": None, "capture_ratio": None,
+            "worst_trade": None, "worst_trade_pair": None,
+        }
+    max_win = max_loss = cur_win = cur_loss = 0
+    win_vals: list[float] = []
+    loss_vals: list[float] = []
+    mfe_vals: list[float] = []
+    mae_vals: list[float] = []
+    profit_vals: list[float] = []
+    worst_pr: float | None = None
+    worst_pair: str | None = None
+    for t in trades:
+        pr = t.get("profit_ratio")
+        try:
+            pr = float(pr) if pr is not None else 0.0
+        except (TypeError, ValueError):
+            pr = 0.0
+        profit_vals.append(pr)
+        if worst_pr is None or pr < worst_pr:
+            worst_pr = pr
+            worst_pair = t.get("pair")
+        is_win = pr > 0
+        if is_win:
+            cur_win += 1
+            cur_loss = 0
+            max_win = max(max_win, cur_win)
+            win_vals.append(pr)
+        else:
+            cur_loss += 1
+            cur_win = 0
+            max_loss = max(max_loss, cur_loss)
+            loss_vals.append(pr)
+        open_r = t.get("open_rate")
+        max_r = t.get("max_rate")
+        min_r = t.get("min_rate")
+        is_short = t.get("is_short")
+        try:
+            open_r = float(open_r) if open_r is not None else None
+            max_r = float(max_r) if max_r is not None else None
+            min_r = float(min_r) if min_r is not None else None
+        except (TypeError, ValueError):
+            continue
+        if open_r and max_r and min_r and open_r != 0:
+            if is_short:
+                mfe = (open_r - min_r) / open_r
+                mae = (max_r - open_r) / open_r
+            else:
+                mfe = (max_r - open_r) / open_r
+                mae = (open_r - min_r) / open_r
+            # clamp to reasonable 0..5
+            if -1 < mfe < 5 and -1 < mae < 5:
+                mfe_vals.append(mfe)
+                mae_vals.append(mae)
+    avg_mfe = sum(mfe_vals) / len(mfe_vals) if mfe_vals else None
+    avg_mae = sum(mae_vals) / len(mae_vals) if mae_vals else None
+    avg_win = sum(win_vals) / len(win_vals) if win_vals else None
+    avg_loss = sum(loss_vals) / len(loss_vals) if loss_vals else None
+    avg_profit = sum(profit_vals) / len(profit_vals) if profit_vals else None
+    payoff = abs(avg_win / avg_loss) if avg_win is not None and avg_loss not in (None, 0) else None
+    capture = None
+    if avg_profit is not None and avg_mfe not in (None, 0):
+        try:
+            capture = avg_profit / avg_mfe
+        except ZeroDivisionError:
+            capture = None
+    return {
+        "max_win_streak": max_win if trades else None,
+        "max_loss_streak": max_loss if trades else None,
+        "avg_mfe": avg_mfe,
+        "avg_mae": avg_mae,
+        "payoff_ratio": payoff,
+        "avg_win": avg_win,
+        "avg_loss": avg_loss,
+        "avg_profit": avg_profit,
+        "capture_ratio": capture,
+        "worst_trade": worst_pr if trades else None,
+        "worst_trade_pair": worst_pair,
+    }
+
+
+def _enrich_with_derived(conn: sqlite3.Connection, rows: list[dict]) -> None:
+    """Attach derived metrics (streaks, MFE/MAE, worst trade) in-place (keyed by strategy/source)."""
+    if not rows:
+        return
+    # Build map (strategy, source) -> list[trade dict]
+    conn.row_factory = sqlite3.Row
+    # Fetch all trades once, then group. 530k rows is fine (<10MB).
+    try:
+        all_trades = conn.execute(
+            """SELECT strategy, source, pair, profit_ratio, open_rate, max_rate, min_rate, is_short, trade_duration, close_date
+               FROM trades ORDER BY strategy, source, close_date"""
+        ).fetchall()
+    except sqlite3.OperationalError:
+        all_trades = []
+    grouped: dict[tuple[str, str], list[dict]] = {}
+    for r in all_trades:
+        key = (r["strategy"], r["source"])
+        grouped.setdefault(key, []).append(dict(r))
+    for row in rows:
+        key = (row.get("strategy"), row.get("source"))
+        trades = grouped.get(key, [])
+        derived = _compute_derived(trades)
+        row.update(derived)
+
+
+def build_recommendations(row: dict) -> list[dict]:
+    """Generic actionable recommendations based on graded + derived metrics."""
+    recs: list[dict] = []
+
+    def add(level: str, title: str, detail: str):
+        recs.append({"level": level, "title": title, "detail": detail})
+
+    total = row.get("total_trades")
+    pf = row.get("profit_factor")
+    winrate = row.get("winrate")
+    dd = row.get("max_drawdown_account")
+    sortino = row.get("sortino")
+    calmar = row.get("calmar")
+    expectancy = row.get("expectancy")
+    sqn = row.get("sqn")
+    tpd = row.get("trades_per_day")
+    holding = row.get("holding_avg_s")
+    wh = row.get("winner_holding_avg_s")
+    lh = row.get("loser_holding_avg_s")
+    max_loss_streak = row.get("max_loss_streak")
+    payoff = row.get("payoff_ratio")
+    avg_mfe = row.get("avg_mfe")
+    avg_mae = row.get("avg_mae")
+    capture = row.get("capture_ratio")
+    timeframe = row.get("timeframe")
+
+    # 1. Statistical significance
+    if total is not None:
+        if total < 30:
+            add("fail", "Too few trades", "n<30 is not significant. Widen entry, lower filters, or extend timerange (>6 months).")
+        elif total < 100:
+            add("warn", "Few trades", "n<100 — results are fragile. Test longer period or more pairs before live.")
+
+    # 2. Profit factor
+    if pf is not None:
+        if pf < 1.0:
+            add("fail", "Losing after fees", f"PF {pf:.2f} <1.0 — strategy destroys capital. Tighten exits / avoid noisy pairs.")
+        elif pf < 1.2:
+            add("warn", "Thin edge", f"PF {pf:.2f} <1.2 — barely profitable after slippage. Improve exit.")
+
+    # 3. Winrate / payoff interaction
+    if winrate is not None and payoff is not None:
+        if winrate > 0.70 and payoff < 1.0:
+            add("warn", "High WR but payoff <1", f"WR {winrate*100:.1f}% looks good but avg win {(row.get('avg_win') or 0)*100:.2f}% < avg loss {abs((row.get('avg_loss') or 0)*100):.2f}%. Winners tiny — loosen ROI or trailing.")
+        elif winrate < 0.35 and (pf or 0) < 1.2:
+            add("warn", "Low winrate", f"WR {winrate*100:.1f}% — entry is near coin-flip. Add trend/volume filter.")
+    elif winrate is not None and winrate < 0.35:
+        add("warn", "Low winrate", f"WR {winrate*100:.1f}% — needs filter improvement.")
+
+    # 4. Drawdown
+    if dd is not None:
+        if dd > 0.40:
+            add("fail", "Drawdown too high", f"MaxDD {dd*100:.1f}% >40% — position sizing / stop is broken. Reduce stake, add max-drawdown pause.")
+        elif dd > 0.20:
+            add("warn", "High drawdown", f"MaxDD {dd*100:.1f}% >20% — consider tighter stop or reducing max_open_trades.")
+
+    # 5. Risk-adjusted
+    if sortino is not None and sortino < 0.3:
+        add("warn", "Poor Sortino", f"Sortino {sortino:.2f} <0.3 — return does not compensate for downside volatility.")
+    if calmar is not None and calmar < 0.3:
+        add("warn", "Poor Calmar", f"Calmar {calmar:.2f} <0.3 — return vs drawdown is weak.")
+    if row.get("sortino") is not None and row.get("calmar") is not None and sortino < 0.3 and calmar < 0.3:
+        add("fail", "Risk-adjusted weak", "Both Sortino & Calmar <0.3 — edge doesn't survive volatility. Likely overfit.")
+
+    # 6. Expectancy / SQN
+    if expectancy is not None and expectancy <= 0:
+        add("fail", "Negative expectancy", f"Expectancy {expectancy:.4f} ≤0 — loses per trade on average. Overfit or fee drag.")
+    if sqn is not None:
+        if sqn < 1.0:
+            add("warn", "Low SQN", f"SQN {sqn:.2f} <1.0 — system quality poor (Van Tharp <1.6 = poor).")
+        elif sqn < 1.6:
+            add("info", "Mediocre SQN", f"SQN {sqn:.2f} <1.6 — average system, needs more edge.")
+
+    # 7. Activity
+    if tpd is not None:
+        if tpd > 8:
+            add("warn", "Overtrading", f"{tpd:.1f} trades/day — fees/slippage & delisting risk. Add cooldown / filter.")
+        elif tpd < 0.2:
+            add("info", "Low activity", f"{tpd:.2f} trades/day — may miss regimes. Test more pairs or lower timeframe.")
+
+    # 8. Holding time
+    if holding is not None and timeframe:
+        # 5m -> expected holding hours, if >48h warn
+        if timeframe == "5m" and holding > 172800:
+            add("info", "Holding >> timeframe", f"Avg holding {holding/3600:.1f}h on 5m — mismatch. Consider higher TF or review exit.")
+        if timeframe == "1d" and holding and holding < 86400:
+            add("info", "Short holding on daily", "Avg hold <1d on 1d TF — noisy.")
+
+    # 9. Winner vs loser holding
+    if wh is not None and lh is not None and wh and lh:
+        if lh > wh * 2:
+            add("warn", "Holding losers too long", f"Losers {lh/3600:.1f}h vs winners {wh/3600:.1f}h — loss aversion. Add time-stop or tighten SL.")
+        elif wh > lh * 3:
+            add("info", "Winners held long", "Winners 3× longer than losers — good, but check trailing is not too loose.")
+
+    # 10. Loss streak
+    if max_loss_streak is not None:
+        if max_loss_streak >= 8:
+            add("fail", f"Loss streak {max_loss_streak}", "8+ consecutive losses — sizing risk. Add regime filter / pause after N losses.")
+        elif max_loss_streak >= 5:
+            add("warn", f"Loss streak {max_loss_streak}", "5+ consecutive losses — check if streak clusters in bear/bull regimes.")
+
+    # 11. Payoff
+    if payoff is not None:
+        if payoff < 1.0:
+            add("warn", f"Payoff {payoff:.2f} <1", f"Avg win {(row.get('avg_win') or 0)*100:.2f}% < |avg loss| {abs((row.get('avg_loss') or 0)*100):.2f}% — improve R:R.")
+        elif payoff > 3 and (winrate or 0) < 0.40:
+            add("info", "Lottery payoff", f"Payoff {payoff:.2f} with WR {(winrate or 0)*100:.1f}% — high variance, needs many trades to converge.")
+
+    # 12. MFE capture
+    if capture is not None and avg_mfe is not None:
+        if capture < 0.20:
+            add("warn", f"Low capture {capture*100:.0f}% of MFE", f"Avg profit {(row.get('avg_profit') or 0)*100:.2f}% vs avg MFE {avg_mfe*100:.2f}% — exits too early. Loosen ROI/trailing.")
+        elif capture < 0.35 and (payoff or 0) < 1.5:
+            add("info", "Leaving money on table", f"Capturing only {capture*100:.0f}% of MFE — test trailing stop.")
+
+    # 13. MAE vs MFE — stop placement hint
+    if avg_mae is not None and avg_mfe is not None:
+        if avg_mae > avg_mfe * 0.9:
+            add("warn", "Adverse ≈ favorable", f"Avg MAE {avg_mae*100:.2f}% ≈ MFE {avg_mfe*100:.2f}% — entries are tossed, no edge.")
+
+    # 14. Outlier single-trade loss
+    worst_trade = row.get("worst_trade")
+    if worst_trade is not None:
+        wpair = row.get("worst_trade_pair") or "?"
+        wpct = abs(worst_trade) * 100
+        if worst_trade <= -0.50:
+            add("fail", f"Outlier loss −{wpct:.0f}%",
+                f"Worst trade {worst_trade*100:.1f}% on {wpair} — a single trade wiped out ~{wpct:.0f}% of stake. Stop/sizing broken; cap risk per trade.")
+        elif worst_trade <= -0.15:
+            add("warn", f"Large single loss −{wpct:.0f}%",
+                f"Worst trade {worst_trade*100:.1f}% on {wpair} — one outlier distorts the grade. Tighten SL or reduce stake on that pair.")
+
+    # 15. Positive but fragile
+    if not recs and row.get("score", {}).get("grade") == "A":
+        add("good", "Well balanced", "5+ metrics pass, no fail. Check walk-forward OOS next.")
+
+    # Cap to 8 most severe
+    order = {"fail": 0, "warn": 1, "info": 2, "good": 3}
+    recs.sort(key=lambda r: order.get(r["level"], 9))
+    return recs[:8]
+
+
 # ------------------------------------------------------------------- queries ---
 
 def load_data(conn: sqlite3.Connection) -> dict:
     conn.row_factory = sqlite3.Row
 
-    def with_score(rows):
+    def score_and_recommend(rows):
         out = []
         for r in rows:
             d = dict(r)
             d["score"] = score_strategy(d)
+            d["recommendations"] = build_recommendations(d)
             out.append(d)
         return out
 
-    backtests = with_score(conn.execute(
+    backtests = conn.execute(
         """SELECT b.*, s.status, s.notes
            FROM backtests b
            LEFT JOIN strategies s ON s.name = b.strategy
            ORDER BY b.strategy, b.run_time"""
-    ).fetchall())
-    benchmarks = with_score(conn.execute(
+    ).fetchall()
+    benchmarks = conn.execute(
         "SELECT * FROM benchmarks ORDER BY strategy, run_time"
-    ).fetchall())
+    ).fetchall()
+    # derived metrics must be attached before scoring so worst_trade feeds the grade
+    backtests = [dict(r) for r in backtests]
+    benchmarks = [dict(r) for r in benchmarks]
+    _enrich_with_derived(conn, backtests)
+    _enrich_with_derived(conn, benchmarks)
+    backtests = score_and_recommend(backtests)
+    benchmarks = score_and_recommend(benchmarks)
     hyperopt = [dict(r) for r in conn.execute(
         "SELECT * FROM hyperopt ORDER BY strategy, run_time"
     )]
@@ -243,17 +511,60 @@ def history_series(data: dict) -> dict:
     return {k: v for k, v in series.items() if len(v["dates"]) >= 2}
 
 
-def benchmark_bars(data: dict) -> list[dict]:
-    """Latest benchmark run per strategy for the compare bar chart."""
-    latest: dict[str, dict] = {}
-    for row in data["benchmarks"]:
-        name = row["strategy"]
-        if name not in latest or (row["run_time"] or "") > (latest[name].get("run_time") or ""):
-            latest[name] = row
-    return sorted(
-        (dict(r) for r in latest.values()),
-        key=lambda r: -(r.get("sortino") or 0),
-    )
+def collect_extras(conn: sqlite3.Connection | None) -> dict:
+    """Provenance data for the UI: deduped configs, current-code hashes, snapshot index.
+
+    configs       {hash: parsed config}   – embedded once per unique config
+    current_code  {strategy: sha1}        – hash of the .py at report build time
+    snapshot_paths{hash: {path, mtime}}   – where/when a snapshot was captured
+    """
+    extras = {"configs": {}, "current_code": {}, "snapshot_paths": {}}
+    if conn is None:
+        return extras
+    conn.row_factory = sqlite3.Row
+    try:
+        for r in conn.execute("SELECT hash, size FROM configs"):
+            extras["configs"][r["hash"]] = {"__size": r["size"]}
+        # parse lazily per hash below to keep memory bounded
+        for h in list(extras["configs"]):
+            raw = conn.execute("SELECT config_json FROM configs WHERE hash=?", (h,)).fetchone()[0]
+            try:
+                extras["configs"][h] = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                extras["configs"][h] = {"_raw": str(raw)[:20000] if raw else None}
+    except sqlite3.OperationalError:
+        pass
+    try:
+        # current file hashes: recompute from disk so offline staleness badges work
+        import sys as _sys
+
+        _sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from ft_metrics import find_strategy_file, sha1_text
+
+        user_data = ANALYSIS_DIR.parent
+        names = {r["strategy"] for r in conn.execute(
+            "SELECT DISTINCT name AS strategy FROM strategies")}
+        for name in sorted(names):
+            f = find_strategy_file(user_data, name)
+            if f is None:
+                continue
+            try:
+                extras["current_code"][name] = sha1_text(f.read_text(encoding="utf-8"))
+            except OSError:
+                continue
+    except sqlite3.OperationalError:
+        pass
+    try:
+        for r in conn.execute(
+            "SELECT hash, path, mtime FROM strategy_snapshots"
+        ):
+            extras["snapshot_paths"][r["hash"]] = {
+                "path": r["path"],
+                "mtime": datetime.fromtimestamp(r["mtime"]).strftime("%Y-%m-%d %H:%M") if r["mtime"] else None,
+            }
+    except (sqlite3.OperationalError, ValueError, OSError, TypeError):
+        pass
+    return extras
 
 
 # ------------------------------------------------------------------ html css ---
@@ -338,6 +649,17 @@ section { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   background: linear-gradient(to left, rgba(19, 16, 32, .92), rgba(19, 16, 32, 0)); }
 .table-wrap.has-overflow.scroll-left::before { opacity: 1; }
 .table-wrap.has-overflow.scroll-right::after { opacity: 1; }
+
+/* top scrollbar under the table header (header strip stays put, synced to the body scroll) */
+.table-stack { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; min-width: 0; }
+.table-stack .thead-scroll { overflow-x: auto; overflow-y: hidden; background: var(--bg-soft);
+  scrollbar-width: thin; scrollbar-color: #3a3254 var(--bg-soft); overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--border); }
+.table-stack .thead-scroll::-webkit-scrollbar { height: 10px; }
+.table-stack .thead-scroll::-webkit-scrollbar-track { background: var(--bg-soft); }
+.table-stack .thead-scroll::-webkit-scrollbar-thumb { background: #3a3254; border-radius: 8px; border: 2px solid var(--bg-soft); }
+.table-stack .thead-scroll::-webkit-scrollbar-thumb:hover { background: var(--lavender-ink); }
+.table-stack .table-wrap { border: 0; border-radius: 0; }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
 thead th { background: var(--bg-soft); color: var(--lavender); font-weight: 600;
   text-align: left; padding: 10px 12px; white-space: nowrap; cursor: pointer; user-select: none; }
@@ -384,6 +706,25 @@ td.num, th.num { text-align: right; }
 .btn.primary { background: var(--lavender-ink); color: #fff; border-color: var(--lavender-ink); }
 .btn.primary:hover { background: #7c6cd6; }
 .btn.compact { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
+
+/* lab date range */
+input[type="date"] { color-scheme: dark; }
+.daterange { display: flex; align-items: center; background: var(--bg-soft);
+  border: 1px solid var(--border); border-radius: 8px;
+  transition: border-color .15s ease, box-shadow .15s ease; }
+
+.daterange:hover { border-color: #3d3358; }
+.daterange:focus-within { border-color: var(--lavender-ink);
+  box-shadow: 0 0 0 3px rgba(109, 91, 208, .18); }
+.daterange > label { display: flex; align-items: center; gap: 6px; color: var(--text-dim);
+  font-size: 13px; padding: 0 2px 0 10px; white-space: nowrap; cursor: pointer; }
+.daterange input[type="date"] { background: transparent; border: 0; color: var(--text);
+  padding: 7px 2px 7px 0; width: 128px; font-family: inherit; font-size: 13px; outline: none; }
+.daterange input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a89fc4' stroke-width='2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M16 3v4M8 3v4M3 11h18'/%3E%3C/svg%3E"); }
+.daterange input[type="date"]:hover::-webkit-calendar-picker-indicator,
+.daterange input[type="date"]:focus::-webkit-calendar-picker-indicator { opacity: 1; }
+.dr-sep { color: var(--text-faint); font-size: 12px; padding: 0 2px; user-select: none; }
 
 /* lab strategy editor */
 select.statusSel {
@@ -439,6 +780,44 @@ footer { padding: 16px 24px; color: var(--text-faint); font-size: 12px;
 .hidden { display: none !important; }
 .bad { color: var(--bad); }
 
+/* run drawer */
+#drawerBackdrop { position: fixed; inset: 0; background: rgba(10, 7, 20, .55);
+  opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 60; }
+#drawerBackdrop.open { opacity: 1; pointer-events: auto; }
+#drawer { position: fixed; top: 0; right: 0; height: 100vh; width: min(720px, 100vw);
+  background: var(--bg-soft); border-left: 1px solid var(--border);
+  transform: translateX(102%); transition: transform .22s ease; z-index: 70;
+  display: flex; flex-direction: column; box-shadow: -18px 0 40px rgba(0,0,0,.4); }
+#drawer.open { transform: translateX(0); }
+.drawer-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 16px 18px 10px; border-bottom: 1px solid var(--border); }
+.drawer-head .name { font-size: 18px; font-weight: 700; }
+.drawer-head .grow { flex: 1; }
+.drawer-tabs { display: flex; gap: 4px; padding: 8px 14px 0; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border); background: var(--bg); }
+.drawer-tabs button { background: transparent; border: 1px solid transparent; border-bottom: 0;
+  color: var(--text-dim); padding: 7px 14px; border-radius: 8px 8px 0 0; cursor: pointer;
+  font-size: 13px; font-weight: 500; }
+.drawer-tabs button:hover { color: var(--lavender); }
+.drawer-tabs button.active { background: var(--card); color: #fff;
+  border-color: var(--border); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 16px 18px; background: var(--card);
+  display: flex; flex-direction: column; gap: 14px; }
+.drawer-pane { display: none; flex-direction: column; gap: 12px; }
+.drawer-pane.active { display: flex; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 18px; font-size: 13px; }
+.kv .k { color: var(--text-faint); }
+.kv .v { color: var(--text); word-break: break-all; }
+pre.codeblock { background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; font-size: 12px; line-height: 1.5; overflow: auto; max-height: 55vh;
+  margin: 0; white-space: pre-wrap; word-break: break-word;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace; color: var(--text-dim); }
+details.paramsBlock { background: var(--bg-soft); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 12px; }
+details.paramsBlock summary { cursor: pointer; color: var(--lavender); font-size: 13px;
+  font-weight: 600; user-select: none; }
+details.paramsBlock[open] summary { margin-bottom: 8px; }
+
 /* responsive */
 @media (max-width: 768px) {
   main { padding: 14px; }
@@ -446,6 +825,8 @@ footer { padding: 16px 24px; color: var(--text-faint); font-size: 12px;
   .tabs button { padding: 7px 12px; font-size: 12px; }
   header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
   header h1 { font-size: 16px; }
+  #drawer { width: 100vw; border-left: 0; }
+  .drawer-body { padding: 12px; }
   .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .stat { padding: 12px 14px; }
   .stat .v { font-size: 20px; }
@@ -459,6 +840,14 @@ footer { padding: 16px 24px; color: var(--text-faint); font-size: 12px;
   .controls label { width: 100%; display: flex; flex-direction: column; gap: 4px; }
   #histSelect { min-width: 0 !important; width: 100%; }
   #benchStrategies, #benchRange, #benchTf { min-width: 0 !important; width: 100%; }
+  #runStrategy, #runMode, #runTf, #runEpochs, #runLoss, #runSpaces,
+  #runJobs, #runRandomState, #runMinTrades, #runAnalyzePerEpoch, #runDisableExport, #runPrintAll,
+  #runTrain, #runTest, #runStep, #runWfMinTrades, #runWfMaxDD, #runConfig { min-width: 0 !important; width: 100%; }
+  .daterange { width: 100%; }
+  .daterange > label { flex: 1; min-width: 0; flex-direction: column;
+    align-items: flex-start; gap: 4px; }
+  .daterange input[type="date"] { min-width: 0 !important; width: 100%; }
+  .dr-sep { display: none; }
   #tradeRun { min-width: 0 !important; width: 100%; }
   .section-head { flex-direction: column; align-items: flex-start; }
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -499,8 +888,15 @@ function esc(s) { return String(s==null?'':s).replace(/[&<>"']/g, c => ({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 /* ---------- tabs ---------- */
-function showTab(name) {
+function showTab(name, fromHash) {
   state.tab = name;
+  // tabs are always authoritative: close an open strategy detail overlay first
+  if ($('strategy-detail').classList.contains('active')) {
+    $('strategy-detail').classList.remove('active');
+    $('mainContent').classList.remove('hidden');
+    state.strategy = null;
+  }
+  closeDrawer();
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   if (name === 'dashboard') renderDashboard();
@@ -511,8 +907,26 @@ function showTab(name) {
   if (name === 'hyperopt') renderHyperopt();
   if (name === 'trades') renderTradesTab();
   if (name === 'lab') renderLab();
+  if (!fromHash) setHash();
+  window.scrollTo(0, 0);
   window.dispatchEvent(new Event('resize'));
+  tryPendingSplits();
 }
+
+/* ---------- url hash routing (#t=tab / #s=strategy) ---------- */
+function setHash() {
+  const h = state.strategy ? '#s=' + encodeURIComponent(state.strategy)
+                           : '#t=' + encodeURIComponent(state.tab);
+  if (location.hash !== h) history.pushState(null, '', h);
+}
+function applyFromHash() {
+  const h = decodeURIComponent((location.hash || '').replace(/^#/, ''));
+  if (h.startsWith('s=')) { openStrategy(h.slice(2), true); return; }
+  const tab = h.startsWith('t=') ? h.slice(2) : 'dashboard';
+  showTab(TABS.includes(tab) ? tab : 'dashboard', true);
+}
+const TABS = ['dashboard','strategies','history','benchmark','walkforward','hyperopt','trades','lab'];
+window.addEventListener('popstate', applyFromHash);
 
 /* ---------- table scroll indicators ---------- */
 function updateTableScroll(wrap) {
@@ -561,7 +975,117 @@ function makeSortable(tableEl) {
 }
 
 function stratLink(name) {
-  return `<a class="clickable" onclick="openStrategy('${esc(name)}')">${esc(name)}</a>`;
+  return `<a class="clickable" data-strategy="${esc(name)}" onclick="openStrategy(this.dataset.strategy)">${esc(name)}</a>`;
+}
+function drawerBtn(kind, r) {
+  const s = esc(r.strategy || ''), src = esc(r.source || '');
+  return `<button class="btn compact" title="config & code for this run" data-kind="${esc(kind)}" data-strategy="${s}" data-source="${src}"
+    onclick="openDrawer({kind:this.dataset.kind,strategy:this.dataset.strategy,source:this.dataset.source})">{ }</button>`;
+}
+
+/* ---------- top scrollbar under the header ---------- */
+// After a table is rendered, lift its <thead> into a header-only table inside a
+// thin scroll strip above the body. Column widths are frozen with table-layout:
+// fixed + a measured colgroup so header and body stay aligned, and the two
+// scroll areas (header strip + body) are synced so the header follows the data.
+const pendingSplits = [];
+function splitTableScroll(tableEl) {
+  const wrap = tableEl.closest('.table-wrap');
+  const thead = tableEl.querySelector('thead');
+  if (!wrap || !thead) return;
+  const stack = wrap.closest('.table-stack');
+  let headScroll = stack ? stack.querySelector('.thead-scroll') : null;
+  const widths = [...thead.querySelectorAll('th')].map(th => th.offsetWidth);
+  if (!widths.length || widths.some(w => w <= 0)) {
+    // table not laid out yet (hidden tab/detail) — retry once it becomes visible
+    if (!pendingSplits.includes(tableEl)) pendingSplits.push(tableEl);
+    return;
+  }
+
+  const colgroup = document.createElement('colgroup');
+  widths.forEach(w => { const c = document.createElement('col'); c.style.width = w + 'px'; colgroup.appendChild(c); });
+  tableEl.insertBefore(colgroup.cloneNode(true), tableEl.firstChild);
+  tableEl.style.tableLayout = 'fixed';
+  tableEl.removeChild(thead);
+
+  let headTable;
+  if (stack && headScroll) {
+    headTable = document.createElement('table');
+  } else {
+    const s = document.createElement('div');
+    s.className = 'table-stack';
+    headScroll = document.createElement('div');
+    headScroll.className = 'thead-scroll';
+    const parent = wrap.parentNode;
+    parent.insertBefore(s, wrap);
+    s.appendChild(headScroll);
+    s.appendChild(wrap);
+    const sync = (a, b) => a.addEventListener('scroll', () => { b.scrollLeft = a.scrollLeft; }, { passive: true });
+    sync(wrap, headScroll);
+    sync(headScroll, wrap);
+    headTable = document.createElement('table');
+  }
+  headTable.appendChild(thead.cloneNode(true));
+  headTable.insertBefore(colgroup.cloneNode(true), headTable.firstChild);
+  headTable.style.tableLayout = 'fixed';
+  headScroll.innerHTML = '';
+  headScroll.appendChild(headTable);
+
+  attachSort(headTable, tableEl);
+  updateTableScroll(wrap);
+}
+
+function tryPendingSplits() {
+  for (let i = pendingSplits.length - 1; i >= 0; i--) {
+    const t = pendingSplits[i];
+    if (!t.isConnected || !t.querySelector('thead')) { pendingSplits.splice(i, 1); continue; }
+    const widths = [...t.querySelectorAll('thead th')].map(th => th.offsetWidth);
+    if (widths.length && !widths.some(w => w <= 0)) {
+      pendingSplits.splice(i, 1);
+      splitTableScroll(t);
+    }
+  }
+}
+
+function attachSort(headTable, bodyTable) {
+  const wrap = bodyTable.closest('.table-wrap');
+  const tbody = bodyTable.querySelector('tbody');
+  if (!tbody) return;
+  headTable.querySelectorAll('thead th').forEach(th => {
+    th.addEventListener('click', () => {
+      const idx = [...th.parentNode.children].indexOf(th);
+      headTable.querySelectorAll('thead th').forEach(h => { const a = h.querySelector('.arrow'); if (a) a.remove(); });
+      const asc = th.dataset.asc !== '1';
+      const rows = [...tbody.rows].sort((a,b) => {
+        let av = a.cells[idx].dataset.val, bv = b.cells[idx].dataset.val;
+        if (av === undefined && bv === undefined) return 0;
+        if (av === '' || av === undefined) av = '-inf';
+        if (bv === '' || bv === undefined) bv = '-inf';
+        const an = Number(av), bn = Number(bv);
+        const useNum = !isNaN(an) && !isNaN(bn) && av !== '-inf' && bv !== '-inf';
+        let r = useNum ? (an - bn) : String(av).localeCompare(String(bv));
+        return asc ? r : -r;
+      });
+      rows.forEach(r => tbody.appendChild(r));
+      th.dataset.asc = asc ? '1' : '0';
+      const arrow = document.createElement('span');
+      arrow.className = 'arrow';
+      arrow.textContent = asc ? '\u25B2' : '\u25BC';
+      th.appendChild(arrow);
+      updateTableScroll(wrap);
+    });
+  });
+}
+
+function setupTableSplitter() {
+  const obs = new MutationObserver(muts => {
+    muts.forEach(m => m.addedNodes.forEach(n => {
+      if (!n || n.nodeType !== 1) return;
+      const tables = n.matches && n.matches('table') ? [n] : (n.querySelectorAll ? [...n.querySelectorAll('table')] : []);
+      tables.forEach(t => { if (!t.closest('.thead-scroll')) splitTableScroll(t); });
+    }));
+  });
+  obs.observe(document.body, { childList: true, subtree: true });
 }
 
 /* ---------- dashboard ---------- */
@@ -604,7 +1128,7 @@ function renderDashboard() {
       .filter(([k,g]) => g === 'warn').map(([k]) => LAB.scorecard[k].label).join(', ');
     let focus = fails ? '<b class="bad">' + fails + '</b>' : '';
     if (warns) focus += (focus ? ' + ' : '') + warns;
-    return `<div class="metric-card" style="cursor:pointer" onclick="openStrategy('${esc(r.strategy)}')">
+    return `<div class="metric-card" style="cursor:pointer" data-strategy="${esc(r.strategy)}" onclick="openStrategy(this.dataset.strategy)">
       <div class="mk">${esc(r.strategy)} — ${gradePill(r.score.grade)}</div>
       <div class="mv">${focus || '—'}</div>
     </div>`;
@@ -622,7 +1146,7 @@ function renderStrategies() {
   t.innerHTML = `<thead><tr>
     <th>Strategy</th><th>Status</th><th class="num">Grade</th><th class="num">Trades</th>
     <th class="num">Profit%</th><th class="num">PF</th><th class="num">Sortino</th>
-    <th class="num">Calmar</th><th class="num">MaxDD</th><th>Basis</th><th>Run</th>
+    <th class="num">Calmar</th><th class="num">MaxDD</th><th>Basis</th><th>Run</th><th></th>
   </tr></thead><tbody>` + rows.map(r => {
     return `<tr>
       <td>${stratLink(r.strategy)}</td>
@@ -636,6 +1160,7 @@ function renderStrategies() {
       <td class="num" data-val="${r.max_drawdown_account||0}">${pct(r.max_drawdown_account)}</td>
       <td data-val="${r.basis||''}">${r.basis||''}</td>
       <td data-val="${r.run_time||''}">${esc((r.run_time||'').slice(0,10))}</td>
+      <td>${drawerBtn(r.basis === 'benchmark' ? 'benchmark' : 'backtest', r)}</td>
     </tr>`;
   }).join('') + '</tbody>';
   const wrap = $('strategiesTable');
@@ -651,8 +1176,12 @@ function applyFilters() {
 }
 
 /* ---------- strategy detail ---------- */
-function openStrategy(name) {
+function openStrategy(name, fromHash) {
   state.strategy = name;
+  // show the detail pane before populating its tables so column widths can be measured
+  $('strategy-detail').classList.add('active');
+  $('mainContent').classList.add('hidden');
+  closeDrawer();
   const canon = LAB.canonical.find(r => r.strategy === name);
   const allRuns = LAB.backtests.filter(r => r.strategy === name).sort((a,b) =>
     (b.run_time||'').localeCompare(a.run_time||''));
@@ -661,6 +1190,7 @@ function openStrategy(name) {
   const wfs = LAB.walkforward.filter(r => r.strategy === name);
 
   const head = $('detailHead');
+  const canonCode = canon ? { hash: canon.code_hash, verified: canon.code_verified } : null;
   head.innerHTML = `
     <button class="btn" onclick="closeStrategy()">← Back</button>
     <div>
@@ -669,6 +1199,8 @@ function openStrategy(name) {
         ${canon ? gradePill(canon.score.grade) : ''}
         ${statusPill(canon ? canon.status : '')}
         <span class="basis-badge">grade basis: ${canon ? canon.basis : '—'}</span>
+        ${codeBadge(name, canonCode)}
+        ${canon ? `<button class="btn compact" data-kind="${esc(canon.basis === 'benchmark' ? 'benchmark' : 'backtest')}" data-strategy="${esc(name)}" data-source="${esc(canon.source)}" onclick="openDrawer({kind:this.dataset.kind,strategy:this.dataset.strategy,source:this.dataset.source})">{ } config &amp; code</button>` : ''}
       </div>
       <div class="hint">${canon ? esc((canon.notes||'') + (canon.notes?' · ':'')) : ''}${canon ? canon.score.pass_count+' pass, '+canon.score.warn_count+' warn, '+canon.score.fail_count+' fail' : ''}</div>
     </div>`;
@@ -693,20 +1225,54 @@ function openStrategy(name) {
         const v = canon[k];
         const g = canon.score.grades[k];
         let shown = fmt(v);
-        if (k==='winrate'||k==='max_drawdown_account') shown = pct(v);
+        if (k==='winrate'||k==='max_drawdown_account'||k==='worst_trade') shown = pct(v);
         if (k==='total_trades') shown = fmt(v,0);
-        const passStr = k==='max_drawdown_account' ? `≤ ${pct(spec.pass)}` : (k==='total_trades' ? fmt(spec.pass,0) : fmt(spec.pass));
-        const warnStr = k==='max_drawdown_account' ? `≤ ${pct(spec.warn)}` : (k==='total_trades' ? fmt(spec.warn,0) : fmt(spec.warn));
+        const isPctMetric = k==='max_drawdown_account'||k==='worst_trade';
+        const passStr = isPctMetric ? `≤ ${pct(spec.pass)}` : (k==='total_trades' ? fmt(spec.pass,0) : fmt(spec.pass));
+        const warnStr = isPctMetric ? `≤ ${pct(spec.warn)}` : (k==='total_trades' ? fmt(spec.warn,0) : fmt(spec.warn));
         return `<tr><td>${spec.label}</td><td class="num">${shown}</td>
           <td>${pill(g,g)}</td><td class="num">${passStr}</td><td class="num">${warnStr}</td></tr>`;
       }).join('') + '</tbody></table>';
   } else sb.innerHTML = '<p class="hint">No scorecard.</p>';
 
+  // diagnostics + recommendations
+  const diag = $('detailDiagnostics');
+  const recWrap = $('detailRecommendations');
+  if (canon) {
+    const avgMfe = canon.avg_mfe != null ? (canon.avg_mfe*100).toFixed(2)+'%' : '—';
+    const avgMae = canon.avg_mae != null ? (canon.avg_mae*100).toFixed(2)+'%' : '—';
+    const payoff = canon.payoff_ratio != null ? fmt(canon.payoff_ratio) : '—';
+    const capture = canon.capture_ratio != null ? (canon.capture_ratio*100).toFixed(0)+'%' : '—';
+    const wStreak = canon.max_win_streak ?? '—';
+    const lStreak = canon.max_loss_streak ?? '—';
+    const avgWin = canon.avg_win != null ? (canon.avg_win*100).toFixed(2)+'%' : '—';
+    const avgLoss = canon.avg_loss != null ? (canon.avg_loss*100).toFixed(2)+'%' : '—';
+    const worstTrade = canon.worst_trade != null ? (canon.worst_trade*100).toFixed(2)+'%' : '—';
+    diag.innerHTML = [
+      ['Max loss streak', fmt(lStreak,0), (canon.max_loss_streak||0) >=8 ? 'bad' : (canon.max_loss_streak||0) >=5 ? 'warn' : ''],
+      ['Max win streak', fmt(wStreak,0), ''],
+      ['Payoff (avg win/loss)', payoff, (canon.payoff_ratio!=null && canon.payoff_ratio <1 ? 'bad' : '')],
+      ['Avg MFE', avgMfe, ''], ['Avg MAE', avgMae, ''],
+      ['Capture of MFE', capture, (canon.capture_ratio!=null && canon.capture_ratio <0.25 ? 'bad' : '')],
+      ['Avg win', avgWin, ''], ['Avg loss', avgLoss, ''],
+      ['Worst trade' + (canon.worst_trade_pair ? ` · ${esc(canon.worst_trade_pair)}` : ''), worstTrade, ((canon.worst_trade ?? 0) <= -0.15 ? 'bad' : '')],
+    ].map(([k,v,c]) => `<div class="metric-card"><span class="mk">${k}</span><span class="mv ${c}">${v}</span></div>`).join('');
+    const recs = canon.recommendations || [];
+    if (!recs.length) recWrap.innerHTML = '<p class="hint">No recommendations — well balanced.</p>';
+    else recWrap.innerHTML = recs.map(r => {
+      const cls = r.level==='fail'?'fail':r.level==='warn'?'warn':r.level==='good'?'pass':'na';
+      return `<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start"><span style="flex-shrink:0">${pill(cls, r.level)}</span><div><b>${esc(r.title)}</b><div class="hint" style="margin-top:2px">${esc(r.detail)}</div></div></div>`;
+    }).join('');
+  } else {
+    diag.innerHTML = '<p class="hint">No diagnostics.</p>';
+    recWrap.innerHTML = '';
+  }
+
   // all runs
   const rt = document.createElement('table');
   rt.innerHTML = `<thead><tr><th>Run</th><th class="num">Grade</th><th class="num">Profit%</th>
     <th class="num">Trades</th><th class="num">PF</th><th class="num">Sortino</th>
-    <th class="num">MaxDD</th><th>TF</th><th>Source</th></tr></thead><tbody>` +
+    <th class="num">MaxDD</th><th>TF</th><th>Source</th><th></th></tr></thead><tbody>` +
     allRuns.map(r => `<tr>
       <td data-val="${r.run_time||''}">${esc((r.run_time||'').slice(0,16))}</td>
       <td class="num" data-val="${r.score.grade}">${gradePill(r.score.grade)}</td>
@@ -717,6 +1283,7 @@ function openStrategy(name) {
       <td class="num" data-val="${r.max_drawdown_account||0}">${pct(r.max_drawdown_account)}</td>
       <td data-val="${r.timeframe||''}">${esc(r.timeframe||'')}</td>
       <td data-val="${r.source||''}" title="${esc(r.source)}">${esc((r.source||'').slice(-28))}</td>
+      <td>${drawerBtn('backtest', r)}</td>
     </tr>`).join('') + '</tbody>';
   const rtWrap = $('detailRuns');
   rtWrap.innerHTML = '';
@@ -727,28 +1294,31 @@ function openStrategy(name) {
   const bt = benches.length ? benches.map(r => `<tr>
       <td>${esc((r.run_time||'').slice(0,10))}</td><td class="num">${gradePill(r.score.grade)}</td>
       <td class="num">${fmt((r.profit_total||0)*100,1)}%</td><td class="num">${fmt(r.sortino)}</td>
-      <td class="num">${fmt(r.profit_factor)}</td></tr>`).join('')
-    : '<tr><td colspan="5" class="hint">No benchmark runs.</td></tr>';
-  $('detailBench').innerHTML = `<table><thead><tr><th>Run</th><th class="num">Grade</th><th class="num">Profit%</th><th class="num">Sortino</th><th class="num">PF</th></tr></thead><tbody>${bt}</tbody></table>`;
+      <td class="num">${fmt(r.profit_factor)}</td><td>${drawerBtn('benchmark', r)}</td></tr>`).join('')
+    : '<tr><td colspan="6" class="hint">No benchmark runs.</td></tr>';
+  $('detailBench').innerHTML = `<table><thead><tr><th>Run</th><th class="num">Grade</th><th class="num">Profit%</th><th class="num">Sortino</th><th class="num">PF</th><th></th></tr></thead><tbody>${bt}</tbody></table>`;
 
   const ht = hos.length ? hos.slice(0, 8).map(r => `<tr>
       <td>${esc((r.run_time||'').slice(0,10))}</td><td class="num">${fmt(r.epochs,0)}</td>
       <td class="num">${fmt(r.best_loss,2)}</td><td class="num">${fmt((r.best_profit_total||0)*100,1)}%</td>
-      <td class="num">${fmt(r.best_sortino)}</td></tr>`).join('')
-    : '<tr><td colspan="5" class="hint">No hyperopt runs.</td></tr>';
-  $('detailHyperopt').innerHTML = `<table><thead><tr><th>Run</th><th class="num">Epochs</th><th class="num">Best loss</th><th class="num">Best profit</th><th class="num">Best sortino</th></tr></thead><tbody>${ht}</tbody></table>`;
+      <td class="num">${fmt(r.best_sortino)}</td><td>${drawerBtn('hyperopt', r)}</td></tr>`).join('')
+    : '<tr><td colspan="6" class="hint">No hyperopt runs.</td></tr>';
+  $('detailHyperopt').innerHTML = `<table><thead><tr><th>Run</th><th class="num">Epochs</th><th class="num">Best loss</th><th class="num">Best profit</th><th class="num">Best sortino</th><th></th></tr></thead><tbody>${ht}</tbody></table>`;
 
   const wt = wfs.length ? wfs.map(r => `<tr>
       <td>${esc((r.run_id||'').slice(0,16))}</td><td class="num">${fmt(r.n_windows,0)}</td>
       <td class="num">${r.profitable_windows}/${r.n_windows}</td>
-      <td class="num">${fmt(r.oos_profit_abs)}</td><td class="num">${fmt(r.avg_oos_sortino)}</td></tr>`).join('')
-    : '<tr><td colspan="5" class="hint">No walk-forward runs.</td></tr>';
-  $('detailWF').innerHTML = `<table><thead><tr><th>Run</th><th class="num">Windows</th><th class="num">Profitable</th><th class="num">OOS profit</th><th class="num">Avg sortino</th></tr></thead><tbody>${wt}</tbody></table>`;
+      <td class="num">${fmt(r.oos_profit_abs)}</td><td class="num">${fmt(r.avg_oos_sortino)}</td>
+      <td>${drawerBtn('walkforward', r)}</td></tr>`).join('')
+    : '<tr><td colspan="6" class="hint">No walk-forward runs.</td></tr>';
+  $('detailWF').innerHTML = `<table><thead><tr><th>Run</th><th class="num">Windows</th><th class="num">Profitable</th><th class="num">OOS profit</th><th class="num">Avg sortino</th><th></th></tr></thead><tbody>${wt}</tbody></table>`;
 
   $('strategy-detail').classList.add('active');
   $('mainContent').classList.add('hidden');
+  if (!fromHash) setHash();
   window.scrollTo(0, 0);
   updateAllTableScrolls();
+  tryPendingSplits();
 
   // trades: use latest run of this strategy
   const run = LAB.trade_runs.find(r => r.strategy === name);
@@ -781,6 +1351,175 @@ function closeStrategy() {
   $('strategy-detail').classList.remove('active');
   $('mainContent').classList.remove('hidden');
   showTab(state.tab);
+  tryPendingSplits();
+}
+
+/* ---------- run provenance: badges + drawer ---------- */
+function codeBadge(strategy, info) {
+  if (!info || !info.hash) return pill('na', 'code unknown');
+  const cur = (LAB.current_code || {})[strategy];
+  if (!cur) return pill('na', 'no .py on disk');
+  if (cur === info.hash) return pill(info.verified ? 'pass' : 'warn', info.verified ? 'code current' : 'code current*');
+  return pill('fail', 'code changed since run');
+}
+function findRun(kind, strategy, source) {
+  const pool = kind === 'benchmark' ? LAB.benchmarks
+    : kind === 'hyperopt' ? LAB.hyperopt
+    : kind === 'walkforward' ? LAB.walkforward : LAB.backtests;
+  return (pool || []).find(r => r.strategy === strategy && r.source === source) ||
+         (pool || []).find(r => r.source === source);
+}
+const drawerState = { open: false, ctx: null, tab: 'overview' };
+const DRAWER_TABS = ['overview', 'config', 'code', 'params'];
+function openDrawer(ctx, tab) {
+  drawerState.ctx = ctx;
+  drawerState.open = true;
+  drawerState.tab = tab || 'overview';
+  $('drawer').classList.add('open');
+  $('drawerBackdrop').classList.add('open');
+  renderDrawer();
+}
+function closeDrawer() {
+  drawerState.open = false;
+  drawerState.ctx = null;
+  const d = $('drawer');
+  if (!d) return;
+  d.classList.remove('open');
+  $('drawerBackdrop').classList.remove('open');
+}
+function escAttr(s) { return esc(s).replace(/`/g, '&#96;'); }
+function drawerTabBtn(t) {
+  return `<button data-dtab="${t}" class="${drawerState.tab === t ? 'active' : ''}"
+    onclick="drawerState.tab='${t}';renderDrawer()">${t[0].toUpperCase() + t.slice(1)}</button>`;
+}
+function renderDrawer() {
+  const ctx = drawerState.ctx;
+  const body = $('drawerBody');
+  const head = document.querySelector('#drawer .drawer-head');
+  if (!ctx) { body.innerHTML = ''; head.innerHTML = ''; return; }
+  const r = findRun(ctx.kind, ctx.strategy, ctx.source) || {};
+  const tabs = ['overview', 'config', 'code'];
+  if (ctx.kind === 'hyperopt') tabs.push('params');
+  head.innerHTML = `
+    <span class="name">${esc(ctx.strategy)}</span>
+    ${pill(ctx.kind === 'benchmark' ? 'pass' : 'na', ctx.kind)}
+    <span class="hint">${esc((ctx.source || '').slice(-40))}</span>
+    <span class="grow"></span>
+    <button class="btn compact" onclick="closeDrawer()">✕ Close</button>`;
+  document.querySelector('#drawer .drawer-tabs').innerHTML = tabs.map(drawerTabBtn).join('');
+  body.innerHTML = tabs.map(t =>
+    `<div class="drawer-pane ${drawerState.tab === t ? 'active' : ''}" id="dpane-${t}">${drawerPane(t, r)}</div>`
+  ).join('');
+}
+function drawerPane(t, r) {
+  if (t === 'overview') return paneOverview(r);
+  if (t === 'config') return paneConfig(r);
+  if (t === 'code') return paneCode(r);
+  if (t === 'params') return paneParams(r);
+  return '';
+}
+function paneOverview(r) {
+  const rows = [
+    ['Strategy', esc(r.strategy || '')],
+    ['Kind', esc(drawerState.ctx.kind)],
+    ['Source', `<code>${esc(r.source || '')}</code>`],
+    ['Run time', esc(r.run_time || '—')],
+    ['Timeframe', esc(r.timeframe || '—')],
+    ['Timerange', esc(r.timerange || '—')],
+    ['Pairs', fmt(r.pair_count, 0)],
+    ['Stake currency', esc(r.stake_currency || '—')],
+    ['Trading mode', esc(r.trading_mode || '—')],
+    ['Profit total', r.profit_total != null ? pct(r.profit_total) : '—'],
+    ['Trades / winrate', `${fmt(r.total_trades, 0)} / ${pct(r.winrate)}`],
+    ['Sortino / Calmar', `${fmt(r.sortino)} / ${fmt(r.calmar)}`],
+    ['Max drawdown', pct(r.max_drawdown_account)],
+  ];
+  if (r.loss_function) rows.push(['Loss function', esc(r.loss_function)]);
+  if (r.spaces) rows.push(['Spaces', esc(r.spaces)]);
+  if (r.train_days) rows.push(['WF windows', `${fmt(r.n_windows,0)} (${r.profitable_windows ?? '—'} profitable)`]);
+  if (r.epochs) rows.push(['Epochs', fmt(r.epochs, 0)]);
+  return `<div class="kv">${rows.map(([k, v]) => `<span class="k">${k}</span><span class="v">${v}</span>`).join('')}</div>`;
+}
+function configFor(r) {
+  if (r && r.config_hash && LAB.configs && LAB.configs[r.config_hash]) {
+    return { hash: r.config_hash, obj: LAB.configs[r.config_hash] };
+  }
+  return null;
+}
+function paneConfig(r) {
+  const c = configFor(r);
+  if (!c) {
+    let hint = 'No config captured for this run.';
+    if (drawerState.ctx.kind === 'backtest' && !r.config_hash)
+      hint += ' Plain-JSON backtests predate provenance capture; re-run or benchmark to link one.';
+    if (drawerState.ctx.kind !== 'backtest' && drawerState.ctx.kind !== 'benchmark')
+      hint += ' Hyperopt/walk-forward configs are linked when launched from the Lab.';
+    return `<p class="hint">${hint}</p>`;
+  }
+  return `
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn compact" onclick="copyText(JSON.stringify(LAB.configs['${escAttr(c.hash)}'],null,2))">Copy JSON</button>
+      <a class="btn compact" download="config_${escAttr(c.hash.slice(0, 8))}.json"
+         href="data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(c.obj, null, 2))}">Download</a>
+      <span class="hint">hash ${esc(c.hash.slice(0, 12))}…</span>
+    </div>
+    <pre class="codeblock">${esc(JSON.stringify(c.obj, null, 2))}</pre>`;
+}
+let _codeCache = {};
+function codeText(hash) { return _codeCache[hash] || ''; }
+function loadCodeInto(hash, elId) {
+  const el = $(elId);
+  fetch('/api/strategy/file?hash=' + encodeURIComponent(hash))
+    .then(r => r.ok ? r.text() : Promise.reject(r.status))
+    .then(txt => {
+      _codeCache[hash] = txt;
+      el.innerHTML = `<pre class="codeblock" id="codePre-${escAttr(hash).slice(0,8)}">${esc(txt.length > 120000 ? txt.slice(0, 120000) + '\n… (truncated preview)' : txt)}</pre>
+        <button class="btn compact" onclick="copyText(codeText('${escAttr(hash)}'))">Copy code</button>`;
+    })
+    .catch(() => { el.innerHTML = '<p class="hint">Snapshot viewer needs the server (lab.py serve).</p>'; });
+}
+function paneCode(r) {
+  const strategy = drawerState.ctx.strategy;
+  const badge = codeBadge(strategy, { hash: r.code_hash, verified: r.code_verified });
+  if (!r.code_hash) return `<p class="hint">No code snapshot for this run.</p>`;
+  const meta = (LAB.snapshot_paths || {})[r.code_hash];
+  const isCurrent = (LAB.current_code || {})[strategy] === r.code_hash;
+  const curPath = meta && meta.path;
+  return `
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      ${badge}
+      <span class="hint">snapshot ${esc(r.code_hash.slice(0, 12))}…${meta && meta.mtime ? ' · ' + esc(meta.mtime) : ''}${curPath ? ' · <code>' + esc(curPath) + '</code>' : ''}</span>
+    </div>
+    ${isCurrent ? '' : '<p class="hint bad">The current .py file differs from this snapshot — metrics below reflect the old code.</p>'}
+    <div id="dcode-viewer"><button class="btn compact" onclick="loadCodeInto('${escAttr(r.code_hash)}','dcode-viewer')">View snapshot source</button> <span class="hint">(loads via server)</span></div>`;
+}
+function paneParams(r) {
+  if (drawerState.ctx.kind !== 'hyperopt') return '<p class="hint">Params apply to hyperopt runs.</p>';
+  let params = null;
+  try { params = r.best_params ? JSON.parse(r.best_params) : null; } catch (e) { params = null; }
+  const metaRows = [
+    ['Loss function', esc(r.loss_function || '—')],
+    ['Spaces', esc(r.spaces || '—')],
+    ['Epochs', fmt(r.epochs, 0)],
+    ['Best loss', fmt(r.best_loss, 4)],
+    ['Random state', fmt(r.random_state, 0)],
+    ['Jobs', fmt(r.jobs, 0)],
+    ['Min trades', fmt(r.min_trades, 0)],
+  ].map(([k, v]) => `<span class="k">${k}</span><span class="v">${v}</span>`).join('');
+  return `<div class="kv">${metaRows}</div>`
+    + (params
+      ? `<details class="paramsBlock" open><summary>Best epoch params</summary><pre class="codeblock">${esc(JSON.stringify(params, null, 2))}</pre></details>`
+      : '<p class="hint">No best_params stored (re-run ingest).</p>');
+}
+function copyText(txt) {
+  (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject())
+    .then(() => {})
+    .catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = txt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+    });
 }
 
 /* ---------- history ---------- */
@@ -845,6 +1584,13 @@ function renderBenchmark() {
   const el = $('benchChart');
   const rows = LAB.benchmarks;
   if (!rows.length) { $('benchHint').textContent = 'No benchmark runs yet. Use the Lab tab to run one.'; el.style.display='none'; return; }
+  // one bar per strategy: latest benchmark run wins
+  const latest = {};
+  rows.forEach(r => {
+    const cur = latest[r.strategy];
+    if (!cur || (r.run_time||'') > (cur.run_time||'')) latest[r.strategy] = r;
+  });
+  const shown = Object.values(latest).sort((a,b) => -(Number(a.sortino||0) - Number(b.sortino||0)));
   $('benchHint').textContent = ''; el.style.display='';
   const metric = $('benchMetric').value;
   const useLog = $('benchLog').checked;
@@ -854,9 +1600,9 @@ function renderBenchmark() {
     grid:{left:110,right:30,top:20,bottom:40},
     xAxis: useLog ? {type:'log',logBase:10,axisLabel:{color:'#a89fc4'},splitLine:{lineStyle:{color:'#241d36'}}}
                   : {type:'value',axisLabel:{color:'#a89fc4'},splitLine:{lineStyle:{color:'#241d36'}}},
-    yAxis:{type:'category',data:rows.map(r=>r.strategy),axisLabel:{color:'#a89fc4'}},
+    yAxis:{type:'category',data:shown.map(r=>r.strategy),axisLabel:{color:'#a89fc4'}},
     series:[{ name:metric, type:'bar',
-      data: rows.map(r=>{ const v=value(r);
+      data: shown.map(r=>{ const v=value(r);
         let color = metric==='max_drawdown_account' ? (v<=0.2?'#6ee7a8':v<=0.4?'#fbbf24':'#f87171')
           : (v>=1?'#6ee7a8':v>=0.3?'#fbbf24':'#f87171');
         return {value:v,itemStyle:{color}}; }) }] });
@@ -864,48 +1610,166 @@ function renderBenchmark() {
 }
 
 /* ---------- walk-forward ---------- */
+let wfSelected = null;
 function renderWalkForward() {
   const rows = LAB.walkforward;
   if (!rows.length) { $('wf').innerHTML = '<p class="hint">No walk-forward results ingested yet.</p>'; return; }
+  const q = ($('wfFilter') ? $('wfFilter').value.toLowerCase() : '');
+  let filtered = rows.filter(r => !q || (r.strategy||'').toLowerCase().includes(q) || (r.run_id||'').toLowerCase().includes(q));
+  filtered.sort((a,b)=>(b.run_time||'').localeCompare(a.run_time||''));
   const t = document.createElement('table');
   t.innerHTML = `<thead><tr><th>Strategy</th><th class="num">Run</th><th class="num">Windows</th>
     <th class="num">Profitable</th><th class="num">OOS Trades</th><th class="num">OOS Profit</th>
-    <th class="num">Avg Sortino</th><th class="num">Avg PF</th></tr></thead><tbody>` +
-    rows.map(r => {
+    <th class="num">Avg Sortino</th><th class="num">Avg PF</th><th>Loss</th><th>Detail</th></tr></thead><tbody>` +
+    filtered.slice(0,80).map(r => {
       const ratio = r.n_windows ? (r.profitable_windows / r.n_windows) : 0;
-      return `<tr>
+      const sel = wfSelected===r.source ? ' style="background:var(--card-hover)"' : '';
+      return `<tr${sel}>
         <td>${stratLink(r.strategy)}</td>
-        <td class="num" data-val="${r.run_id||''}">${esc((r.run_id||'').slice(0,16))}</td>
+        <td class="num" data-val="${r.run_id||''}" title="${esc(r.source||'')}">${esc((r.run_id||r.source||'').slice(0,18))}</td>
         <td class="num" data-val="${r.n_windows||0}">${fmt(r.n_windows,0)}</td>
         <td class="num" data-val="${ratio}">${pill(ratio>=0.6?'pass':ratio>=0.4?'warn':'fail', `${r.profitable_windows}/${r.n_windows}`)}</td>
         <td class="num" data-val="${r.oos_trades||0}">${fmt(r.oos_trades,0)}</td>
         <td class="num" data-val="${r.oos_profit_abs||0}">${fmt(r.oos_profit_abs)}</td>
         <td class="num" data-val="${r.avg_oos_sortino||0}">${fmt(r.avg_oos_sortino)}</td>
         <td class="num" data-val="${r.avg_oos_profit_factor||0}">${fmt(r.avg_oos_profit_factor)}</td>
+        <td data-val="${r.loss_function||''}">${esc(r.loss_function||'')}</td>
+        <td style="white-space:nowrap"><button class="btn compact" data-source="${esc(r.source)}" onclick="loadWFDetail(this.dataset.source)">Windows</button> ${drawerBtn('walkforward', r)}</td>
       </tr>`;
     }).join('') + '</tbody>';
   const wrap = $('wf'); wrap.innerHTML=''; wrap.appendChild(t); makeSortable(t);
+  if ($('wfCount')) $('wfCount').textContent = `${filtered.length}/${rows.length} runs`;
+}
+function renderWFDetailFromWindows(r, wins, el) {
+  const chartId = 'wfSpark';
+  el.innerHTML = `<div class="card"><div class="section-head"><h2>OOS per window — ${esc(r.strategy)} · ${esc((r.run_id||'').slice(0,16))}</h2><span class="hint">${wins.length} windows · ${r.train_days}/${r.test_days}/${r.step_days} d</span></div><div id="${chartId}" class="chart" style="height:200px"></div><div class="table-wrap"><div id="wfWinTable"></div></div></div>`;
+  setTimeout(()=>{
+    try {
+      const c = echarts.init($(chartId));
+      const x = wins.map((_,i)=>'W'+(i+1));
+      const y = wins.map(w=>w.oos_profit_abs||0);
+      c.setOption({backgroundColor:'transparent', tooltip:{trigger:'axis'}, grid:{left:50,right:20,top:20,bottom:30}, xAxis:{type:'category',data:x,axisLabel:{color:'#a89fc4'}}, yAxis:{type:'value',axisLabel:{color:'#a89fc4'}}, series:[{type:'bar',data:y.map(v=>({value:v,itemStyle:{color:v>=0?'#6ee7a8':'#f87171'}}))},{type:'line',data:y,smooth:true,lineStyle:{color:'#c4b5fd'}}]});
+      window._wfChart=c;
+    } catch(e){}
+  },60);
+  const t = document.createElement('table');
+  t.innerHTML = `<thead><tr><th>#</th><th>Test range</th><th class="num">Trades</th><th class="num">Profit</th><th class="num">Win%</th><th class="num">Sortino</th><th class="num">PF</th><th class="num">DD</th></tr></thead><tbody>` +
+    wins.map((w,i)=>`<tr><td>${i+1}</td><td>${esc(w.test_range||'')}</td><td class="num">${fmt(w.oos_trades,0)}</td><td class="num">${fmt(w.oos_profit_abs)}</td><td class="num">${pct(w.oos_winrate)}</td><td class="num">${fmt(w.oos_sortino)}</td><td class="num">${fmt(w.oos_pf)}</td><td class="num">${pct(w.oos_dd)}</td></tr>`).join('') + '</tbody>';
+  $('wfWinTable').appendChild(t); makeSortable(t);
+}
+function loadWFDetail(source) {
+  wfSelected = source;
+  renderWalkForward();
+  const el = $('wfDetail');
+  if (!el) return;
+  el.innerHTML = '<p class="hint">Loading windows for '+esc(source.slice(-40))+'…</p>';
+  const local = (LAB.walkforward||[]).find(r=>r.source===source);
+  if (local && local.windows_json) {
+    try {
+      const wins = JSON.parse(local.windows_json);
+      if (wins && wins.length) { renderWFDetailFromWindows(local, wins, el); return; }
+    } catch(e) {}
+  }
+  fetch('/api/walkforward?source='+encodeURIComponent(source)).then(r=>r.json()).then(d=>{
+    const rows = d.rows||[];
+    if (!rows.length) { el.innerHTML='<p class="hint">No detail.</p>'; return; }
+    const r = rows[0];
+    const wins = r.windows || [];
+    if (!wins.length) { el.innerHTML='<p class="hint">No windows_json (re-ingest).</p>'; return; }
+    renderWFDetailFromWindows(r, wins, el);
+  }).catch(()=>{ el.innerHTML='<p class="hint">Failed to load (need server).</p>'; });
 }
 
 /* ---------- hyperopt ---------- */
+let hoSelected = null;
+let hoSort = {col:'loss', asc:true};
+let hoMinTrades = 0;
 function renderHyperopt() {
   const rows = LAB.hyperopt;
   if (!rows.length) { $('ho').innerHTML = '<p class="hint">No hyperopt results ingested yet.</p>'; return; }
-  rows.sort((a,b)=>(b.epochs||0)-(a.epochs||0));
+  const q = ($('hoFilter') ? $('hoFilter').value.toLowerCase() : '');
+  const minT = hoMinTrades;
+  let filtered = rows.filter(r => {
+    if (minT && (r.best_trades||0) < minT) return false;
+    if (!q) return true;
+    return (r.strategy||'').toLowerCase().includes(q) || (r.source||'').toLowerCase().includes(q) || (r.loss_function||'').toLowerCase().includes(q);
+  });
+  filtered.sort((a,b)=>(b.epochs||0)-(a.epochs||0));
   const t = document.createElement('table');
   t.innerHTML = `<thead><tr><th>Strategy</th><th class="num">Epochs</th><th class="num">Best Loss</th>
-    <th class="num">Best Profit</th><th class="num">Best Sortino</th><th class="num">Best PF</th><th>Run</th></tr></thead><tbody>` +
-    rows.slice(0,40).map(r => `<tr>
+    <th class="num">Best Profit</th><th class="num">Best Sortino</th><th class="num">Best PF</th><th class="num">Trades</th><th>Loss</th><th>Spaces</th><th>Run</th><th></th></tr></thead><tbody>` +
+    filtered.slice(0,60).map(r => `<tr${hoSelected===r.source?' style="background:var(--card-hover)"':''}>
       <td>${stratLink(r.strategy)}</td>
       <td class="num" data-val="${r.epochs||0}">${fmt(r.epochs,0)}</td>
       <td class="num" data-val="${r.best_loss||0}">${fmt(r.best_loss,2)}</td>
       <td class="num" data-val="${r.best_profit_total||0}">${fmt((r.best_profit_total||0)*100,1)}%</td>
       <td class="num" data-val="${r.best_sortino||0}">${fmt(r.best_sortino)}</td>
       <td class="num" data-val="${r.best_profit_factor||0}">${fmt(r.best_profit_factor)}</td>
+      <td class="num" data-val="${r.best_trades||0}">${fmt(r.best_trades,0)}</td>
+      <td data-val="${r.loss_function||''}" title="${esc(r.spaces||'')}">${esc((r.loss_function||'').replace('HyperOptLoss',''))}</td>
+      <td data-val="${r.spaces||''}">${esc((r.spaces||'').slice(0,18))}</td>
       <td data-val="${r.run_time||''}">${esc((r.run_time||'').slice(0,16))}</td>
+      <td style="white-space:nowrap"><button class="btn compact" data-source="${esc(r.source)}" onclick="loadHOEpochs(this.dataset.source)">Drill</button> ${drawerBtn('hyperopt', r)}</td>
     </tr>`).join('') + '</tbody>';
   const wrap = $('ho'); wrap.innerHTML=''; wrap.appendChild(t); makeSortable(t);
+  if ($('hoCount')) $('hoCount').textContent = `${filtered.length}/${rows.length} runs`;
+  if ($('hoFiles')) fetch('/api/hyperopt/files').then(r=>r.json()).then(f=>{ $('hoFiles').innerHTML = f.slice(0,8).map(x=>`<option value="${esc(x.source)}">${esc(x.source)} (${(x.size/1e6).toFixed(1)} MB)</option>`).join(''); }).catch(()=>{});
 }
+function loadHOEpochs(source) {
+  hoSelected=source;
+  renderHyperopt();
+  const el = $('hoDetail');
+  if (!el) return;
+  el.innerHTML = '<p class="hint">Loading epochs for '+esc(source.slice(-40))+'… (up to 200 sorted by loss)</p>';
+  const limit = ($('hoLimit')? Number($('hoLimit').value)||200 : 200);
+  fetch('/api/hyperopt?source='+encodeURIComponent(source)+'&limit='+limit).then(r=>r.json()).then(d=>{
+    if (d.error) { el.innerHTML='<p class="hint bad">'+esc(d.error)+'</p>'; return; }
+    const recs = d.records||[];
+    const corr = d.corr||{};
+    if (!recs.length) { el.innerHTML='<p class="hint">No epochs.</p>'; return; }
+    // inline best-params glance (from the ingested hyperopt row, works offline)
+    let inlineParams = '';
+    const hoRow = (LAB.hyperopt||[]).find(x => x.source === d.source);
+    if (hoRow && hoRow.best_params) {
+      try {
+        const bp = JSON.parse(hoRow.best_params);
+        inlineParams = `<details class="paramsBlock"><summary>Best epoch params — ${esc(hoRow.loss_function||'')} · loss ${fmt(hoRow.best_loss,4)}</summary><pre class="codeblock">${esc(JSON.stringify(bp,null,2))}</pre></details>`;
+      } catch(e) {}
+    }
+    let corrHtml = Object.keys(corr).length ? '<div class="card" style="padding:10px"><div class="hint">Correlation with loss (lower loss = better). Negative = good for sortino/calmar/PF.</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">'+Object.entries(corr).map(([k,v])=>`<span class="pill ${v< -0.2 ? 'pass' : v>0.2 ? 'fail' : 'warn'}">${esc(k)} ${v>0?'+':''}${v.toFixed(2)}</span>`).join('')+'</div></div>' : '';
+    const t = document.createElement('table');
+    // compute sortable
+    const head = `<thead><tr><th class="num">Epoch</th><th class="num">Loss</th><th class="num">Trades</th><th class="num">Profit%</th><th class="num">Sortino</th><th class="num">Calmar</th><th class="num">PF</th><th class="num">SQN</th><th class="num">DD</th><th class="num">MAE%</th><th class="num">ExitEff</th><th>Best?</th></tr></thead>`;
+    const rows = recs.map(r=>`<tr>
+      <td class="num" data-val="${r.epoch||0}">${fmt(r.epoch,0)}</td>
+      <td class="num" data-val="${r.loss||0}">${fmt(r.loss,4)}</td>
+      <td class="num" data-val="${r.trades||0}">${fmt(r.trades,0)}</td>
+      <td class="num" data-val="${r.profit_total||0}">${fmt((r.profit_total||0)*100,1)}%</td>
+      <td class="num" data-val="${r.sortino||0}">${fmt(r.sortino)}</td>
+      <td class="num" data-val="${r.calmar||0}">${fmt(r.calmar)}</td>
+      <td class="num" data-val="${r.profit_factor||0}">${fmt(r.profit_factor)}</td>
+      <td class="num" data-val="${r.sqn||0}">${fmt(r.sqn)}</td>
+      <td class="num" data-val="${r.max_drawdown||0}">${pct(r.max_drawdown)}</td>
+      <td class="num" data-val="${r.mae||0}">${fmt((r.mae||0)*100,2)}%</td>
+      <td class="num" data-val="${r.exit_eff||0}">${fmt((r.exit_eff||0)*100,0)}%</td>
+      <td>${r.best?pill('pass','best'): r.init?pill('na','init'):''}</td>
+    </tr>`).join('');
+    t.innerHTML = head + '<tbody>' + rows + '</tbody>';
+    const chartId = 'hoScatter';
+    el.innerHTML = corrHtml + inlineParams + `<div class="card"><div class="section-head"><h2>Epochs — ${esc(d.source)} (${recs.length}/${d.count})</h2><span class="hint">sorted by loss asc · MAE/exit_eff from embedded trades</span></div><div id="${chartId}" class="chart" style="height:220px"></div><div class="table-wrap"></div><div class="hint" style="margin-top:8px">Tip: use Min trades filter to cull noise; compare Top loss vs Top sortino/calmar before trusting a loss function. Use <code>python user_data/scripts/analyze_hyperopt.py --results user_data/hyperopt_results/${esc(d.source)} --top 15</code> for full CLI table.</div></div>`;
+    el.querySelector('.table-wrap').appendChild(t); makeSortable(t);
+    setTimeout(()=>{
+      try {
+        const c = echarts.init($(chartId));
+        const pts = recs.map(r=>[r.loss, r.sortino]);
+        c.setOption({backgroundColor:'transparent', tooltip:{trigger:'item', formatter:p=>`loss ${p.value[0].toFixed(4)}<br/>sortino ${p.value[1]}`}, grid:{left:50,right:20,top:20,bottom:30}, xAxis:{type:'value',name:'loss',nameTextStyle:{color:'#a89fc4'},axisLabel:{color:'#a89fc4'}}, yAxis:{type:'value',name:'sortino',axisLabel:{color:'#a89fc4'}}, series:[{type:'scatter',data:pts, symbolSize:6, itemStyle:{color:'#c4b5fd'}}]});
+        window._hoChart=c;
+      } catch(e){}
+    },60);
+  }).catch(()=>{ el.innerHTML='<p class="hint">Failed (need server with /api/hyperopt).</p>'; });
+}
+function hoApplyFilter() { const v = $('hoMinTrades'); hoMinTrades = v ? (Number(v.value)||0) : 0; renderHyperopt(); }
+
 
 /* ---------- trades ---------- */
 function populateTradeRunSelect() {
@@ -988,7 +1852,7 @@ function renderTradeTable(data, wrapEl) {
         <td data-val="${td.c||''}">${esc((td.c||'').slice(0,16))}</td>
         <td class="num" data-val="${td.or||0}">${fmt(td.or)}</td>
         <td class="num" data-val="${td.cr||0}">${fmt(td.cr)}</td>
-        <td class="num" data-val="${td.pr||0}">${pill(prof>=0?'pass':'fail', prof.toFixed(2)+'%')}</td>
+        <td class="num" data-val="${td.pr||0}">${pill(prof>=0?'pass':'fail', (prof<=-0.15?'⚠ ':'')+prof.toFixed(2)+'%')}</td>
         <td class="num" data-val="${td.pa||0}">${fmt(td.pa)}</td>
         <td class="num" data-val="${td.sl||0}">${fmt(td.sl)}</td>
         <td class="num" data-val="${td.slr||0}">${fmt((td.slr||0)*100,1)}%</td>
@@ -1036,9 +1900,80 @@ function labBench() {
   fetch('/api/bench', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
     .then(r=>r.json()).then(() => { jobTimer = setInterval(() => { pollJobs(); }, 1500); });
 }
+function updateRunFields() {
+  const mode = $('runMode').value;
+  document.querySelectorAll('[data-runfield]').forEach(el => {
+    el.classList.toggle('hidden', !el.dataset.runfield.split(' ').includes(mode));
+  });
+}
+function defaultRunRange() {
+  let min = '20220101', max = '20240101';
+  (LAB.backtests || []).forEach(r => {
+    const m = /^(\d{8})-(\d{8})$/.exec(r.timerange || '');
+    if (m) { if (m[1] < min) min = m[1]; if (m[2] > max) max = m[2]; }
+  });
+  const fmt = s => s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8);
+  $('runStart').value = fmt(min);
+  $('runEnd').value = fmt(max);
+}
+function loadLosses() {
+  fetch('/api/losses').then(r => r.json()).then(d => {
+    const dl = $('lossList');
+    (d.losses || []).forEach(l => { const o = document.createElement('option'); o.value = l; dl.appendChild(o); });
+  }).catch(() => {});
+}
+function labRun() {
+  const strategy = $('runStrategy').value;
+  if (!strategy) { $('jobStatus').textContent = 'Pick a strategy first.'; return; }
+  const start = ($('runStart').value || '').replace(/-/g, '');
+  const end = ($('runEnd').value || '').replace(/-/g, '');
+  const mode = $('runMode').value;
+  const body = {
+    mode,
+    strategy,
+    timerange: (start && end) ? start + '-' + end : '',
+    timeframe: $('runTf').value,
+    config: $('runConfig').value.trim(),
+    rebuild: $('runRebuild').checked,
+  };
+  if (mode === 'hyperopt' || mode === 'walkforward') {
+    body.epochs = Number($('runEpochs').value) || 100;
+    body.loss = $('runLoss').value.trim() || 'SharpeHyperOptLossDaily';
+    const spaces = $('runSpaces').value.split(/\s+/).map(s=>s.trim()).filter(Boolean);
+    if (spaces.length) body.spaces = spaces;
+    const jobs = $('runJobs').value.trim();
+    if (jobs !== '') body.jobs = Number(jobs);
+    const seed = $('runRandomState').value.trim();
+    if (seed !== '') body.random_state = Number(seed);
+    const mt = $('runMinTrades').value.trim();
+    if (mt !== '') body.min_trades = Number(mt);
+    if ($('runAnalyzePerEpoch').checked) body.analyze_per_epoch = true;
+  }
+  if (mode === 'hyperopt') {
+    if ($('runDisableExport').checked) body.disable_param_export = true;
+    if ($('runPrintAll').checked) body.print_all = true;
+  }
+  if (mode === 'walkforward') {
+    body.train_days = Number($('runTrain').value) || 90;
+    body.test_days = Number($('runTest').value) || 7;
+    body.step_days = Number($('runStep').value) || 7;
+    const wfmt = $('runWfMinTrades').value.trim();
+    if (wfmt !== '') body.wf_min_trades = Number(wfmt);
+    const wfdd = $('runWfMaxDD').value.trim();
+    if (wfdd !== '') body.wf_max_drawdown = Number(wfdd);
+  }
+  $('jobStatus').textContent = `Running ${mode} for ${strategy} (${body.timerange || 'all data'})…`;
+  fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
+    .then(r => r.json()).then(() => { jobTimer = setInterval(() => { pollJobs(); }, 1500); })
+    .catch(e => { $('jobStatus').textContent = 'Run failed: ' + e; });
+}
 function renderLab() {
   // strategy status editor
   fetch('/api/strategies').then(r=>r.json()).then(list => {
+    const sel = $('runStrategy');
+    sel.innerHTML = '<option value="">(choose…)</option>';
+    list.forEach(s => { const o = document.createElement('option'); o.value = s.name; o.textContent = s.name; sel.appendChild(o); });
+    $('runHint').textContent = 'Auto config: user_data/config_<strategy>.json if it exists, else config_benchmark.json. Override with the Config field.';
     const wrap = $('strategyEditor');
     if (!list.length) { wrap.innerHTML = '<p class="hint">No strategies registered.</p>'; return; }
     const t = document.createElement('table');
@@ -1051,7 +1986,7 @@ function renderLab() {
         <td class="num">${fmt(s.n_backtests,0)}</td>
         <td class="num">${fmt(s.n_trades,0)}</td>
         <td><input class="notesInput" data-name="${esc(s.name)}" value="${esc(s.notes||'')}" placeholder="notes"></td>
-        <td><button class="btn compact" onclick="saveStrategy('${esc(s.name)}')">Save</button></td>
+        <td><button class="btn compact" data-name="${esc(s.name)}" onclick="saveStrategy(this.dataset.name)">Save</button></td>
       </tr>`).join('') + '</tbody>';
     wrap.innerHTML = '';
     wrap.appendChild(t);
@@ -1069,11 +2004,16 @@ function saveStrategy(name) {
 
 /* ---------- init ---------- */
 function init() {
+  setupTableSplitter();
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); } });
   populateHistSelect();
   populateTradeRunSelect();
   renderDashboard();
   renderLab();
+  updateRunFields();
+  defaultRunRange();
+  loadLosses();
 
   // resize charts when the viewport changes
   let resizeTimer = null;
@@ -1084,6 +2024,8 @@ function init() {
        '_detailEquityChart','_detailHistChart'].forEach(k => {
         if (window[k]) window[k].resize();
       });
+      updateAllTableScrolls();
+      tryPendingSplits();
     }, 150);
   });
 }
@@ -1154,8 +2096,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <div><b style="color:var(--lavender)">Max drawdown</b> ≤ 20% pass · ≤ 40% warn</div>
           <div><b style="color:var(--lavender)">Win rate</b> ≥ 45% pass · ≥ 35% warn</div>
           <div><b style="color:var(--lavender)">Trades</b> ≥ 100 pass · ≥ 30 warn</div>
+          <div><b style="color:var(--lavender)">Worst trade</b> ≥ −8% pass · ≥ −15% warn · below flags outlier trades</div>
         </div>
-        <div class="hint">Each strategy shows ONE grade from its most recent benchmark run (else latest backtest). Click a strategy for the full breakdown and every run.</div>
+        <div class="hint">Each strategy shows ONE grade from its most recent benchmark run (else latest backtest). A single extreme losing trade (e.g. −15% or worse) flags the Worst trade metric; a −50% outlier also raises a fail recommendation. Click a strategy for the full breakdown and every run.</div>
       </div>
     </section>
 
@@ -1237,8 +2180,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="tab" id="tab-walkforward">
     <section>
       <div class="section-head"><h2>Walk-Forward (out-of-sample)</h2>
-        <span class="hint">profitable windows / total = OOS consistency</span></div>
+        <span class="hint">profitable windows / total = OOS consistency · click Windows for per-window OOS</span></div>
+      <div class="controls">
+        <input id="wfFilter" type="text" placeholder="Filter strategy/run..." oninput="renderWalkForward()" style="min-width:220px">
+        <span id="wfCount" class="hint"></span>
+        <button class="btn" onclick="loadWFDetail(wfSelected||LAB.walkforward[0]?.source||'')">Load latest</button>
+      </div>
       <div class="table-wrap"><div id="wf"></div></div>
+      <div id="wfDetail" style="display:flex;flex-direction:column;gap:12px"></div>
     </section>
   </div>
 
@@ -1246,8 +2195,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="tab" id="tab-hyperopt">
     <section>
       <div class="section-head"><h2>Hyperopt</h2>
-        <span class="hint">best epoch per run</span></div>
+        <span class="hint">best epoch per run · Drill loads top 200 epochs sorted by loss (MAE/exit_eff + corr)</span></div>
+      <div class="controls">
+        <input id="hoFilter" type="text" placeholder="Filter strategy/loss..." oninput="renderHyperopt()" style="min-width:200px">
+        <label>Min trades <input id="hoMinTrades" type="number" value="0" style="width:80px" oninput="hoApplyFilter()"></label>
+        <label>Limit <select id="hoLimit" onchange="hoSelected&&loadHOEpochs(hoSelected)"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option></select></label>
+        <select id="hoFiles" style="min-width:200px" onchange="if(this.value) loadHOEpochs(this.value)"><option value="">(pick .fthypt)</option></select>
+        <span id="hoCount" class="hint"></span>
+      </div>
       <div class="table-wrap"><div id="ho"></div></div>
+      <div id="hoDetail" style="display:flex;flex-direction:column;gap:12px;margin-top:8px"></div>
+      <p class="hint">Full analysis offline: <code>python user_data/scripts/analyze_hyperopt.py --results user_data/hyperopt_results/strategy_X.fthypt --top 15 --best-params 5</code></p>
     </section>
   </div>
 
@@ -1274,18 +2232,72 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <!-- ============ LAB ============ -->
   <div class="tab" id="tab-lab">
     <section>
-      <div class="section-head"><h2>Lab</h2>
-        <span class="hint">run everything from here — requires the web server (lab.py serve)</span></div>
+      <div class="section-head"><h2>Run strategy</h2>
+        <span class="hint">backtest / hyperopt / walk-forward for one strategy — requires the web server (lab.py serve)</span></div>
       <div class="card">
         <div class="controls">
-          <button class="btn primary" onclick="labRefresh()">↻ Refresh data</button>
+          <label>Strategy:
+            <select id="runStrategy"><option value="">(choose…)</option></select>
+          </label>
+          <label>Run:
+            <select id="runMode" onchange="updateRunFields()">
+              <option value="backtest">Backtest</option>
+              <option value="hyperopt">Hyperopt</option>
+              <option value="walkforward">Walk-Forward</option>
+            </select>
+          </label>
+          <div class="daterange">
+            <label>From: <input id="runStart" type="date"></label>
+            <span class="dr-sep" aria-hidden="true">→</span>
+            <label>To: <input id="runEnd" type="date"></label>
+          </div>
+          <label>TF: <input id="runTf" type="text" value="5m" style="width:70px"></label>
+          <label data-runfield="hyperopt walkforward" class="hidden">Epochs:
+            <input id="runEpochs" type="number" value="100" style="width:90px"></label>
+          <label data-runfield="hyperopt walkforward" class="hidden">Loss:
+            <input id="runLoss" list="lossList" value="SharpeHyperOptLossDaily">
+            <datalist id="lossList"></datalist></label>
+          <label data-runfield="hyperopt walkforward" class="hidden">Spaces:
+            <input id="runSpaces" value="buy sell roi stoploss trailing" style="min-width:200px"></label>
+          <label data-runfield="hyperopt walkforward" class="hidden">Jobs:
+            <input id="runJobs" type="number" placeholder="-1" style="width:70px"></label>
+          <label data-runfield="hyperopt walkforward" class="hidden">Seed:
+            <input id="runRandomState" type="number" placeholder="auto" style="width:90px"></label>
+          <label data-runfield="hyperopt walkforward" class="hidden">MinTr:
+            <input id="runMinTrades" type="number" placeholder="1" style="width:70px"></label>
+          <label data-runfield="hyperopt walkforward" class="hidden"><input type="checkbox" id="runAnalyzePerEpoch"> per-epoch</label>
+          <label data-runfield="hyperopt" class="hidden"><input type="checkbox" id="runDisableExport"> no export</label>
+          <label data-runfield="hyperopt" class="hidden"><input type="checkbox" id="runPrintAll"> print-all</label>
+          <label data-runfield="walkforward" class="hidden">Train d:
+            <input id="runTrain" type="number" value="90" style="width:80px"></label>
+          <label data-runfield="walkforward" class="hidden">Test d:
+            <input id="runTest" type="number" value="7" style="width:70px"></label>
+          <label data-runfield="walkforward" class="hidden">Step d:
+            <input id="runStep" type="number" value="7" style="width:70px"></label>
+          <label data-runfield="walkforward" class="hidden">WF minTr:
+            <input id="runWfMinTrades" type="number" placeholder="0" style="width:70px"></label>
+          <label data-runfield="walkforward" class="hidden">WF maxDD:
+            <input id="runWfMaxDD" type="number" step="0.01" placeholder="0.25" style="width:80px"></label>
+          <label>Config: <input id="runConfig" type="text" placeholder="auto (optional)" style="min-width:180px"></label>
+          <label><input type="checkbox" id="runRebuild" checked> Rebuild report when done</label>
+          <button class="btn primary" onclick="labRun()">▶ Run</button>
+          <button class="btn" onclick="labRefresh()">↻ Refresh data</button>
           <button class="btn" onclick="labReport()">Rebuild report</button>
+        </div>
+        <div id="runHint" class="hint"></div>
+        <div id="jobStatus" class="hint">Idle.</div>
+      </div>
+    </section>
+    <section>
+      <div class="section-head"><h2>Benchmark (apples-to-apples)</h2>
+        <span class="hint">every strategy on the shared benchmark config</span></div>
+      <div class="card">
+        <div class="controls">
           <button class="btn" onclick="labBench()">Run benchmark</button>
           <label>Strategies: <input id="benchStrategies" type="text" placeholder="comma separated (empty = all)" style="min-width:220px"></label>
           <label>Range: <input id="benchRange" type="text" value="20230101-20240101" style="width:150px"></label>
           <label>TF: <input id="benchTf" type="text" value="5m" style="width:70px"></label>
         </div>
-        <div id="jobStatus" class="hint">Idle.</div>
       </div>
     </section>
     <section>
@@ -1310,6 +2322,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="section-head"><h2>Scorecard breakdown</h2>
       <span class="hint">why this grade — each metric vs its threshold</span></div>
     <div class="table-wrap"><div id="detailScorecard"></div></div>
+  </section>
+  <section>
+    <div class="section-head"><h2>Diagnostics</h2>
+      <span class="hint">streaks, MFE/MAE, payoff & capture — from trade history</span></div>
+    <div class="metric-row" id="detailDiagnostics"></div>
+    <div id="detailRecommendations" style="display:flex;flex-direction:column;gap:8px"></div>
   </section>
   <section>
     <div class="section-head"><h2>All backtest runs</h2></div>
@@ -1337,13 +2355,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </section>
 </main>
 
+<!-- ============ RUN DRAWER ============ -->
+<div id="drawerBackdrop" onclick="closeDrawer()"></div>
+<aside id="drawer" aria-hidden="true">
+  <div class="drawer-head"></div>
+  <div class="drawer-tabs"></div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
 <footer>Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py</footer>
 
 <script>
 const LAB = {data_placeholder};
 {js}
 init();
-showTab('dashboard');
+applyFromHash();
 </script>
 </body>
 </html>
@@ -1353,8 +2379,6 @@ showTab('dashboard');
 def build_html(data: dict, conn: sqlite3.Connection | None = None) -> str:
     canonical = canonical_per_strategy(data)
     history = history_series(data)
-    benchmarks = benchmark_bars(data)
-    from datetime import datetime
 
     # embed the most recent run's trades so the section works without a server
     embedded_trades = None
@@ -1376,6 +2400,8 @@ def build_html(data: dict, conn: sqlite3.Connection | None = None) -> str:
                 "trades": [compact_trade(dict(r)) for r in rows],
             }
 
+    extras = collect_extras(conn)
+
     lab = {
         "canonical": canonical,
         "latest": canonical,
@@ -1387,7 +2413,10 @@ def build_html(data: dict, conn: sqlite3.Connection | None = None) -> str:
         "strategies": data["strategies"],
         "trade_runs": data["trade_runs"],
         "embedded_trades": embedded_trades,
-        "scorecard": {k: {kk: vv for kk, vv in v.items() if kk != "label"} for k, v in SCORECARD.items()},
+        "scorecard": SCORECARD,
+        "configs": extras["configs"],
+        "current_code": extras["current_code"],
+        "snapshot_paths": extras["snapshot_paths"],
     }
 
     html = HTML_TEMPLATE
