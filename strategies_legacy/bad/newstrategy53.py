@@ -140,16 +140,17 @@ class newstrategy53(IStrategy):
 
     # Structural stop-side owner (Octopus Nest pattern, plan Option B):
     # close-cross SL via components.risk; profit exits below stay untouched.
+    # Defaults tuned via SortinoHyperOptLoss on 20230601-20240104 (lab config).
     sl_tp_mode = "Highest Lowest + ATR"
     sl_size_or_atr_multiplier = DecimalParameter(
-        0.5, 6.0, default=2.0, decimals=2, space="sell", optimize=False
+        0.5, 6.0, default=5.93, decimals=2, space="sell", optimize=False
     )
-    high_low_stop_loss_lookback = IntParameter(96, 480, default=288, space="sell", optimize=False)
+    high_low_stop_loss_lookback = IntParameter(96, 480, default=270, space="sell", optimize=False)
     high_low_stop_loss_multiplier = DecimalParameter(
-        0.95, 1.0, default=0.98, decimals=3, space="sell", optimize=False
+        0.95, 1.0, default=0.973, decimals=3, space="sell", optimize=False
     )
     atr_length = IntParameter(7, 28, default=14, space="sell", optimize=False)
-    max_trade_duration_days = IntParameter(1, 10, default=7, space="sell", optimize=False)
+    max_trade_duration_days = IntParameter(1, 10, default=4, space="sell", optimize=False)
     enable_take_profit_levels = False
     risk_reward_ratio_levels = 1.05
     my_backup_multiplier_levels = 1.1
