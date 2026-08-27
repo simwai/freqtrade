@@ -30,6 +30,14 @@ from datetime import datetime  # noqa: E402
 
 # ---------------------------------------------------------------- scorecard ---
 
+# Outlier thresholds – tuned for futures variance (single-wick sensitivity reduction).
+# -15% pass keeps the user's requested band; -25% warn and -60% fail are materially looser
+# than the original -8%/-15%/-50% so one liquidation wick does not dominate the grade.
+WORST_TRADE_PASS: float = -0.15
+WORST_TRADE_WARN: float = -0.25
+WORST_TRADE_FAIL: float = -0.60
+WORST_TRADE_ROBUST_K: int = 3
+
 SCORECARD = {
     "sortino": {"pass": 1.0, "warn": 0.3, "higher_is_better": True, "label": "Sortino"},
     "calmar": {"pass": 1.0, "warn": 0.3, "higher_is_better": True, "label": "Calmar"},
@@ -37,7 +45,7 @@ SCORECARD = {
     "max_drawdown_account": {"pass": 0.2, "warn": 0.4, "higher_is_better": False, "label": "Max drawdown"},
     "winrate": {"pass": 0.45, "warn": 0.35, "higher_is_better": True, "label": "Win rate"},
     "total_trades": {"pass": 100, "warn": 30, "higher_is_better": True, "label": "Trades"},
-    "worst_trade": {"pass": -0.08, "warn": -0.15, "higher_is_better": True, "label": "Worst trade"},
+    "worst_trade": {"pass": WORST_TRADE_PASS, "warn": WORST_TRADE_WARN, "higher_is_better": True, "label": "Worst trade"},
 }
 
 GRADE_EXPLANATION = {
@@ -48,7 +56,7 @@ GRADE_EXPLANATION = {
 }
 
 
-def grade_value(value, spec):
+def grade_value(value: float | None, spec: dict) -> str:
     if value is None:
         return "na"
     if spec["higher_is_better"]:
@@ -77,18 +85,30 @@ def overall_grade(grades: list[str]) -> str:
     return "C"
 
 
+def _demote_sole_worst_trade_fail(grades: dict[str, str]) -> list[str]:
+    """Desensitization carve-out: a sole worst_trade fail is demoted to warn.
+
+    One wick should not force grade C/D when the other 6 metrics are clean.
+    """
+    lst = list(grades.values())
+    if lst.count("fail") == 1 and grades.get("worst_trade") == "fail":
+        return [("warn" if k == "worst_trade" else g) for k, g in grades.items()]
+    return lst
+
+
 def score_strategy(row: dict) -> dict:
     """Compute a scorecard for a single backtest/benchmark row."""
-    grades = {}
+    grades: dict[str, str] = {}
     for key, spec in SCORECARD.items():
         grades[key] = grade_value(row.get(key), spec)
-    grade_list = list(grades.values())
+    # counts and grade both come from the demoted list so display stays consistent
+    counted = _demote_sole_worst_trade_fail(grades)
     return {
-        "grade": overall_grade(grade_list),
+        "grade": overall_grade(counted),
         "grades": grades,
-        "pass_count": grade_list.count("pass"),
-        "warn_count": grade_list.count("warn"),
-        "fail_count": grade_list.count("fail"),
+        "pass_count": counted.count("pass"),
+        "warn_count": counted.count("warn"),
+        "fail_count": counted.count("fail"),
     }
 
 
@@ -112,6 +132,7 @@ def _compute_derived(trades: list[dict]) -> dict:
     profit_vals: list[float] = []
     worst_pr: float | None = None
     worst_pair: str | None = None
+    worst_candidates: list[tuple[float, str | None]] = []
     for t in trades:
         pr = t.get("profit_ratio")
         try:
@@ -119,6 +140,7 @@ def _compute_derived(trades: list[dict]) -> dict:
         except (TypeError, ValueError):
             pr = 0.0
         profit_vals.append(pr)
+        worst_candidates.append((pr, t.get("pair")))
         if worst_pr is None or pr < worst_pr:
             worst_pr = pr
             worst_pair = t.get("pair")
@@ -166,6 +188,23 @@ def _compute_derived(trades: list[dict]) -> dict:
             capture = avg_profit / avg_mfe
         except ZeroDivisionError:
             capture = None
+    # robust worst_trade – desensitized to a single wick (averages worst K)
+    worst_trade_robust: float | None = worst_pr
+    worst_trade_raw: float | None = worst_pr
+    worst_pair_robust: str | None = worst_pair
+    if trades and worst_candidates:
+        n = len(worst_candidates)
+        if n >= 20:
+            worst_candidates.sort(key=lambda x: x[0])
+            k = min(WORST_TRADE_ROBUST_K, n)
+            # average of k worst; keeps -15% threshold meaningful without single-outlier dominance
+            worst_slice = [p for p, _ in worst_candidates[:k]]
+            worst_trade_robust = sum(worst_slice) / len(worst_slice) if worst_slice else worst_pr
+            # pair stays as the single worst for traceability
+            worst_pair_robust = worst_candidates[0][1]
+        else:
+            worst_trade_robust = worst_pr
+            worst_pair_robust = worst_pair
     return {
         "max_win_streak": max_win if trades else None,
         "max_loss_streak": max_loss if trades else None,
@@ -176,8 +215,9 @@ def _compute_derived(trades: list[dict]) -> dict:
         "avg_loss": avg_loss,
         "avg_profit": avg_profit,
         "capture_ratio": capture,
-        "worst_trade": worst_pr if trades else None,
-        "worst_trade_pair": worst_pair,
+        "worst_trade": worst_trade_robust if trades else None,
+        "worst_trade_pair": worst_pair_robust,
+        "worst_trade_raw": worst_trade_raw if trades else None,
     }
 
 
@@ -327,17 +367,19 @@ def build_recommendations(row: dict) -> list[dict]:
         if avg_mae > avg_mfe * 0.9:
             add("warn", "Adverse ≈ favorable", f"Avg MAE {avg_mae*100:.2f}% ≈ MFE {avg_mfe*100:.2f}% — entries are tossed, no edge.")
 
-    # 14. Outlier single-trade loss
+    # 14. Outlier trade loss – uses desensitized thresholds (-15%/-25%/-60%)
     worst_trade = row.get("worst_trade")
     if worst_trade is not None:
         wpair = row.get("worst_trade_pair") or "?"
         wpct = abs(worst_trade) * 100
-        if worst_trade <= -0.50:
+        raw = row.get("worst_trade_raw")
+        raw_hint = f" (raw worst {raw*100:.1f}%)" if isinstance(raw, (int, float)) and raw != worst_trade else ""
+        if worst_trade <= WORST_TRADE_FAIL:
             add("fail", f"Outlier loss −{wpct:.0f}%",
-                f"Worst trade {worst_trade*100:.1f}% on {wpair} — a single trade wiped out ~{wpct:.0f}% of stake. Stop/sizing broken; cap risk per trade.")
-        elif worst_trade <= -0.15:
+                f"Worst trade {worst_trade*100:.1f}% on {wpair}{raw_hint} — a trade wiped out ~{wpct:.0f}% of stake. Stop/sizing broken; cap risk per trade.")
+        elif worst_trade <= WORST_TRADE_WARN:
             add("warn", f"Large single loss −{wpct:.0f}%",
-                f"Worst trade {worst_trade*100:.1f}% on {wpair} — one outlier distorts the grade. Tighten SL or reduce stake on that pair.")
+                f"Worst trade {worst_trade*100:.1f}% on {wpair}{raw_hint} — one outlier distorts the grade. Tighten SL or reduce stake on that pair.")
 
     # 15. Positive but fragile
     if not recs and row.get("score", {}).get("grade") == "A":
@@ -861,6 +903,34 @@ details.paramsBlock[open] summary { margin-bottom: 8px; }
   .tabs button { padding: 6px 10px; font-size: 11px; }
   .chart { height: 260px; }
 }
+
+/* global job bar (visible from any tab) */
+#globalJobs { background: var(--bg-soft); border-bottom: 1px solid var(--border);
+  padding: 8px 24px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; }
+#globalJobs.hidden { display: none !important; }
+#globalJobs .job-chip { display: inline-flex; gap: 8px; align-items: center;
+  background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; }
+#globalJobs .job-chip .job-name { font-weight: 600; color: var(--text); }
+#globalJobs .job-chip .job-log { color: var(--text-dim); max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#globalJobs .job-chip.paused { border-color: rgba(251,191,36,.5); }
+
+/* log viewer */
+#logViewerBackdrop { position: fixed; inset: 0; background: rgba(10,7,20,.55);
+  opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 80; }
+#logViewerBackdrop.open { opacity: 1; pointer-events: auto; }
+#logViewer { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-44%);
+  width: min(900px, 96vw); max-height: 86vh; background: var(--bg-soft);
+  border: 1px solid var(--border); border-radius: 14px; z-index: 90;
+  display: flex; flex-direction: column; opacity: 0; pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease; box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+#logViewer.open { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%); }
+#logViewer .lv-head { display: flex; gap: 10px; align-items: center; padding: 12px 14px;
+  border-bottom: 1px solid var(--border); }
+#logViewer .lv-head .title { font-weight: 700; flex: 1; }
+#logViewer .lv-body { padding: 12px 14px; overflow: auto; flex: 1; }
+#logViewer pre.log { margin: 0; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.5; white-space: pre-wrap;
+  word-break: break-word; font-family: ui-monospace, monospace; color: var(--text-dim); max-height: 64vh; overflow: auto; }
 """
 
 # ------------------------------------------------------------------ JS --------
@@ -1096,7 +1166,7 @@ function renderDashboard() {
     <th>Strategy</th><th class="num">Grade</th><th class="num">Profit%</th>
     <th class="num">Sortino</th><th class="num">Calmar</th><th class="num">PF</th>
     <th class="num">MaxDD</th><th class="num">Win%</th><th class="num">Trades</th>
-    <th>Basis</th><th>Run</th>
+    <th>Basis</th><th>Range</th><th>Run</th>
   </tr></thead><tbody>` + rows.map(r => {
     const prof = (r.profit_total||0)*100;
     return `<tr>
@@ -1110,6 +1180,7 @@ function renderDashboard() {
       <td class="num" data-val="${r.winrate||0}">${pct(r.winrate)}</td>
       <td class="num" data-val="${r.total_trades||0}">${fmt(r.total_trades,0)}</td>
       <td data-val="${r.basis||''}">${pill(r.basis==='benchmark'?'pass':'na', r.basis||'')}</td>
+      <td data-val="${r.timerange||''}" title="${esc(r.timerange||'')}" style="font-size:12px;color:var(--text-dim)">${esc(r.timerange||'—')}</td>
       <td data-val="${r.run_time||''}">${esc((r.run_time||'').slice(0,10))}</td>
     </tr>`;
   }).join('') + '</tbody>';
@@ -1146,7 +1217,7 @@ function renderStrategies() {
   t.innerHTML = `<thead><tr>
     <th>Strategy</th><th>Status</th><th class="num">Grade</th><th class="num">Trades</th>
     <th class="num">Profit%</th><th class="num">PF</th><th class="num">Sortino</th>
-    <th class="num">Calmar</th><th class="num">MaxDD</th><th>Basis</th><th>Run</th><th></th>
+    <th class="num">Calmar</th><th class="num">MaxDD</th><th>Basis</th><th>Range</th><th>Run</th><th></th>
   </tr></thead><tbody>` + rows.map(r => {
     return `<tr>
       <td>${stratLink(r.strategy)}</td>
@@ -1159,6 +1230,7 @@ function renderStrategies() {
       <td class="num" data-val="${r.calmar||0}">${fmt(r.calmar)}</td>
       <td class="num" data-val="${r.max_drawdown_account||0}">${pct(r.max_drawdown_account)}</td>
       <td data-val="${r.basis||''}">${r.basis||''}</td>
+      <td data-val="${r.timerange||''}" title="${esc(r.timerange||'')}" style="font-size:12px;color:var(--text-dim)">${esc(r.timerange||'—')}</td>
       <td data-val="${r.run_time||''}">${esc((r.run_time||'').slice(0,10))}</td>
       <td>${drawerBtn(r.basis === 'benchmark' ? 'benchmark' : 'backtest', r)}</td>
     </tr>`;
@@ -1255,7 +1327,7 @@ function openStrategy(name, fromHash) {
       ['Avg MFE', avgMfe, ''], ['Avg MAE', avgMae, ''],
       ['Capture of MFE', capture, (canon.capture_ratio!=null && canon.capture_ratio <0.25 ? 'bad' : '')],
       ['Avg win', avgWin, ''], ['Avg loss', avgLoss, ''],
-      ['Worst trade' + (canon.worst_trade_pair ? ` · ${esc(canon.worst_trade_pair)}` : ''), worstTrade, ((canon.worst_trade ?? 0) <= -0.15 ? 'bad' : '')],
+      ['Worst trade' + (canon.worst_trade_pair ? ` · ${esc(canon.worst_trade_pair)}` : ''), worstTrade, ((canon.worst_trade ?? 0) <= -0.60 ? 'bad' : (canon.worst_trade ?? 0) <= -0.25 ? 'warn' : '')],
     ].map(([k,v,c]) => `<div class="metric-card"><span class="mk">${k}</span><span class="mv ${c}">${v}</span></div>`).join('');
     const recs = canon.recommendations || [];
     if (!recs.length) recWrap.innerHTML = '<p class="hint">No recommendations — well balanced.</p>';
@@ -1852,7 +1924,7 @@ function renderTradeTable(data, wrapEl) {
         <td data-val="${td.c||''}">${esc((td.c||'').slice(0,16))}</td>
         <td class="num" data-val="${td.or||0}">${fmt(td.or)}</td>
         <td class="num" data-val="${td.cr||0}">${fmt(td.cr)}</td>
-        <td class="num" data-val="${td.pr||0}">${pill(prof>=0?'pass':'fail', (prof<=-0.15?'⚠ ':'')+prof.toFixed(2)+'%')}</td>
+        <td class="num" data-val="${td.pr||0}">${pill(prof>=0?'pass':'fail', (prof<=-0.25?'⚠ ':'')+prof.toFixed(2)+'%')}</td>
         <td class="num" data-val="${td.pa||0}">${fmt(td.pa)}</td>
         <td class="num" data-val="${td.sl||0}">${fmt(td.sl)}</td>
         <td class="num" data-val="${td.slr||0}">${fmt((td.slr||0)*100,1)}%</td>
@@ -1865,40 +1937,107 @@ function renderTradeTable(data, wrapEl) {
   wrapEl.appendChild(hint); wrapEl.appendChild(t); makeSortable(t);
 }
 
-/* ---------- lab ---------- */
+/* ---------- lab + global jobs ---------- */
 let jobTimer = null;
+let lastJobs = {};
+function jobPill(j) {
+  if (j.status === 'done') return pill('pass', 'done');
+  if (j.status === 'error') return pill('fail', 'error');
+  if (j.status === 'stopped') return pill('fail', 'stopped');
+  if (j.status === 'paused') return pill('warn', 'paused');
+  return pill('warn', j.status || 'running');
+}
+function renderGlobalJobs(jobs) {
+  const bar = $('globalJobs');
+  if (!bar) return;
+  const entries = Object.entries(jobs).sort((a,b)=> (b[1].created||0)-(a[1].created||0));
+  const active = entries.filter(([,j])=> j.status==='running' || j.status==='paused');
+  if (!active.length) { bar.classList.add('hidden'); bar.innerHTML=''; return; }
+  bar.classList.remove('hidden');
+  bar.innerHTML = active.map(([id,j])=>{
+    const step = j.step ? ` · step ${esc(j.step)}` : '';
+    const isPaused = j.status==='paused';
+    return `<div class="job-chip ${isPaused?'paused':''}">
+      ${jobPill(j)} <span class="job-name">${esc(j.name||id)}</span>
+      <span class="hint" style="font-size:11px">${esc(id)}${step}</span>
+      <span class="job-log">${esc((j.log||'').slice(-120))}</span>
+      <button class="btn compact" onclick="openLogViewer('${escAttr(id)}')">Logs</button>
+      ${isPaused ? `<button class="btn compact" onclick="jobAction('${escAttr(id)}','resume')">Resume</button>` : `<button class="btn compact" onclick="jobAction('${escAttr(id)}','pause')">Pause</button>`}
+      <button class="btn compact" onclick="jobAction('${escAttr(id)}','stop')">Stop</button>
+    </div>`;
+  }).join('');
+}
 function pollJobs() {
   fetch('/api/jobs').then(r => r.json()).then(jobs => {
+    lastJobs = jobs;
     const entries = Object.entries(jobs);
     const st = $('jobStatus');
-    if (!entries.length) { st.innerHTML = 'Idle.'; return; }
-    const lines = entries.slice(0, 4).map(([id, j]) => {
-      const cls = j.status === 'done' ? 'pass' : j.status === 'error' ? 'fail' : 'warn';
-      return `<div>${pill(cls, j.status)} <b>${esc(id)}</b> — ${esc(j.log.slice(-200))}</div>`;
+    if (!entries.length) { st.innerHTML = 'Idle.'; renderGlobalJobs(jobs); return; }
+    const lines = entries.slice(0, 6).map(([id, j]) => {
+      const tail = (j.log||'').slice(-240).replace(/^.*\n.*$/,'').slice(-200); // last snippet
+      const paused = j.paused ? ' (paused)' : '';
+      return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${jobPill(j)} <b>${esc(id)}</b><span class="hint">${esc(j.name||'')}${paused}</span> — <span class="hint">${esc(tail.slice(-160))}</span> <button class="btn compact" onclick="openLogViewer('${escAttr(id)}')">View log</button> ${j.status==='running' ? `<button class="btn compact" onclick="jobAction('${escAttr(id)}','stop')">Stop</button><button class="btn compact" onclick="jobAction('${escAttr(id)}','pause')">Pause</button>` : j.status==='paused' ? `<button class="btn compact" onclick="jobAction('${escAttr(id)}','resume')">Resume</button><button class="btn compact" onclick="jobAction('${escAttr(id)}','stop')">Stop</button>` : ''}</div>`;
     }).join('');
     st.innerHTML = lines;
-    const running = entries.some(([,j]) => j.status === 'running');
-    if (!running && jobTimer) { clearInterval(jobTimer); jobTimer = null; }
+    renderGlobalJobs(jobs);
+    if (logViewerState.open) refreshLogViewer(true);
+    const hasRunning = entries.some(([,j]) => j.status === 'running' || j.status === 'paused');
+    if (!hasRunning && jobTimer) { clearInterval(jobTimer); jobTimer = null; }
+    if (hasRunning && !jobTimer) { /* keep timer */ }
   }).catch(() => {});
+}
+function ensureJobPolling() {
+  pollJobs();
+  if (!jobTimer) jobTimer = setInterval(() => { pollJobs(); }, 1500);
+}
+function jobAction(jobId, action) {
+  fetch('/api/jobs/' + encodeURIComponent(jobId) + '/' + action, {method:'POST'})
+    .then(r=>r.json()).then(d=>{
+      if (!d.ok) { alert(d.msg || 'failed'); }
+      pollJobs();
+    }).catch(e=> alert(String(e)));
+}
+let logViewerState = { open: false, jobId: null };
+function openLogViewer(jobId) {
+  logViewerState.open = true; logViewerState.jobId = jobId;
+  $('logViewer').classList.add('open');
+  $('logViewerBackdrop').classList.add('open');
+  $('lvTitle').textContent = 'Logs — ' + jobId;
+  $('lvPre').textContent = 'Loading…';
+  refreshLogViewer();
+}
+function closeLogViewer() {
+  logViewerState.open = false; logViewerState.jobId = null;
+  $('logViewer').classList.remove('open');
+  $('logViewerBackdrop').classList.remove('open');
+}
+function refreshLogViewer(silent) {
+  const id = logViewerState.jobId;
+  if (!id) return;
+  const hint = $('lvHint');
+  fetch('/api/jobs/' + encodeURIComponent(id) + '/log?tail=120000').then(r=>r.json()).then(d=>{
+    if (d.error) { $('lvPre').textContent = d.error; return; }
+    $('lvPre').textContent = d.log || '(empty)';
+    if (!silent) { $('lvPre').scrollTop = $('lvPre').scrollHeight; }
+    else { /* keep scroll if near bottom */ const el=$('lvPre'); const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40; if (nearBottom) el.scrollTop = el.scrollHeight; }
+    const j = lastJobs[id];
+    hint.textContent = j ? `${j.status} · ${esc(j.name||'')} · ${d.len} chars` : `${d.len} chars`;
+  }).catch(()=>{ if(!silent) $('lvPre').textContent='Failed to load log (need server).'; });
 }
 function labRefresh() {
   $('jobStatus').innerHTML = 'Starting ingest + report…';
-  fetch('/api/refresh', {method:'POST'}).then(r=>r.json()).then(() => {
-    jobTimer = setInterval(() => { pollJobs(); }, 1500);
-  });
+  fetch('/api/refresh', {method:'POST'}).then(r=>r.json()).then(() => { ensureJobPolling(); });
 }
 function labReport() {
   $('jobStatus').innerHTML = 'Rebuilding report…';
-  fetch('/api/report', {method:'POST'}).then(r=>r.json()).then(() => {
-    jobTimer = setInterval(() => { pollJobs(); }, 1500);
-  });
+  fetch('/api/report', {method:'POST'}).then(r=>r.json()).then(() => { ensureJobPolling(); });
 }
 function labBench() {
   const strategies = $('benchStrategies').value.split(',').map(s=>s.trim()).filter(Boolean);
   const body = { timerange: $('benchRange').value, timeframe: $('benchTf').value, strategies };
   $('jobStatus').innerHTML = 'Running benchmark…';
   fetch('/api/bench', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
-    .then(r=>r.json()).then(() => { jobTimer = setInterval(() => { pollJobs(); }, 1500); });
+    .then(r=>r.json()).then(() => { ensureJobPolling(); });
 }
 function updateRunFields() {
   const mode = $('runMode').value;
@@ -1964,7 +2103,7 @@ function labRun() {
   }
   $('jobStatus').textContent = `Running ${mode} for ${strategy} (${body.timerange || 'all data'})…`;
   fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
-    .then(r => r.json()).then(() => { jobTimer = setInterval(() => { pollJobs(); }, 1500); })
+    .then(r => r.json()).then(() => { ensureJobPolling(); })
     .catch(e => { $('jobStatus').textContent = 'Run failed: ' + e; });
 }
 function renderLab() {
@@ -2006,7 +2145,7 @@ function saveStrategy(name) {
 function init() {
   setupTableSplitter();
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeLogViewer(); } });
   populateHistSelect();
   populateTradeRunSelect();
   renderDashboard();
@@ -2014,6 +2153,8 @@ function init() {
   updateRunFields();
   defaultRunRange();
   loadLosses();
+  // global job polling – visible from any tab (Lab or otherwise)
+  ensureJobPolling();
 
   // resize charts when the viewport changes
   let resizeTimer = null;
@@ -2052,6 +2193,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </div>
   </div>
 </header>
+<div id="globalJobs" class="hidden"></div>
 
 <div class="tabs">
   <button data-tab="dashboard" class="active">Dashboard</button>
@@ -2096,9 +2238,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <div><b style="color:var(--lavender)">Max drawdown</b> ≤ 20% pass · ≤ 40% warn</div>
           <div><b style="color:var(--lavender)">Win rate</b> ≥ 45% pass · ≥ 35% warn</div>
           <div><b style="color:var(--lavender)">Trades</b> ≥ 100 pass · ≥ 30 warn</div>
-          <div><b style="color:var(--lavender)">Worst trade</b> ≥ −8% pass · ≥ −15% warn · below flags outlier trades</div>
+          <div><b style="color:var(--lavender)">Worst trade</b> ≥ −15% pass · ≥ −25% warn · below flags outlier trades (robust avg of 3 worst; n&lt;20 uses single worst)</div>
         </div>
-        <div class="hint">Each strategy shows ONE grade from its most recent benchmark run (else latest backtest). A single extreme losing trade (e.g. −15% or worse) flags the Worst trade metric; a −50% outlier also raises a fail recommendation. Click a strategy for the full breakdown and every run.</div>
+        <div class="hint">Each strategy shows ONE grade from its most recent benchmark run (else latest backtest). A robust Worst trade (avg of 3 worst, −25% or worse) flags the metric; a −60% outlier also raises a fail recommendation. A lone −15% to −25% wick is now warn-only and will not alone force grade C/D. Click a strategy for the full breakdown and every run.</div>
       </div>
     </section>
 
@@ -2362,6 +2504,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="drawer-tabs"></div>
   <div class="drawer-body" id="drawerBody"></div>
 </aside>
+
+<!-- ============ JOB LOG VIEWER ============ -->
+<div id="logViewerBackdrop" onclick="closeLogViewer()"></div>
+<div id="logViewer" aria-hidden="true">
+  <div class="lv-head">
+    <span class="title" id="lvTitle">Job log</span>
+    <button class="btn compact" onclick="copyText($('lvPre').textContent)">Copy</button>
+    <button class="btn compact" onclick="refreshLogViewer()">↻ Refresh</button>
+    <button class="btn compact" onclick="closeLogViewer()">✕ Close</button>
+  </div>
+  <div class="lv-body"><pre class="log" id="lvPre">Loading…</pre><div class="hint" id="lvHint" style="margin-top:8px"></div></div>
+</div>
 
 <footer>Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py</footer>
 
