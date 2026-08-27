@@ -24,7 +24,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ft_metrics import extract_metrics, run_time_iso, timerange_str  # noqa: E402
+from ft_metrics import (
+    apply_run_artifacts,
+    ensure_provenance,
+    extract_metrics,
+    run_time_iso,
+    stamp_legacy_code_hashes,
+    store_config_text,
+    timerange_str,
+)  # noqa: E402
 
 USER_DATA = Path(__file__).resolve().parents[1]
 BACKTEST_DIR = USER_DATA / "backtest_results"
@@ -83,6 +91,11 @@ CREATE TABLE IF NOT EXISTS hyperopt (
     best_profit_factor REAL,
     best_max_drawdown REAL,
     best_params TEXT,
+    random_state INTEGER,
+    jobs INTEGER,
+    min_trades INTEGER,
+    loss_function TEXT,
+    spaces TEXT,
     UNIQUE(source)
 );
 
@@ -105,6 +118,12 @@ CREATE TABLE IF NOT EXISTS walkforward (
     avg_oos_calmar REAL,
     avg_oos_profit_factor REAL,
     avg_oos_max_drawdown REAL,
+    windows_json TEXT,
+    jobs INTEGER,
+    random_state INTEGER,
+    min_trades INTEGER,
+    loss_function TEXT,
+    spaces TEXT,
     UNIQUE(source)
 );
 
@@ -179,10 +198,43 @@ CREATE TABLE IF NOT EXISTS trades (
 """
 
 
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Additive migrations for existing DBs (no drop)."""
+    cur = conn.cursor()
+    # hyperopt new columns
+    try:
+        cols = {r[1] for r in cur.execute("PRAGMA table_info(hyperopt)").fetchall()}
+        for col, ddl in {
+            "random_state": "ALTER TABLE hyperopt ADD COLUMN random_state INTEGER",
+            "jobs": "ALTER TABLE hyperopt ADD COLUMN jobs INTEGER",
+            "min_trades": "ALTER TABLE hyperopt ADD COLUMN min_trades INTEGER",
+            "loss_function": "ALTER TABLE hyperopt ADD COLUMN loss_function TEXT",
+            "spaces": "ALTER TABLE hyperopt ADD COLUMN spaces TEXT",
+        }.items():
+            if col not in cols:
+                cur.execute(ddl)
+        cols = {r[1] for r in cur.execute("PRAGMA table_info(walkforward)").fetchall()}
+        for col, ddl in {
+            "windows_json": "ALTER TABLE walkforward ADD COLUMN windows_json TEXT",
+            "jobs": "ALTER TABLE walkforward ADD COLUMN jobs INTEGER",
+            "random_state": "ALTER TABLE walkforward ADD COLUMN random_state INTEGER",
+            "min_trades": "ALTER TABLE walkforward ADD COLUMN min_trades INTEGER",
+            "loss_function": "ALTER TABLE walkforward ADD COLUMN loss_function TEXT",
+            "spaces": "ALTER TABLE walkforward ADD COLUMN spaces TEXT",
+        }.items():
+            if col not in cols:
+                cur.execute(ddl)
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass
+
+
 def open_db(path: Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path)
     conn.executescript(SCHEMA)
+    _migrate(conn)
+    ensure_provenance(conn)
     return conn
 
 
@@ -234,6 +286,7 @@ def ingest_backtests(conn: sqlite3.Connection) -> int:
         m = extract_metrics(sdata)
         run_time = run_time_iso(sdata, os.path.getmtime(BACKTEST_DIR / source))
         timerange = timerange_str(sdata)
+        config_hash = store_config_text(conn, config_json) if config_json else None
         cur.execute(
             """INSERT OR IGNORE INTO backtests
                (strategy, source, run_time, timeframe, timerange, trading_mode, stake_currency,
@@ -253,6 +306,16 @@ def ingest_backtests(conn: sqlite3.Connection) -> int:
                 m.get("trades_per_day"), m.get("holding_avg_s"),
             ),
         )
+        if config_hash and not cur.rowcount:
+            # row existed without a hash (pre-provenance ingest) — stamp it now
+            try:
+                conn.execute(
+                    "UPDATE backtests SET config_hash=?, config_json=COALESCE(config_json, ?)"
+                    " WHERE source=? AND strategy=? AND config_hash IS NULL",
+                    (config_hash, config_json, source, sname),
+                )
+            except sqlite3.OperationalError:
+                pass
         count += cur.rowcount
     conn.commit()
     return count
@@ -372,6 +435,31 @@ def best_epoch_from_fthypt(path: Path) -> tuple[dict | None, int]:
     return best, n
 
 
+def _hyperopt_meta_from_path(path: Path) -> dict:
+    """Best-effort extract of jobs/random_state/loss/spaces from .fthypt first epoch."""
+    try:
+        with path.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                # hyperopt epoch may embed config hints; also check sibling .json if exists
+                return {
+                    "loss": row.get("hyperopt_loss") or row.get("loss_function") or None,
+                    "random_state": row.get("random_state"),
+                    "jobs": row.get("jobs") or row.get("hyperopt_jobs"),
+                    "min_trades": row.get("min_trades") or row.get("hyperopt_min_trades"),
+                    "spaces": ",".join(row.get("spaces") or []) if isinstance(row.get("spaces"), list) else row.get("spaces"),
+                }
+    except OSError:
+        pass
+    return {}
+
+
 def ingest_hyperopt(conn: sqlite3.Connection) -> int:
     count = 0
     cur = conn.cursor()
@@ -389,19 +477,29 @@ def ingest_hyperopt(conn: sqlite3.Connection) -> int:
         except (TypeError, ValueError):
             pass
         params = epoch.get("params_dict") or {}
+        meta = _hyperopt_meta_from_path(f)
+        # infer strategy more robustly (strategy_BigZ08_... -> BigZ08)
+        raw = f.name.replace("strategy_", "")
+        # split on _YYYY- pattern
+        import re as _re
+        strat = _re.split(r"_\d{4}-\d{2}-\d{2}", raw, maxsplit=1)[0]
+        if not strat:
+            strat = raw.split("_")[0]
         cur.execute(
             """INSERT OR IGNORE INTO hyperopt
                (strategy, source, run_time, epochs, best_loss, best_trades, best_profit_total,
                 best_profit_abs, best_winrate, best_sortino, best_calmar, best_profit_factor,
-                best_max_drawdown, best_params)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                best_max_drawdown, best_params, random_state, jobs, min_trades, loss_function, spaces)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
-                f.name.replace("strategy_", "").split("_")[0], f.name,
+                strat, f.name,
                 run_time_iso(epoch, os.path.getmtime(f)), n, best_loss,
                 m.get("total_trades"), m.get("profit_total"), m.get("profit_total_abs"),
                 m.get("winrate"), m.get("sortino"), m.get("calmar"), m.get("profit_factor"),
                 m.get("max_drawdown_account"),
                 json.dumps(params, sort_keys=True),
+                meta.get("random_state"), meta.get("jobs"), meta.get("min_trades"),
+                meta.get("loss"), meta.get("spaces"),
             ),
         )
         count += cur.rowcount
@@ -412,9 +510,24 @@ def ingest_hyperopt(conn: sqlite3.Connection) -> int:
 def ingest_walkforward(conn: sqlite3.Connection) -> int:
     count = 0
     cur = conn.cursor()
+    # migrate legacy absolute Windows paths to relative POSIX
+    try:
+        for rowid, src in conn.execute("SELECT rowid, source FROM walkforward").fetchall():
+            if "\\" in src or (":" in src and "walk_forward" in src):
+                norm = src.replace("\\", "/")
+                if "walk_forward/" in norm:
+                    rel_norm = "walk_forward/" + norm.split("walk_forward/", 1)[-1]
+                else:
+                    rel_norm = norm
+                if rel_norm != src:
+                    conn.execute("UPDATE walkforward SET source=? WHERE rowid=?", (rel_norm, rowid))
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass
     files = sorted(WALK_FORWARD_DIR.rglob("walk_forward.json"))
     for f in files:
-        if cur.execute("SELECT 1 FROM walkforward WHERE source=?", (str(f),)).fetchone():
+        rel = f.relative_to(USER_DATA).as_posix()
+        if cur.execute("SELECT 1 FROM walkforward WHERE source=?", (rel,)).fetchone():
             continue
         try:
             with f.open("r", encoding="utf-8") as fh:
@@ -429,8 +542,10 @@ def ingest_walkforward(conn: sqlite3.Connection) -> int:
         oos_profit = 0.0
         profitable = 0
         sortino_s, calmar_s, pf_s, dd_s = [], [], [], []
+        windows_compact: list[dict] = []
         for w in windows:
             oos = w.get("out_of_sample") or {}
+            ins = w.get("in_sample") or {}
             m = extract_metrics(oos)
             t = m.get("total_trades") or 0
             oos_trades += t
@@ -446,6 +561,19 @@ def ingest_walkforward(conn: sqlite3.Connection) -> int:
                 pf_s.append(m["profit_factor"])
             if m.get("max_drawdown_account") is not None:
                 dd_s.append(m["max_drawdown_account"])
+            windows_compact.append({
+                "train_range": w.get("train_timerange") or (ins.get("timerange") if isinstance(ins, dict) else None) or w.get("train_range"),
+                "test_range": w.get("test_timerange") or (oos.get("timerange") if isinstance(oos, dict) else None) or w.get("test_range"),
+                "oos_trades": t,
+                "oos_profit_abs": p,
+                "oos_profit_total": m.get("profit_total"),
+                "oos_winrate": m.get("winrate"),
+                "oos_sortino": m.get("sortino"),
+                "oos_calmar": m.get("calmar"),
+                "oos_pf": m.get("profit_factor"),
+                "oos_dd": m.get("max_drawdown_account"),
+                "oos_expectancy": m.get("expectancy"),
+            })
 
         run_time = None
         try:
@@ -457,14 +585,21 @@ def ingest_walkforward(conn: sqlite3.Connection) -> int:
             """INSERT OR IGNORE INTO walkforward
                (strategy, run_id, source, run_time, train_days, test_days, step_days, timerange,
                 n_windows, profitable_windows, oos_trades, oos_profit_abs, oos_winrate,
-                avg_oos_sortino, avg_oos_calmar, avg_oos_profit_factor, avg_oos_max_drawdown)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                avg_oos_sortino, avg_oos_calmar, avg_oos_profit_factor, avg_oos_max_drawdown,
+                windows_json, jobs, random_state, min_trades, loss_function, spaces)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
-                data.get("strategy"), data.get("run_id"), str(f), run_time,
+                data.get("strategy"), data.get("run_id"), rel, run_time,
                 settings.get("train_days"), settings.get("test_days"), settings.get("step_days"),
                 data.get("timerange"), len(windows), profitable, oos_trades, oos_profit,
                 (oos_profit / oos_trades if oos_trades else None),
                 avg(sortino_s), avg(calmar_s), avg(pf_s), avg(dd_s),
+                json.dumps(windows_compact),
+                settings.get("jobs") or settings.get("hyperopt_jobs"),
+                settings.get("random_state") or settings.get("hyperopt_random_state"),
+                settings.get("min_trades") or settings.get("hyperopt_min_trades"),
+                settings.get("loss") or settings.get("hyperopt_loss"),
+                ",".join(settings.get("spaces") or []) if isinstance(settings.get("spaces"), list) else settings.get("spaces"),
             ),
         )
         count += cur.rowcount
@@ -522,6 +657,14 @@ def main() -> int:
 
     n_tr = ingest_trades(conn)
     print(f"Trades imported: {n_tr} new")
+
+    n_art = apply_run_artifacts(conn)
+    if n_art:
+        print(f"Run artifacts matched: {n_art} rows stamped with config/code hashes")
+
+    n_legacy = stamp_legacy_code_hashes(conn, USER_DATA)
+    if n_legacy:
+        print(f"Legacy code hashes (unverified): {n_legacy} rows stamped")
 
     for table in ("backtests", "hyperopt", "walkforward", "trades"):
         n = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]

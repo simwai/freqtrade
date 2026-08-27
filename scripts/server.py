@@ -14,7 +14,8 @@ the browser instead of the CLI:
     POST  /api/bench               -> run benchmark  {strategies[], timerange, timeframe}
     POST  /api/run                 -> backtest / hyperopt / walk-forward for one strategy
                                         {mode, strategy, timerange, timeframe, config?, epochs?,
-                                         loss?, spaces?, train_days?, test_days?, step_days?, rebuild?}
+                                         loss?, spaces?, train_days?, test_days?, step_days?,
+                                         rebuild?}
 
 Background jobs (ingest/benchmark) run in threads; the UI polls /api/jobs.
 
@@ -113,20 +114,22 @@ def load_lab_payload() -> dict:
     data = build_report.load_data(conn)
     canonical = build_report.canonical_per_strategy(data)
     history = build_report.history_series(data)
-    benchmarks = build_report.benchmark_bars(data)
+    extras = build_report.collect_extras(conn)
     lab = {
         "canonical": canonical,
         "latest": canonical,
         "backtests": data["backtests"],
         "history": history,
-        "benchmarks": benchmarks,
+        "benchmarks": data["benchmarks"],
         "walkforward": data["walkforward"],
         "hyperopt": data["hyperopt"],
         "strategies": data["strategies"],
         "trade_runs": data["trade_runs"],
         "embedded_trades": None,
-        "scorecard": {k: {kk: vv for kk, vv in v.items() if kk != "label"}
-                      for k, v in build_report.SCORECARD.items()},
+        "scorecard": build_report.SCORECARD,
+        "configs": extras["configs"],
+        "current_code": extras["current_code"],
+        "snapshot_paths": extras["snapshot_paths"],
     }
     conn.close()
     return lab
@@ -142,6 +145,24 @@ def read_body(handler: BaseHTTPRequestHandler) -> dict:
         return {}
 
 
+def _int_or_none(v) -> int | None:
+    if v is None or v == "":
+        return None
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _float_or_none(v) -> float | None:
+    if v is None or v == "":
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def build_run_cmd(body: dict) -> list[str]:
     """Translate an /api/run body into a run_strategy.py command."""
     mode = body.get("mode", "backtest")
@@ -155,17 +176,47 @@ def build_run_cmd(body: dict) -> list[str]:
         cmd += ["--timeframe", timeframe,
                 "--epochs", str(body.get("epochs", 100)),
                 "--loss", str(body.get("loss", "SharpeHyperOptLossDaily"))]
+        if (v := _int_or_none(body.get("jobs"))) is not None:
+            cmd += ["--jobs", str(v)]
+        if (v := _int_or_none(body.get("random_state"))) is not None:
+            cmd += ["--random-state", str(v)]
+        if (v := _int_or_none(body.get("min_trades"))) is not None:
+            cmd += ["--min-trades", str(v)]
+        if body.get("analyze_per_epoch"):
+            cmd += ["--analyze-per-epoch"]
+        if body.get("disable_param_export"):
+            cmd += ["--disable-param-export"]
+        if body.get("print_all"):
+            cmd += ["--print-all"]
     elif mode == "walkforward":
         cmd += ["--epochs", str(body.get("epochs", 50)),
                 "--loss", str(body.get("loss", "SharpeHyperOptLossDaily")),
                 "--train-days", str(body.get("train_days", 90)),
                 "--test-days", str(body.get("test_days", 7)),
                 "--step-days", str(body.get("step_days", 7))]
+        if (v := _int_or_none(body.get("jobs"))) is not None:
+            cmd += ["--jobs", str(v)]
+        if (v := _int_or_none(body.get("random_state"))) is not None:
+            cmd += ["--random-state", str(v)]
+        if (v := _int_or_none(body.get("min_trades"))) is not None:
+            cmd += ["--min-trades", str(v)]
+        if body.get("analyze_per_epoch"):
+            cmd += ["--analyze-per-epoch"]
+        if (v := _int_or_none(body.get("wf_min_trades"))) is not None:
+            cmd += ["--wf-min-trades", str(v)]
+        if (v := _float_or_none(body.get("wf_max_drawdown"))) is not None:
+            cmd += ["--wf-max-drawdown", str(v)]
     else:
         raise ValueError("mode must be backtest | hyperopt | walkforward")
     spaces = body.get("spaces")
     if spaces:
-        cmd += ["--spaces", *[str(s) for s in spaces]]
+        # accept comma or space separated list
+        if isinstance(spaces, str):
+            parts = [s.strip() for s in spaces.replace(",", " ").split() if s.strip()]
+        else:
+            parts = [str(s) for s in spaces if str(s).strip()]
+        if parts:
+            cmd += ["--spaces", *parts]
     config = body.get("config")
     if config:
         cmd += ["--config", str(config)]
@@ -211,7 +262,11 @@ class LabHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        path = urlparse(self.path).path
+        from urllib.parse import parse_qs
+
+        parsed = urlparse(self.path)
+        path = parsed.path
+        qs = parse_qs(parsed.query)
         if path == "/" or path == "" or path == "/dashboard.html":
             if not DASHBOARD.is_file():
                 self._send_json({"error": "dashboard not built yet — POST /api/refresh"}, 503)
@@ -228,7 +283,7 @@ class LabHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/losses":
             sys.path.insert(0, str(SCRIPTS))
-            from run_strategy import KNOWN_LOSSES  # noqa: E402
+            from run_strategy import KNOWN_LOSSES
             self._send_json({"losses": KNOWN_LOSSES})
             return
         if path == "/api/data":
@@ -236,6 +291,34 @@ class LabHandler(BaseHTTPRequestHandler):
                 self._send_json(load_lab_payload())
             except Exception as e:  # noqa: BLE001
                 self._send_json({"error": str(e)}, 500)
+            return
+        if path == "/api/hyperopt":
+            # drill-down: ?source=strategy_BigZ08_....fthypt&limit=200 or ?strategy=BigZ08
+            try:
+                self._send_json(self._hyperopt_epochs(qs))
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            return
+        if path == "/api/walkforward":
+            try:
+                self._send_json(self._walkforward_detail(qs))
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            return
+        if path == "/api/hyperopt/files":
+            self._send_json(self._hyperopt_files())
+            return
+        if path == "/api/run/meta":
+            try:
+                self._send_json(self._run_meta(qs))
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            return
+        if path == "/api/strategy/file":
+            self._strategy_file(qs)
+            return
+        if path == "/api/strategy/current":
+            self._send_json(self._strategy_current(qs))
             return
         if path == "/api/health":
             self._send_json({"ok": True, "db": DB.exists()})
@@ -310,6 +393,178 @@ class LabHandler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt, *args):  # quieter logs
         sys.stderr.write("  %s\n" % (fmt % args))
+
+    # ---- hyperopt / walkforward drill-down ----
+    def _hyperopt_files(self) -> list[dict]:
+        from pathlib import Path as _P
+        base = USER_DATA / "hyperopt_results"
+        out: list[dict] = []
+        for f in sorted(base.rglob("*.fthypt"), key=lambda p: p.stat().st_mtime, reverse=True)[:60]:
+            out.append({"source": f.name, "path": str(f.relative_to(USER_DATA)), "size": f.stat().st_size, "mtime": f.stat().st_mtime})
+        return out
+
+    def _hyperopt_epochs(self, qs: dict) -> dict:
+        sys.path.insert(0, str(SCRIPTS))
+        import analyze_hyperopt as ah  # noqa: E402
+        from pathlib import Path as _P
+
+        limit = int(qs.get("limit", ["200"])[0]) if qs.get("limit") else 200
+        limit = max(1, min(limit, 2000))
+        source = (qs.get("source", [None])[0] if qs.get("source") else None)
+        strategy = (qs.get("strategy", [None])[0] if qs.get("strategy") else None)
+        if source:
+            # allow both basename and relative path
+            cand = USER_DATA / "hyperopt_results" / source
+            if not cand.is_file():
+                # search recursively
+                found = list((USER_DATA / "hyperopt_results").rglob(source))
+                cand = found[0] if found else cand
+            if not cand.is_file():
+                return {"error": f"not found: {source}"}
+            epochs = ah.load_epochs(cand)
+            return {"source": cand.name, "count": len(epochs),
+                    "corr": ah.epochs_corr_with_loss(epochs),
+                    "records": ah.epochs_to_records(epochs, limit=limit)}
+        if strategy:
+            p = ah.latest_results(strategy)
+            if not p or not p.is_file():
+                return {"error": f"no .fthypt for {strategy}"}
+            epochs = ah.load_epochs(p)
+            return {"source": p.name, "strategy": strategy, "count": len(epochs),
+                    "corr": ah.epochs_corr_with_loss(epochs),
+                    "records": ah.epochs_to_records(epochs, limit=limit)}
+        return {"error": "supply ?source=... or ?strategy=..."}
+
+    def _walkforward_detail(self, qs: dict) -> dict:
+        import sqlite3 as _sql
+        source = (qs.get("source", [None])[0] if qs.get("source") else None)
+        run_id = (qs.get("run_id", [None])[0] if qs.get("run_id") else None)
+        strategy = (qs.get("strategy", [None])[0] if qs.get("strategy") else None)
+        conn = _sql.connect(DB)
+        conn.row_factory = _sql.Row
+        q = "SELECT * FROM walkforward WHERE 1=1"
+        params: list = []
+        if source:
+            q += " AND source LIKE ?"
+            params.append(f"%{source}%")
+        if run_id:
+            q += " AND run_id=?"; params.append(run_id)
+        if strategy:
+            q += " AND strategy=?"; params.append(strategy)
+        q += " ORDER BY run_time DESC LIMIT 20"
+        rows = [dict(r) for r in conn.execute(q, params).fetchall()]
+        for r in rows:
+            if r.get("windows_json"):
+                try:
+                    r["windows"] = json.loads(r["windows_json"])
+                except (json.JSONDecodeError, TypeError):
+                    r["windows"] = []
+            else:
+                r["windows"] = []
+        conn.close()
+        return {"rows": rows}
+
+    # ---- provenance: run meta / strategy snapshots ----
+    _RUN_TABLES = {
+        "backtest": "backtests",
+        "benchmark": "benchmarks",
+        "hyperopt": "hyperopt",
+        "walkforward": "walkforward",
+    }
+
+    def _run_meta(self, qs: dict) -> dict:
+        import sqlite3
+
+        kind = (qs.get("kind", [""])[0] or "").lower()
+        source = qs.get("source", [None])[0]
+        strategy = qs.get("strategy", [None])[0]
+        table = self._RUN_TABLES.get(kind)
+        if not table or not source:
+            return {"error": "kind (backtest|benchmark|hyperopt|walkforward) + source required"}
+        conn = sqlite3.connect(DB)
+        conn.row_factory = sqlite3.Row
+        cols = {r[1] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+        want = [c for c in ("strategy", "source", "config_hash", "code_hash",
+                            "code_verified", "best_params") if c in cols]
+        q = f"SELECT {', '.join(want)} FROM {table} WHERE source=?"
+        params: list = [source]
+        if strategy and "strategy" in want:
+            q += " AND strategy=?"
+            params.append(strategy)
+        row = conn.execute(q + " LIMIT 1", params).fetchone()
+        out: dict = {"kind": kind, "source": source}
+        if row is None:
+            conn.close()
+            out["error"] = "run not found"
+            return out
+        out.update(dict(row))
+        if out.get("config_hash"):
+            cfg = conn.execute(
+                "SELECT config_json, path FROM configs WHERE hash=?",
+                (out["config_hash"],),
+            ).fetchone()
+            if cfg and cfg["config_json"]:
+                try:
+                    out["config"] = json.loads(cfg["config_json"])
+                except json.JSONDecodeError:
+                    out["config_raw"] = cfg["config_json"]
+                out["config_path"] = cfg["path"]
+        if out.get("code_hash"):
+            snap = conn.execute(
+                "SELECT path, mtime FROM strategy_snapshots WHERE hash=?",
+                (out["code_hash"],),
+            ).fetchone()
+            if snap:
+                out["snapshot"] = dict(snap)
+        conn.close()
+        return out
+
+    def _send_text(self, text: str):
+        body = text.encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _strategy_file(self, qs: dict) -> None:
+        """Serve a stored strategy snapshot by hash."""
+        import sqlite3
+
+        h = qs.get("hash", [None])[0]
+        if not h:
+            self._send_json({"error": "hash required"}, 400)
+            return
+        conn = sqlite3.connect(DB)
+        row = conn.execute(
+            "SELECT source FROM strategy_snapshots WHERE hash=?", (h,)
+        ).fetchone()
+        conn.close()
+        if not row:
+            self._send_json({"error": "snapshot not found"}, 404)
+            return
+        self._send_text(row[0])
+
+    def _strategy_current(self, qs: dict) -> dict:
+        from ft_metrics import find_strategy_file
+
+        name = qs.get("name", [None])[0]
+        if not name:
+            return {"error": "name required"}
+        f = find_strategy_file(USER_DATA, name)
+        if f is None:
+            return {"found": False}
+        try:
+            from ft_metrics import sha1_text
+
+            return {
+                "found": True,
+                "path": str(f),
+                "mtime": f.stat().st_mtime,
+                "hash": sha1_text(f.read_text(encoding="utf-8")),
+            }
+        except OSError as e:
+            return {"found": False, "error": str(e)}
 
     # ---- db access ----
     def _strategies(self) -> list[dict]:

@@ -24,7 +24,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ft_metrics import extract_metrics, run_time_iso, timerange_str  # noqa: E402
+from ft_metrics import (
+    ensure_provenance,
+    extract_metrics,
+    run_time_iso,
+    snapshot_strategy,
+    store_config_text,
+    timerange_str,
+)  # noqa: E402
 
 USER_DATA = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = USER_DATA / "config_benchmark.json"
@@ -128,6 +135,7 @@ def main() -> int:
 
     conn = sqlite3.connect(args.db)
     conn.executescript(BENCH_SCHEMA)
+    ensure_provenance(conn)
 
     if args.list:
         for s in list_strategies(conn):
@@ -149,9 +157,15 @@ def main() -> int:
 
     print(f"Benchmark: {len(strategies)} strategies, config={config.name}, "
           f"timerange={args.timerange}, tf={args.timeframe}")
+    bench_config_hash = None
+    try:
+        bench_config_hash = store_config_text(conn, config.read_text(encoding="utf-8"), path=str(config))
+    except OSError:
+        pass
     cur = conn.cursor()
     imported = 0
     for s in strategies:
+        code_hash = snapshot_strategy(conn, USER_DATA, s, verified=True)
         try:
             res = run_backtest(s, config, args.timerange, args.timeframe, args.freqtrade, [])
         except RuntimeError as e:
@@ -184,6 +198,15 @@ def main() -> int:
         )
         if cur.rowcount:
             imported += 1
+            try:
+                cur.execute(
+                    "UPDATE benchmarks SET config_hash=?, code_hash=?, code_verified=1"
+                    " WHERE strategy=? AND source=?",
+                    (bench_config_hash, code_hash, s, source),
+                )
+            except sqlite3.OperationalError:
+                pass
+            conn.commit()
             print(f"  OK   {s}: trades={m.get('total_trades')} profit={m.get('profit_total'):.4f} "
                   f"sortino={m.get('sortino')} dd={m.get('max_drawdown_account'):.3f}")
         else:
