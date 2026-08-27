@@ -1,24 +1,32 @@
-import freqtrade.vendor.qtpylib.indicators as qtpylib
-import numpy as np
-from functools import reduce
-import talib.abstract as ta
-from freqtrade.strategy.interface import IStrategy
-from freqtrade.strategy import (
-    merge_informative_pair,
-    DecimalParameter,
-    stoploss_from_absolute,
-    RealParameter,
-    IntParameter,
-    informative,
-)
-from strategy_lib.risk import SlTpConfig, TradeLevelsManager
-from pandas import DataFrame, Series
-from datetime import datetime
-import math
 import logging
-from freqtrade.persistence import Trade
+import math
+from datetime import datetime
+from functools import reduce
+
+import numpy as np
+import pandas as pd
 import pandas_ta as pta
+import talib.abstract as ta
+from pandas import DataFrame, Series
 from technical.indicators import RMI
+
+import freqtrade.vendor.qtpylib.indicators as qtpylib
+from freqtrade.exchange.exchange_utils_timeframe import timeframe_to_prev_date
+from freqtrade.persistence import Trade
+from freqtrade.strategy import (
+    DecimalParameter,
+    IntParameter,
+    RealParameter,
+    merge_informative_pair,
+)
+from freqtrade.strategy.interface import IStrategy
+from user_data.strategies.components.indicators import hann_atr as comp_hann_atr
+from user_data.strategies.components.risk import (
+    octopus_duration_exceeded,
+    octopus_exit_cross_signal,
+    octopus_trade_levels,
+)
+
 
 logger = logging.getLogger(__name__)
 # Elliot Wave Oscillator
@@ -41,9 +49,7 @@ def top_percent_change_dca(dataframe: DataFrame, length: int) -> float:
     if length == 0:
         return (dataframe["open"] - dataframe["close"]) / dataframe["close"]
     else:
-        return (
-            dataframe["open"].rolling(length).max() - dataframe["close"]
-        ) / dataframe["close"]
+        return (dataframe["open"].rolling(length).max() - dataframe["close"]) / dataframe["close"]
 
 
 # EWO
@@ -71,7 +77,7 @@ def williams_r(dataframe: DataFrame, period: int = 14) -> Series:
     lowest_low = dataframe["low"].rolling(center=False, window=period).min()
     WR = Series(
         (highest_high - dataframe["close"]) / (highest_high - lowest_low),
-        name="{0} Williams %R".format(period),
+        name=f"{period} Williams %R",
     )
     return WR * -100
 
@@ -109,15 +115,12 @@ def chaikin_money_flow(dataframe, n=20, fillna=False) -> Series:
     Returns:
         pandas.Series: New feature generated.
     """
-    mfv = (
-        dataframe["close"] - dataframe["low"] - (dataframe["high"] - dataframe["close"])
-    ) / (dataframe["high"] - dataframe["low"])
+    mfv = (dataframe["close"] - dataframe["low"] - (dataframe["high"] - dataframe["close"])) / (
+        dataframe["high"] - dataframe["low"]
+    )
     mfv = mfv.fillna(0.0)  # float division by zero
     mfv *= dataframe["volume"]
-    cmf = (
-        mfv.rolling(n, min_periods=0).sum()
-        / dataframe["volume"].rolling(n, min_periods=0).sum()
-    )
+    cmf = mfv.rolling(n, min_periods=0).sum() / dataframe["volume"].rolling(n, min_periods=0).sum()
     if fillna:
         cmf = cmf.replace([np.inf, -np.inf], np.nan).fillna(0)
     return Series(cmf, name="cmf")
@@ -134,51 +137,30 @@ class newstrategy53(IStrategy):
     # hypered params
     # ClucHA
     ## is big DIP
-    buy_params = {
-        "bbdelta_close": 0.01568,
-        "bbdelta_tail": 0.75301,
-        "close_bblower": 0.01195,
-        "closedelta_close": 0.0092,
-        "base_nb_candles_buy": 12,
-        "rsi_buy": 58,
-        "low_offset": 0.985,
-        "rocr_1h": 0.57032,
-        "rocr1_1h": 0.7210406300824859,
-        "buy_clucha_bbdelta_close": 0.049,
-        "buy_clucha_bbdelta_tail": 1.146,
-        "buy_clucha_close_bblower": 0.018,
-        "buy_clucha_closedelta_close": 0.017,
-        "buy_clucha_rocr_1h": 0.526,
-        "buy_cci": -116,
-        "buy_cci_length": 25,
-        "buy_rmi": 49,
-        "buy_rmi_length": 17,
-        "buy_srsi_fk": 32,
-        "buy_bb_width_1h": 1.074,
-    }
-    # Sell hyperspace params:
-    # custom stoploss params, come from BB_RPB_TSL
-    ##
-    ## Dead fish
-    sell_params = {
-        "pHSL": -0.397,
-        "pPF_1": 0.012,
-        "pPF_2": 0.07,
-        "pSL_1": 0.015,
-        "pSL_2": 0.068,
-        "sell_bbmiddle_close": 1.0909210168690215,
-        "sell_fisher": 0.46405736994786184,
-        "base_nb_candles_sell": 22,
-        "high_offset": 1.014,
-        "high_offset_2": 1.01,
-        "sell_u_e_2_cmf": -0.0,
-        "sell_u_e_2_ema_close_delta": 0.016,
-        "sell_u_e_2_rsi": 10,
-        "sell_deadfish_profit": -0.063,
-        "sell_deadfish_bb_factor": 0.954,
-        "sell_deadfish_bb_width": 0.043,
-        "sell_deadfish_volume_factor": 2.37,
-    }
+
+    # Structural stop-side owner (Octopus Nest pattern, plan Option B):
+    # close-cross SL via components.risk; profit exits below stay untouched.
+    sl_tp_mode = "Highest Lowest + ATR"
+    sl_size_or_atr_multiplier = DecimalParameter(
+        0.5, 6.0, default=2.0, decimals=2, space="sell", optimize=False
+    )
+    high_low_stop_loss_lookback = IntParameter(96, 480, default=288, space="sell", optimize=False)
+    high_low_stop_loss_multiplier = DecimalParameter(
+        0.95, 1.0, default=0.98, decimals=3, space="sell", optimize=False
+    )
+    atr_length = IntParameter(7, 28, default=14, space="sell", optimize=False)
+    max_trade_duration_days = IntParameter(1, 10, default=7, space="sell", optimize=False)
+    enable_take_profit_levels = False
+    risk_reward_ratio_levels = 1.05
+    my_backup_multiplier_levels = 1.1
+
+    # Inert former buy_params/sell_params dicts deleted (plan: param drift).
+    # Governing defaults retained from the previously effective values:
+    base_nb_candles_buy = IntParameter(8, 20, default=12, space="buy", optimize=False)
+    base_nb_candles_sell = IntParameter(8, 20, default=22, space="sell", optimize=False)
+    low_offset = DecimalParameter(0.985, 0.995, default=0.985, space="buy", optimize=True)
+    high_offset = DecimalParameter(1.005, 1.015, default=1.014, space="sell", optimize=True)
+    high_offset_2 = DecimalParameter(1.01, 1.02, default=1.01, space="sell", optimize=True)
     # ROI table:
     minimal_roi = {"0": 100}
     # dca
@@ -190,8 +172,6 @@ class newstrategy53(IStrategy):
     trailing_stop_positive = 0.02  # povodne 0.001
     trailing_stop_positive_offset = 0.1  # povodne 0.012
     trailing_only_offset_is_reached = True
-    # dca
-    position_adjustment_enable = True
     "\n    END HYPEROPT\n    "
     timeframe = "5m"
     # Make sure these match or are not overridden in config
@@ -201,7 +181,7 @@ class newstrategy53(IStrategy):
     # Custom stoploss
     use_custom_stoploss = False
     process_only_new_candles = True
-    startup_candle_count = 168
+    startup_candle_count = 400
     order_types = {
         "entry": "market",
         "exit": "market",
@@ -247,17 +227,11 @@ class newstrategy53(IStrategy):
     buy_cci_length = IntParameter(25, 45, default=25, optimize=is_optimize_dip)
     buy_rmi_length = IntParameter(8, 20, default=8, optimize=is_optimize_dip)
     is_optimize_break = False
-    buy_bb_width = DecimalParameter(
-        0.065, 0.135, default=0.095, optimize=is_optimize_break
-    )
-    buy_bb_delta = DecimalParameter(
-        0.018, 0.035, default=0.025, optimize=is_optimize_break
-    )
+    buy_bb_width = DecimalParameter(0.065, 0.135, default=0.095, optimize=is_optimize_break)
+    buy_bb_delta = DecimalParameter(0.018, 0.035, default=0.025, optimize=is_optimize_break)
     is_optimize_check = False
     buy_roc_1h = IntParameter(-25, 200, default=10, optimize=is_optimize_check)
-    buy_bb_width_1h = DecimalParameter(
-        0.3, 2.0, default=0.3, optimize=is_optimize_check
-    )
+    buy_bb_width_1h = DecimalParameter(0.3, 2.0, default=0.3, optimize=is_optimize_check)
     # ClucHA
     is_optimize_clucha = False
     buy_clucha_bbdelta_close = DecimalParameter(
@@ -272,36 +246,22 @@ class newstrategy53(IStrategy):
     buy_clucha_closedelta_close = DecimalParameter(
         0.001, 0.05, default=0.04401, optimize=is_optimize_clucha
     )
-    buy_clucha_rocr_1h = DecimalParameter(
-        0.1, 1.0, default=0.47782, optimize=is_optimize_clucha
-    )
+    buy_clucha_rocr_1h = DecimalParameter(0.1, 1.0, default=0.47782, optimize=is_optimize_clucha)
     # Local_Uptrend
     is_optimize_local_uptrend = False
-    buy_ema_diff = DecimalParameter(
-        0.022, 0.027, default=0.025, optimize=is_optimize_local_uptrend
-    )
+    buy_ema_diff = DecimalParameter(0.022, 0.027, default=0.025, optimize=is_optimize_local_uptrend)
     buy_bb_factor = DecimalParameter(0.99, 0.999, default=0.995, optimize=False)
-    buy_closedelta = DecimalParameter(
-        12.0, 18.0, default=15.0, optimize=is_optimize_local_uptrend
-    )
+    buy_closedelta = DecimalParameter(12.0, 18.0, default=15.0, optimize=is_optimize_local_uptrend)
     # buy params
     rocr_1h = RealParameter(0.5, 1.0, default=0.54904, space="buy", optimize=True)
     rocr1_1h = RealParameter(0.5, 1.0, default=0.72, space="buy", optimize=True)
-    bbdelta_close = RealParameter(
-        0.0005, 0.02, default=0.01965, space="buy", optimize=True
-    )
-    closedelta_close = RealParameter(
-        0.0005, 0.02, default=0.00556, space="buy", optimize=True
-    )
+    bbdelta_close = RealParameter(0.0005, 0.02, default=0.01965, space="buy", optimize=True)
+    closedelta_close = RealParameter(0.0005, 0.02, default=0.00556, space="buy", optimize=True)
     bbdelta_tail = RealParameter(0.7, 1.0, default=0.95089, space="buy", optimize=True)
-    close_bblower = RealParameter(
-        0.0005, 0.02, default=0.00799, space="buy", optimize=True
-    )
+    close_bblower = RealParameter(0.0005, 0.02, default=0.00799, space="buy", optimize=True)
     # sell params
     sell_fisher = RealParameter(0.1, 0.5, default=0.38414, space="sell", optimize=False)
-    sell_bbmiddle_close = RealParameter(
-        0.97, 1.1, default=1.07634, space="sell", optimize=False
-    )
+    sell_bbmiddle_close = RealParameter(0.97, 1.1, default=1.07634, space="sell", optimize=False)
     # Deadfish
     is_optimize_deadfish = True
     sell_deadfish_bb_width = DecimalParameter(
@@ -316,22 +276,7 @@ class newstrategy53(IStrategy):
     sell_deadfish_volume_factor = DecimalParameter(
         1, 2.5, default=1.5, space="sell", optimize=is_optimize_deadfish
     )
-    # SMAOffset
-    base_nb_candles_buy = IntParameter(
-        8, 20, default=buy_params["base_nb_candles_buy"], space="buy", optimize=False
-    )
-    base_nb_candles_sell = IntParameter(
-        8, 20, default=sell_params["base_nb_candles_sell"], space="sell", optimize=False
-    )
-    low_offset = DecimalParameter(
-        0.985, 0.995, default=buy_params["low_offset"], space="buy", optimize=True
-    )
-    high_offset = DecimalParameter(
-        1.005, 1.015, default=sell_params["high_offset"], space="sell", optimize=True
-    )
-    high_offset_2 = DecimalParameter(
-        1.01, 1.02, default=sell_params["high_offset_2"], space="sell", optimize=True
-    )
+
     sell_trail_profit_min_1 = DecimalParameter(
         0.1, 0.25, default=0.1, space="sell", decimals=3, optimize=False, load=True
     )
@@ -350,30 +295,31 @@ class newstrategy53(IStrategy):
     sell_trail_down_2 = DecimalParameter(
         0.04, 0.2, default=0.015, space="sell", decimals=3, optimize=False, load=True
     )
-    # hard stoploss profit
-    pHSL = DecimalParameter(
-        -0.5, -0.04, default=-0.08, decimals=3, space="sell", optimize=False, load=True
-    )
-    # profit threshold 1, trigger point, SL_1 is used
-    pPF_1 = DecimalParameter(
-        0.008, 0.02, default=0.016, decimals=3, space="sell", optimize=False, load=True
-    )
-    pSL_1 = DecimalParameter(
-        0.008, 0.02, default=0.011, decimals=3, space="sell", optimize=False, load=True
-    )
-    # profit threshold 2, SL_2 is used
-    pPF_2 = DecimalParameter(
-        0.04, 0.1, default=0.08, decimals=3, space="sell", optimize=False, load=True
-    )
-    pSL_2 = DecimalParameter(
-        0.02, 0.07, default=0.04, decimals=3, space="sell", optimize=False, load=True
-    )
 
-    def informative_pairs(self):
+    # Structural-stop helpers (single owner of the loss side, per plan Option B).
+    _LONG_WATERMARK_KEY = "ns53_long_stop_watermark"
+    _SHORT_WATERMARK_KEY = "ns53_short_stop_watermark"
+
+    def informative_pairs(self) -> list[tuple[str, str]]:
         pairs = self.dp.current_whitelist()
         informative_pairs = [(pair, "1h") for pair in pairs]
-        informative_pairs += [("BTC/USDT:USDT", "5m")]
+        informative_pairs += [(self._btc_ref_pair(), "5m")]
         return informative_pairs
+
+    def _btc_ref_pair(self) -> str:
+        """Futures whitelists carry a ':USDT'-style suffix; pick the BTC pair to match."""
+        if getattr(self, "dp", None):
+            for pair in self.dp.current_whitelist():
+                if ":" in pair:
+                    return "BTC/USDT:USDT"
+        return "BTC/USDT"
+
+    def _entry_index_for_trade(self, dataframe: DataFrame, trade: "Trade") -> int:
+        """Resolve the dataframe bar of the trade's entry candle (Octopus parity)."""
+        entry_date = timeframe_to_prev_date(self.timeframe, trade.open_date_utc)
+        dts = pd.to_datetime(dataframe["date"], utc=True)
+        matches = np.flatnonzero((dts <= entry_date).to_numpy())
+        return int(matches[-1]) if len(matches) else 0
 
     def custom_exit(
         self,
@@ -383,8 +329,15 @@ class newstrategy53(IStrategy):
         current_rate: float,
         current_profit: float,
         **kwargs,
-    ):
+    ) -> str | None:
         (dataframe, _) = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+        if dataframe is None or len(dataframe) < 2:
+            return None
+        # Structural close-cross SL owns the loss side (Octopus parity). A
+        # mirrored intrabar stop would shadow these tags on wick touches.
+        stop_signal = self._structural_stop_cross(pair, trade, dataframe)
+        if stop_signal:
+            return stop_signal
         last_candle = dataframe.iloc[-1].squeeze()
         filled_buys = trade.select_filled_orders("entry")
         count_of_buys = len(filled_buys)
@@ -483,67 +436,117 @@ class newstrategy53(IStrategy):
                 )
                 and (
                     last_candle["volume_mean_12"]
-                    < last_candle["volume_mean_24"]
-                    * self.sell_deadfish_volume_factor.value
+                    < last_candle["volume_mean_24"] * self.sell_deadfish_volume_factor.value
                 )
                 and (last_candle["cmf"] < 0.0)
             ):
-                return f"sell_stoploss_deadfish"
+                return "sell_stoploss_deadfish"
+        # Duration escape after all signal exits (plan order: cross-stop,
+        # profit branches, then duration).
+        direction = "SHORT" if trade.is_short else "LONG"
+        if octopus_duration_exceeded(
+            trade.open_date_utc, current_time, int(self.max_trade_duration_days.value)
+        ):
+            return f"EXIT_{direction}_TIME"
+        return None
 
-    # come from BB_RPB_TSL
+    def _structural_stop_cross(self, pair: str, trade: "Trade", dataframe: DataFrame) -> str | None:
+        """Close-cross structural SL check with a post-DCA ratchet watermark.
 
-    def _risk_config(self) -> SlTpConfig:
-        """Profit-tiered trailing stop via the shared strategy_lib.risk engine."""
-        return SlTpConfig(
-            mode="Trailing Profit Tier",
-            tier_p_hsl=float(self.pHSL.value),
-            tier_p_pf_1=float(self.pPF_1.value),
-            tier_p_sl_1=float(self.pSL_1.value),
-            tier_p_pf_2=float(self.pPF_2.value),
-            tier_p_sl_2=float(self.pSL_2.value),
-            enable_take_profit=False,
+        Safety-order fills shift ``trade.open_rate``; recomputed levels would
+        re-anchor and could loosen an already-raised stop. The watermark keeps
+        the tightest level seen so the ratchet only ever tightens.
+        """
+        current_index = len(dataframe) - 1
+        previous_index = current_index - 1
+        entry_index = self._entry_index_for_trade(dataframe, trade)
+        if current_index <= entry_index or previous_index < 0:
+            return None
+        levels = octopus_trade_levels(
+            dataframe,
+            float(trade.open_rate),
+            entry_index,
+            mode=self.sl_tp_mode,
+            sl_size_or_atr_multiplier=float(self.sl_size_or_atr_multiplier.value),
+            sl_size_or_atr_multiplier_short=None,
+            risk_reward_ratio=float(self.risk_reward_ratio_levels),
+            my_backup_multiplier=float(self.my_backup_multiplier_levels),
+            max_trade_duration_days=int(self.max_trade_duration_days.value),
+            high_low_stop_loss_lookback=int(self.high_low_stop_loss_lookback.value),
+            high_low_stop_loss_multiplier=float(self.high_low_stop_loss_multiplier.value),
+            atr_length=int(self.atr_length.value),
+            enable_take_profit=self.enable_take_profit_levels,
         )
-
-    def custom_stoploss(
-        self,
-        pair: str,
-        trade: "Trade",
-        current_time: datetime,
-        current_rate: float,
-        current_profit: float,
-        after_fill: bool,
-        **kwargs,
-    ) -> float:
-        config = self._risk_config()
-        manager = getattr(self, "_risk_manager", None)
-        if manager is None:
-            manager = TradeLevelsManager(config)
-            self._risk_manager = manager
-        else:
-            manager.config = config
-        dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
-        levels = manager.current_trade_levels(pair, dataframe, trade, self.timeframe)
         if levels is None:
-            return self.stoploss
-        stop = levels["short_stop"] if trade.is_short else levels["long_stop"]
-        if not np.isfinite(stop) or stop <= 0.0:
-            return self.stoploss
-        return stoploss_from_absolute(
-            stop, current_rate, is_short=trade.is_short, leverage=trade.leverage
+            return None
+        key = self._SHORT_WATERMARK_KEY if trade.is_short else self._LONG_WATERMARK_KEY
+        try:
+            previous_watermark = trade.get_custom_data(key)
+        except Exception as exception:  # noqa: BLE001
+            logger.info(
+                f"Watermark read failed for {pair} {trade.pair}: "
+                f"{type(exception).__name__}: {exception}"
+            )
+            previous_watermark = None
+        candidate = (
+            float(levels["short_stop"][current_index])
+            if trade.is_short
+            else float(levels["long_stop"][current_index])
+        )
+        if np.isfinite(candidate):
+            watermark = candidate
+            if previous_watermark is not None:
+                watermark = (
+                    min(float(previous_watermark), candidate)
+                    if trade.is_short
+                    else max(float(previous_watermark), candidate)
+                )
+        else:
+            watermark = float(previous_watermark) if previous_watermark is not None else None
+        if watermark is None or not np.isfinite(watermark):
+            return None
+        try:
+            trade.set_custom_data(key, float(watermark))
+        except Exception as exception:  # noqa: BLE001
+            logger.info(
+                f"Watermark write failed for {pair} {trade.pair}: "
+                f"{type(exception).__name__}: {exception}"
+            )
+            return None
+        previous_close = float(dataframe["close"].iloc[previous_index])
+        current_close = float(dataframe["close"].iloc[current_index])
+        reference = float(previous_watermark) if previous_watermark is not None else watermark
+        # TP disabled structurally (plan): NaN targets can never cross.
+        prev_tp = float(levels["long_tp"][previous_index])
+        cur_tp = float(levels["short_tp"][current_index])
+        return octopus_exit_cross_signal(
+            previous_close,
+            current_close,
+            {
+                "long_stop": reference,
+                "short_stop": reference,
+                "long_tp": prev_tp,
+                "short_tp": prev_tp,
+            },
+            {
+                "long_stop": watermark,
+                "short_stop": watermark,
+                "long_tp": cur_tp,
+                "short_tp": cur_tp,
+            },
+            trade.is_short,
         )
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         info_tf = "5m"
-        informative = self.dp.get_pair_dataframe("BTC/USDT", timeframe=info_tf)
+        informative = self.dp.get_pair_dataframe(self._btc_ref_pair(), timeframe=info_tf)
         informative_btc = informative.copy().shift(1)
         # informative = self.dp.get_pair_dataframe('BTC/USDT', timeframe=inf_tf)
         # informative_btc = informative.copy().shift(1)
         dataframe["btc_close"] = informative_btc["close"]
         dataframe["btc_ema_fast"] = ta.EMA(informative_btc, timeperiod=20)
         dataframe["btc_ema_slow"] = ta.EMA(informative_btc, timeperiod=25)
-        dataframe["down"] = (
-            dataframe["btc_ema_fast"] < dataframe["btc_ema_slow"]
-        ).astype("int")
+        dataframe["down"] = (dataframe["btc_ema_fast"] < dataframe["btc_ema_slow"]).astype("int")
         # Calculate all ma_sell values
         for val in self.base_nb_candles_sell.range:
             dataframe[f"ma_sell_{val}"] = ta.EMA(dataframe, timeperiod=val)
@@ -551,9 +554,7 @@ class newstrategy53(IStrategy):
         dataframe["volume_mean_24"] = dataframe["volume"].rolling(24).mean().shift(1)
         dataframe["cmf"] = chaikin_money_flow(dataframe, 20)
         # Bollinger bands
-        bollinger2 = qtpylib.bollinger_bands(
-            qtpylib.typical_price(dataframe), window=20, stds=2
-        )
+        bollinger2 = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
         dataframe["bb_lowerband2"] = bollinger2["lower"]
         dataframe["bb_middleband2"] = bollinger2["mid"]
         dataframe["bb_upperband2"] = bollinger2["upper"]
@@ -561,9 +562,7 @@ class newstrategy53(IStrategy):
             dataframe["bb_upperband2"] - dataframe["bb_lowerband2"]
         ) / dataframe["bb_middleband2"]
         ## BB 40
-        bollinger2_40 = qtpylib.bollinger_bands(
-            qtpylib.typical_price(dataframe), window=40, stds=2
-        )
+        bollinger2_40 = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=40, stds=2)
         dataframe["bb_lowerband2_40"] = bollinger2_40["lower"]
         dataframe["bb_middleband2_40"] = bollinger2_40["mid"]
         dataframe["bb_upperband2_40"] = bollinger2_40["upper"]
@@ -585,30 +584,22 @@ class newstrategy53(IStrategy):
         dataframe["bb_delta_cluc"] = (
             dataframe["bb_middleband2_40"] - dataframe["bb_lowerband2_40"]
         ).abs()
-        dataframe["ha_closedelta"] = (
-            dataframe["ha_close"] - dataframe["ha_close"].shift()
-        ).abs()
+        dataframe["ha_closedelta"] = (dataframe["ha_close"] - dataframe["ha_close"].shift()).abs()
         # SRSI hyperopt (is DIP)
         stoch = ta.STOCHRSI(dataframe, 15, 20, 2, 2)
         dataframe["srsi_fk"] = stoch["fastk"]
         dataframe["srsi_fd"] = stoch["fastd"]
         # Set Up Bollinger Bands
-        (mid, lower) = bollinger_bands(
-            ha_typical_price(dataframe), window_size=40, num_of_std=2
-        )
+        (mid, lower) = bollinger_bands(ha_typical_price(dataframe), window_size=40, num_of_std=2)
         dataframe["lower"] = lower
         dataframe["mid"] = mid
         dataframe["bbdelta"] = (mid - dataframe["lower"]).abs()
-        dataframe["closedelta"] = (
-            dataframe["ha_close"] - dataframe["ha_close"].shift()
-        ).abs()
+        dataframe["closedelta"] = (dataframe["ha_close"] - dataframe["ha_close"].shift()).abs()
         dataframe["tail"] = (dataframe["ha_close"] - dataframe["ha_low"]).abs()
         dataframe["bb_lowerband"] = dataframe["lower"]
         dataframe["bb_middleband"] = dataframe["mid"]
         # is DIP
-        bollinger3 = qtpylib.bollinger_bands(
-            qtpylib.typical_price(dataframe), window=20, stds=3
-        )
+        bollinger3 = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=3)
         dataframe["bb_lowerband3"] = bollinger3["lower"]
         dataframe["bb_middleband3"] = bollinger3["mid"]
         dataframe["bb_upperband3"] = bollinger3["upper"]
@@ -620,7 +611,6 @@ class newstrategy53(IStrategy):
         dataframe["volume_mean_slow"] = dataframe["volume"].rolling(window=30).mean()
         dataframe["rocr"] = ta.ROCR(dataframe["ha_close"], timeperiod=28)
         # VWAP
-        (vwap_low, vwap, vwap_high) = VWAPB(dataframe, 20, 1)
         (vwap_low, vwap, vwap_high) = VWAPB(dataframe, 20, 1)
         dataframe["vwap_low"] = vwap_low
         dataframe["vwap_upperband"] = vwap_high
@@ -672,26 +662,22 @@ class newstrategy53(IStrategy):
             heikinashi, MAtype=1, length=9, multiplier=27, period=10, src=3
         )
         dataframe["source"] = (
-            dataframe["high"]
-            + dataframe["low"]
-            + dataframe["open"]
-            + dataframe["close"]
+            dataframe["high"] + dataframe["low"] + dataframe["open"] + dataframe["close"]
         ) / 4
         dataframe["pmax_thresh"] = ta.EMA(dataframe["source"], timeperiod=9)
         dataframe["sma_75"] = ta.SMA(dataframe, timeperiod=75)
-        rsi = ta.RSI(dataframe)
-        dataframe["rsi"] = rsi
+        rsi = dataframe["rsi"]
         rsi = 0.1 * (rsi - 50)
         dataframe["fisher"] = (np.exp(2 * rsi) - 1) / (np.exp(2 * rsi) + 1)
+        # Structural-stop ATR source for components.risk level computation.
+        dataframe["hann_atr"] = comp_hann_atr(dataframe, int(self.atr_length.value))
         inf_tf = "1h"
-        informative = self.dp.get_pair_dataframe(
-            pair=metadata["pair"], timeframe=inf_tf
-        )
+        informative = self.dp.get_pair_dataframe(pair=metadata["pair"], timeframe=inf_tf)
         inf_heikinashi = qtpylib.heikinashi(informative)
         informative["ha_close"] = inf_heikinashi["close"]
         informative["rocr"] = ta.ROCR(informative["ha_close"], timeperiod=168)
-        informative["rsi_14"] = ta.RSI(dataframe, timeperiod=14)
-        informative["cmf"] = chaikin_money_flow(dataframe, 20)
+        informative["rsi_14"] = ta.RSI(informative, timeperiod=14)
+        informative["cmf"] = chaikin_money_flow(informative, 20)
         sup_series = (
             informative["low"]
             .rolling(window=5, center=True)
@@ -712,9 +698,7 @@ class newstrategy53(IStrategy):
         informative["roc"] = ta.ROC(informative, timeperiod=9)
         informative["r_480"] = williams_r(informative, period=480)
         # Bollinger bands (is DIP)
-        bollinger2 = qtpylib.bollinger_bands(
-            qtpylib.typical_price(informative), window=20, stds=2
-        )
+        bollinger2 = qtpylib.bollinger_bands(qtpylib.typical_price(informative), window=20, stds=2)
         informative["bb_lowerband2"] = bollinger2["lower"]
         informative["bb_middleband2"] = bollinger2["mid"]
         informative["bb_upperband2"] = bollinger2["upper"]
@@ -730,29 +714,16 @@ class newstrategy53(IStrategy):
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        btc_dump = (
-            dataframe["btc_close"].rolling(24).max() >= dataframe["btc_close"] * 1.03
-        )
-        rsi_check = (dataframe["rsi_84"] < 60) & (
-            dataframe["rsi_112"] < 60
-        )  # from BinH
+        btc_dump = dataframe["btc_close"].rolling(24).max() >= dataframe["btc_close"] * 1.03
+        rsi_check = (dataframe["rsi_84"] < 60) & (dataframe["rsi_112"] < 60)  # from BinH
         dataframe.loc[
             (dataframe[f"rmi_length_{self.buy_rmi_length.value}"] < self.buy_rmi.value)
-            & (
-                dataframe[f"cci_length_{self.buy_cci_length.value}"]
-                <= self.buy_cci.value
-            )
+            & (dataframe[f"cci_length_{self.buy_cci_length.value}"] <= self.buy_cci.value)
             & (dataframe["srsi_fk"] < self.buy_srsi_fk.value)
             & (dataframe["bb_delta"] > self.buy_bb_delta.value)
             & (dataframe["bb_width"] > self.buy_bb_width.value)
-            & (
-                dataframe["closedelta"]
-                > dataframe["close"] * self.buy_closedelta.value / 1000
-            )
-            & (
-                dataframe["close"]
-                < dataframe["bb_lowerband3"] * self.buy_bb_factor.value
-            )
+            & (dataframe["closedelta"] > dataframe["close"] * self.buy_closedelta.value / 1000)
+            & (dataframe["close"] < dataframe["bb_lowerband3"] * self.buy_bb_factor.value)
             & (dataframe["roc_1h"] < self.buy_roc_1h.value)
             & (dataframe["bb_width_1h"] < self.buy_bb_width_1h.value),
             ["enter_long", "enter_tag"],
@@ -760,14 +731,8 @@ class newstrategy53(IStrategy):
         dataframe.loc[
             (dataframe["bb_delta"] > self.buy_bb_delta.value)
             & (dataframe["bb_width"] > self.buy_bb_width.value)
-            & (
-                dataframe["closedelta"]
-                > dataframe["close"] * self.buy_closedelta.value / 1000
-            )
-            & (
-                dataframe["close"]
-                < dataframe["bb_lowerband3"] * self.buy_bb_factor.value
-            )
+            & (dataframe["closedelta"] > dataframe["close"] * self.buy_closedelta.value / 1000)
+            & (dataframe["close"] < dataframe["bb_lowerband3"] * self.buy_bb_factor.value)
             & (dataframe["roc_1h"] < self.buy_roc_1h.value)
             & (dataframe["bb_width_1h"] < self.buy_bb_width_1h.value),
             ["enter_long", "enter_tag"],
@@ -783,10 +748,7 @@ class newstrategy53(IStrategy):
                 dataframe["ha_closedelta"]
                 > dataframe["ha_close"] * self.buy_clucha_closedelta_close.value
             )
-            & (
-                dataframe["tail"]
-                < dataframe["bb_delta_cluc"] * self.buy_clucha_bbdelta_tail.value
-            )
+            & (dataframe["tail"] < dataframe["bb_delta_cluc"] * self.buy_clucha_bbdelta_tail.value)
             & (dataframe["ha_close"] < dataframe["bb_lowerband2_40"].shift())
             & (dataframe["close"] > dataframe["sup_level_1h"] * 0.88)
             & (dataframe["ha_close"] < dataframe["ha_close"].shift()),
@@ -817,18 +779,9 @@ class newstrategy53(IStrategy):
                 dataframe["ema_26"] - dataframe["ema_12"]
                 > dataframe["open"] * self.buy_ema_diff.value
             )
-            & (
-                dataframe["ema_26"].shift() - dataframe["ema_12"].shift()
-                > dataframe["open"] / 100
-            )
-            & (
-                dataframe["close"]
-                < dataframe["bb_lowerband2"] * self.buy_bb_factor.value
-            )
-            & (
-                dataframe["closedelta"]
-                > dataframe["close"] * self.buy_closedelta.value / 1000
-            ),
+            & (dataframe["ema_26"].shift() - dataframe["ema_12"].shift() > dataframe["open"] / 100)
+            & (dataframe["close"] < dataframe["bb_lowerband2"] * self.buy_bb_factor.value)
+            & (dataframe["closedelta"] > dataframe["close"] * self.buy_closedelta.value / 1000),
             ["enter_long", "enter_tag"],
         ] = (1, "local_uptrend")  # 0.053)
         # -0.8)
@@ -852,10 +805,7 @@ class newstrategy53(IStrategy):
             & (dataframe["cti"] < -0.845)
             & (dataframe["cti_40_1h"] < -0.735)
             & (dataframe["close"].rolling(48).max() >= dataframe["close"] * 1.1)
-            & (
-                dataframe["btc_close"].rolling(24).max()
-                >= dataframe["btc_close"] * 1.03
-            ),
+            & (dataframe["btc_close"].rolling(24).max() >= dataframe["btc_close"] * 1.03),
             ["enter_long", "enter_tag"],
         ] = (1, "insta_signal")
         # (dataframe['tcp_percent_4'] > 0.053) & # 0.053)
@@ -882,10 +832,7 @@ class newstrategy53(IStrategy):
                 dataframe["ema_26"] - dataframe["ema_12"]
                 > dataframe["open"] * self.buy_ema_open_mult_7
             )
-            & (
-                dataframe["ema_26"].shift() - dataframe["ema_12"].shift()
-                > dataframe["open"] / 100
-            )
+            & (dataframe["ema_26"].shift() - dataframe["ema_12"].shift() > dataframe["open"] / 100)
             & (dataframe["cti"] < self.buy_cti_7),
             ["enter_long", "enter_tag"],
         ] = (1, "NFINext7")
@@ -926,10 +873,7 @@ class newstrategy53(IStrategy):
             & dataframe["ha_high"].shift(1).le(dataframe["ha_high"].shift(2))
             & dataframe["ha_close"].le(dataframe["ha_close"].shift(1))
             & (dataframe["ema_fast"] > dataframe["ha_close"])
-            & (
-                dataframe["ha_close"] * self.sell_bbmiddle_close.value
-                > dataframe["bb_middleband"]
-            )
+            & (dataframe["ha_close"] * self.sell_bbmiddle_close.value > dataframe["bb_middleband"])
             & (dataframe["volume"] > 0),
             "exit_long",
         ] = 0
@@ -950,9 +894,9 @@ class newstrategy53(IStrategy):
         if length == 0:
             return (dataframe["open"] - dataframe["close"]) / dataframe["close"]
         else:
-            return (
-                dataframe["open"].rolling(length).max() - dataframe["close"]
-            ) / dataframe["close"]
+            return (dataframe["open"].rolling(length).max() - dataframe["close"]) / dataframe[
+                "close"
+            ]
 
     def adjust_trade_position(
         self,
@@ -978,90 +922,79 @@ class newstrategy53(IStrategy):
         filled_buys = trade.select_filled_orders("entry")
         count_of_buys = len(filled_buys)
         if (
-            count_of_buys == 1
-            and last_candle["tpct_change_0"] > 0.018
-            and (last_candle["close"] < last_candle["open"])
-        ):
-            return None
-        elif (
-            count_of_buys == 2
-            and last_candle["tpct_change_0"] > 0.018
-            and (last_candle["close"] < last_candle["open"])
-            and (last_candle["ema_vwap_diff_50"] < 0.215)
-        ):
-            return None
-        elif (
-            count_of_buys == 3
-            and last_candle["tpct_change_0"] > 0.018
-            and (last_candle["close"] < last_candle["open"])
-            and (last_candle["ema_vwap_diff_50"] < 0.215)
-        ):
-            return None
-        elif (
-            count_of_buys == 4
-            and last_candle["tpct_change_0"] > 0.018
-            and (last_candle["close"] < last_candle["open"])
-            and (last_candle["ema_vwap_diff_50"] < 0.215)
-            and (last_candle["ema_5"] >= last_candle["ema_10"])
-        ):
-            return None
-        elif (
-            count_of_buys == 5
-            and last_candle["cmf_1h"] < 0.0
-            and (last_candle["close"] < last_candle["open"])
-            and (last_candle["rsi_14_1h"] < 30)
-            and (last_candle["tpct_change_0"] > 0.018)
-            and (last_candle["close"] < last_candle["open"])
-            and (last_candle["ema_vwap_diff_50"] < 0.215)
-            and (last_candle["ema_5"] >= last_candle["ema_10"])
-        ):
-            logger.info(
-                f"DCA for {trade.pair} waiting for cmf_1h ({last_candle['cmf_1h']}) to rise above 0. Waiting for rsi_1h ({last_candle['rsi_14_1h']})to rise above 30"
+            (
+                count_of_buys == 1
+                and last_candle["tpct_change_0"] > 0.018
+                and (last_candle["close"] < last_candle["open"])
             )
-            return None
-        elif (
-            count_of_buys == 6
-            and last_candle["cmf_1h"] < 0.0
-            and (last_candle["close"] < last_candle["open"])
-            and (last_candle["rsi_14_1h"] < 30)
-            and (last_candle["tpct_change_0"] > 0.018)
-            and (
-                last_candle["close"] < last_candle["open"]
-                and last_candle["ema_vwap_diff_50"] < 0.215
+            or (
+                count_of_buys == 2
+                and last_candle["tpct_change_0"] > 0.018
+                and (last_candle["close"] < last_candle["open"])
+                and (last_candle["ema_vwap_diff_50"] < 0.215)
             )
-            and (last_candle["ema_5"] >= last_candle["ema_10"])
+            or (
+                count_of_buys == 3
+                and last_candle["tpct_change_0"] > 0.018
+                and (last_candle["close"] < last_candle["open"])
+                and (last_candle["ema_vwap_diff_50"] < 0.215)
+            )
+            or (
+                count_of_buys == 4
+                and last_candle["tpct_change_0"] > 0.018
+                and (last_candle["close"] < last_candle["open"])
+                and (last_candle["ema_vwap_diff_50"] < 0.215)
+                and (last_candle["ema_5"] >= last_candle["ema_10"])
+            )
         ):
-            logger.info(
-                f"DCA for {trade.pair} waiting for cmf_1h ({last_candle['cmf_1h']}) to rise above 0. Waiting for rsi_1h ({last_candle['rsi_14_1h']})to rise above 30"
-            )
             return None
         elif (
-            count_of_buys == 7
-            and last_candle["cmf_1h"] < 0.0
-            and (last_candle["close"] < last_candle["open"])
-            and (last_candle["rsi_14_1h"] < 30)
-            and (last_candle["tpct_change_0"] > 0.018)
-            and (
-                last_candle["close"] < last_candle["open"]
-                and last_candle["ema_vwap_diff_50"] < 0.215
+            (
+                count_of_buys == 5
+                and last_candle["cmf_1h"] < 0.0
+                and (last_candle["close"] < last_candle["open"])
+                and (last_candle["rsi_14_1h"] < 30)
+                and (last_candle["tpct_change_0"] > 0.018)
+                and (last_candle["close"] < last_candle["open"])
+                and (last_candle["ema_vwap_diff_50"] < 0.215)
+                and (last_candle["ema_5"] >= last_candle["ema_10"])
             )
-            and (last_candle["ema_5"] >= last_candle["ema_10"])
-        ):
-            logger.info(
-                f"DCA for {trade.pair} waiting for cmf_1h ({last_candle['cmf_1h']}) to rise above 0. Waiting for rsi_1h ({last_candle['rsi_14_1h']})to rise above 30"
+            or (
+                count_of_buys == 6
+                and last_candle["cmf_1h"] < 0.0
+                and (last_candle["close"] < last_candle["open"])
+                and (last_candle["rsi_14_1h"] < 30)
+                and (last_candle["tpct_change_0"] > 0.018)
+                and (
+                    last_candle["close"] < last_candle["open"]
+                    and last_candle["ema_vwap_diff_50"] < 0.215
+                )
+                and (last_candle["ema_5"] >= last_candle["ema_10"])
             )
-            return None
-        elif (
-            count_of_buys == 8
-            and last_candle["cmf_1h"] < 0.0
-            and (last_candle["close"] < last_candle["open"])
-            and (last_candle["rsi_14_1h"] < 30)
-            and (last_candle["tpct_change_0"] > 0.018)
-            and (
-                last_candle["close"] < last_candle["open"]
-                and last_candle["ema_vwap_diff_50"] < 0.215
+            or (
+                count_of_buys == 7
+                and last_candle["cmf_1h"] < 0.0
+                and (last_candle["close"] < last_candle["open"])
+                and (last_candle["rsi_14_1h"] < 30)
+                and (last_candle["tpct_change_0"] > 0.018)
+                and (
+                    last_candle["close"] < last_candle["open"]
+                    and last_candle["ema_vwap_diff_50"] < 0.215
+                )
+                and (last_candle["ema_5"] >= last_candle["ema_10"])
             )
-            and (last_candle["ema_5"] >= last_candle["ema_10"])
+            or (
+                count_of_buys == 8
+                and last_candle["cmf_1h"] < 0.0
+                and (last_candle["close"] < last_candle["open"])
+                and (last_candle["rsi_14_1h"] < 30)
+                and (last_candle["tpct_change_0"] > 0.018)
+                and (
+                    last_candle["close"] < last_candle["open"]
+                    and last_candle["ema_vwap_diff_50"] < 0.215
+                )
+                and (last_candle["ema_5"] >= last_candle["ema_10"])
+            )
         ):
             logger.info(
                 f"DCA for {trade.pair} waiting for cmf_1h ({last_candle['cmf_1h']}) to rise above 0. Waiting for rsi_1h ({last_candle['rsi_14_1h']})to rise above 30"
@@ -1078,9 +1011,7 @@ class newstrategy53(IStrategy):
         #    if order.status == "closed":
         #        count_of_buys += 1
         if 1 <= count_of_buys <= self.max_safety_orders:
-            safety_order_trigger = (
-                abs(self.initial_safety_order_trigger) * count_of_buys
-            )
+            safety_order_trigger = abs(self.initial_safety_order_trigger) * count_of_buys
             if self.safety_order_step_scale > 1:
                 safety_order_trigger = abs(self.initial_safety_order_trigger) + abs(
                     self.initial_safety_order_trigger
@@ -1106,9 +1037,10 @@ class newstrategy53(IStrategy):
                         f"Initiating safety order buy #{count_of_buys} for {trade.pair} with stake amount of {stake_amount} which equals {amount}"
                     )
                     return stake_amount
-                except Exception as exception:
+                except Exception as exception:  # noqa: BLE001
                     logger.info(
-                        f"Error occured while trying to get stake amount for {trade.pair}: {str(exception)}"
+                        f"Error occured while trying to get stake amount for {trade.pair}: "
+                        f"{type(exception).__name__}: {exception}"
                     )
                     return None
         return None
@@ -1125,26 +1057,8 @@ def pmax(df, period, multiplier, length, MAtype, src):
     src = int(src)
     mavalue = "MA_" + str(MAtype) + "_" + str(length)
     atr = "ATR_" + str(period)
-    pm = (
-        "pm_"
-        + str(period)
-        + "_"
-        + str(multiplier)
-        + "_"
-        + str(length)
-        + "_"
-        + str(MAtype)
-    )
-    pmx = (
-        "pmX_"
-        + str(period)
-        + "_"
-        + str(multiplier)
-        + "_"
-        + str(length)
-        + "_"
-        + str(MAtype)
-    )
+    pm = "pm_" + str(period) + "_" + str(multiplier) + "_" + str(length) + "_" + str(MAtype)
+    pmx = "pmX_" + str(period) + "_" + str(multiplier) + "_" + str(length) + "_" + str(MAtype)
     # MAtype==1 --> EMA
     # MAtype==2 --> DEMA
     # MAtype==3 --> T3
@@ -1213,5 +1127,5 @@ def pmax(df, period, multiplier, length, MAtype, src):
         )
     pm = Series(pm_arr)
     # Mark the trend direction up/down
-    pmx = np.where(pm_arr > 0.0, np.where(mavalue < pm_arr, "down", "up"), np.NaN)
+    pmx = np.where(pm_arr > 0.0, np.where(mavalue < pm_arr, "down", "up"), np.nan)
     return (pm, pmx)
