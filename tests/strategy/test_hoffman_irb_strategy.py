@@ -515,3 +515,71 @@ def test_adjust_order_price_cancels_stale_setup():
         )
         == 115.0
     )
+
+
+# ---------------------------------------------------------------------------
+# Fee-distance guard
+# ---------------------------------------------------------------------------
+def test_fee_filter_disabled_by_default():
+    strategy = _strategy()
+    assert strategy.min_target_fee_mult == 0.0
+    # Guard off: any distance passes.
+    assert strategy._fee_filter_ok(100.0, 99.999)
+    assert strategy._fee_filter_ok(100.0, 99.0)
+
+
+def test_fee_filter_rejects_targets_below_fee_threshold():
+    strategy = _strategy()
+    strategy.min_target_fee_mult = 2.0
+    # rr=1.5, fee_rate=0.0005 -> required target distance = 2 * 0.001 * entry.
+    strategy.rr.value = 1.5
+    # Target distance = 1.5 * 0.1 = 0.15 (0.15% of entry) < 0.2% required.
+    assert strategy._fee_filter_ok(100.0, 99.9) is False
+    # Target distance = 1.5 * 1.0 = 1.5 (1.5% of entry) >= 0.2% required.
+    assert strategy._fee_filter_ok(100.0, 99.0) is True
+    # Degenerate input never passes.
+    assert strategy._fee_filter_ok(0.0, 99.0) is False
+    assert strategy._fee_filter_ok(float("nan"), 99.0) is False
+
+
+def test_fee_filter_skips_setups_in_state_machine():
+    strategy = _strategy()
+    strategy.min_target_fee_mult = 2.0
+    df = _state_df()
+    df.loc[50, "irb_bear"] = True  # h1=100, l1=90 -> huge range, passes the guard
+    df.loc[70, "h1"] = 100.0
+    df.loc[70, "l1"] = 99.97  # 0.03% range: 1.5R = 0.045% << 0.2% fee threshold
+    df.loc[70, "irb_bear"] = True
+    df.loc[72, "high"] = 101.0
+
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    # The wide-range setup is signaled and breaks out; the tiny-range one is not.
+    assert result["irb_enter_long"].iloc[50]
+    assert not result["irb_enter_long"].iloc[70:75].any()
+    assert result["irb_tag"].iloc[50] == "irb_long_50"
+
+
+def test_fee_filter_applies_on_short_setups():
+    strategy = _strategy()
+    strategy.min_target_fee_mult = 2.0
+    df = _state_df()
+    df.loc[50, "irb_bull"] = True  # entry 90-pad, stop 100+pad: wide range
+    df.loc[53, "low"] = 89.0
+
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    assert result["irb_enter_short"].iloc[50]
+    assert result["irb_tag"].iloc[50] == "irb_short_50"
+
+
+def test_15m_variant_defaults():
+    from user_data.strategies.pattern.HoffmanIRBStrategy15m import HoffmanIRBStrategy15m
+
+    strategy = HoffmanIRBStrategy15m({})
+    assert strategy.timeframe == "15m"
+    assert strategy._param("htf") == "1h"
+    assert strategy.min_target_fee_mult == 2.0
+    # Inherited faithful defaults stay untouched.
+    assert strategy.pct == 45
+    assert strategy.rr.value == 1.5
