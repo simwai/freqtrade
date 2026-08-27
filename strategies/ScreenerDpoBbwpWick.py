@@ -164,16 +164,14 @@ class ScreenerDpoBbwpWick(IStrategy):
         product_up2 = (1 - prob_down_bb_upper) * (1 - prob_down_bb_basis) * (1 - prob_down_sma)
         sigma_up = product_down2 / (product_down2 + product_up2)
 
-        prob_prime = sigma_down * sigma_up / (
-            sigma_down * sigma_up + (1 - sigma_down) * (1 - sigma_up)
+        prob_prime = (
+            sigma_down * sigma_up / (sigma_down * sigma_up + (1 - sigma_down) * (1 - sigma_up))
         )
 
         return sigma_down, sigma_up, prob_prime
 
     @staticmethod
-    def _bbwp(
-        close: pd.Series, length: int = 20, mult: float = 2, window: int = 100
-    ) -> pd.Series:
+    def _bbwp(close: pd.Series, length: int = 20, mult: float = 2, window: int = 100) -> pd.Series:
         bb = ta.bbands(close, length=length, std=mult)
         # column names embed the length (BBU_20_2.0) - pick by prefix, not f-string
         bbu = next(c for c in bb.columns if str(c).startswith("BBU_"))
@@ -194,14 +192,14 @@ class ScreenerDpoBbwpWick(IStrategy):
         o = df["open"]
 
         step = c.shift(1) * (perc / 100)
-        green = (c.shift(1) > o.shift(1))
-        red = (c.shift(1) < o.shift(1))
+        green = c.shift(1) > o.shift(1)
+        red = c.shift(1) < o.shift(1)
 
         up_target = h.shift(1) + step
         down_target = lo.shift(1) - step
 
-        hit_up = (h >= up_target)
-        hit_down = (lo <= down_target)
+        hit_up = h >= up_target
+        hit_down = lo <= down_target
 
         green_total = green.rolling(lookback, min_periods=1).sum()
         red_total = red.rolling(lookback, min_periods=1).sum()
@@ -335,16 +333,13 @@ class ScreenerDpoBbwpWick(IStrategy):
     def populate_entry_trend(self, dataframe: pd.DataFrame, metadata: dict) -> pd.DataFrame:
         df = dataframe
         enter_long = (
-            (
-                (df["dpo_20"] <= -47.6724987)
-                & (df["dpo_20"] <= -80.09499741)
-                & (df["dpo_20"] > -715.506012)
-            )
-            | (
-                (df["dpo_20"] <= -47.6724987)
-                & (df["dpo_20"] > -80.09499741)
-                & (df["fvg_distance"] > 0.0005490539188)
-            )
+            (df["dpo_20"] <= -47.6724987)
+            & (df["dpo_20"] <= -80.09499741)
+            & (df["dpo_20"] > -715.506012)
+        ) | (
+            (df["dpo_20"] <= -47.6724987)
+            & (df["dpo_20"] > -80.09499741)
+            & (df["fvg_distance"] > 0.0005490539188)
         )
         dataframe.loc[enter_long, "enter_long"] = 1
         return dataframe

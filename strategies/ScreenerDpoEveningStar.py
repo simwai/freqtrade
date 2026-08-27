@@ -164,8 +164,8 @@ class ScreenerDpoEveningStar(IStrategy):
         product_up2 = (1 - prob_down_bb_upper) * (1 - prob_down_bb_basis) * (1 - prob_down_sma)
         sigma_up = product_down2 / (product_down2 + product_up2)
 
-        prob_prime = sigma_down * sigma_up / (
-            sigma_down * sigma_up + (1 - sigma_down) * (1 - sigma_up)
+        prob_prime = (
+            sigma_down * sigma_up / (sigma_down * sigma_up + (1 - sigma_down) * (1 - sigma_up))
         )
 
         return sigma_down, sigma_up, prob_prime
@@ -180,14 +180,14 @@ class ScreenerDpoEveningStar(IStrategy):
         o = df["open"]
 
         step = c.shift(1) * (perc / 100)
-        green = (c.shift(1) > o.shift(1))
-        red = (c.shift(1) < o.shift(1))
+        green = c.shift(1) > o.shift(1)
+        red = c.shift(1) < o.shift(1)
 
         up_target = h.shift(1) + step
         down_target = lo.shift(1) - step
 
-        hit_up = (h >= up_target)
-        hit_down = (lo <= down_target)
+        hit_up = h >= up_target
+        hit_down = lo <= down_target
 
         green_total = green.rolling(lookback, min_periods=1).sum()
         red_total = red.rolling(lookback, min_periods=1).sum()
@@ -210,15 +210,12 @@ class ScreenerDpoEveningStar(IStrategy):
     @staticmethod
     def _cdl_evening_star(open_, high, low, close) -> pd.Series:
         big_bull = (close.shift(2) > open_.shift(2)) & (
-            (close.shift(2) - open_.shift(2)).abs()
-            > (close.shift(3) - open_.shift(3)).abs() * 0.8
+            (close.shift(2) - open_.shift(2)).abs() > (close.shift(3) - open_.shift(3)).abs() * 0.8
         )
         small_mid = (open_.shift(1) - close.shift(1)).abs() <= (
             close.shift(2) - open_.shift(2)
         ).abs() * 0.5
-        bear_close = (close < open_) & (
-            close < (open_.shift(2) + close.shift(2)) / 2
-        )
+        bear_close = (close < open_) & (close < (open_.shift(2) + close.shift(2)) / 2)
         es = big_bull & small_mid & bear_close
         return es.fillna(False).astype(int)
 
@@ -340,16 +337,13 @@ class ScreenerDpoEveningStar(IStrategy):
     def populate_entry_trend(self, dataframe: pd.DataFrame, metadata: dict) -> pd.DataFrame:
         df = dataframe
         enter_long = (
-            (
-                (df["dpo_20"] <= -47.6724987)
-                & (df["dpo_20"] <= -81.02750015)
-                & (df["dpo_20"] > -715.506012)
-            )
-            | (
-                (df["dpo_20"] <= -47.6724987)
-                & (df["dpo_20"] > -81.02750015)
-                & (df["vqzl_zscore"] > 0.9667899311)
-            )
+            (df["dpo_20"] <= -47.6724987)
+            & (df["dpo_20"] <= -81.02750015)
+            & (df["dpo_20"] > -715.506012)
+        ) | (
+            (df["dpo_20"] <= -47.6724987)
+            & (df["dpo_20"] > -81.02750015)
+            & (df["vqzl_zscore"] > 0.9667899311)
         )
         dataframe.loc[enter_long, "enter_long"] = 1
         return dataframe
