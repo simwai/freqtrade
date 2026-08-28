@@ -573,6 +573,244 @@ def test_fee_filter_applies_on_short_setups():
     assert result["irb_tag"].iloc[50] == "irb_short_50"
 
 
+# ---------------------------------------------------------------------------
+# Volatility-regime guard
+# ---------------------------------------------------------------------------
+def test_vol_regime_disabled_by_default():
+    strategy = _strategy()
+    assert strategy.vol_regime_pctile_min == 0.0
+    assert strategy.vol_regime_window == 500
+    # Guard off: any percentile passes (NaN included).
+    assert strategy._vol_regime_ok(0.5)
+    assert strategy._vol_regime_ok(0.99)
+    assert strategy._vol_regime_ok(float("nan"))
+
+
+def test_vol_regime_skips_low_volatility_setups():
+    strategy = _strategy()
+    strategy.vol_regime_pctile_min = 0.8
+    df = _state_df()
+    # Populate the percentile column with a known value at the setup bar
+    # (bar 50 -> pctile 0.5, below the 0.8 threshold -> guard should reject).
+    df["vol_regime_pctile"] = 0.5
+    df.loc[50, "irb_bear"] = True  # wide range, qty/fee guards pass
+    df.loc[52, "high"] = 101.0  # breakout -> consume
+
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    # The setup is rejected: no irb_enter_long anywhere in the breakout window.
+    assert not result["irb_enter_long"].iloc[50:75].any()
+    assert result["irb_tag"].iloc[50:75].isna().all()
+
+
+def test_vol_regime_allows_high_volatility_setups():
+    strategy = _strategy()
+    strategy.vol_regime_pctile_min = 0.8
+    df = _state_df()
+    df["vol_regime_pctile"] = 0.9
+    df.loc[50, "irb_bear"] = True
+    df.loc[52, "high"] = 101.0
+
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    assert result["irb_enter_long"].iloc[50]
+    assert result["irb_tag"].iloc[50] == "irb_long_50"
+
+
+def test_vol_regime_treats_warmup_nan_as_not_high_vol():
+    strategy = _strategy()
+    strategy.vol_regime_pctile_min = 0.8
+    df = _state_df()
+    # NaN during the rolling window's warmup -> conservative: skip.
+    df["vol_regime_pctile"] = float("nan")
+    df.loc[50, "irb_bear"] = True
+    df.loc[52, "high"] = 101.0
+
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    assert not result["irb_enter_long"].iloc[50:75].any()
+
+
+def test_vol_regime_applies_on_short_setups():
+    strategy = _strategy()
+    strategy.vol_regime_pctile_min = 0.8
+    df = _state_df()
+    df["vol_regime_pctile"] = 0.5
+    df.loc[50, "irb_bull"] = True  # wide range, short setup
+    df.loc[53, "low"] = 89.0
+
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    assert not result["irb_enter_short"].iloc[50:75].any()
+
+
+# ---------------------------------------------------------------------------
+# Consecutive-loss lockout
+# ---------------------------------------------------------------------------
+def test_loss_streak_lockout_disabled_by_default():
+    strategy = _strategy()
+    assert strategy.loss_streak_lockout == 0
+    assert strategy.loss_streak_cooldown_min == 0
+    # No lockout, three losses in a row -> side still open.
+    from datetime import datetime, timezone
+
+    base = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    for i in range(3):
+        strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    assert strategy._is_side_locked(False, base) is False
+
+
+def test_loss_streak_lockout_engages_after_threshold():
+    from datetime import datetime, timezone
+
+    strategy = _strategy()
+    strategy.loss_streak_lockout = 3
+    strategy.loss_streak_cooldown_min = 240
+    base = datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc)
+    # Two losses: still open.
+    strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    assert strategy._is_side_locked(False, base) is False
+    # Third loss: locked until 16:00 UTC.
+    strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    assert strategy._is_side_locked(False, base) is True
+    # 30 minutes later: still locked.
+    later = datetime(2024, 1, 1, 12, 30, tzinfo=timezone.utc)
+    assert strategy._is_side_locked(False, later) is True
+    # After 240 minutes: open again.
+    after = datetime(2024, 1, 1, 16, 1, tzinfo=timezone.utc)
+    assert strategy._is_side_locked(False, after) is False
+
+
+def test_loss_streak_lockout_resets_on_win():
+    from datetime import datetime, timezone
+
+    strategy = _strategy()
+    strategy.loss_streak_lockout = 3
+    strategy.loss_streak_cooldown_min = 240
+    base = datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc)
+    strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    # Win in between: streak cleared.
+    strategy._record_trade_close(0.01, is_short=False, close_time=base)
+    # Two more losses: still open (streak restarted at 0).
+    strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    assert strategy._is_side_locked(False, base) is False
+
+
+def test_loss_streak_lockout_is_per_side():
+    from datetime import datetime, timezone
+
+    strategy = _strategy()
+    strategy.loss_streak_lockout = 3
+    strategy.loss_streak_cooldown_min = 240
+    base = datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc)
+    for _ in range(3):
+        strategy._record_trade_close(-0.01, is_short=False, close_time=base)
+    # Long is locked, short is not.
+    assert strategy._is_side_locked(False, base) is True
+    assert strategy._is_side_locked(True, base) is False
+
+
+def test_loss_streak_lockout_cooldown_expires():
+    from datetime import datetime, timezone
+
+    strategy = _strategy()
+    strategy.loss_streak_lockout = 3
+    strategy.loss_streak_cooldown_min = 240
+    # Set the lockout anchored 5 hours ago, so the cooldown has already
+    # expired by the time we check.
+    ancient = datetime(2024, 1, 1, 0, 0, tzinfo=timezone.utc)
+    for _ in range(3):
+        strategy._record_trade_close(-0.01, is_short=False, close_time=ancient)
+    now = datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc)
+    assert strategy._is_side_locked(False, now) is False
+
+
+# ---------------------------------------------------------------------------
+# Ehlers Super PassBand Filter
+# ---------------------------------------------------------------------------
+def test_spbf_guard_disabled_by_default():
+    strategy = _strategy()
+    assert strategy.spbf_length1 == 0
+    assert strategy.spbf_length2 == 0
+    # Guard off: any value passes (including NaN).
+    assert strategy._spbf_ok("long", 1.0, 1.0)
+    assert strategy._spbf_ok("long", float("nan"), float("nan"))
+
+
+def test_spbf_guard_long_only_when_pb_above_rms():
+    strategy = _strategy()
+    strategy.spbf_length1 = 40
+    strategy.spbf_length2 = 60
+    # pb > rms: long allowed, short rejected.
+    assert strategy._spbf_ok("long", 2.0, 1.0) is True
+    assert strategy._spbf_ok("short", 2.0, 1.0) is False
+
+
+def test_spbf_guard_short_only_when_pb_below_minus_rms():
+    strategy = _strategy()
+    strategy.spbf_length1 = 40
+    strategy.spbf_length2 = 60
+    # pb < -rms: short allowed, long rejected.
+    assert strategy._spbf_ok("short", -2.0, 1.0) is True
+    assert strategy._spbf_ok("long", -2.0, 1.0) is False
+
+
+def test_spbf_guard_rejects_inside_band():
+    strategy = _strategy()
+    strategy.spbf_length1 = 40
+    strategy.spbf_length2 = 60
+    # |pb| <= rms: both directions rejected.
+    assert strategy._spbf_ok("long", 0.5, 1.0) is False
+    assert strategy._spbf_ok("short", 0.5, 1.0) is False
+    assert strategy._spbf_ok("long", -0.5, 1.0) is False
+    assert strategy._spbf_ok("short", -0.5, 1.0) is False
+
+
+def test_spbf_guard_treats_warmup_nan_as_rejected():
+    strategy = _strategy()
+    strategy.spbf_length1 = 40
+    strategy.spbf_length2 = 60
+    # NaN during warmup -> conservative: reject.
+    assert strategy._spbf_ok("long", float("nan"), 1.0) is False
+    assert strategy._spbf_ok("long", 2.0, float("nan")) is False
+    assert strategy._spbf_ok("short", -2.0, 0.0) is False  # rms <= 0
+
+
+def test_spbf_guard_rejects_long_when_short_band_set():
+    df = _state_df()
+    df["spbf_pb"] = -2.0  # below the lower band
+    df["spbf_rms"] = 1.0
+    df.loc[50, "irb_bear"] = True  # long setup
+    df.loc[52, "high"] = 101.0
+    df.loc[52, "low"] = 95.0
+
+    strategy = _strategy()
+    strategy.spbf_length1 = 40
+    strategy.spbf_length2 = 60
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    assert not result["irb_enter_long"].iloc[50:75].any()
+
+
+def test_spbf_guard_allows_long_when_pb_above_rms():
+    df = _state_df()
+    df["spbf_pb"] = 2.0  # above the upper band
+    df["spbf_rms"] = 1.0
+    df.loc[50, "irb_bear"] = True
+    df.loc[52, "high"] = 101.0
+    df.loc[52, "low"] = 95.0
+
+    strategy = _strategy()
+    strategy.spbf_length1 = 40
+    strategy.spbf_length2 = 60
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    assert result["irb_enter_long"].iloc[50]
+
+
 def test_15m_variant_defaults():
     from user_data.strategies.pattern.HoffmanIRBStrategy15m import HoffmanIRBStrategy15m
 
