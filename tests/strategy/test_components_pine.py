@@ -6,6 +6,7 @@ confirmation state machine), the risk / exit-level managers, order-management
 helpers and the reference ``StrategyTemplateV21`` compose path.
 """
 
+import itertools
 from datetime import datetime, timezone
 
 import numpy as np
@@ -292,6 +293,55 @@ def test_exit_on_opposite_entry():
         long_sig, short_sig, exit_long2, exit_long2, block_opposite=True
     )
     assert not es.iloc[1]  # opposite entry blocked (existing long exit)
+
+
+# ---------------------------------------------------------------------------
+# HH/HL structure regime oscillator
+# ---------------------------------------------------------------------------
+def test_structure_regime_state_machine():
+    # Zigzag close engineered so confirmed swings are:
+    # HH -> HL -> LH -> LL -> LH -> LL -> HH -> HL -> HH
+    # Alternating swing-low/peak values; one interpolation bar per leg.
+    turns = [4.0, 10.0, 4.0, 11.0, 5.0, 7.0, 2.0, 5.0, 1.0, 16.0, 8.0, 18.0]
+    vals = []
+    for a, b in itertools.pairwise(turns):
+        vals.extend([a, (a + b) / 2.0])
+    vals.extend([turns[-1], 14.0, 10.0])
+    n = len(vals)
+    df = pd.DataFrame(
+        {
+            "date": pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC"),
+            "open": vals,
+            "high": vals,
+            "low": vals,
+            "close": vals,
+            "volume": 1.0,
+        }
+    )
+    out = indicators.structure_regime(df, pivot_source="Close", bars_left=1, bars_right=1)
+    event_rows = out[out[["higher_high", "higher_low", "lower_high", "lower_low"]].any(axis=1)]
+    labels = []
+    for _, row in event_rows.iterrows():
+        if row["higher_high"]:
+            labels.append("HH")
+        elif row["higher_low"]:
+            labels.append("HL")
+        elif row["lower_high"]:
+            labels.append("LH")
+        else:
+            labels.append("LL")
+    assert labels == ["HH", "HL", "LH", "LL", "LH", "LL", "HH", "HL", "HH"]
+    # Cross-regime events only neutralize; ±2 needs both same-side components.
+    assert list(event_rows["structural_state"]) == [1, 2, 0, -1, -2, -2, 0, 1, 2]
+    assert sorted(out["structural_oscillator"].round(2).unique()) == [-1.0, -0.5, 0.0, 0.5, 1.0]
+
+
+def test_structure_regime_atr_filter_runs():
+    df = _candles(400)
+    out = indicators.structure_regime(df, atr_filter=True, atr_length=14)
+    assert len(out) == len(df)
+    assert np.isfinite(out["structural_oscillator"]).all()
+    assert out["structural_state"].isin([-2, -1, 0, 1, 2]).all()
 
 
 # ---------------------------------------------------------------------------
