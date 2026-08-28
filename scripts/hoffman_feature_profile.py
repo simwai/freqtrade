@@ -354,6 +354,18 @@ def _add_features(df: pd.DataFrame) -> pd.DataFrame:
     spbf_pb, spbf_rms = _compute_spbf(df["c1"], length1=40, length2=60, rms_length=50)
     df["spbf_pb"] = spbf_pb
     df["spbf_rms"] = spbf_rms
+
+    # SMMA EMA Dual MA Convergence gate (component defaults 15/25/5, the same
+    # parameterization SuperKeltnerConvergenceStrategy uses).
+    try:
+        from user_data.strategies.components.indicators import ma_convergence
+
+        conv = ma_convergence(df["close"], ema_length=15, smma_length=25, lookback=5)
+        df["dc_long_allowed"] = conv["is_long_allowed"].to_numpy()
+        df["dc_short_allowed"] = conv["is_short_allowed"].to_numpy()
+    except ImportError:
+        df["dc_long_allowed"] = False
+        df["dc_short_allowed"] = False
     return df
 
 
@@ -376,7 +388,18 @@ def _match_trades_to_setups(
     # diagnostic can derive the proposed entry/stop without re-running the
     # strategy's state machine.
     setup_idx = setup_idx.set_index("irb_tag")[
-        ["date", "high", "low", "h1", "l1", "spbf_pb", "spbf_rms"] + [f.name for f in FEATURES]
+        [
+            "date",
+            "high",
+            "low",
+            "h1",
+            "l1",
+            "spbf_pb",
+            "spbf_rms",
+            "dc_long_allowed",
+            "dc_short_allowed",
+        ]
+        + [f.name for f in FEATURES]
     ]
     base_seconds = timeframe_to_seconds("5m")
     rows: list[dict[str, Any]] = []
@@ -443,6 +466,11 @@ def _match_trades_to_setups(
                 **{f.name: setup_idx.loc[tag, f.name] for f in FEATURES},
                 "spbf_pb": setup_idx.loc[tag, "spbf_pb"],
                 "spbf_rms": setup_idx.loc[tag, "spbf_rms"],
+                "dc_allowed": bool(
+                    setup_idx.loc[tag, "dc_short_allowed"]
+                    if trade.get("is_short")
+                    else setup_idx.loc[tag, "dc_long_allowed"]
+                ),
             }
         )
     return pd.DataFrame(rows), dropped
@@ -1024,6 +1052,29 @@ def _print_trade_diagnostics(  # noqa: C901
                 winrate = avg_pnl = total_pnl = 0.0
             print(
                 f"    {group_name:>6}: n={n:>4} ({pct:5.1%})  "
+                f"winrate={_format_pct(winrate)}  "
+                f"avg_pnl={avg_pnl:+.5f}  total_pnl={total_pnl:+.4f}"
+            )
+
+    for label, period in (("discovery", disc), ("validation", val)):
+        rows = period.rows
+        if rows.empty or "dc_allowed" not in rows.columns:
+            continue
+        print()
+        print(f"[{label}]  SMMA EMA dual-convergence gate coverage at the setup bar")
+        n_total = len(rows)
+        for group_name, wanted in (("allowed", True), ("blocked", False)):
+            grp = [r for _, r in rows.iterrows() if bool(r["dc_allowed"]) is wanted]
+            n = len(grp)
+            pct = n / n_total if n_total else 0.0
+            if n:
+                winrate = sum(g["win"] for g in grp) / n
+                avg_pnl = sum(g["profit_ratio"] for g in grp) / n
+                total_pnl = sum(g["profit_ratio"] for g in grp)
+            else:
+                winrate = avg_pnl = total_pnl = 0.0
+            print(
+                f"    {group_name:>7}: n={n:>4} ({pct:5.1%})  "
                 f"winrate={_format_pct(winrate)}  "
                 f"avg_pnl={avg_pnl:+.5f}  total_pnl={total_pnl:+.4f}"
             )
