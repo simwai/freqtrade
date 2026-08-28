@@ -261,6 +261,11 @@ class WalkForwardHistoricalRunner:
             manifest["windows"].append(record)
             write_json_atomic(self.manifest_file, manifest)
 
+            # The per-window hyperopt data pickle is a re-computable cache;
+            # keeping it for 40+ windows fills multi-GB drives mid-run.
+            tickerdata = work_directory / "hyperopt_results" / "hyperopt_tickerdata.pkl"
+            tickerdata.unlink(missing_ok=True)
+
         all_results = [r for r in all_results if not r.empty]
         if not all_results:
             raise OperationalException("Walk-forward produced no out-of-sample results.")
