@@ -795,6 +795,80 @@ def test_spbf_guard_rejects_long_when_short_band_set():
     assert not result["irb_enter_long"].iloc[50:75].any()
 
 
+# ---------------------------------------------------------------------------
+# EMA pullback confirmation (IRB candle touches the base EMA)
+# ---------------------------------------------------------------------------
+def test_ema_pullback_disabled_by_default():
+    strategy = _strategy()
+    assert strategy.pullback_ema_touch is False
+    assert strategy.pullback_ema_atr_tol == 0.0
+    # Guard off: any distance passes.
+    assert strategy._ema_pullback_ok("long", l1=90.0, ema=95.0, atr=2.0)
+    assert strategy._ema_pullback_ok("short", h1=110.0, ema=95.0, atr=2.0)
+
+
+def test_ema_pullback_touch_allows_long():
+    strategy = _strategy()
+    strategy.pullback_ema_touch = True
+    # Setup candle's low pierced the EMA (l1=90 <= ema=95), close above.
+    assert strategy._ema_pullback_ok("long", l1=90.0, ema=95.0, atr=2.0)
+    # Low above the EMA + zero tolerance: no touch -> reject.
+    assert strategy._ema_pullback_ok("long", l1=96.0, ema=95.0, atr=2.0) is False
+
+
+def test_ema_pullback_touch_allows_short():
+    strategy = _strategy()
+    strategy.pullback_ema_touch = True
+    # Setup candle's high pierced the EMA from below (h1=110 >= ema=95).
+    assert strategy._ema_pullback_ok("short", h1=110.0, ema=95.0, atr=2.0)
+    assert strategy._ema_pullback_ok("short", h1=94.0, ema=95.0, atr=2.0) is False
+
+
+def test_ema_pullback_atr_tolerance():
+    strategy = _strategy()
+    strategy.pullback_ema_touch = True
+    strategy.pullback_ema_atr_tol = 0.5
+    # Long: low within 0.5 ATR above the EMA counts as a pullback (2*0.5=1.0).
+    assert strategy._ema_pullback_ok("long", l1=95.8, ema=95.0, atr=2.0)
+    # One ATR above: outside tolerance.
+    assert strategy._ema_pullback_ok("long", l1=97.5, ema=95.0, atr=2.0) is False
+    # Short mirrors: high within tolerance below the EMA.
+    assert strategy._ema_pullback_ok("short", h1=94.2, ema=95.0, atr=2.0)
+
+
+def test_ema_pullback_blocks_long_in_state_machine():
+    df = _state_df()
+    df["ema"] = 99.0
+    # Setup candle low (l1 at the setup bar) stays above the EMA -> no touch.
+    df.loc[50, "l1"] = 99.5
+    df.loc[50, "irb_bear"] = True  # long setup
+    df.loc[52, "high"] = 101.0
+    df.loc[52, "low"] = 95.0
+
+    strategy = _strategy()
+    strategy.pullback_ema_touch = True
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    assert not result["irb_enter_long"].iloc[50:75].any()
+    assert result["irb_tag"].iloc[50:75].isna().all()
+
+
+def test_ema_pullback_allows_long_when_touched():
+    df = _state_df()
+    df["ema"] = 99.0
+    # Setup candle low pierces the EMA exactly -> touch counts.
+    df.loc[50, "l1"] = 99.0
+    df.loc[50, "irb_bear"] = True
+    df.loc[52, "high"] = 101.0
+    df.loc[52, "low"] = 95.0
+
+    strategy = _strategy()
+    strategy.pullback_ema_touch = True
+    result = strategy._build_signals(df.copy(), "BTC/USDT:USDT")
+
+    assert result["irb_enter_long"].iloc[50]
+
+
 def test_spbf_guard_allows_long_when_pb_above_rms():
     df = _state_df()
     df["spbf_pb"] = 2.0  # above the upper band
