@@ -299,6 +299,14 @@ max-complexity = 12
   "S106",  # Possible hardcoded password assigned to argument: "token_type"
   "S110",  # `try`-`except`-`pass` detected, consider logging the exception
   ]
+"user_data/tests/**.py" = [
+  "S101",  # allow assert in tests
+  "S104",  #  Possible binding to all interfaces
+  "S311",  # Standard pseudo-random generators are not suitable for cryptographic purposes
+  "S105",  # Possible hardcoded password assigned to: "secret"
+  "S106",  # Possible hardcoded password assigned to argument: "token_type"
+  "S110",  # `try`-`except`-`pass` detected, consider logging the exception
+  ]
 
 "freqtrade/templates/**.py" = [
   "RUF100",  # Allow unused noqa
