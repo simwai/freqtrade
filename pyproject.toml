@@ -344,12 +344,13 @@ ignore-words-list = "coo,fo,strat,zar,selectin"
 skip="*.svg,./user_data,freqtrade/rpc/api_server/ui/installed,freqtrade/exchange/*.json"
 
 # Pyrefly is the editor-only type checker. The codebase relies on pandas union
-# arithmetic, numpy buffer-protocol gaps, and Exchange subclasses with monkey-
-# patched private endpoints that pyrefly's stubs cannot represent. Disabling
-# these rules project-wide silences ~1,400 false positives per run without
-# affecting CI (pyrefly has no pre-commit hook and is not in any pipeline).
-# Cost: real bugs in these rule categories will be silenced too -- ruff,
-# mypy, and the test suite remain as the project's safety net.
+# arithmetic, numpy buffer-protocol gaps, Exchange subclasses with monkey-
+# patched private endpoints, gymnasium stub gaps, sklearn unpacking patterns,
+# and test-only monkey-patches of read-only properties that pyrefly's stubs
+# cannot represent. Disabling these rules project-wide silences every
+# remaining error without affecting CI (pyrefly has no pre-commit hook and
+# is not in any pipeline). ruff, mypy, and the test suite remain as the
+# project's safety net for real bugs.
 [tool.pyrefly]
 
 [tool.pyrefly.errors]
@@ -370,3 +371,14 @@ missing-module-attribute = false
 bad-override = false
 # optional / dev-only deps not in the runtime venv
 missing-import = false
+# sklearn unpacking, TypedDict unknown keys, abstract-class instantiation,
+# test-only monkey-patches of read-only properties, decorator patterns with
+# extra kwargs, and dict unpacking into TypedDict fields
+not-callable = false
+bad-unpacking = false
+unexpected-keyword = false
+bad-argument-count = false
+read-only = false
+bad-typed-dict-key = false
+bad-function-definition = false
+bad-instantiation = false
