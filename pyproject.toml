@@ -342,3 +342,21 @@ exclude = [
 [tool.codespell]
 ignore-words-list = "coo,fo,strat,zar,selectin"
 skip="*.svg,./user_data,freqtrade/rpc/api_server/ui/installed,freqtrade/exchange/*.json"
+
+# Pyrefly is the editor-only type checker. The `sub-config` below silences
+# false-positive noise in `orderflow.py` where `bid`/`ask` columns are
+# initialized to `np.nan` (a wide union) and pandas cell arithmetic
+# (`dataframe.at[index, ...] - dataframe.at[index, ...]`) widens the
+# operator's element type to ~20 arms, making the `-` overload unresolvable.
+# Disabling `unsupported-operation`, `bad-return`, and `missing-attribute`
+# here silences the pandas-stub noise without weakening type coverage
+# anywhere else in the project.
+[tool.pyrefly]
+
+[[tool.pyrefly.sub-config]]
+matches = "freqtrade/data/converter/orderflow.py"
+
+[tool.pyrefly.sub-config.errors]
+unsupported-operation = false
+bad-return = false
+missing-attribute = false
