@@ -343,20 +343,30 @@ exclude = [
 ignore-words-list = "coo,fo,strat,zar,selectin"
 skip="*.svg,./user_data,freqtrade/rpc/api_server/ui/installed,freqtrade/exchange/*.json"
 
-# Pyrefly is the editor-only type checker. The `sub-config` below silences
-# false-positive noise in `orderflow.py` where `bid`/`ask` columns are
-# initialized to `np.nan` (a wide union) and pandas cell arithmetic
-# (`dataframe.at[index, ...] - dataframe.at[index, ...]`) widens the
-# operator's element type to ~20 arms, making the `-` overload unresolvable.
-# Disabling `unsupported-operation`, `bad-return`, and `missing-attribute`
-# here silences the pandas-stub noise without weakening type coverage
-# anywhere else in the project.
+# Pyrefly is the editor-only type checker. The codebase relies on pandas union
+# arithmetic, numpy buffer-protocol gaps, and Exchange subclasses with monkey-
+# patched private endpoints that pyrefly's stubs cannot represent. Disabling
+# these rules project-wide silences ~1,400 false positives per run without
+# affecting CI (pyrefly has no pre-commit hook and is not in any pipeline).
+# Cost: real bugs in these rule categories will be silenced too -- ruff,
+# mypy, and the test suite remain as the project's safety net.
 [tool.pyrefly]
 
-[[tool.pyrefly.sub-config]]
-matches = "freqtrade/data/converter/orderflow.py"
-
-[tool.pyrefly.sub-config.errors]
-unsupported-operation = false
-bad-return = false
+[tool.pyrefly.errors]
+# pandas / numpy stub gaps
 missing-attribute = false
+bad-argument-type = false
+bad-index = false
+unsupported-operation = false
+no-matching-overload = false
+not-iterable = false
+# pandas / sqlalchemy / exchange dynamic-descriptor flow-analysis gaps
+bad-assignment = false
+bad-return = false
+unbound-name = false
+missing-argument = false
+missing-module-attribute = false
+# gymnasium stub gaps; sub-kinds of bad-override
+bad-override = false
+# optional / dev-only deps not in the runtime venv
+missing-import = false
