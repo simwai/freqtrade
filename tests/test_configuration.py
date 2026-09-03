@@ -20,6 +20,7 @@ from freqtrade.configuration.deprecated_settings import (
 )
 from freqtrade.configuration.environment_vars import _flat_vars_to_nested_dict
 from freqtrade.configuration.load_config import (
+    _resolve_config_path,
     load_config_file,
     load_file,
     load_from_files,
@@ -115,6 +116,56 @@ def test_load_config_file_error_range(default_conf, mocker, caplog) -> None:
 
     x = log_config_error_range("-", "")
     assert x == ""
+
+
+def test_resolve_config_path_absolute(tmp_path):
+    # Absolute paths are returned as-is, user_data_dir is ignored.
+    abs_cfg = tmp_path / "config.json"
+    abs_cfg.write_text("{}")
+    assert _resolve_config_path(str(abs_cfg), tmp_path / "user_data") == abs_cfg
+    assert _resolve_config_path(str(abs_cfg), None) == abs_cfg
+
+
+def test_resolve_config_path_cwd_wins(tmp_path, monkeypatch):
+    # When the bare relative name exists in cwd, cwd wins and user_data is
+    # not consulted (preserves current behavior; no INFO log on cwd hit).
+    cwd_cfg = tmp_path / "config.json"
+    user_data = tmp_path / "user_data"
+    user_data.mkdir()
+    user_data_cfg = user_data / "config.json"
+    cwd_cfg.write_text("{}")
+    user_data_cfg.write_text("{}")
+    monkeypatch.chdir(tmp_path)
+    result = _resolve_config_path("config.json", user_data)
+    assert result.resolve() == cwd_cfg.resolve()
+
+
+def test_resolve_config_path_user_data_fallback(tmp_path, monkeypatch, caplog):
+    # Cwd miss + user_data hit -> fallback fires, INFO log emitted.
+    cwd = tmp_path / "empty_cwd"
+    cwd.mkdir()
+    user_data = tmp_path / "user_data"
+    user_data.mkdir()
+    user_data_cfg = user_data / "config.json"
+    user_data_cfg.write_text("{}")
+    monkeypatch.chdir(cwd)
+    with caplog.at_level("INFO"):
+        result = _resolve_config_path("config.json", user_data)
+    assert result == user_data_cfg
+    assert any("Config file resolved via user_data_dir" in r.message for r in caplog.records)
+
+
+def test_resolve_config_path_neither_exists(tmp_path, monkeypatch):
+    # Both miss -> original (non-existent) Path returned; load_config_file
+    # will raise FileNotFoundError downstream, which becomes OperationalException.
+    cwd = tmp_path / "empty_cwd"
+    cwd.mkdir()
+    user_data = tmp_path / "user_data"
+    user_data.mkdir()
+    monkeypatch.chdir(cwd)
+    result = _resolve_config_path("missing.json", user_data)
+    assert result == Path("missing.json")
+    assert not result.exists()
 
 
 def test_load_file_error(tmp_path):
