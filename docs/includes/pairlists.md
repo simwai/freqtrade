@@ -26,6 +26,7 @@ You may also use something like `.*DOWN/BTC` or `.*UP/BTC` to exclude leveraged 
 * [`ProducerPairList`](#producerpairlist)
 * [`RemotePairList`](#remotepairlist)
 * [`MarketCapPairList`](#marketcappairlist)
+* [`CorrelationPairList`](#correlationpairlist)
 * [`AgeFilter`](#agefilter)
 * [`FullTradesFilter`](#fulltradesfilter)
 * [`OffsetFilter`](#offsetfilter)
@@ -395,6 +396,67 @@ If an incorrect category string is chosen, the plugin will print the available c
 
 !!! Danger "Duplicate symbols in coingecko"
     Coingecko often has duplicate symbols, where the same symbol is used for different coins. Freqtrade will use the symbol as is and try to search for it on the exchange. If the symbol exists - it will be used. Freqtrade will however not check if the _intended_ symbol is the one coingecko meant. This can sometimes lead to unexpected results, especially on low volume coins or with meme coin categories.
+
+#### CorrelationPairList
+
+`CorrelationPairList` is a filter that automatically discovers and adds pairs highly correlated to your base pairlist. It calculates Pearson correlation coefficients on historical close prices and expands the whitelist with correlated pairs above a configurable threshold.
+
+This is useful for strategies that benefit from trading correlated assets (e.g., statistical arbitrage, pairs trading, or strategies that perform well on correlated markets).
+
+**Configuration Options**
+
+* `correlation_threshold`: Minimum Pearson correlation coefficient (0.0 to 1.0) to include a pair. Default: `0.7`
+* `max_correlated_per_base`: Maximum number of correlated pairs to add per base pair. Default: `3`
+* `lookback_days`: Number of days of historical data to analyze. Default: `30`
+* `min_correlation_periods`: Minimum number of overlapping candles required for valid correlation. Default: `100`
+* `refresh_period`: Cache TTL in seconds for live/dry-run mode. Default: `3600` (1 hour)
+
+**Example Configuration**
+
+```json
+"pairlists": [
+    {"method": "StaticPairList"},
+    {
+        "method": "CorrelationPairList",
+        "correlation_threshold": 0.7,
+        "max_correlated_per_base": 3,
+        "lookback_days": 30,
+        "min_correlation_periods": 100,
+        "refresh_period": 3600
+    }
+],
+```
+
+In this example:
+1. `StaticPairList` provides the base pairs (e.g., BTC/USDC, ETH/USDC)
+2. `CorrelationPairList` finds pairs correlated to each base pair
+3. For BTC/USDC, it might add ETH/USDC, XRP/USDC, SOL/USDC (if correlation ≥ 0.7)
+4. For ETH/USDC, it might add BTC/USDC, ADA/USDC, DOGE/USDC (if correlation ≥ 0.7)
+5. Duplicates are automatically removed, preserving the order of first appearance
+
+**How it works**
+
+1. Loads historical close price data for all active markets matching your stake currency
+2. Calculates returns (percentage change) for each pair
+3. Computes Pearson correlation matrix across all pairs
+4. For each base pair in the incoming pairlist, selects top N correlated pairs above the threshold
+5. Adds discovered pairs to the whitelist (deduplicated)
+
+**Backtesting Support**
+
+`CorrelationPairList` fully supports backtesting mode (`SupportsBacktesting.YES`). During backtesting, it uses the same historical data loaded by the backtesting engine, ensuring no lookahead bias. The correlation is calculated on the full timerange available for backtesting.
+
+**Live/Dry-run Mode**
+
+In live and dry-run modes, the pairlist fetches recent OHLCV data for all stake-currency pairs using the exchange's `get_historic_ohlcv` method. Results are cached for `refresh_period` seconds to avoid excessive API calls.
+
+**Notes**
+
+* Only pairs with the same stake currency as configured are considered
+* Only the strategy's timeframe is used for correlation calculation
+* Discovered correlated pairs respect the pair blacklist (filtered by PairListManager)
+* Minimum `min_correlation_periods` overlapping candles are required for a valid correlation
+* The filter must be placed after a pairlist generator (e.g., StaticPairList) in the chain
 
 #### AgeFilter
 
