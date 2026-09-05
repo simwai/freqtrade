@@ -1,4 +1,5 @@
 # pragma pylint: disable=missing-docstring,W0212,C0103
+import sys
 from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
@@ -7,6 +8,7 @@ from unittest.mock import ANY, MagicMock, PropertyMock
 import pandas as pd
 import pytest
 from filelock import Timeout
+from joblib.externals import cloudpickle
 from skopt.space import Integer
 
 from freqtrade.commands.optimize_commands import setup_optimize_configuration, start_hyperopt
@@ -1114,6 +1116,16 @@ def test_in_strategy_auto_hyperopt_with_parallel(mocker, hyperopt_conf, tmp_path
             "fee": fee.return_value,
         }
     )
+
+    # Ensure the test strategy module is importable in worker processes.
+    # The strategy is defined in tests/strategy/strats/hyperoptable_strategy.py
+    # and needs to be in sys.path and registered with cloudpickle for pickling to work.
+    strategy_dir = Path(__file__).parent.parent / "strategy" / "strats"
+    sys.path.insert(0, str(strategy_dir))
+    import hyperoptable_strategy  # noqa: F401
+
+    cloudpickle.register_pickle_by_value(sys.modules["hyperoptable_strategy"])
+
     hyperopt = Hyperopt(hyperopt_conf)
     opt = hyperopt.hyperopter
     opt.backtesting.exchange.get_max_leverage = lambda *x, **xx: 1.0
