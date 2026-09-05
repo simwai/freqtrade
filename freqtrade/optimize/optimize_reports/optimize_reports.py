@@ -91,12 +91,7 @@ def _generate_result_line(
     expectancy, expectancy_ratio = calculate_expectancy(result)
     winning_profit = result.loc[result["profit_abs"] > 0, "profit_abs"].sum()
     losing_profit = result.loc[result["profit_abs"] < 0, "profit_abs"].sum()
-    if winning_profit > 0 and losing_profit == 0:
-        profit_factor = float("inf")
-    elif losing_profit:
-        profit_factor = winning_profit / abs(losing_profit)
-    else:
-        profit_factor = 0.0
+    profit_factor = winning_profit / abs(losing_profit) if losing_profit else 0.0
 
     try:
         drawdown = calculate_max_drawdown(
@@ -285,12 +280,7 @@ def generate_periodic_breakdown_stats(
         trades = wins + draws + losses
         winning_profit = day.loc[day["profit_abs"] > 0, "profit_abs"].sum()
         losing_profit = day.loc[day["profit_abs"] < 0, "profit_abs"].sum()
-        if winning_profit > 0 and losing_profit == 0:
-            profit_factor = float("inf")
-        elif losing_profit:
-            profit_factor = winning_profit / abs(losing_profit)
-        else:
-            profit_factor = 0.0
+        profit_factor = winning_profit / abs(losing_profit) if losing_profit else 0.0
         stats.append(
             {
                 "date": name.strftime("%d/%m/%Y"),
@@ -512,12 +502,7 @@ def generate_strategy_stats(
     )
     winning_profit = results.loc[results["profit_abs"] > 0, "profit_abs"].sum()
     losing_profit = results.loc[results["profit_abs"] < 0, "profit_abs"].sum()
-    if winning_profit > 0 and losing_profit == 0:
-        profit_factor = float("inf")
-    elif losing_profit:
-        profit_factor = winning_profit / abs(losing_profit)
-    else:
-        profit_factor = 0.0
+    profit_factor = winning_profit / abs(losing_profit) if losing_profit else 0.0
 
     expectancy, expectancy_ratio = calculate_expectancy(results)
     backtest_days = (max_date - min_date).days or 1

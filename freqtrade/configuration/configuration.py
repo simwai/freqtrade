@@ -74,16 +74,8 @@ class Configuration:
         Extract information for sys.argv and load the bot configuration
         :return: Configuration dictionary
         """
-        # Pre-resolve user_data_dir so config-file lookup can fall back to it
-        # when a bare relative --config path doesn't exist in cwd.
-        _args_udd = self.args.get("user_data_dir")
-        _user_data_dir = Path(_args_udd) if _args_udd else Path.cwd() / "user_data"
-
         # Load all configs
-        config: Config = load_from_files(
-            self.args.get("config", []),
-            user_data_dir=_user_data_dir,
-        )
+        config: Config = load_from_files(self.args.get("config", []))
 
         # Load environment variables
         from freqtrade.commands.arguments import NO_CONF_ALLOWED

@@ -55,29 +55,10 @@ def start_backtesting(args: dict[str, Any]) -> None:
     config = setup_optimize_configuration(args, RunMode.BACKTEST)
 
     logger.info("Starting freqtrade in Backtesting mode")
-    # why: WARNING so it surfaces in the logfile even when verbosity=error; INFO
-    # gets suppressed and the logfile would otherwise be empty between init and result.
-    pair_list = config.get("pairs") or config.get("exchange", {}).get("pair_whitelist") or []
-    strat_list = config.get("strategies") or (
-        [config["strategy"]] if config.get("strategy") else []
-    )
-    logger.warning(
-        "Backtest inputs: timerange=%s, pairs=%d, strategies=%s",
-        config.get("timerange", "n/a"),
-        len(pair_list),
-        strat_list,
-    )
 
     # Initialize backtesting object
     backtesting = Backtesting(config)
-    try:
-        backtesting.start()
-    except Exception:
-        # why: flush all logging handlers (notably the RotatingFileHandler) so a
-        # post-mortem traceback lands on disk even if the process is about to exit.
-        # re-raise so main.py's logger.exception("Fatal exception!") still runs.
-        logging.shutdown()
-        raise
+    backtesting.start()
 
 
 def start_backtesting_show(args: dict[str, Any]) -> None:

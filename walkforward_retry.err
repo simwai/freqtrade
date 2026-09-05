@@ -1,0 +1,177 @@
+2026-09-04 18:34:48,642 - freqtrade - INFO - freqtrade 2025.4-dev-bb0639f9e
+2026-09-04 18:34:49,240 - freqtrade.configuration.load_config - INFO - Using config: M:\Documents\Programming\Python\freqtrade\user_data\config_benchmark.json ...
+2026-09-04 18:34:49,243 - freqtrade.loggers - INFO - Enabling colorized output.
+2026-09-04 18:34:49,244 - root - INFO - Logfile configured
+2026-09-04 18:34:49,246 - freqtrade.loggers - INFO - Verbosity set to 2
+2026-09-04 18:34:49,247 - freqtrade.configuration.configuration - INFO - Using max_open_trades: 6 ...
+2026-09-04 18:34:49,248 - freqtrade.configuration.configuration - INFO - Parameter --timerange detected: 20190908-20260830 ...
+2026-09-04 18:34:49,250 - freqtrade.configuration.configuration - INFO - Using user-data directory: M:\Documents\Programming\Python\freqtrade\user_data ...
+2026-09-04 18:34:49,252 - freqtrade.configuration.configuration - INFO - Using data directory: M:\Documents\Programming\Python\freqtrade\user_data\data\binance ...
+2026-09-04 18:34:49,253 - freqtrade.configuration.configuration - INFO - Parameter --epochs detected ... Will run Hyperopt with for 100 epochs ...
+2026-09-04 18:34:49,253 - freqtrade.configuration.configuration - INFO - Parameter -s/--spaces detected: ['buy', 'sell', 'roi', 'stoploss', 'trailing']
+2026-09-04 18:34:49,255 - freqtrade.configuration.configuration - INFO - Parameter -j/--job-workers detected: -1
+2026-09-04 18:34:49,256 - freqtrade.configuration.configuration - INFO - Parameter --min-trades detected: 1
+2026-09-04 18:34:49,257 - freqtrade.configuration.configuration - INFO - Using Hyperopt loss class name: SharpeHyperOptLossDaily
+2026-09-04 18:34:49,258 - freqtrade.configuration.configuration - INFO - Filter trades by timerange: 20190908-20260830
+2026-09-04 18:34:49,261 - freqtrade.exchange.check_exchange - INFO - Checking exchange...
+2026-09-04 18:34:49,267 - freqtrade.exchange.check_exchange - INFO - Exchange "binance" is officially supported by the Freqtrade development team.
+2026-09-04 18:34:49,269 - freqtrade.configuration.configuration - INFO - Using pairlist from configuration.
+2026-09-04 18:34:49,270 - freqtrade.configuration.config_validation - INFO - Validating configuration ...
+2026-09-04 18:34:49,273 - freqtrade.commands.optimize_commands - INFO - Starting freqtrade in Walk-forward mode
+2026-09-04 18:34:49,277 - freqtrade.exchange.exchange - INFO - Instance is running with dry_run enabled
+2026-09-04 18:34:49,278 - freqtrade.exchange.exchange - INFO - Using CCXT 4.4.75
+2026-09-04 18:34:49,279 - freqtrade.exchange.exchange - INFO - Applying additional ccxt config: {'options': {'defaultType': 'swap'}}
+2026-09-04 18:34:49,285 - freqtrade.exchange.exchange - INFO - Applying additional ccxt config: {'options': {'defaultType': 'swap'}}
+2026-09-04 18:34:49,293 - freqtrade.exchange.exchange - INFO - Using Exchange "Binance"
+2026-09-04 18:34:49,294 - freqtrade.exchange.exchange - DEBUG - Performing scheduled market reload..
+2026-09-04 18:34:50,919 - freqtrade.resolvers.exchange_resolver - INFO - Using resolved exchange 'Binance'...
+2026-09-04 18:34:50,926 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__'
+2026-09-04 18:34:50,927 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerDpoBbwpWick.cpython-311.pyc
+2026-09-04 18:34:50,929 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerDpoEveningStar.cpython-311.pyc
+2026-09-04 18:34:50,930 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerDpoShootingStar.cpython-311.pyc
+2026-09-04 18:34:50,931 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerRank1RocVixAdLondon.cpython-311.pyc
+2026-09-04 18:34:50,932 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerRank4RsiChopPvtNy.cpython-311.pyc
+2026-09-04 18:34:50,933 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__'
+2026-09-04 18:34:50,934 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\OctopusNestStrategy.cpython-310.pyc
+2026-09-04 18:34:50,936 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\OctopusNestStrategy.cpython-311.pyc
+2026-09-04 18:34:50,937 - freqtrade.resolvers.iresolver - DEBUG - Ignoring 
+M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SuperKeltnerConvergenceStrategy.cpython-310.pyc
+2026-09-04 18:34:50,938 - freqtrade.resolvers.iresolver - DEBUG - Ignoring 
+M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SuperKeltnerConvergenceStrategy.cpython-311.pyc
+2026-09-04 18:34:50,940 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SuperKeltnerStrategy.cpython-310.pyc
+2026-09-04 18:34:50,941 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SuperKeltnerStrategy.cpython-311.pyc
+2026-09-04 18:34:50,942 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SupertrendKeltner.cpython-310.pyc
+2026-09-04 18:34:50,943 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SupertrendKeltner.cpython-311.pyc
+2026-09-04 18:34:50,944 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\TrendOMaticNadarayaBaseline.cpython-311.pyc
+2026-09-04 18:34:50,946 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\TrendOMaticStrategy.cpython-310.pyc
+2026-09-04 18:34:50,947 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\TrendOMaticStrategy.cpython-311.pyc
+2026-09-04 18:34:50,948 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\TrendOMaticSweep.cpython-311.pyc
+2026-09-04 18:34:50,949 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend'
+2026-09-04 18:34:50,950 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\OctopusNestStrategy.backup.json
+2026-09-04 18:34:50,951 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\OctopusNestStrategy.json
+2026-09-04 18:34:51,105 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__
+2026-09-04 18:34:51,107 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__'
+2026-09-04 18:34:51,108 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__\HybridRegimeSwitcher.cpython-310.pyc
+2026-09-04 18:34:51,110 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__\HybridRegimeSwitcher.cpython-311.pyc
+2026-09-04 18:34:51,111 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__\LuxAlgo15mBTCLowRisk.cpython-310.pyc
+2026-09-04 18:34:51,113 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__\LuxAlgo15mBTCLowRisk.cpython-311.pyc
+2026-09-04 18:34:51,116 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime'
+2026-09-04 18:34:51,118 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__
+2026-09-04 18:34:51,120 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\pattern'
+2026-09-04 18:34:51,121 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\pattern\.gitkeep
+2026-09-04 18:34:51,122 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\pattern\README.md
+2026-09-04 18:34:51,123 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\ml'
+2026-09-04 18:34:51,125 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\ml\.gitkeep
+2026-09-04 18:34:51,126 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\ml\README.md
+2026-09-04 18:34:51,128 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__'
+2026-09-04 18:34:51,128 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__\GkdAdaptive.cpython-310.pyc
+2026-09-04 18:34:51,129 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__\GkdAdaptive.cpython-311.pyc
+2026-09-04 18:34:51,131 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__\strategy_gkd_academic_final.cpython-310.pyc
+2026-09-04 18:34:51,132 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__\strategy_gkd_academic_final.cpython-311.pyc
+2026-09-04 18:34:51,133 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd'
+2026-09-04 18:34:51,135 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\regime_map_academic.json
+2026-09-04 18:34:51,137 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__
+2026-09-04 18:34:51,139 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__'
+2026-09-04 18:34:51,140 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\adaptive.cpython-310.pyc
+2026-09-04 18:34:51,141 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\adaptive.cpython-311.pyc
+2026-09-04 18:34:51,142 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\MfiEmaWaveTrend.cpython-310.pyc
+2026-09-04 18:34:51,143 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\MfiEmaWaveTrend.cpython-311.pyc
+2026-09-04 18:34:51,144 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\MfiEmaWaveTrend2.cpython-310.pyc
+2026-09-04 18:34:51,146 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\MfiEmaWaveTrend2.cpython-311.pyc
+2026-09-04 18:34:51,147 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\NadarayaWatson.cpython-310.pyc
+2026-09-04 18:34:51,148 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\NadarayaWatson.cpython-311.pyc
+2026-09-04 18:34:51,149 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\VixFixBb.cpython-310.pyc
+2026-09-04 18:34:51,150 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\VixFixBb.cpython-311.pyc
+2026-09-04 18:34:51,151 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\VixFixMultiLab.cpython-310.pyc
+2026-09-04 18:34:51,152 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\VixFixMultiLab.cpython-311.pyc
+2026-09-04 18:34:51,153 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\WildersVolatility.cpython-310.pyc
+2026-09-04 18:34:51,154 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\WildersVolatility.cpython-311.pyc
+2026-09-04 18:34:51,155 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\WildersVolatilityBingAi.cpython-310.pyc
+2026-09-04 18:34:51,157 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\WildersVolatilityBingAi.cpython-311.pyc
+2026-09-04 18:34:51,158 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip'
+2026-09-04 18:34:51,171 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\MfiEmaWaveTrend2.json
+2026-09-04 18:34:51,174 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\NadarayaWatson.json
+2026-09-04 18:34:51,183 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__
+2026-09-04 18:34:51,185 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__'
+2026-09-04 18:34:51,185 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__\ExampleComponentStrategy.cpython-310.pyc
+2026-09-04 18:34:51,186 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__\ExampleComponentStrategy.cpython-311.pyc
+2026-09-04 18:34:51,187 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__\StrategyTemplateV21.cpython-310.pyc
+2026-09-04 18:34:51,188 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__\StrategyTemplateV21.cpython-311.pyc
+2026-09-04 18:34:51,191 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo'
+2026-09-04 18:34:51,193 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__
+2026-09-04 18:34:51,195 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\debug\__pycache__'
+2026-09-04 18:34:51,196 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\debug'
+2026-09-04 18:34:51,197 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\debug\__pycache__
+2026-09-04 18:34:51,198 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 
+'M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__'
+2026-09-04 18:34:51,199 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\ehlers.cpython-310.pyc
+2026-09-04 18:34:51,200 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\ehlers.cpython-311.pyc
+2026-09-04 18:34:51,202 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\exit_levels.cpython-310.pyc
+2026-09-04 18:34:51,203 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\exit_levels.cpython-311.pyc
+2026-09-04 18:34:51,204 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\filters.cpython-311.pyc
+2026-09-04 18:34:51,205 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\indicators.cpython-311.pyc
+2026-09-04 18:34:51,206 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\indicators_combo_engine.cpython-311.pyc
+2026-09-04 18:34:51,208 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\indicators_pandas_ta.cpython-311.pyc
+2026-09-04 18:34:51,209 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\loss_streak_lock.cpython-311.pyc
+2026-09-04 18:34:51,210 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\risk.cpython-311.pyc
+2026-09-04 18:34:51,211 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\signals.cpython-311.pyc
+2026-09-04 18:34:51,212 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\strategy_base.cpython-311.pyc
+2026-09-04 18:34:51,213 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\_recursive_check.cpython-311.pyc
+2026-09-04 18:34:51,214 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\_repaint_check.cpython-311.pyc
+2026-09-04 18:34:51,215 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\_repaint_check_core.cpython-311.pyc
+2026-09-04 18:34:51,216 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\__init__.cpython-310.pyc
+2026-09-04 18:34:51,217 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\__init__.cpython-311.pyc
+2026-09-04 18:34:51,218 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\components'
+2026-09-04 18:34:51,230 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\README.md
+2026-09-04 18:34:51,232 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\REPAINT_AUDIT_REPORT.md
+2026-09-04 18:34:51,239 - freqtrade.resolvers.iresolver - WARNING - Could not import M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\_repaint_check_core.py due to 'attempted 
+relative import with no known parent package'
+2026-09-04 18:34:51,242 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__
+2026-09-04 18:34:51,243 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__'
+2026-09-04 18:34:51,244 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__\ClucHAnix_5m.cpython-310.pyc
+2026-09-04 18:34:51,245 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__\ClucHAnix_5m.cpython-311.pyc
+2026-09-04 18:34:51,246 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__\CombinedBinHClucAndMADV3.cpython-310.pyc
+2026-09-04 18:34:51,247 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__\CombinedBinHClucAndMADV3.cpython-311.pyc
+2026-09-04 18:34:51,248 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc'
+2026-09-04 18:34:51,251 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__
+2026-09-04 18:34:51,252 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__'
+2026-09-04 18:34:51,253 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ06AtrSl.cpython-310.pyc
+2026-09-04 18:34:51,254 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ06AtrSl.cpython-311.pyc
+2026-09-04 18:34:51,255 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ06Original.cpython-310.pyc
+2026-09-04 18:34:51,257 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ06Original.cpython-311.pyc
+2026-09-04 18:34:51,258 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ07Next2.cpython-310.pyc
+2026-09-04 18:34:51,259 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ07Next2.cpython-311.pyc
+2026-09-04 18:34:51,260 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ08.cpython-310.pyc
+2026-09-04 18:34:51,261 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ08.cpython-311.pyc
+2026-09-04 18:34:51,262 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\_bigz_shared.cpython-310.pyc
+2026-09-04 18:34:51,263 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\_bigz_shared.cpython-311.pyc
+2026-09-04 18:34:51,264 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz'
+2026-09-04 18:34:51,270 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\BigZ08.json
+2026-09-04 18:34:51,273 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__
+2026-09-04 18:34:51,274 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__'
+2026-09-04 18:34:51,275 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BBModCEV1.cpython-310.pyc
+2026-09-04 18:34:51,276 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BBModCEV1.cpython-311.pyc
+2026-09-04 18:34:51,277 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BB_RPB_TSLmeneguzzo.cpython-310.pyc
+2026-09-04 18:34:51,279 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BB_RPB_TSLmeneguzzo.cpython-311.pyc
+2026-09-04 18:34:51,279 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BB_RTR.cpython-310.pyc
+2026-09-04 18:34:51,280 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BB_RTR.cpython-311.pyc
+2026-09-04 18:34:51,281 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\ichiV1.cpython-310.pyc
+2026-09-04 18:34:51,282 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\ichiV1.cpython-311.pyc
+2026-09-04 18:34:51,284 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\newstrategy53.cpython-310.pyc
+2026-09-04 18:34:51,284 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\newstrategy53.cpython-311.pyc
+2026-09-04 18:34:51,285 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\turbov8.cpython-310.pyc
+2026-09-04 18:34:51,287 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\turbov8.cpython-311.pyc
+2026-09-04 18:34:51,288 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\WildersVolatilityBingAi.cpython-310.pyc
+2026-09-04 18:34:51,289 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\WildersVolatilityBingAi.cpython-311.pyc
+2026-09-04 18:34:51,291 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad'
+2026-09-04 18:34:51,297 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__
+2026-09-04 18:34:51,298 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies'
+2026-09-04 18:34:51,300 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad
+2026-09-04 18:34:51,301 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz
+2026-09-04 18:34:51,302 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc
+2026-09-04 18:34:51,303 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\commands.txt
+2026-09-04 18:34:51,304 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components
+2026-09-04 18:34:51,305 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\debug
+2026-09-04 18:34:51,306 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo
+2026-09-04 18:34:51,307 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip
+2026-09-04 18:34:51,308 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd

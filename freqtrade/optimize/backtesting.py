@@ -434,25 +434,11 @@ class Backtesting:
         data: dict = {}
         self.progress.init_step(BacktestState.CONVERT, len(processed))
 
-        # why: parallel log-side heartbeat so the logfile gains a progress trail even
-        # when the rich progress bar is invisible (closed terminal, piped output, log
-        # scraped later). One modulo per pair, negligible cost.
-        total_pairs = len(processed)
-        _heartbeat_step = max(1, total_pairs // 20)  # ~5% increments
-
         # Create dict with data
-        for pair_idx, pair in enumerate(processed.keys(), start=1):
+        for pair in processed.keys():
             pair_data = processed[pair]
             self.check_abort()
             self.progress.increment()
-
-            if pair_idx % _heartbeat_step == 0 or pair_idx == total_pairs:
-                logger.info(
-                    "Backtest convert progress: %d/%d pairs (%.1f%%)",
-                    pair_idx,
-                    total_pairs,
-                    100.0 * pair_idx / total_pairs,
-                )
 
             if not pair_data.empty:
                 # Cleanup from prior runs
@@ -490,7 +476,6 @@ class Backtesting:
             # Convert from Pandas to list for performance reasons
             # (Looping Pandas is slow.)
             data[pair] = df_analyzed[HEADERS].values.tolist() if not df_analyzed.empty else []
-        logger.info("Backtest convert complete: %d pairs converted to lists", total_pairs)
         return data
 
     def _get_close_rate(

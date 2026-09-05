@@ -51,22 +51,6 @@ def load_file(path: Path) -> dict[str, Any]:
     return config
 
 
-def _resolve_config_path(filename: str, user_data_dir: Path | None) -> Path:
-    """
-    Resolve a config file path. Tries the filename as-given first, then
-    falls back to user_data_dir when the filename is a bare relative name.
-    """
-    candidate = Path(filename)
-    if candidate.is_absolute() or candidate.exists():
-        return candidate
-    if user_data_dir is not None and not filename.startswith(("/", "\\")):
-        fallback = user_data_dir / filename
-        if fallback.exists():
-            logger.info("Config file resolved via user_data_dir: %s", fallback)
-            return fallback
-    return candidate
-
-
 def load_config_file(path: str) -> dict[str, Any]:
     """
     Loads a config file from the given path
@@ -94,10 +78,7 @@ def load_config_file(path: str) -> dict[str, Any]:
 
 
 def load_from_files(
-    files: list[str],
-    base_path: Path | None = None,
-    level: int = 0,
-    user_data_dir: Path | None = None,
+    files: list[str], base_path: Path | None = None, level: int = 0
 ) -> dict[str, Any]:
     """
     Recursively load configuration files if specified.
@@ -120,18 +101,11 @@ def load_from_files(
         if base_path:
             # Prepend basepath to allow for relative assignments
             file = base_path / file
-        else:
-            # why: bare relative config paths also resolve under user_data_dir
-            # so users can run from the repo root without typing the full path.
-            # cwd-relative resolution is preserved; this is purely additive.
-            file = _resolve_config_path(filename, user_data_dir)
 
         config_tmp = load_config_file(str(file))
         if "add_config_files" in config_tmp:
             config_sub = load_from_files(
-                config_tmp["add_config_files"],
-                file.resolve().parent,
-                level + 1,
+                config_tmp["add_config_files"], file.resolve().parent, level + 1
             )
             files_loaded.extend(config_sub.get("config_files", []))
             config_tmp = deep_merge_dicts(config_tmp, config_sub)

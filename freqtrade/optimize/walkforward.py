@@ -22,11 +22,6 @@ from freqtrade.optimize.hyperopt_tools import HyperoptTools
 from freqtrade.optimize.optimize_reports import generate_strategy_stats
 from freqtrade.optimize.walk_forward_tools import (
     WalkForwardWindow,
-    _human_seconds,
-    capture_resource_snapshot,
-    compute_resource_delta,
-    estimate_daily_weekly,
-    format_resource_line,
     generate_walk_forward_windows,
     live_training_timerange,
     next_schedule,
@@ -178,7 +173,7 @@ class WalkForwardHistoricalRunner:
             "windows": [],
         }
 
-    def run(self) -> dict[str, Any]:  # noqa: C901
+    def run(self) -> dict[str, Any]:
         manifest = self._initial_manifest()
         write_json_atomic(self.manifest_file, manifest)
 
@@ -195,7 +190,6 @@ class WalkForwardHistoricalRunner:
         active_result: dict[str, Any] | None = None
         all_results: list[pd.DataFrame] = []
         content: BacktestContentTypeIcomplete | None = None
-        overall_snapshot = capture_resource_snapshot()
 
         for window in self.windows:
             logger.info(
@@ -204,14 +198,8 @@ class WalkForwardHistoricalRunner:
                 window.train_timerange,
                 window.test_timerange,
             )
-            window_snapshot_start = capture_resource_snapshot()
             work_directory = self.run_directory / f"window_{window.index:04d}"
-            hyperopt_snapshot_start = capture_resource_snapshot()
             best, result_file = _run_hyperopt(self.config, window.train, work_directory)
-            hyperopt_snapshot_end = capture_resource_snapshot()
-            hyperopt_resource = compute_resource_delta(
-                hyperopt_snapshot_start, hyperopt_snapshot_end, {"phase": "hyperopt"}
-            )
             if best is None:
                 raise OperationalException(
                     "No usable hyperopt result was produced for "
@@ -239,17 +227,12 @@ class WalkForwardHistoricalRunner:
                 raise OperationalException(
                     f"Walk-forward window {window.index} requires a finite test range."
                 )
-            backtest_snapshot_start = capture_resource_snapshot()
             content = backtesting.backtest(
                 processed,
                 test_start,
                 test_stop,
                 preserve_state=True,
                 finalize=window.index == self.windows[-1].index,
-            )
-            backtest_snapshot_end = capture_resource_snapshot()
-            backtest_resource = compute_resource_delta(
-                backtest_snapshot_start, backtest_snapshot_end, {"phase": "backtest"}
             )
             run_end = int(datetime.now(UTC).timestamp())
             segment_results = content["results"].iloc[before_count:].copy()
@@ -264,20 +247,6 @@ class WalkForwardHistoricalRunner:
                 run_end,
             )
 
-            window_snapshot_end = capture_resource_snapshot()
-            window_resource = compute_resource_delta(
-                window_snapshot_start,
-                window_snapshot_end,
-                {
-                    "hyperopt_wall_s": hyperopt_resource.get("wall_s"),
-                    "hyperopt_cpu_s": hyperopt_resource.get("cpu_total_s"),
-                    "hyperopt_peak_rss_mb": hyperopt_resource.get("peak_rss_mb"),
-                    "backtest_wall_s": backtest_resource.get("wall_s"),
-                    "backtest_cpu_s": backtest_resource.get("cpu_total_s"),
-                    "backtest_peak_rss_mb": backtest_resource.get("peak_rss_mb"),
-                },
-            )
-
             record = {
                 "index": window.index,
                 "train_timerange": window.train_timerange,
@@ -288,31 +257,9 @@ class WalkForwardHistoricalRunner:
                 else None,
                 "best": _best_snapshot(best, result_file),
                 "out_of_sample": stats,
-                "resource": window_resource,
             }
             manifest["windows"].append(record)
             write_json_atomic(self.manifest_file, manifest)
-
-            # Per-window log - keep quotable, no per-window daily estimate (too noisy).
-            try:
-                logger.info(
-                    format_resource_line(
-                        f"Walk-forward window {window.index}/{len(self.windows)} done",
-                        window_resource,
-                    )
-                )
-            except Exception:  # noqa: BLE001
-                logger.info(
-                    "Walk-forward window %s done: wall %ss, peak RSS %s MB",
-                    window.index,
-                    window_resource.get("wall_s"),
-                    window_resource.get("peak_rss_mb"),
-                )
-
-            # The per-window hyperopt data pickle is a re-computable cache;
-            # keeping it for 40+ windows fills multi-GB drives mid-run.
-            tickerdata = work_directory / "hyperopt_results" / "hyperopt_tickerdata.pkl"
-            tickerdata.unlink(missing_ok=True)
 
         all_results = [r for r in all_results if not r.empty]
         if not all_results:
@@ -345,92 +292,6 @@ class WalkForwardHistoricalRunner:
             overall_stop,
             market_change=0.0,
         )
-        # Aggregate resource summary - quotable per-day/per-week estimate.
-        try:
-            overall_snapshot_end = capture_resource_snapshot()
-            overall_resource = compute_resource_delta(overall_snapshot, overall_snapshot_end)
-            windows_resources = [w.get("resource", {}) for w in manifest["windows"]]
-            total_wall = round(sum(float(r.get("wall_s", 0) or 0) for r in windows_resources), 2)
-            total_cpu = round(
-                sum(
-                    float(r.get("cpu_total_s", 0) or 0)
-                    for r in windows_resources
-                    if r.get("cpu_total_s") is not None
-                ),
-                2,
-            )
-            avg_wall = round(total_wall / max(len(windows_resources), 1), 2)
-            avg_cpu = round(total_cpu / max(len(windows_resources), 1), 2) if total_cpu else None
-            peak_rss = max(
-                (float(r.get("peak_rss_mb", 0) or 0) for r in windows_resources), default=0
-            )
-            avg_rss = round(
-                sum(float(r.get("peak_rss_mb", 0) or 0) for r in windows_resources)
-                / max(len(windows_resources), 1),
-                2,
-            )
-            estimate = estimate_daily_weekly(
-                avg_wall, avg_cpu, avg_rss, self.settings["step_days"], total_wall
-            )
-            manifest["resource"] = {
-                "total_wall_s": total_wall,
-                "total_cpu_s": total_cpu if total_cpu else None,
-                "avg_wall_s": avg_wall,
-                "avg_cpu_s": avg_cpu,
-                "peak_rss_mb": round(float(peak_rss), 2),
-                "avg_rss_mb": avg_rss,
-                "overall_wall_s": overall_resource.get("wall_s"),
-                "overall_cpu_s": overall_resource.get("cpu_total_s"),
-                "overall_peak_rss_mb": overall_resource.get("peak_rss_mb"),
-                "cpu_count_logical": overall_resource.get("cpu_count_logical"),
-                "cpu_count_physical": overall_resource.get("cpu_count_physical"),
-                "cpu_total_ghz": overall_resource.get("cpu_total_ghz"),
-                "cpu_freq_current_mhz": overall_resource.get("cpu_freq_current_mhz"),
-                "windows": len(windows_resources),
-                "step_days": self.settings["step_days"],
-                "estimate": estimate,
-            }
-            # Human log for infra quote - keep it stakeholder-quotable.
-            logger.info(format_resource_line("Walk-forward total", manifest["resource"], estimate))
-            if estimate.get("per_day") and estimate.get("per_week"):
-                pd_est = estimate["per_day"]
-                pw_est = estimate["per_week"]
-                peak_gb = (
-                    f"{manifest['resource']['peak_rss_mb'] / 1024:.2f} GB"
-                    if manifest["resource"]["peak_rss_mb"] >= 1024
-                    else f"{manifest['resource']['peak_rss_mb']:.0f} MB"
-                )
-                avg_human = _human_seconds(float(manifest["resource"]["avg_wall_s"]))
-                total_ghz = manifest["resource"].get("cpu_total_ghz")
-                freq_mhz = manifest["resource"].get("cpu_freq_current_mhz")
-                if isinstance(total_ghz, int | float) and isinstance(freq_mhz, int | float):
-                    cores_ghz_s = (
-                        f"{manifest['resource']['cpu_count_logical']} cores"
-                        f" @ {float(freq_mhz) / 1000:.2f} GHz"
-                        f" ({float(total_ghz):.2f} GHz total)"
-                    )
-                elif isinstance(total_ghz, int | float):
-                    cores_ghz_s = (
-                        f"{manifest['resource']['cpu_count_logical']} cores"
-                        f" ({float(total_ghz):.2f} GHz total)"
-                    )
-                else:
-                    cores_ghz_s = f"{manifest['resource']['cpu_count_logical']} cores"
-                logger.info(
-                    "Walk-forward quote: avg %s/window -> ~%s/day, ~%s/week "
-                    "on %s, peak %s RAM. Historical replay total %s for %s windows.",
-                    avg_human,
-                    pd_est.get("wall_human"),
-                    pw_est.get("wall_human"),
-                    cores_ghz_s,
-                    peak_gb,
-                    estimate.get("total_measured_wall_human")
-                    or manifest["resource"]["total_wall_s"],
-                    manifest["resource"]["windows"],
-                )
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Unable to compute walk-forward resource summary: %s", exc)
-
         write_json_atomic(self.manifest_file, manifest)
 
         logger.info("Walk-forward results saved to '%s'.", self.manifest_file)
@@ -454,75 +315,9 @@ class WalkForwardLiveRunner:
         run_id = _run_id()
         run_directory = self.run_root / run_id
         logger.info("Running live walk-forward hyperopt for %s.", training_range.timerange_str)
-        live_snapshot_start = capture_resource_snapshot()
         best, result_file = _run_hyperopt(self.config, training_range, run_directory)
-        live_snapshot_end = capture_resource_snapshot()
-        live_resource = compute_resource_delta(live_snapshot_start, live_snapshot_end)
-        # Estimate per-day/per-week for live (weekly schedule => 1 run/week).
-        live_estimate = estimate_daily_weekly(
-            live_resource.get("wall_s"),
-            live_resource.get("cpu_total_s"),
-            live_resource.get("peak_rss_mb"),
-            self.settings["step_days"],
-        )
-        try:
-            logger.info(
-                format_resource_line(
-                    f"Live walk-forward run {run_id} resource", live_resource, live_estimate
-                )
-            )
-            if live_estimate.get("per_day") and live_estimate.get("per_week"):
-                pd_est = live_estimate["per_day"]
-                pw_est = live_estimate["per_week"]
-                peak_gb = (
-                    f"{live_resource.get('peak_rss_mb', 0) / 1024:.2f} GB"
-                    if (live_resource.get("peak_rss_mb") or 0) >= 1024
-                    else f"{live_resource.get('peak_rss_mb'):.0f} MB"
-                )
-                total_ghz = live_resource.get("cpu_total_ghz")
-                freq_mhz = live_resource.get("cpu_freq_current_mhz")
-                if isinstance(total_ghz, int | float) and isinstance(freq_mhz, int | float):
-                    live_cores_ghz_s = (
-                        f"{live_resource.get('cpu_count_logical')} cores"
-                        f" @ {float(freq_mhz) / 1000:.2f} GHz"
-                        f" ({float(total_ghz):.2f} GHz total)"
-                    )
-                elif isinstance(total_ghz, int | float):
-                    live_cores_ghz_s = (
-                        f"{live_resource.get('cpu_count_logical')} cores"
-                        f" ({float(total_ghz):.2f} GHz total)"
-                    )
-                else:
-                    live_cores_ghz_s = f"{live_resource.get('cpu_count_logical')} cores"
-                logger.info(
-                    "Live walk-forward quote: ~%s/day, ~%s/week (single run %s, peak %s on %s).",
-                    pd_est.get("wall_human"),
-                    pw_est.get("wall_human"),
-                    live_resource.get("wall_human"),
-                    peak_gb,
-                    live_cores_ghz_s,
-                )
-        except Exception:  # noqa: BLE001, S110
-            pass
         if best is None:
             logger.warning("No usable live walk-forward result was produced.")
-            # Still persist resource for cost tracking even on failure.
-            try:
-                state = {
-                    "last_run": {
-                        "run_id": run_id,
-                        "train_timerange": training_range.timerange_str,
-                        "failed": True,
-                        "reason": "no_result",
-                        "resource": live_resource,
-                        "estimate": live_estimate,
-                    },
-                    "pending_file": str(pending_parameter_file(self.config, self.strategy_name)),
-                    "published_at": datetime.now(UTC),
-                }
-                write_json_atomic(self.state_file, state)
-            except Exception:  # noqa: BLE001, S110
-                pass
             return None
 
         metrics = best.get("results_metrics", {})
@@ -534,22 +329,6 @@ class WalkForwardLiveRunner:
                 metrics.get("total_trades", 0),
                 min_trades,
             )
-            try:
-                state = {
-                    "last_run": {
-                        "run_id": run_id,
-                        "train_timerange": training_range.timerange_str,
-                        "failed": True,
-                        "reason": "min_trades",
-                        "resource": live_resource,
-                        "estimate": live_estimate,
-                    },
-                    "pending_file": str(pending_parameter_file(self.config, self.strategy_name)),
-                    "published_at": datetime.now(UTC),
-                }
-                write_json_atomic(self.state_file, state)
-            except Exception:  # noqa: BLE001, S110
-                pass
             return None
 
         max_drawdown = self.settings.get("max_drawdown")
@@ -559,22 +338,6 @@ class WalkForwardLiveRunner:
                 metrics.get("max_drawdown_account", 0),
                 max_drawdown,
             )
-            try:
-                state = {
-                    "last_run": {
-                        "run_id": run_id,
-                        "train_timerange": training_range.timerange_str,
-                        "failed": True,
-                        "reason": "max_drawdown",
-                        "resource": live_resource,
-                        "estimate": live_estimate,
-                    },
-                    "pending_file": str(pending_parameter_file(self.config, self.strategy_name)),
-                    "published_at": datetime.now(UTC),
-                }
-                write_json_atomic(self.state_file, state)
-            except Exception:  # noqa: BLE001, S110
-                pass
             return None
 
         metadata = {
@@ -582,21 +345,14 @@ class WalkForwardLiveRunner:
             "train_timerange": training_range.timerange_str,
             "loss": best.get("loss"),
             "result_file": str(result_file),
-            "resource": live_resource,
-            "estimate": live_estimate,
         }
         candidate = parameter_file_from_result(best, self.strategy_name, metadata)
-        # Embed resource into the pending file's walk_forward metadata as well.
-        candidate["walk_forward"]["resource"] = live_resource
-        candidate["walk_forward"]["estimate"] = live_estimate
         pending = pending_parameter_file(self.config, self.strategy_name)
         write_json_atomic(pending, candidate)
         state = {
             "last_run": metadata,
             "pending_file": str(pending),
             "published_at": datetime.now(UTC),
-            "resource": live_resource,
-            "estimate": live_estimate,
         }
         write_json_atomic(self.state_file, state)
         logger.info("Published pending walk-forward parameters to '%s'.", pending)

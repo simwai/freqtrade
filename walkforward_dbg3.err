@@ -1,0 +1,480 @@
+2026-09-04 19:20:42,823 - freqtrade - INFO - freqtrade 2025.4-dev-bb0639f9e
+2026-09-04 19:20:43,509 - freqtrade.configuration.load_config - INFO - Using config: M:\Documents\Programming\Python\freqtrade\user_data\config_benchmark.json ...
+2026-09-04 19:20:43,512 - freqtrade.loggers - INFO - Enabling colorized output.
+2026-09-04 19:20:43,514 - root - INFO - Logfile configured
+2026-09-04 19:20:43,515 - freqtrade.loggers - INFO - Verbosity set to 2
+2026-09-04 19:20:43,516 - freqtrade.configuration.configuration - INFO - Using max_open_trades: 6 ...
+2026-09-04 19:20:43,517 - freqtrade.configuration.configuration - INFO - Parameter --timerange detected: 20190908-20260830 ...
+2026-09-04 19:20:43,519 - freqtrade.configuration.configuration - INFO - Using user-data directory: M:\Documents\Programming\Python\freqtrade\user_data ...
+2026-09-04 19:20:43,520 - freqtrade.configuration.configuration - INFO - Using data directory: M:\Documents\Programming\Python\freqtrade\user_data\data\binance ...
+2026-09-04 19:20:43,521 - freqtrade.configuration.configuration - INFO - Parameter --epochs detected ... Will run Hyperopt with for 100 epochs ...
+2026-09-04 19:20:43,523 - freqtrade.configuration.configuration - INFO - Parameter -s/--spaces detected: ['buy', 'sell', 'roi', 'stoploss', 'trailing']
+2026-09-04 19:20:43,523 - freqtrade.configuration.configuration - INFO - Parameter -j/--job-workers detected: -1
+2026-09-04 19:20:43,524 - freqtrade.configuration.configuration - INFO - Parameter --min-trades detected: 1
+2026-09-04 19:20:43,525 - freqtrade.configuration.configuration - INFO - Using Hyperopt loss class name: SharpeHyperOptLossDaily
+2026-09-04 19:20:43,526 - freqtrade.configuration.configuration - INFO - Filter trades by timerange: 20190908-20260830
+2026-09-04 19:20:43,528 - freqtrade.exchange.check_exchange - INFO - Checking exchange...
+2026-09-04 19:20:43,535 - freqtrade.exchange.check_exchange - INFO - Exchange "binance" is officially supported by the Freqtrade development team.
+2026-09-04 19:20:43,536 - freqtrade.configuration.configuration - INFO - Using pairlist from configuration.
+2026-09-04 19:20:43,537 - freqtrade.configuration.config_validation - INFO - Validating configuration ...
+2026-09-04 19:20:43,539 - freqtrade.commands.optimize_commands - INFO - Starting freqtrade in Walk-forward mode
+2026-09-04 19:20:43,543 - freqtrade.exchange.exchange - INFO - Instance is running with dry_run enabled
+2026-09-04 19:20:43,545 - freqtrade.exchange.exchange - INFO - Using CCXT 4.4.75
+2026-09-04 19:20:43,546 - freqtrade.exchange.exchange - INFO - Applying additional ccxt config: {'options': {'defaultType': 'swap'}}
+2026-09-04 19:20:43,552 - freqtrade.exchange.exchange - INFO - Applying additional ccxt config: {'options': {'defaultType': 'swap'}}
+2026-09-04 19:20:43,559 - freqtrade.exchange.exchange - INFO - Using Exchange "Binance"
+2026-09-04 19:20:43,560 - freqtrade.exchange.exchange - DEBUG - Performing scheduled market reload..
+2026-09-04 19:20:45,126 - freqtrade.resolvers.exchange_resolver - INFO - Using resolved exchange 'Binance'...
+2026-09-04 19:20:45,132 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__'
+2026-09-04 19:20:45,134 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\HarmonicDivergence.cpython-311.pyc
+2026-09-04 19:20:45,134 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\HarmonicDivergenceRegime.cpython-311.pyc
+2026-09-04 19:20:45,136 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\Ichi.cpython-311.pyc
+2026-09-04 19:20:45,137 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\NFIX7Guarded.cpython-311.pyc
+2026-09-04 19:20:45,137 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\NFIX7GuardedRel.cpython-311.pyc
+2026-09-04 19:20:45,138 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\NFIX7GuardedRelative.cpython-311.pyc
+2026-09-04 19:20:45,140 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\NFIX7GuardedSweep.cpython-311.pyc
+2026-09-04 19:20:45,140 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\NostalgiaForInfinityX6.cpython-311.pyc
+2026-09-04 19:20:45,141 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\NostalgiaForInfinityX7.cpython-311.pyc
+2026-09-04 19:20:45,142 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerDpoBbwpWick.cpython-311.pyc
+2026-09-04 19:20:45,143 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerDpoEveningStar.cpython-311.pyc
+2026-09-04 19:20:45,144 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerDpoShootingStar.cpython-311.pyc
+2026-09-04 19:20:45,145 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerRank1RocVixAdLondon.cpython-311.pyc
+2026-09-04 19:20:45,146 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\ScreenerRank4RsiChopPvtNy.cpython-311.pyc
+2026-09-04 19:20:45,148 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\__pycache__\TurtleStrategy.cpython-311.pyc
+2026-09-04 19:20:45,149 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__'
+2026-09-04 19:20:45,150 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\OctopusNestStrategy.cpython-310.pyc
+2026-09-04 19:20:45,151 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\OctopusNestStrategy.cpython-311.pyc
+2026-09-04 19:20:45,152 - freqtrade.resolvers.iresolver - DEBUG - Ignoring 
+M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SuperKeltnerConvergenceStrategy.cpython-310.pyc
+2026-09-04 19:20:45,154 - freqtrade.resolvers.iresolver - DEBUG - Ignoring 
+M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SuperKeltnerConvergenceStrategy.cpython-311.pyc
+2026-09-04 19:20:45,156 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SuperKeltnerStrategy.cpython-310.pyc
+2026-09-04 19:20:45,157 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SuperKeltnerStrategy.cpython-311.pyc
+2026-09-04 19:20:45,158 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SupertrendKeltner.cpython-310.pyc
+2026-09-04 19:20:45,159 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\SupertrendKeltner.cpython-311.pyc
+2026-09-04 19:20:45,160 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\TrendOMaticNadarayaBaseline.cpython-311.pyc
+2026-09-04 19:20:45,161 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\TrendOMaticStrategy.cpython-310.pyc
+2026-09-04 19:20:45,162 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\TrendOMaticStrategy.cpython-311.pyc
+2026-09-04 19:20:45,163 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__\TrendOMaticSweep.cpython-311.pyc
+2026-09-04 19:20:45,164 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend'
+2026-09-04 19:20:45,165 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\OctopusNestStrategy.backup.json
+2026-09-04 19:20:45,166 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\OctopusNestStrategy.json
+2026-09-04 19:20:45,300 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\trend\__pycache__
+2026-09-04 19:20:45,301 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__'
+2026-09-04 19:20:45,302 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__\HybridRegimeSwitcher.cpython-310.pyc
+2026-09-04 19:20:45,304 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__\HybridRegimeSwitcher.cpython-311.pyc
+2026-09-04 19:20:45,305 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__\LuxAlgo15mBTCLowRisk.cpython-310.pyc
+2026-09-04 19:20:45,307 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__\LuxAlgo15mBTCLowRisk.cpython-311.pyc
+2026-09-04 19:20:45,307 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime'
+2026-09-04 19:20:45,310 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\regime\__pycache__
+2026-09-04 19:20:45,311 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\pattern'
+2026-09-04 19:20:45,313 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\pattern\.gitkeep
+2026-09-04 19:20:45,314 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\pattern\README.md
+2026-09-04 19:20:45,315 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\ml'
+2026-09-04 19:20:45,317 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\ml\.gitkeep
+2026-09-04 19:20:45,318 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\ml\README.md
+2026-09-04 19:20:45,320 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__'
+2026-09-04 19:20:45,321 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__\GkdAdaptive.cpython-310.pyc
+2026-09-04 19:20:45,322 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__\GkdAdaptive.cpython-311.pyc
+2026-09-04 19:20:45,323 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__\strategy_gkd_academic_final.cpython-310.pyc
+2026-09-04 19:20:45,324 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__\strategy_gkd_academic_final.cpython-311.pyc
+2026-09-04 19:20:45,326 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd'
+2026-09-04 19:20:45,328 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\regime_map_academic.json
+2026-09-04 19:20:45,331 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd\__pycache__
+2026-09-04 19:20:45,332 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__'
+2026-09-04 19:20:45,333 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\adaptive.cpython-310.pyc
+2026-09-04 19:20:45,334 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\adaptive.cpython-311.pyc
+2026-09-04 19:20:45,336 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\MfiEmaWaveTrend.cpython-310.pyc
+2026-09-04 19:20:45,337 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\MfiEmaWaveTrend.cpython-311.pyc
+2026-09-04 19:20:45,338 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\MfiEmaWaveTrend2.cpython-310.pyc
+2026-09-04 19:20:45,339 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\MfiEmaWaveTrend2.cpython-311.pyc
+2026-09-04 19:20:45,340 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\NadarayaWatson.cpython-310.pyc
+2026-09-04 19:20:45,341 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\NadarayaWatson.cpython-311.pyc
+2026-09-04 19:20:45,342 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\VixFixBb.cpython-310.pyc
+2026-09-04 19:20:45,343 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\VixFixBb.cpython-311.pyc
+2026-09-04 19:20:45,344 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\VixFixMultiLab.cpython-310.pyc
+2026-09-04 19:20:45,346 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\VixFixMultiLab.cpython-311.pyc
+2026-09-04 19:20:45,347 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\WildersVolatility.cpython-310.pyc
+2026-09-04 19:20:45,348 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\WildersVolatility.cpython-311.pyc
+2026-09-04 19:20:45,349 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\WildersVolatilityBingAi.cpython-310.pyc
+2026-09-04 19:20:45,351 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__\WildersVolatilityBingAi.cpython-311.pyc
+2026-09-04 19:20:45,352 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip'
+2026-09-04 19:20:45,366 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\MfiEmaWaveTrend2.json
+2026-09-04 19:20:45,368 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\NadarayaWatson.json
+2026-09-04 19:20:45,378 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip\__pycache__
+2026-09-04 19:20:45,379 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__'
+2026-09-04 19:20:45,380 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__\ExampleComponentStrategy.cpython-310.pyc
+2026-09-04 19:20:45,381 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__\ExampleComponentStrategy.cpython-311.pyc
+2026-09-04 19:20:45,382 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__\StrategyTemplateV21.cpython-310.pyc
+2026-09-04 19:20:45,383 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__\StrategyTemplateV21.cpython-311.pyc
+2026-09-04 19:20:45,384 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo'
+2026-09-04 19:20:45,387 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo\__pycache__
+2026-09-04 19:20:45,388 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\debug\__pycache__'
+2026-09-04 19:20:45,389 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\debug'
+2026-09-04 19:20:45,390 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\debug\__pycache__
+2026-09-04 19:20:45,391 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 
+'M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__'
+2026-09-04 19:20:45,393 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\ehlers.cpython-310.pyc
+2026-09-04 19:20:45,395 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\ehlers.cpython-311.pyc
+2026-09-04 19:20:45,396 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\exit_levels.cpython-310.pyc
+2026-09-04 19:20:45,397 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\exit_levels.cpython-311.pyc
+2026-09-04 19:20:45,398 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\filters.cpython-310.pyc
+2026-09-04 19:20:45,399 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\filters.cpython-311.pyc
+2026-09-04 19:20:45,401 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\indicators.cpython-310.pyc
+2026-09-04 19:20:45,402 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\indicators.cpython-311.pyc
+2026-09-04 19:20:45,403 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\indicators_combo_engine.cpython-311.pyc
+2026-09-04 19:20:45,404 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\indicators_pandas_ta.cpython-310.pyc
+2026-09-04 19:20:45,405 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\indicators_pandas_ta.cpython-311.pyc
+2026-09-04 19:20:45,406 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\loss_streak_lock.cpython-310.pyc
+2026-09-04 19:20:45,407 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\loss_streak_lock.cpython-311.pyc
+2026-09-04 19:20:45,408 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\risk.cpython-310.pyc
+2026-09-04 19:20:45,409 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\risk.cpython-311.pyc
+2026-09-04 19:20:45,410 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\signals.cpython-310.pyc
+2026-09-04 19:20:45,412 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\signals.cpython-311.pyc
+2026-09-04 19:20:45,414 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\strategy_base.cpython-310.pyc
+2026-09-04 19:20:45,415 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\strategy_base.cpython-311.pyc
+2026-09-04 19:20:45,416 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\_recursive_check.cpython-311.pyc
+2026-09-04 19:20:45,417 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\_repaint_check.cpython-311.pyc
+2026-09-04 19:20:45,418 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\_repaint_check_core.cpython-311.pyc
+2026-09-04 19:20:45,419 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\__init__.cpython-310.pyc
+2026-09-04 19:20:45,420 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__\__init__.cpython-311.pyc
+2026-09-04 19:20:45,421 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\components'
+2026-09-04 19:20:45,433 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\README.md
+2026-09-04 19:20:45,434 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\REPAINT_AUDIT_REPORT.md
+2026-09-04 19:20:45,442 - freqtrade.resolvers.iresolver - WARNING - Could not import M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\_repaint_check_core.py due to 'attempted 
+relative import with no known parent package'
+2026-09-04 19:20:45,445 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components\__pycache__
+2026-09-04 19:20:45,446 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__'
+2026-09-04 19:20:45,447 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__\ClucHAnix_5m.cpython-310.pyc
+2026-09-04 19:20:45,448 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__\ClucHAnix_5m.cpython-311.pyc
+2026-09-04 19:20:45,449 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__\CombinedBinHClucAndMADV3.cpython-310.pyc
+2026-09-04 19:20:45,450 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__\CombinedBinHClucAndMADV3.cpython-311.pyc
+2026-09-04 19:20:45,451 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc'
+2026-09-04 19:20:45,453 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc\__pycache__
+2026-09-04 19:20:45,455 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__'
+2026-09-04 19:20:45,456 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ06AtrSl.cpython-310.pyc
+2026-09-04 19:20:45,457 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ06AtrSl.cpython-311.pyc
+2026-09-04 19:20:45,458 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ06Original.cpython-310.pyc
+2026-09-04 19:20:45,459 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ06Original.cpython-311.pyc
+2026-09-04 19:20:45,460 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ07Next2.cpython-310.pyc
+2026-09-04 19:20:45,461 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ07Next2.cpython-311.pyc
+2026-09-04 19:20:45,462 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ08.cpython-310.pyc
+2026-09-04 19:20:45,463 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\BigZ08.cpython-311.pyc
+2026-09-04 19:20:45,464 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\_bigz_shared.cpython-310.pyc
+2026-09-04 19:20:45,465 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__\_bigz_shared.cpython-311.pyc
+2026-09-04 19:20:45,466 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz'
+2026-09-04 19:20:45,472 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\BigZ08.json
+2026-09-04 19:20:45,475 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz\__pycache__
+2026-09-04 19:20:45,477 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__'
+2026-09-04 19:20:45,478 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BBModCEV1.cpython-310.pyc
+2026-09-04 19:20:45,480 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BBModCEV1.cpython-311.pyc
+2026-09-04 19:20:45,481 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BB_RPB_TSLmeneguzzo.cpython-310.pyc
+2026-09-04 19:20:45,482 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BB_RPB_TSLmeneguzzo.cpython-311.pyc
+2026-09-04 19:20:45,483 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BB_RTR.cpython-310.pyc
+2026-09-04 19:20:45,484 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\BB_RTR.cpython-311.pyc
+2026-09-04 19:20:45,485 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\ichiV1.cpython-310.pyc
+2026-09-04 19:20:45,486 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\ichiV1.cpython-311.pyc
+2026-09-04 19:20:45,487 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\newstrategy53.cpython-310.pyc
+2026-09-04 19:20:45,489 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\newstrategy53.cpython-311.pyc
+2026-09-04 19:20:45,489 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\turbov8.cpython-310.pyc
+2026-09-04 19:20:45,490 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\turbov8.cpython-311.pyc
+2026-09-04 19:20:45,491 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\WildersVolatilityBingAi.cpython-310.pyc
+2026-09-04 19:20:45,493 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__\WildersVolatilityBingAi.cpython-311.pyc
+2026-09-04 19:20:45,494 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad'
+2026-09-04 19:20:45,500 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad\__pycache__
+2026-09-04 19:20:45,501 - freqtrade.resolvers.iresolver - DEBUG - Searching for IStrategy ScreenerDpoEveningStar in 'M:\Documents\Programming\Python\freqtrade\user_data\strategies'
+2026-09-04 19:20:45,502 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bad
+2026-09-04 19:20:45,503 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\bigz
+2026-09-04 19:20:45,505 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\cluc
+2026-09-04 19:20:45,506 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\commands.txt
+2026-09-04 19:20:45,508 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\components
+2026-09-04 19:20:45,509 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\debug
+2026-09-04 19:20:45,510 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\demo
+2026-09-04 19:20:45,511 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\dip
+2026-09-04 19:20:45,513 - freqtrade.resolvers.iresolver - DEBUG - Ignoring M:\Documents\Programming\Python\freqtrade\user_data\strategies\gkd
+[DBG] _ohlcv_load pair='DOGE/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/DOGE_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK DOGE/USDT:USDT rows=214975 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim DOGE/USDT:USDT rows=214975 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='XRP/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/XRP_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK XRP/USDT:USDT rows=232834 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim XRP/USDT:USDT rows=232834 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='ENJ/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ENJ_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ENJ/USDT:USDT rows=207207 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ENJ/USDT:USDT rows=207207 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='DOT/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/DOT_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK DOT/USDT:USDT rows=210855 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim DOT/USDT:USDT rows=210855 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='CRV/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/CRV_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK CRV/USDT:USDT rows=209895 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim CRV/USDT:USDT rows=209895 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='MANA/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/MANA_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK MANA/USDT:USDT rows=191175 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim MANA/USDT:USDT rows=191175 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='SAND/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/SAND_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK SAND/USDT:USDT rows=195879 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim SAND/USDT:USDT rows=195879 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='ATOM/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ATOM_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ATOM/USDT:USDT rows=229747 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ATOM/USDT:USDT rows=229747 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='LTC/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/LTC_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK LTC/USDT:USDT rows=232547 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim LTC/USDT:USDT rows=232547 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='APE/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/APE_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK APE/USDT:USDT rows=155911 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim APE/USDT:USDT rows=155911 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='ALGO/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ALGO_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ALGO/USDT:USDT rows=217279 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ALGO/USDT:USDT rows=217279 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='GRT/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/GRT_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK GRT/USDT:USDT rows=199431 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim GRT/USDT:USDT rows=199431 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='ANKR/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ANKR_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ANKR/USDT:USDT rows=102952 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ANKR/USDT:USDT rows=102952 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='ONT/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ONT_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ONT/USDT:USDT rows=136176 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ONT/USDT:USDT rows=136176 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='SNX/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/SNX_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK SNX/USDT:USDT rows=118423 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim SNX/USDT:USDT rows=118423 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='BAND/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BAND_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK BAND/USDT:USDT rows=120332 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BAND/USDT:USDT rows=120332 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='BAT/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BAT_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK BAT/USDT:USDT rows=135978 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BAT/USDT:USDT rows=135978 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='BCH/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BCH_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK BCH/USDT:USDT rows=141339 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BCH/USDT:USDT rows=141339 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='IOTA/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/IOTA_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK IOTA/USDT:USDT rows=136088 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim IOTA/USDT:USDT rows=136088 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='LINK/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/LINK_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK LINK/USDT:USDT rows=139043 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim LINK/USDT:USDT rows=139043 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='XTZ/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/XTZ_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK XTZ/USDT:USDT rows=137027 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim XTZ/USDT:USDT rows=137027 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='NEO/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/NEO_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK NEO/USDT:USDT rows=135587 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim NEO/USDT:USDT rows=135587 timerange_startup.startts=1567540800 stopts=1788048000
+[DBG] _ohlcv_load pair='DOGE/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/DOGE_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK DOGE/USDT:USDT rows=6725 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim DOGE/USDT:USDT rows=6725 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='XRP/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/XRP_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK XRP/USDT:USDT rows=7283 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim XRP/USDT:USDT rows=7283 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ENJ/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ENJ_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK ENJ/USDT:USDT rows=6921 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ENJ/USDT:USDT rows=6919 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='DOT/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/DOT_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK DOT/USDT:USDT rows=6602 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim DOT/USDT:USDT rows=6602 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='CRV/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/CRV_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK CRV/USDT:USDT rows=6566 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim CRV/USDT:USDT rows=6566 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='MANA/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/MANA_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK MANA/USDT:USDT rows=5981 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim MANA/USDT:USDT rows=5981 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='SAND/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/SAND_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK SAND/USDT:USDT rows=6128 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim SAND/USDT:USDT rows=6128 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ATOM/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ATOM_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK ATOM/USDT:USDT rows=7189 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ATOM/USDT:USDT rows=7189 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='LTC/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/LTC_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK LTC/USDT:USDT rows=7274 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim LTC/USDT:USDT rows=7274 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='APE/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/APE_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK APE/USDT:USDT rows=4879 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim APE/USDT:USDT rows=4879 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ALGO/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ALGO_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK ALGO/USDT:USDT rows=6859 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ALGO/USDT:USDT rows=6859 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='GRT/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/GRT_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK GRT/USDT:USDT rows=6239 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim GRT/USDT:USDT rows=6239 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ANKR/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ANKR_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK ANKR/USDT:USDT rows=6534 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ANKR/USDT:USDT rows=6532 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ONT/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ONT_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK ONT/USDT:USDT rows=7582 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ONT/USDT:USDT rows=7580 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='SNX/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/SNX_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK SNX/USDT:USDT rows=6620 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim SNX/USDT:USDT rows=6620 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='BAND/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BAND_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK BAND/USDT:USDT rows=6668 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BAND/USDT:USDT rows=6668 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='BAT/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BAT_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK BAT/USDT:USDT rows=7169 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BAT/USDT:USDT rows=7169 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='BCH/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BCH_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK BCH/USDT:USDT rows=7336 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BCH/USDT:USDT rows=7324 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='IOTA/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/IOTA_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK IOTA/USDT:USDT rows=7172 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim IOTA/USDT:USDT rows=7172 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='LINK/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/LINK_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK LINK/USDT:USDT rows=7250 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim LINK/USDT:USDT rows=7250 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='XTZ/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/XTZ_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK XTZ/USDT:USDT rows=7603 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim XTZ/USDT:USDT rows=7601 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='NEO/USDT:USDT' tf='8h' ct=<CandleType.FUNDING_RATE: 'funding_rate'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/NEO_USDT_USDT-8h-funding_rate.feather') exists=True
+[DBG] read_feather OK NEO/USDT:USDT rows=7157 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim NEO/USDT:USDT rows=7157 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='DOGE/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/DOGE_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK DOGE/USDT:USDT rows=6727 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim DOGE/USDT:USDT rows=6727 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='XRP/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/XRP_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK XRP/USDT:USDT rows=7285 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim XRP/USDT:USDT rows=7285 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ENJ/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ENJ_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK ENJ/USDT:USDT rows=6484 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ENJ/USDT:USDT rows=6484 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='DOT/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/DOT_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK DOT/USDT:USDT rows=6604 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim DOT/USDT:USDT rows=6604 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='CRV/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/CRV_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK CRV/USDT:USDT rows=6568 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim CRV/USDT:USDT rows=6568 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='MANA/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/MANA_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK MANA/USDT:USDT rows=5983 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim MANA/USDT:USDT rows=5983 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='SAND/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/SAND_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK SAND/USDT:USDT rows=6130 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim SAND/USDT:USDT rows=6130 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ATOM/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ATOM_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK ATOM/USDT:USDT rows=7191 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ATOM/USDT:USDT rows=7191 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='LTC/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/LTC_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK LTC/USDT:USDT rows=7276 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim LTC/USDT:USDT rows=7276 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='APE/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/APE_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK APE/USDT:USDT rows=4881 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim APE/USDT:USDT rows=4881 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ALGO/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ALGO_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK ALGO/USDT:USDT rows=6861 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ALGO/USDT:USDT rows=6861 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='GRT/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/GRT_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK GRT/USDT:USDT rows=6241 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim GRT/USDT:USDT rows=6241 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ANKR/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ANKR_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK ANKR/USDT:USDT rows=6129 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ANKR/USDT:USDT rows=6129 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='ONT/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ONT_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK ONT/USDT:USDT rows=7177 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ONT/USDT:USDT rows=7177 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='SNX/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/SNX_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK SNX/USDT:USDT rows=6622 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim SNX/USDT:USDT rows=6622 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='BAND/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BAND_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK BAND/USDT:USDT rows=6670 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BAND/USDT:USDT rows=6670 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='BAT/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BAT_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK BAT/USDT:USDT rows=7171 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BAT/USDT:USDT rows=7171 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='BCH/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BCH_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK BCH/USDT:USDT rows=7326 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BCH/USDT:USDT rows=7325 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='IOTA/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/IOTA_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK IOTA/USDT:USDT rows=7174 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim IOTA/USDT:USDT rows=7174 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='LINK/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/LINK_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK LINK/USDT:USDT rows=7252 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim LINK/USDT:USDT rows=7252 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='XTZ/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/XTZ_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK XTZ/USDT:USDT rows=7198 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim XTZ/USDT:USDT rows=7198 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='NEO/USDT:USDT' tf='8h' ct=<CandleType.MARK: 'mark'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/NEO_USDT_USDT-8h-mark.feather') exists=True
+[DBG] read_feather OK NEO/USDT:USDT rows=7159 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim NEO/USDT:USDT rows=7159 timerange_startup.startts=1577105100 stopts=1788048000
+[DBG] _ohlcv_load pair='DOGE/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/DOGE_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK DOGE/USDT:USDT rows=214975 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim DOGE/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY DOGE/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='XRP/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/XRP_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK XRP/USDT:USDT rows=232834 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim XRP/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY XRP/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='ENJ/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ENJ_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ENJ/USDT:USDT rows=207207 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ENJ/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY ENJ/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='DOT/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/DOT_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK DOT/USDT:USDT rows=210855 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim DOT/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY DOT/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='CRV/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/CRV_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK CRV/USDT:USDT rows=209895 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim CRV/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY CRV/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='MANA/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/MANA_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK MANA/USDT:USDT rows=191175 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim MANA/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY MANA/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='SAND/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/SAND_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK SAND/USDT:USDT rows=195879 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim SAND/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY SAND/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='ATOM/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ATOM_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ATOM/USDT:USDT rows=229747 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ATOM/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY ATOM/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='LTC/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/LTC_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK LTC/USDT:USDT rows=232547 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim LTC/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY LTC/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='APE/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/APE_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK APE/USDT:USDT rows=155911 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim APE/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY APE/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='ALGO/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ALGO_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ALGO/USDT:USDT rows=217279 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ALGO/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY ALGO/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='GRT/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/GRT_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK GRT/USDT:USDT rows=199431 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim GRT/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY GRT/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='ANKR/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ANKR_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ANKR/USDT:USDT rows=102952 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ANKR/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY ANKR/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='ONT/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/ONT_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK ONT/USDT:USDT rows=136176 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim ONT/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY ONT/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='SNX/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/SNX_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK SNX/USDT:USDT rows=118423 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim SNX/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY SNX/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='BAND/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BAND_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK BAND/USDT:USDT rows=120332 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BAND/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY BAND/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='BAT/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BAT_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK BAT/USDT:USDT rows=135978 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BAT/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY BAT/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='BCH/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/BCH_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK BCH/USDT:USDT rows=141339 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim BCH/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY BCH/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='IOTA/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/IOTA_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK IOTA/USDT:USDT rows=136088 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim IOTA/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY IOTA/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='LINK/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/LINK_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK LINK/USDT:USDT rows=139043 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim LINK/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY LINK/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='XTZ/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/XTZ_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK XTZ/USDT:USDT rows=137027 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim XTZ/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY XTZ/USDT:USDT futures 15m
+[DBG] _ohlcv_load pair='NEO/USDT:USDT' tf='15m' ct=<CandleType.FUTURES: 'futures'> datadir=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance') -> filename=WindowsPath('M:/Documents/Programming/Python/freqtrade/user_data/data/binance/futures/NEO_USDT_USDT-15m-futures.feather') exists=True
+[DBG] read_feather OK NEO/USDT:USDT rows=135587 cols=['date', 'open', 'high', 'low', 'close', 'volume']
+[DBG] post-trim NEO/USDT:USDT rows=0 timerange_startup.startts=1567540800 stopts=1575590400
+[DBG] _check_empty_df EMPTY NEO/USDT:USDT futures 15m

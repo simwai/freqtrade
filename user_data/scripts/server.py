@@ -658,12 +658,54 @@ def list_configs() -> list[dict]:  # noqa: C901
 _LOSSES_CACHE: list[str] | None = None
 
 
+def _scan_losses_via_filesystem() -> list[str]:
+    """Filesystem fallback: parse class names from hyperopt_loss_*.py without importing."""
+    import re
+
+    names: set[str] = set()
+    pat = re.compile(r"class\s+(\w+HyperOptLoss\w*)\s*\(")
+    # builtin + repo constants as seed (no hardcode)
+    try:
+        from freqtrade.constants import HYPEROPT_LOSS_BUILTIN as _builtin  # type: ignore
+
+        names.update(_builtin)
+        names.add("DefaultHyperOptLoss")
+    except Exception:  # noqa: BLE001
+        pass
+    # scan builtin directory
+    builtin_dir = Path(__file__).resolve().parents[2] / "freqtrade" / "optimize" / "hyperopt_loss"
+    if builtin_dir.is_dir():
+        for p in builtin_dir.glob("hyperopt_loss_*.py"):
+            try:
+                text = p.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            for m in pat.finditer(text):
+                n = m.group(1)
+                if n != "IHyperOptLoss":
+                    names.add(n)
+    # scan user hyperopts (custom)
+    custom_dir = USER_DATA / "hyperopts"
+    if custom_dir.is_dir():
+        for p in custom_dir.glob("*.py"):
+            try:
+                text = p.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            for m in pat.finditer(text):
+                n = m.group(1)
+                if n != "IHyperOptLoss":
+                    names.add(n)
+    return sorted(n for n in names if n != "IHyperOptLoss")
+
+
 def list_losses() -> list[str]:
     """Autodiscover available hyperopt loss functions (builtin + user_data/hyperopts).
 
     Mirrors `freqtrade list-hyperoptloss` via HyperOptLossResolver; falls back to
-    run_strategy.KNOWN_LOSSES if the resolver import fails. Cached — module
-    imports are expensive and the set only changes on server restart.
+    a filesystem scan derived from HYPEROPT_LOSS_BUILTIN plus custom files. Cached
+    - module imports are expensive and the set only changes on server restart.
+    No hardcoded list is kept here.
     """
     global _LOSSES_CACHE
     if _LOSSES_CACHE is not None:
@@ -678,10 +720,7 @@ def list_losses() -> list[str]:
         if not losses:
             raise ValueError("no loss functions discovered")
     except Exception:  # noqa: BLE001
-        sys.path.insert(0, str(SCRIPTS))
-        from run_strategy import KNOWN_LOSSES
-
-        losses = list(KNOWN_LOSSES)
+        losses = _scan_losses_via_filesystem()
     _LOSSES_CACHE = losses
     return losses
 

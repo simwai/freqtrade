@@ -40,7 +40,6 @@ HYPEROPT_LOSS_BUILTIN = [
     "MaxDrawDownPerPairHyperOptLoss",
     "ProfitDrawDownHyperOptLoss",
     "MultiMetricHyperOptLoss",
-    "DrawdownConstrainedHyperOptLoss",
 ]
 AVAILABLE_PAIRLISTS = [
     "StaticPairList",
@@ -60,7 +59,6 @@ AVAILABLE_PAIRLISTS = [
     "SpreadFilter",
     "VolatilityFilter",
     "DelistingFilter",
-    "CorrelationPairList",
 ]
 AVAILABLE_DATAHANDLERS = ["json", "jsongz", "feather", "parquet"]
 BACKTEST_BREAKDOWNS = ["day", "week", "month", "year"]

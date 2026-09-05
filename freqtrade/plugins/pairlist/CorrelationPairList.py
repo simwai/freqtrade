@@ -11,7 +11,10 @@ from pathlib import Path
 from cachetools import TTLCache
 from pandas import DataFrame
 
-from freqtrade.data.history import load_data
+# why: importing load_data at module top triggers a circular import
+# (`freqtrade.data.history.__init__` mid-init -> `freqtrade.plugins.pairlist`
+# import chain -> back to `freqtrade.data.history`). Defer the import to
+# the function that uses it so the module loads cleanly.
 from freqtrade.enums import CandleType
 from freqtrade.exchange.exchange_types import Tickers
 from freqtrade.plugins.pairlist.IPairList import IPairList, PairlistParameter, SupportsBacktesting
@@ -210,6 +213,8 @@ class CorrelationPairList(IPairList):
 
         # Load data for all candidate pairs
         try:
+            # Local import: see top-of-file comment about circular-import avoidance.
+            from freqtrade.data.history import load_data
             data = load_data(
                 datadir=self._datadir,
                 pairs=candidate_pairs,
