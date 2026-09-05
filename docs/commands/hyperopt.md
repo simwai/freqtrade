@@ -16,6 +16,9 @@ usage: freqtrade hyperopt [-h] [-v] [--no-color] [--logfile FILE] [-V]
                           [--random-state INT] [--min-trades INT]
                           [--hyperopt-loss NAME] [--disable-param-export]
                           [--ignore-missing-spaces] [--analyze-per-epoch]
+                          [--hyperopt-fibonacci] [--fibonacci-target INT]
+                          [--space-reduction FLOAT] [--initial-points INT]
+                          [--estimator {GP,RF,ET,GBRT}]
 
 options:
   -h, --help            show this help message and exit
@@ -87,6 +90,15 @@ options:
                         Suppress errors for any requested Hyperopt spaces that
                         do not contain any parameters.
   --analyze-per-epoch   Run populate_indicators once per epoch.
+   --hyperopt-fibonacci  Enable Fibonacci stepping mode (multi-stage optimization).
+   --fibonacci-target INT
+                         Target Fibonacci number for Fibonacci mode (default: 34, min: 34).
+                         Must be a Fibonacci number (34, 55, 89, 144, 233, ...).
+   --space-reduction FLOAT
+                         Space reduction factor for Fibonacci mode (default: 0.15, range: 0.01-0.5).
+   --initial-points INT  Initial random points for Fibonacci mode (default: 10).
+   --estimator {GP,RF,ET,GBRT}
+                         Base estimator for hyperopt (default: ET).
 
 Common arguments:
   -v, --verbose         Verbose mode (-vv for more, -vvv to get all messages).

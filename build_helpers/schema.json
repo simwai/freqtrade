@@ -589,8 +589,7 @@
               "ShuffleFilter",
               "SpreadFilter",
               "VolatilityFilter",
-              "DelistingFilter",
-              "CorrelationPairList"
+              "DelistingFilter"
             ]
           }
         },

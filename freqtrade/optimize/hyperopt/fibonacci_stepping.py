@@ -7,17 +7,17 @@ based on Fibonacci numbers.
 """
 
 import logging
+import warnings
 from typing import Any
 
-from freqtrade.constants import Config
-from freqtrade.exceptions import OperationalException
 
-
-# Suppress scikit-learn FutureWarnings from skopt
-import warnings
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=FutureWarning)
     from skopt.space import Categorical, Dimension, Integer, Real
+
+from freqtrade.constants import Config
+from freqtrade.exceptions import OperationalException
+from freqtrade.optimize.space import SKDecimal
 
 
 logger = logging.getLogger(__name__)
@@ -119,6 +119,9 @@ class FibonacciStepping:
         fib = [1, 1]
         while fib[-1] < limit:
             fib.append(fib[-1] + fib[-2])
+        # If the last number exceeds limit, remove it
+        if fib[-1] > limit:
+            fib.pop()
         return fib
 
     def get_fibonacci_trio(self, target: int) -> tuple[int, int, int]:
@@ -161,6 +164,99 @@ class FibonacciStepping:
 
         return budgets
 
+    def _reduce_categorical_space(
+        self, dim: Categorical, param_name: str, values: list, top_k: list
+    ) -> Categorical:
+        """Reduce categorical dimension based on top-K trial values."""
+        top_categories = sorted(set(values))
+        # Always keep at least 1 category, fallback to original if needed
+        if not top_categories:
+            top_categories = dim.categories
+        elif len(top_categories) == 1:
+            # If only one category appears, add nearby categories from original
+            original_cats = list(dim.categories)
+            idx = original_cats.index(top_categories[0])
+            # Add neighbors if available
+            if idx > 0:
+                top_categories.insert(0, original_cats[idx - 1])
+            if idx < len(original_cats) - 1:
+                top_categories.append(original_cats[idx + 1])
+
+        new_dim = Categorical(top_categories, name=param_name)
+        logger.debug(f"  {param_name}: {dim.categories} -> {top_categories}")
+        return new_dim
+
+    def _reduce_numeric_space(
+        self, dim: Dimension, param_name: str, vmin: float, vmax: float, span: float
+    ) -> Dimension:
+        """Reduce numeric dimension based on value range from top-K trials."""
+        # Check SKDecimal first since it inherits from Integer
+        if isinstance(dim, SKDecimal):
+            decimals = dim.decimals
+            scale = 10**decimals
+
+            if span == 0:
+                margin = max(1, int((dim.high - dim.low) * scale * self.space_reduction))
+            else:
+                margin = max(1, int(span * scale * self.space_reduction))
+
+            new_low = max(dim.low, vmin - margin / scale)
+            new_high = min(dim.high, vmax + margin / scale)
+
+            # Ensure valid range
+            if new_low >= new_high:
+                new_low = dim.low
+                new_high = dim.high
+
+            new_dim = SKDecimal(new_low, new_high, decimals=decimals, name=param_name)
+            logger.debug(
+                f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low:.4f}, {new_high:.4f}]"
+            )
+            return new_dim
+
+        elif isinstance(dim, Integer):
+            # For integers, ensure we keep at least the original range if span is 0
+            if span == 0:
+                margin = max(1, int((dim.high - dim.low) * self.space_reduction))
+            else:
+                margin = max(1, int(span * self.space_reduction))
+
+            new_low = max(dim.low, vmin - margin)
+            new_high = min(dim.high, vmax + margin)
+
+            # Ensure valid range
+            if new_low >= new_high:
+                new_low = dim.low
+                new_high = dim.high
+
+            new_dim = Integer(new_low, new_high, name=param_name)
+            logger.debug(f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low}, {new_high}]")
+            return new_dim
+
+        elif isinstance(dim, Real):
+            if span == 0:
+                margin = (dim.high - dim.low) * self.space_reduction
+            else:
+                margin = span * self.space_reduction
+
+            new_low = max(dim.low, vmin - margin)
+            new_high = min(dim.high, vmax + margin)
+
+            if new_low >= new_high:
+                new_low = dim.low
+                new_high = dim.high
+
+            new_dim = Real(new_low, new_high, name=param_name, prior=dim.prior)
+            logger.debug(
+                f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low:.4f}, {new_high:.4f}]"
+            )
+            return new_dim
+
+        else:
+            # Unknown dimension type, keep as-is
+            logger.warning(f"Unknown dimension type {type(dim)} for {param_name}, keeping original")
+            return dim
+
     def reduce_space(
         self,
         dimensions: list[Dimension],
@@ -186,7 +282,10 @@ class FibonacciStepping:
         actual_k = min(k, len(top_trials))
         top_k = top_trials[:actual_k]
 
-        logger.info(f"Reducing search space based on top {actual_k} trials with factor {self.space_reduction}")
+        logger.info(
+            f"Reducing search space based on top {actual_k} trials "
+            f"with factor {self.space_reduction}"
+        )
 
         new_dimensions = []
         for dim in dimensions:
@@ -202,92 +301,27 @@ class FibonacciStepping:
                 new_dimensions.append(dim)
                 continue
 
+            # Handle Categorical dimensions first (no numeric min/max)
+            if isinstance(dim, Categorical):
+                new_dim = self._reduce_categorical_space(dim, param_name, values, top_k)
+                new_dimensions.append(new_dim)
+                continue
+
+            # For numeric dimensions, compute min/max/span
             vmin = min(values)
             vmax = max(values)
             span = vmax - vmin
 
             # Handle different dimension types
-            if isinstance(dim, Integer):
-                # For integers, ensure we keep at least the original range if span is 0
-                if span == 0:
-                    margin = max(1, int((dim.high - dim.low) * self.space_reduction))
-                else:
-                    margin = max(1, int(span * self.space_reduction))
-
-                new_low = max(dim.low, vmin - margin)
-                new_high = min(dim.high, vmax + margin)
-
-                # Ensure valid range
-                if new_low >= new_high:
-                    new_low = dim.low
-                    new_high = dim.high
-
-                new_dim = Integer(new_low, new_high, name=param_name)
-                logger.debug(f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low}, {new_high}]")
+            # Check SKDecimal first since it inherits from Integer
+            if isinstance(dim, SKDecimal | Integer | Real):
+                new_dim = self._reduce_numeric_space(dim, param_name, vmin, vmax, span)
                 new_dimensions.append(new_dim)
-
-            elif isinstance(dim, Real):
-                if span == 0:
-                    margin = (dim.high - dim.low) * self.space_reduction
-                else:
-                    margin = span * self.space_reduction
-
-                new_low = max(dim.low, vmin - margin)
-                new_high = min(dim.high, vmax + margin)
-
-                if new_low >= new_high:
-                    new_low = dim.low
-                    new_high = dim.high
-
-                new_dim = Real(new_low, new_high, name=param_name, prior=dim.prior)
-                logger.debug(f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low:.4f}, {new_high:.4f}]")
-                new_dimensions.append(new_dim)
-
-            elif hasattr(dim, 'decimals'):  # SKDecimal
-                # SKDecimal inherits from Integer but has decimals attribute
-                decimals = getattr(dim, 'decimals', 3)
-                scale = 10 ** decimals
-
-                if span == 0:
-                    margin = max(1, int((dim.high - dim.low) * scale * self.space_reduction))
-                else:
-                    margin = max(1, int(span * scale * self.space_reduction))
-
-                new_low = max(dim.low, vmin - margin / scale)
-                new_high = min(dim.high, vmax + margin / scale)
-
-                if new_low >= new_high:
-                    new_low = dim.low
-                    new_high = dim.high
-
-                from freqtrade.optimize.space import SKDecimal
-                new_dim = SKDecimal(new_low, new_high, decimals=decimals, name=param_name)
-                logger.debug(f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low:.4f}, {new_high:.4f}]")
-                new_dimensions.append(new_dim)
-
-            elif isinstance(dim, Categorical):
-                # For categorical, keep only categories that appear in top-k trials
-                top_categories = sorted(set(values))
-                # Always keep at least 1 category, fallback to original if needed
-                if not top_categories:
-                    top_categories = dim.categories
-                elif len(top_categories) == 1:
-                    # If only one category appears, add nearby categories from original
-                    original_cats = list(dim.categories)
-                    idx = original_cats.index(top_categories[0])
-                    # Add neighbors if available
-                    if idx > 0:
-                        top_categories.insert(0, original_cats[idx - 1])
-                    if idx < len(original_cats) - 1:
-                        top_categories.append(original_cats[idx + 1])
-
-                new_dim = Categorical(top_categories, name=param_name)
-                logger.debug(f"  {param_name}: {dim.categories} -> {top_categories}")
-                new_dimensions.append(new_dim)
-
             else:
                 # Unknown dimension type, keep as-is
-                logger.warning(f"Unknown dimension type {type(dim)} for {param_name}, keeping original")
+                logger.warning(
+                    f"Unknown dimension type {type(dim)} for {param_name}, keeping original"
+                )
                 new_dimensions.append(dim)
 
         return new_dimensions
@@ -318,13 +352,15 @@ class FibonacciStepping:
                 "name": "Stage 2 (Reduced Space)",
                 "trials": budgets["stage2_reduced"],
                 "space": "reduced",
-                "description": f"Bayesian optimization on reduced space (F_{{n-1}}={fn_minus_1})",
+                "description": (f"Bayesian optimization on reduced space (F_{{n-1}}={fn_minus_1})"),
             },
             "stage3_refined": {
                 "name": "Stage 3 (Refined Space)",
                 "trials": budgets["stage3_refined"],
                 "space": "further_reduced",
-                "description": f"Bayesian optimization on further reduced space (F_{{n-2}}={fn_minus_2})",
+                "description": (
+                    f"Bayesian optimization on further reduced space (F_{{n-2}}={fn_minus_2})"
+                ),
             },
         }
 

@@ -499,6 +499,95 @@ The `--spaces all` option determines that all possible parameters should be opti
     Reading commands (`hyperopt-list`, `hyperopt-show`) can use `--hyperopt-filename <filename>` to read and display older hyperopt results.
     You can find a list of filenames with `ls -l user_data/hyperopt_results/`.
 
+## Fibonacci Stepping Mode (Experimental)
+
+Fibonacci stepping is an advanced multi-stage optimization mode that structures hyperopt trials across
+progressively narrowing search spaces using Fibonacci-numbered trial budgets. This approach is based
+on the principle that optimization should start with broad exploration and gradually focus on the
+most promising regions of the search space.
+
+### How it works
+
+The Fibonacci stepping mode divides optimization into four stages:
+
+| Stage | Trials | Search Space | Description |
+|-------|--------|--------------|-------------|
+| Init | `n_initial` (default: 10) | Full | Random exploration to seed the surrogate model |
+| Stage 1 | `F_n - n_initial` | Full | Bayesian optimization on full search space |
+| Stage 2 | `F_{n-1}` | Reduced | Bayesian optimization on reduced space (top `F_{n-1}` results from Stage 1) |
+| Stage 3 | `F_{n-2}` | Further Reduced | Bayesian optimization on further reduced space (top `F_{n-2}` results from Stage 2) |
+
+Where `F_n` is the target Fibonacci number (default: 34 = F₉), giving the sequence:
+F₇=13, F₈=21, F₉=34, F₁₀=55, F₁₁=89, F₁₂=144...
+
+**Example with defaults (F_n=34, n_initial=10):**
+- Init: 10 random trials
+- Stage 1: 24 trials (full space)
+- Stage 2: 21 trials (reduced from top 21)
+- Stage 3: 13 trials (further reduced from top 13)
+- **Total: 68 trials**
+
+### Enabling Fibonacci Mode
+
+```bash
+freqtrade hyperopt --hyperopt-fibonacci --hyperopt-loss SharpeHyperOptLossDaily --spaces all --strategy MyStrategy --config config.json
+```
+
+### Configuration Options
+
+| CLI Argument | Config Key | Default | Description |
+|--------------|------------|---------|-------------|
+| `--hyperopt-fibonacci` | `hyperopt_fibonacci_enabled` | `false` | Enable Fibonacci stepping mode |
+| `--fibonacci-target` | `hyperopt_fibonacci_target` | `34` | Target Fibonacci number (must be ≥ 34) |
+| `--initial-points` | `hyperopt_initial_points` | `10` | Initial random trials before Bayesian optimization |
+| `--space-reduction` | `hyperopt_space_reduction` | `0.15` | Reduction factor for search space bounds (0.01-0.5) |
+| `--estimator` | `hyperopt_estimator` | `ET` | Base estimator: GP, RF, ET, GBRT |
+
+### Example Configurations
+
+**Conservative (faster, fewer trials):**
+```bash
+freqtrade hyperopt --hyperopt-fibonacci --fibonacci-target 34 --initial-points 5 --space-reduction 0.1
+```
+
+**Thorough (more trials, wider exploration):**
+```bash
+freqtrade hyperopt --hyperopt-fibonacci --fibonacci-target 55 --initial-points 15 --space-reduction 0.2
+```
+
+**Aggressive refinement (small reduction factor):**
+```bash
+freqtrade hyperopt --hyperopt-fibonacci --fibonacci-target 89 --space-reduction 0.05
+```
+
+### Output Display
+
+In Fibonacci mode, the live table includes a "Stage" column showing the current stage:
+- `Init` - Initialization (random)
+- `S1` - Stage 1 (full space)
+- `S2` - Stage 2 (reduced space)
+- `S3` - Stage 3 (refined space)
+
+Epoch display shows both stage-local and global epoch numbers: `5/24 (29/68)`
+
+### Result Files
+
+Results are saved to the same `.fthypt` format with additional fields:
+- `stage`: Current stage name (`init`, `stage1_full`, `stage2_reduced`, `stage3_refined`)
+- `stage_epoch`: Epoch number within the current stage
+- `current_epoch`: Global epoch number across all stages
+
+These fields are compatible with existing `hyperopt-list` and `hyperopt-show` commands.
+
+### Limitations & Notes
+
+- **Mutual exclusion**: `--hyperopt-fibonacci` and `--epochs` are mutually exclusive. In Fibonacci mode, total trials are calculated automatically from the Fibonacci target and initial points.
+- **Minimum target**: `--fibonacci-target` must be a Fibonacci number ≥ 34 (34, 55, 89, 144, 233, 377, 610...).
+- **Stage minimums**: Each stage requires a minimum number of trials (Stage 1: 5, Stage 2: 5, Stage 3: 3). The validation will error if the target is too small.
+- **No resume**: Interrupted Fibonacci runs cannot be resumed (same as standard hyperopt).
+- **Walk-forward**: Fibonacci mode works with walk-forward optimization automatically.
+- **Experimental**: This feature is experimental and may change in future releases.
+
 ### Execute Hyperopt with different historical data source
 
 If you would like to hyperopt parameters using an alternate historical data set that

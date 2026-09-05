@@ -397,6 +397,44 @@ AVAILABLE_CLI_OPTIONS = {
         "Example: `--hyperopt-filename=hyperopt_results_2020-09-27_16-20-48.pickle`",
         metavar="FILENAME",
     ),
+    "hyperopt_fibonacci": Arg(
+        "--hyperopt-fibonacci",
+        help="Enable Fibonacci stepping mode for hyperopt (multi-stage optimization).",
+        action="store_true",
+        default=False,
+    ),
+    "hyperopt_fibonacci_target": Arg(
+        "--fibonacci-target",
+        help="Target Fibonacci number for hyperopt Fibonacci stepping mode (default: 34). "
+        "Must be a Fibonacci number >= 34 (e.g., 34, 55, 89, 144).",
+        type=check_int_positive,
+        metavar="INT",
+        default=34,
+    ),
+    "hyperopt_space_reduction": Arg(
+        "--space-reduction",
+        help="Space reduction factor for Fibonacci stepping mode (default: 0.15). "
+        "Factor by which to reduce search space bounds between stages (range: 0.01-0.5).",
+        type=float,
+        metavar="FLOAT",
+        default=0.15,
+    ),
+    "hyperopt_initial_points": Arg(
+        "--initial-points",
+        help="Number of initial random points for Fibonacci stepping mode (default: 10). "
+        "Used for the initialization stage before Bayesian optimization begins.",
+        type=check_int_positive,
+        metavar="INT",
+        default=10,
+    ),
+    "hyperopt_estimator": Arg(
+        "--estimator",
+        help="Base estimator for hyperopt (default: ET). "
+        "Options: GP, RF, ET, GBRT. Used across all stages in Fibonacci mode.",
+        choices=["GP", "RF", "ET", "GBRT"],
+        metavar="NAME",
+        default="ET",
+    ),
     # List exchanges
     "print_one_column": Arg(
         "-1",

@@ -97,6 +97,7 @@ class FibonacciHyperopt:
 
         # Fibonacci stepping
         self.fib_stepping = FibonacciStepping(self.config)
+        self.opt: Any = None  # Will be set in start()
         self.stage_budgets = self.fib_stepping.compute_stage_budgets()
         self.current_stage = "init"
         self.stage_epoch = 0
@@ -343,8 +344,7 @@ class FibonacciHyperopt:
             raise
 
         logger.info(
-            f"Completed {stage_info.get('name', stage_name)}: "
-            f"{len(stage_results)} epochs saved."
+            f"Completed {stage_info.get('name', stage_name)}: {len(stage_results)} epochs saved."
         )
 
         return stage_results
@@ -426,7 +426,9 @@ class FibonacciHyperopt:
                     logger.info("=" * 60)
                     logger.info("STAGE 0: INITIALIZATION (Random Exploration)")
                     logger.info("=" * 60)
-                    self._run_stage("init", self.stage_budgets["init"], parallel, is_first_stage=True)
+                    self._run_stage(
+                        "init", self.stage_budgets["init"], parallel, is_first_stage=True
+                    )
 
                 # Stage 1: Full space Bayesian optimization
                 if self.stage_budgets["stage1_full"] > 0:
@@ -443,7 +445,9 @@ class FibonacciHyperopt:
                     logger.info("=" * 60)
                     logger.info("STAGE 2: REDUCED SPACE BAYESIAN OPTIMIZATION")
                     logger.info("=" * 60)
-                    self._run_stage("stage2_reduced", self.stage_budgets["stage2_reduced"], parallel)
+                    self._run_stage(
+                        "stage2_reduced", self.stage_budgets["stage2_reduced"], parallel
+                    )
 
                     # Prepare further reduced space for Stage 3
                     self._prepare_next_stage_space("stage2_reduced")
@@ -453,7 +457,9 @@ class FibonacciHyperopt:
                     logger.info("=" * 60)
                     logger.info("STAGE 3: REFINED SPACE BAYESIAN OPTIMIZATION")
                     logger.info("=" * 60)
-                    self._run_stage("stage3_refined", self.stage_budgets["stage3_refined"], parallel)
+                    self._run_stage(
+                        "stage3_refined", self.stage_budgets["stage3_refined"], parallel
+                    )
 
         except KeyboardInterrupt:
             self.interrupted = True

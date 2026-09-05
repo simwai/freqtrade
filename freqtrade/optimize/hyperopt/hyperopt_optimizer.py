@@ -410,6 +410,86 @@ class HyperOptimizer:
             model_queue_size=model_queue_size,
         )
 
+    def _categorize_by_prefix(self, dim: Dimension) -> str | None:
+        """Determine space category from dimension name prefix."""
+        if dim.name.startswith("buy_"):
+            return "buy"
+        if dim.name.startswith("sell_"):
+            return "sell"
+        if dim.name.startswith("protection_"):
+            return "protection"
+        if dim.name.startswith("roi_"):
+            return "roi"
+        if dim.name == "stoploss":
+            return "stoploss"
+        if dim.name.startswith("trailing_"):
+            return "trailing"
+        if dim.name == "max_open_trades":
+            return "max_open_trades"
+        return None
+
+    def _categorize_by_fallback(self, dim: Dimension) -> str:
+        """Determine space category by checking existing space membership."""
+        if any(d.name == dim.name for d in self.buy_space):
+            return "buy"
+        if any(d.name == dim.name for d in self.sell_space):
+            return "sell"
+        if any(d.name == dim.name for d in self.protection_space):
+            return "protection"
+        if any(d.name == dim.name for d in self.roi_space):
+            return "roi"
+        if any(d.name == dim.name for d in self.stoploss_space):
+            return "stoploss"
+        if any(d.name == dim.name for d in self.trailing_space):
+            return "trailing"
+        if any(d.name == dim.name for d in self.max_open_trades_space):
+            return "max_open_trades"
+        logger.warning(f"Could not categorize dimension {dim.name}, adding to buy_space")
+        return "buy"
+
+    def _categorize_dimensions(self, new_dimensions: list[Dimension]) -> None:
+        """Categorize new dimensions into their respective spaces."""
+        self.buy_space = []
+        self.sell_space = []
+        self.protection_space = []
+        self.roi_space = []
+        self.stoploss_space = []
+        self.trailing_space = []
+        self.max_open_trades_space = []
+
+        for dim in new_dimensions:
+            category = self._categorize_by_prefix(dim)
+            if category is None:
+                category = self._categorize_by_fallback(dim)
+            getattr(self, f"{category}_space").append(dim)
+
+    def reset_optimizer(self, new_dimensions: list[Dimension]) -> None:
+        """
+        Reset the optimizer with new dimensions for multi-stage optimization.
+
+        This method is used by FibonacciHyperopt to transition between stages
+        with progressively reduced search spaces.
+
+        Args:
+            new_dimensions: New list of skopt.space.Dimension objects
+        """
+        logger.info(
+            f"Resetting optimizer: {len(self.dimensions)} -> {len(new_dimensions)} dimensions"
+        )
+
+        # Store old dimensions for logging
+        old_dim_names = [d.name for d in self.dimensions]
+        new_dim_names = [d.name for d in new_dimensions]
+
+        logger.debug(f"Old dimensions: {old_dim_names}")
+        logger.debug(f"New dimensions: {new_dim_names}")
+
+        # Update dimensions
+        self.dimensions = new_dimensions
+
+        # Update space-specific dimension lists
+        self._categorize_dimensions(new_dimensions)
+
     def advise_and_trim(self, data: dict[str, DataFrame]) -> dict[str, DataFrame]:
         preprocessed = self.backtesting.strategy.advise_all_indicators(data)
 
