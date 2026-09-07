@@ -76,6 +76,7 @@ _JOB_QUEUE: collections.deque = collections.deque()  # (job_id, cmds, single_fli
 _QUEUE_CV = threading.Condition()
 _QUEUE_THREAD: threading.Thread | None = None
 _REFRESH_LOCK = threading.Lock()
+_REFRESH_JOB_ACTIVE = [False]  # tracks if a refresh/report job is queued or running (list for mutability)
 _KEEP_FINISHED_JOBS = 30  # finished jobs kept in the registry before eviction
 
 
@@ -231,33 +232,39 @@ def start_sequence(name: str, cmds: list[list[str]], single_flight: bool = False
     suspends the current subprocess. All shared state updates are short critical
     sections so HTTP endpoints stay responsive even while a job floods its log.
     """
+    return _start_sequence_locked(name, cmds, single_flight)
+
+
+def _start_sequence_locked(name: str, cmds: list[list[str]], single_flight: bool = False) -> str:
+    """Internal version of start_sequence that assumes JOB_LOCK is already held.
+    
+    This avoids deadlock when called from API handlers that already hold JOB_LOCK.
+    """
     date_str = time.strftime("%Y%m%d")
     base = f"{name}-{date_str}"
     counter = 1
-    with JOB_LOCK:
-        max_c = 0
-        for k in JOBS:
-            if k.startswith(f"{base}-"):
-                suffix = k[len(f"{base}-") :]
-                try:
-                    max_c = max(max_c, int(suffix))
-                except ValueError:
-                    pass
-        counter = max_c + 1
+    max_c = 0
+    for k in JOBS:
+        if k.startswith(f"{base}-"):
+            suffix = k[len(f"{base}-") :]
+            try:
+                max_c = max(max_c, int(suffix))
+            except ValueError:
+                pass
+    counter = max_c + 1
     job_id = f"{base}-{counter:04d}"
-    with JOB_LOCK:
-        JOBS[job_id] = {
-            "name": name,
-            "status": "queued",
-            "created": time.time(),
-            "pid": None,
-            "cmd": " | ".join(" ".join(c) for c in cmds),
-            "paused": False,
-        }
-        _LOGS[job_id] = collections.deque()
-        _LOG_TOT[job_id] = 0
-        _JOB_STOP[job_id] = threading.Event()
-        _prune_jobs_locked()
+    JOBS[job_id] = {
+        "name": name,
+        "status": "queued",
+        "created": time.time(),
+        "pid": None,
+        "cmd": " | ".join(" ".join(c) for c in cmds),
+        "paused": False,
+    }
+    _LOGS[job_id] = collections.deque()
+    _LOG_TOT[job_id] = 0
+    _JOB_STOP[job_id] = threading.Event()
+    _prune_jobs_locked()
     with _QUEUE_CV:
         _JOB_QUEUE.append((job_id, cmds, single_flight))
         _QUEUE_CV.notify()
@@ -282,6 +289,7 @@ def _run_sequence(job_id: str, cmds: list[list[str]], single_flight: bool) -> No
             with JOB_LOCK:
                 JOBS[job_id]["status"] = "skipped"
                 JOBS[job_id]["finished"] = time.time()
+                # Do NOT clear _REFRESH_JOB_ACTIVE here - the running job still owns it
             with JOB_LOCK:
                 _log_append_locked(job_id, "\n-- skipped: refresh/report already running --\n")
             return
@@ -292,6 +300,9 @@ def _run_sequence(job_id: str, cmds: list[list[str]], single_flight: bool) -> No
                 if stop_flag.is_set() or JOBS[job_id].get("status") == "stopped":
                     note_locked(f"\n-- job stopped before step {idx + 1}/{len(cmds)} --\n")
                     JOBS[job_id]["finished"] = time.time()
+                    job_name = JOBS[job_id].get("name", "")
+                    if job_name in ("report-refresh", "report"):
+                                                _REFRESH_JOB_ACTIVE[0] = False
                     return
                 JOBS[job_id]["status"] = "running"
                 JOBS[job_id]["step"] = f"{idx + 1}/{len(cmds)}"
@@ -311,11 +322,17 @@ def _run_sequence(job_id: str, cmds: list[list[str]], single_flight: bool) -> No
                 if stop_flag.is_set() or JOBS[job_id].get("status") == "stopped":
                     JOBS[job_id]["code"] = code
                     JOBS[job_id]["finished"] = time.time()
+                    job_name = JOBS[job_id].get("name", "")
+                    if job_name in ("report-refresh", "report"):
+                                                _REFRESH_JOB_ACTIVE[0] = False
                     return
                 if code != 0:
                     JOBS[job_id]["status"] = "error"
                     JOBS[job_id]["code"] = code
                     JOBS[job_id]["finished"] = time.time()
+                    job_name = JOBS[job_id].get("name", "")
+                    if job_name in ("report-refresh", "report"):
+                                                _REFRESH_JOB_ACTIVE[0] = False
                     return
         with JOB_LOCK:
             # don't overwrite a stop that raced the final return
@@ -324,6 +341,9 @@ def _run_sequence(job_id: str, cmds: list[list[str]], single_flight: bool) -> No
                 JOBS[job_id]["code"] = 0
                 JOBS[job_id]["finished"] = time.time()
             JOBS[job_id].pop("pid", None)
+            job_name = JOBS[job_id].get("name", "")
+            if job_name in ("report-refresh", "report"):
+                                _REFRESH_JOB_ACTIVE[0] = False
     finally:
         if holds_lock:
             _REFRESH_LOCK.release()
@@ -808,6 +828,38 @@ def build_run_cmd(body: dict) -> list[str]:
 # ------------------------------------------------------------------ request handling
 
 
+def _coerce_param_value(value: str, annotation) -> object:
+    """Convert a query-string value to its proper Python type based on the parameter annotation.
+
+    Returns the original value when no usable conversion is found, so callers
+    fall back to whatever the indicator function accepts.
+    """
+    if value is None:
+        return None
+    ann_str = str(annotation) if annotation is not inspect.Parameter.empty else ""
+    raw = str(value)
+    if not raw:
+        return raw
+    try:
+        if "bool" in ann_str and "int" not in ann_str:
+            return raw.strip().lower() in ("1", "true", "yes", "y", "on")
+        if "int" in ann_str and "float" not in ann_str:
+            return int(raw)
+        if "float" in ann_str:
+            return float(raw)
+    except (TypeError, ValueError):
+        return raw
+    return raw
+
+
+def _indicator_annotation_str(annotation) -> str:
+    """Return a normalised type string for a parameter annotation."""
+    if annotation is inspect.Parameter.empty:
+        return ""
+    s = str(annotation)
+    return s.replace("typing.", "")
+
+
 class LabHandler(BaseHTTPRequestHandler):
     server_version = "StrategyLab/1.0"
 
@@ -1012,51 +1064,81 @@ class LabHandler(BaseHTTPRequestHandler):
                     self._send_json({"ok": ok, "msg": msg, "job_id": job_id}, 200 if ok else 400)
                     return
         if path == "/api/refresh":
-            # periodic ingest+report: mutually exclusive, dropped (not queued)
-            # while another refresh/report is running
-            if _REFRESH_LOCK.locked():
-                self._send_json({"skipped": "refresh/report already running"})
+            # periodic ingest+report: only queue if no report-refresh job is running or queued
+            with JOB_LOCK:
+                print(f"DEBUG /api/refresh: _REFRESH_JOB_ACTIVE={_REFRESH_JOB_ACTIVE[0]}, _REFRESH_LOCK.locked()={_REFRESH_LOCK.locked()}", file=sys.stderr)
+                if _REFRESH_JOB_ACTIVE[0] or _REFRESH_LOCK.locked():
+                    self._send_json({"skipped": "report-refresh already running or queued"})
+                    return
+                _REFRESH_JOB_ACTIVE[0] = True
+                print(f"DEBUG /api/refresh: set _REFRESH_JOB_ACTIVE[0]=True", file=sys.stderr)
+                job_id = _start_sequence_locked(
+                    "report-refresh",
+                    [
+                        [PYTHON, str(SCRIPTS / "ingest_results.py")],
+                        [PYTHON, str(SCRIPTS / "build_report.py")],
+                    ],
+                    single_flight=True,
+                )
+                self._send_json({"job_id": job_id})
                 return
-            job_id = start_sequence(
-                "report-refresh",
-                [
-                    [PYTHON, str(SCRIPTS / "ingest_results.py")],
-                    [PYTHON, str(SCRIPTS / "build_report.py")],
-                ],
-                single_flight=True,
-            )
-            self._send_json({"job_id": job_id})
-            return
         if path == "/api/report":
-            if _REFRESH_LOCK.locked():
-                self._send_json({"skipped": "refresh/report already running"})
+            with JOB_LOCK:
+                print(f"DEBUG /api/report: _REFRESH_JOB_ACTIVE={_REFRESH_JOB_ACTIVE[0]}, _REFRESH_LOCK.locked()={_REFRESH_LOCK.locked()}", file=sys.stderr)
+                if _REFRESH_JOB_ACTIVE[0] or _REFRESH_LOCK.locked():
+                    self._send_json({"skipped": "report already running or queued"})
+                    return
+                _REFRESH_JOB_ACTIVE[0] = True
+                print(f"DEBUG /api/report: set _REFRESH_JOB_ACTIVE[0]=True", file=sys.stderr)
+                job_id = start_sequence(
+                    "report",
+                    [
+                        [PYTHON, str(SCRIPTS / "build_report.py")],
+                    ],
+                    single_flight=True,
+                )
+                self._send_json({"job_id": job_id})
                 return
-            job_id = start_sequence(
-                "report",
-                [
-                    [PYTHON, str(SCRIPTS / "build_report.py")],
-                ],
-                single_flight=True,
-            )
-            self._send_json({"job_id": job_id})
-            return
         if path == "/api/bench":
             body = read_body(self)
             strategies = body.get("strategies") or []
             timerange = body.get("timerange", "20230101-20240101")
             timeframe = body.get("timeframe", "5m")
+            mode = body.get("mode", "backtest")
+            if mode not in ("backtest", "hyperopt", "walkforward"):
+                self._send_json({"error": f"invalid mode {mode!r}"}, 400)
+                return
             cmd = [
                 PYTHON,
                 str(SCRIPTS / "benchmark_runner.py"),
-                "--timerange",
-                str(timerange),
-                "--timeframe",
-                str(timeframe),
+                "--mode", mode,
+                "--timerange", str(timerange),
+                "--timeframe", str(timeframe),
             ]
+            if mode in ("hyperopt", "walkforward"):
+                if body.get("epochs") is not None:
+                    cmd += ["--epochs", str(body["epochs"])]
+                if body.get("loss"):
+                    cmd += ["--loss", str(body["loss"])]
+                spaces = body.get("spaces")
+                if spaces:
+                    cmd += ["--spaces", *spaces]
+                if body.get("jobs") is not None:
+                    cmd += ["--jobs", str(body["jobs"])]
+                if body.get("random_state") is not None:
+                    cmd += ["--random-state", str(body["random_state"])]
+            if mode == "walkforward":
+                if body.get("train_days") is not None:
+                    cmd += ["--train-days", str(body["train_days"])]
+                if body.get("test_days") is not None:
+                    cmd += ["--test-days", str(body["test_days"])]
+                if body.get("step_days") is not None:
+                    cmd += ["--step-days", str(body["step_days"])]
             if strategies:
                 cmd += ["--strategies", *strategies]
-            job_id = start_job(f"benchmark-{','.join(strategies) if strategies else 'all'}", cmd)
-            self._send_json({"job_id": job_id})
+            label_strats = ",".join(strategies) if strategies else "all"
+            job_id = start_job(f"benchmark-{mode}-{label_strats}", cmd)
+            self._send_json({"job_id": job_id, "mode": mode})
             return
         if path == "/api/run":
             body = read_body(self)
@@ -1320,30 +1402,48 @@ class LabHandler(BaseHTTPRequestHandler):
                 sig = inspect.signature(fn)
             except (TypeError, ValueError):
                 continue
-            inputs: list[str] = []
+            # inputs: list of (param_name, column_name) pairs to keep call-site
+            # kwargs aligned with the original function signature
+            inputs: list[tuple[str, str]] = []
+            params: list[dict] = []
             ok = True
             for p in sig.parameters.values():
                 if p.kind in (p.VAR_POSITIONAL, p.VAR_KEYWORD):
                     ok = False
                     break
-                if p.default is not p.empty:
-                    continue
-                col = self._INDICATOR_COLUMNS.get(p.name)
-                if col is None:
-                    ok = False
-                    break
-                inputs.append(col)
+                if p.default is p.empty:
+                    col = self._INDICATOR_COLUMNS.get(p.name)
+                    if col is None:
+                        ok = False
+                        break
+                    inputs.append((p.name, col))
+                else:
+                    params.append(
+                        {
+                            "name": p.name,
+                            "default": p.default
+                            if isinstance(p.default, (int, float, bool, str))
+                            else str(p.default),
+                            "type": _indicator_annotation_str(p.annotation),
+                        }
+                    )
             if ok and inputs:
                 specs[name] = {
                     "title": self._INDICATOR_TITLES.get(name, name.replace("_", " ").title()),
                     "inputs": inputs,
                     "scale": "price" if name in self._INDICATOR_PRICE_SCALE else "own",
+                    "params": params,
                 }
         return specs
 
     def _indicator_list(self) -> list:
         return [
-            {"name": name, "title": spec["title"], "scale": spec["scale"]}
+            {
+                "name": name,
+                "title": spec["title"],
+                "scale": spec["scale"],
+                "params": spec.get("params", []),
+            }
             for name, spec in self._indicator_specs().items()
         ]
 
@@ -1409,8 +1509,43 @@ class LabHandler(BaseHTTPRequestHandler):
         if df is None or df.empty:
             return {"name": name, "scale": spec["scale"], "series": []}
         fn = getattr(_INDICATOR_MODULE, name)
-        cols = {inp: df[inp] for inp in spec["inputs"]}
-        result = fn(**cols)
+        try:
+            sig = inspect.signature(fn)
+        except (TypeError, ValueError):
+            sig = None
+        # inputs is a list of (param_name, column_name) tuples so we can call
+        # the indicator with the original parameter names (e.g. open_ vs open)
+        import sys as _sys
+        print(f"DEBUG _indicator_payload: name={name}, spec[inputs]={spec['inputs']}", file=_sys.stderr)
+        kwargs = {pname: df[col] for pname, col in spec["inputs"]}
+        print(f"DEBUG _indicator_payload: kwargs={list(kwargs.keys())}", file=_sys.stderr)
+        applied_params: dict[str, object] = {}
+        if sig is not None:
+            for p in sig.parameters.values():
+                if p.default is p.empty or p.name in kwargs:
+                    continue
+                raw = qs.get(p.name, [None])[0]
+                if raw is None or raw == "":
+                    continue
+                try:
+                    kwargs[p.name] = _coerce_param_value(raw, p.annotation)
+                    applied_params[p.name] = kwargs[p.name]
+                except Exception as exc:  # noqa: BLE001 - report to client
+                    return {
+                        "error": f"invalid value for {p.name!r}: {raw!r} ({exc})",
+                        "name": name,
+                        "scale": spec["scale"],
+                        "series": [],
+                    }
+        try:
+            result = fn(**kwargs)
+        except (TypeError, ValueError) as exc:
+            return {
+                "error": f"indicator {name!r} failed: {exc}",
+                "name": name,
+                "scale": spec["scale"],
+                "series": [],
+            }
         series_list = list(result) if isinstance(result, tuple) else [result]
         idx = df.index
         if idx.tz is None:
@@ -1426,7 +1561,13 @@ class LabHandler(BaseHTTPRequestHandler):
                     "values": vals,
                 }
             )
-        return {"name": name, "title": spec["title"], "scale": spec["scale"], "series": out}
+        return {
+            "name": name,
+            "title": spec["title"],
+            "scale": spec["scale"],
+            "series": out,
+            "applied_params": applied_params,
+        }
 
     # ---- provenance: run meta / strategy snapshots ----
     _RUN_TABLES = {

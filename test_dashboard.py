@@ -1,6 +1,6 @@
 import asyncio
-from playwright.async_api import async_playwright
 import json
+from playwright.async_api import async_playwright
 
 async def main():
     async with async_playwright() as p:
@@ -9,39 +9,34 @@ async def main():
         
         errors = []
         page.on("console", lambda msg: errors.append(f"{msg.type}: {msg.text}") if msg.type == "error" else None)
-        page.on("pageerror", lambda err: errors.append(f"PAGE ERROR: {err}"))
+        page.on("pageerror", lambda err: errors.append(f"PAGE_ERROR: {err}"))
         
         print("Loading dashboard...")
         await page.goto("http://127.0.0.1:8088/#s=ScreenerDpoBbwpWick", wait_until="networkidle")
-        await page.wait_for_timeout(10000)
+        await page.wait_for_timeout(20000)
         
-        if errors:
-            print("ERRORS FOUND:")
-            for e in errors[:20]:
-                print(f"  {e}")
-        else:
-            print("No JavaScript errors found")
+        print("Errors:", errors if errors else "none")
         
-        # Check if TradeMap instances were created
-        tm_check = await page.evaluate("""() => {
-            return {
-                tmTab: typeof window._tmTab,
-                tmDetail: typeof window._tmDetail,
-                tmTabType: window._tmTab?.constructor?.name,
-                tmDetailType: window._tmDetail?.constructor?.name,
-            };
+        # Check trade map canvas
+        canvas = await page.evaluate("""() => {
+            const canvases = document.querySelectorAll('canvas');
+            let results = [];
+            canvases.forEach((c, i) => {
+                if (c.width > 100) {
+                    const ctx = c.getContext('2d');
+                    try {
+                        const d = ctx.getImageData(0, 0, c.width, c.height).data;
+                        let n = 0;
+                        for (let j = 3; j < d.length; j += 400) { if (d[j] > 0) n++; }
+                        results.push({ i, w: c.width, h: c.height, painted: n });
+                    } catch (e) { results.push({ i, error: String(e) }); }
+                }
+            });
+            return results;
         }""")
-        print(f"TradeMap check: {json.dumps(tm_check, indent=2)}")
+        print(f"Canvases (should have painted pixels): {json.dumps(canvas, indent=2)}")
         
-        # Check if strategy detail opened
-        detail_check = await page.evaluate("""() => {
-            return {
-                detailActive: document.querySelector('#strategy-detail')?.classList.contains('active'),
-                mainHidden: document.querySelector('#mainContent')?.classList.contains('hidden'),
-            };
-        }""")
-        print(f"Detail check: {json.dumps(detail_check, indent=2)}")
-        
+        await page.screenshot(path="final_working.png", full_page=True)
         await browser.close()
 
 asyncio.run(main())
