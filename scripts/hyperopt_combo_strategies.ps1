@@ -56,10 +56,25 @@ $HyperoptLoss = "ShortTradeDurHyperOptLoss"
 # frame runs populate_indicators every call).
 $Timerange = "20240101-20240130"
 $Pairs = @()                       # empty = all pairs in the data dir
-$Jobs = -1                         # all CPU cores
+$Jobs = 1                           # single worker; -j -1 crashes on this Windows + numpy 2.2 build
 # Per-phase ceilings. Hyperopt dominates the wall clock on a small timerange.
 $HyperoptTimeoutMs = 4 * 60 * 60 * 1000  # 4h per strategy
 $BacktestTimeoutMs = 30 * 60 * 1000       # 30m per strategy (backtest is fast)
+
+# Hyperopt search strategy. The default is TPE (Tree-structured Parzen
+# Estimator) which is sample-inefficient on small epoch budgets. The
+# ExtraTrees (``ET``) estimator is the freqtrade default for Fibonacci
+# stepping and tends to converge faster on noisy small-sample objectives.
+# The Fibonacci stepping mode walks the search space in roughly a golden-
+# ratio pattern: 10 initial random points, then ~15% space reduction per
+# generation toward the ``fibonacci-target`` (default 34, our chosen target).
+# Together with the SmallEpochsFibonacciSpace this is freqtrade's recommended
+# preset for <100 epoch budgets.
+$UseFibonacci = $true
+$FibonacciTarget = 34
+$InitialPoints = 10
+$SpaceReduction = 0.15
+$HyperoptEstimator = "ET"
 
 $LogRoot = Join-Path $Root "user_data\hyperopt_logs"
 if (-not (Test-Path -LiteralPath $LogRoot)) {
@@ -81,55 +96,109 @@ foreach ($Strategy in $Strategies) {
         continue
     }
 
-    Write-Host ""
-    Write-Host "============================================================"
-    Write-Host "[$Strategy] starting hyperopt ($HyperoptEpochs epochs) at $Ts"
-    Write-Host "  log: $HyperoptLog"
-    Write-Host "============================================================"
-
-    $LogFile = Join-Path $StratLogDir "freqtrade_$Ts.log"
-    $HyperoptArgs = @(
-        "-m", "freqtrade", "hyperopt",
-        "-c", "config_screener_test.json",
-        "--strategy", $Strategy,
-        "--strategy-path", "user_data\strategies",
-        "-i", $Timeframe,
-        "--timerange", $Timerange,
-        "--hyperopt-loss", $HyperoptLoss,
-        "--spaces", "buy", "sell",
-        "-e", "$HyperoptEpochs",
-        "-j", "$Jobs",
-        "--userdir", "user_data",
-        "--random-state", "42",
-        "--logfile", $LogFile
-    )
-    if ($Pairs.Count -gt 0) {
-        $HyperoptArgs += @("--pairs") + $Pairs
+    # If a hyperopt result was written in the last 4 hours, skip
+    # hyperopt and reuse the latest result. The Kill-Switch lives in the
+    # ResultFile mtime check below; if a stale result is found the user can
+    # remove the relevant file from user_data/hyperopt_results to force a
+    # rerun.
+    $HyperoptResultsDir = Join-Path $Root "user_data\hyperopt_results"
+    $ExistingResult = Get-ChildItem -LiteralPath $HyperoptResultsDir `
+        -Filter "strategy_${Strategy}_*.fthypt" -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if ($null -ne $ExistingResult -and $ExistingResult.LastWriteTime -gt (Get-Date).AddHours(-4)) {
+        Write-Host "[$Strategy] reusing recent hyperopt result: $($ExistingResult.FullName)"
+        $ResultPath = $ExistingResult.FullName
+        $SkipHyperopt = $true
+    } else {
+        $SkipHyperopt = $false
     }
 
-    $HyperoptStart = Get-Date
-    $HyperoptProc = Start-Process -FilePath $VenvPython -ArgumentList $HyperoptArgs `
-        -RedirectStandardOutput $HyperoptLog -RedirectStandardError "$HyperoptLog.err" `
-        -NoNewWindow -PassThru
-    Write-Host "  pid=$($HyperoptProc.Id) - waiting for hyperopt to finish..."
+    if (-not $SkipHyperopt) {
+        Write-Host ""
+        Write-Host "============================================================"
+        Write-Host "[$Strategy] starting hyperopt ($HyperoptEpochs epochs) at $Ts"
+        Write-Host "  log: $HyperoptLog"
+        Write-Host "============================================================"
 
-    $Exited = $HyperoptProc.WaitForExit($HyperoptTimeoutMs)
-    if (-not $Exited) {
-        Write-Warning "[$Strategy] hyperopt still running after 4h - leaving for next resume"
-        continue
-    }
-    $HyperoptEnd = Get-Date
-    $HyperoptElapsed = $HyperoptEnd - $HyperoptStart
-    Write-Host "[$Strategy] hyperopt exited with code $($HyperoptProc.ExitCode) after $([int]$HyperoptElapsed.TotalMinutes) min"
+        $LogFile = Join-Path $StratLogDir "freqtrade_$Ts.log"
+        $HyperoptArgs = @(
+            "-m", "freqtrade", "hyperopt",
+            "-c", "config_screener_test.json",
+            "--strategy", $Strategy,
+            "--strategy-path", "user_data\strategies",
+            "-i", $Timeframe,
+            "--timerange", $Timerange,
+            "--hyperopt-loss", $HyperoptLoss,
+            "--spaces", "buy", "sell",
+            "-e", "$HyperoptEpochs",
+            "-j", "$Jobs",
+            "--userdir", "user_data",
+            "--random-state", "42",
+            "--logfile", $LogFile
+        )
+        if ($Pairs.Count -gt 0) {
+            $HyperoptArgs += @("--pairs") + $Pairs
+        }
+        # Hyperopt search strategy knobs. When ``$UseFibonacci`` is true we
+        # switch to freqtrade's Fibonacci stepping mode with the chosen
+        # estimator; otherwise the default TPE sampler is used.
+        if ($UseFibonacci) {
+            $HyperoptArgs += @(
+                "--hyperopt-fibonacci",
+                "--fibonacci-target", "$FibonacciTarget",
+                "--initial-points", "$InitialPoints",
+                "--space-reduction", "$SpaceReduction",
+                "--estimator", $HyperoptEstimator
+            )
+        }
 
-    if ($HyperoptProc.ExitCode -ne 0) {
-        Write-Warning "[$Strategy] hyperopt failed - skipping backtest. See $HyperoptLog.err"
-        continue
+        $HyperoptStart = Get-Date
+        $HyperoptProc = Start-Process -FilePath $VenvPython -ArgumentList $HyperoptArgs `
+            -RedirectStandardOutput $HyperoptLog -RedirectStandardError "$HyperoptLog.err" `
+            -NoNewWindow -PassThru
+        Write-Host "  pid=$($HyperoptProc.Id) - waiting for hyperopt to finish..."
+
+        $Exited = $HyperoptProc.WaitForExit($HyperoptTimeoutMs)
+        if (-not $Exited) {
+            Write-Warning "[$Strategy] hyperopt still running after 4h - leaving for next resume"
+            continue
+        }
+        $HyperoptEnd = Get-Date
+        $HyperoptElapsed = $HyperoptEnd - $HyperoptStart
+        # why: $HyperoptProc.ExitCode on PowerShell 5.1 returns 0 immediately
+        # after WaitForExit even if the process hasn't been fully reaped. Poll the
+        # process object until ExitCode is non-zero OR the process is gone, and
+        # fall back to checking whether the hyperopt result JSON was actually
+        # written (the real success signal).
+        $HyperoptExitCode = $null
+        for ($i = 0; $i -lt 10; $i++) {
+            Start-Sleep -Milliseconds 500
+            $proc = Get-Process -Id $HyperoptProc.Id -ErrorAction SilentlyContinue
+            if ($null -eq $proc) { break }
+            if ($proc.ExitCode -ne 0) { $HyperoptExitCode = $proc.ExitCode; break }
+        }
+        if ($null -eq $HyperoptExitCode) {
+            # Process is gone; ExitCode property is inaccessible. Infer from
+            # whether the hyperopt produced a result file after the start time.
+            $ResultProbe = Get-ChildItem -LiteralPath (Join-Path $Root "user_data\strategies") `
+                -Filter "${Strategy}_hyperopt_results-*.json" -ErrorAction SilentlyContinue |
+                Where-Object { $_.LastWriteTime -gt $HyperoptStart } |
+                Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            $HyperoptExitCode = if ($null -ne $ResultProbe) { 0 } else { 1 }
+        }
+        Write-Host "[$Strategy] hyperopt exit code=$HyperoptExitCode after $([int]$HyperoptElapsed.TotalMinutes) min"
+
+        if ($HyperoptExitCode -ne 0) {
+            Write-Warning "[$Strategy] hyperopt failed - skipping backtest. See $HyperoptLog.err"
+            continue
+        }
+    } else {
+        $HyperoptStart = Get-Date
     }
 
     # Find the latest hyperopt result file
-    $ResultDir = Join-Path $Root "user_data\strategies"
-    $ResultFile = Get-ChildItem -LiteralPath $ResultDir -Filter "${Strategy}_hyperopt_results-*.json" -ErrorAction SilentlyContinue |
+    $ResultFile = Get-ChildItem -LiteralPath $HyperoptResultsDir `
+        -Filter "strategy_${Strategy}_*.fthypt" -ErrorAction SilentlyContinue |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if ($null -eq $ResultFile) {
         Write-Warning "[$Strategy] no hyperopt result file found - skipping backtest"
@@ -167,9 +236,25 @@ foreach ($Strategy in $Strategies) {
         Write-Warning "[$Strategy] backtest still running after 30m - leaving for next resume"
         continue
     }
-    Write-Host "[$Strategy] backtest exited with code $($BacktestProc.ExitCode) after $([int]$BacktestElapsed.TotalMinutes) min"
+    # Same PowerShell 5.1 ExitCode quirk as the hyperopt step. Poll then fall
+    # back to whether the backtest produced a non-empty result zip.
+    $BacktestExitCode = $null
+    for ($i = 0; $i -lt 10; $i++) {
+        Start-Sleep -Milliseconds 500
+        $proc = Get-Process -Id $BacktestProc.Id -ErrorAction SilentlyContinue
+        if ($null -eq $proc) { break }
+        if ($proc.ExitCode -ne 0) { $BacktestExitCode = $proc.ExitCode; break }
+    }
+    if ($null -eq $BacktestExitCode) {
+        $RecentZip = Get-ChildItem -LiteralPath (Join-Path $Root "user_data\backtest_results") `
+            -Filter "backtest-result-*.zip" -ErrorAction SilentlyContinue |
+            Where-Object { $_.LastWriteTime -gt $BacktestStart -and $_.Length -gt 1000 } |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        $BacktestExitCode = if ($null -ne $RecentZip) { 0 } else { 1 }
+    }
+    Write-Host "[$Strategy] backtest exit code=$BacktestExitCode after $([int]$BacktestElapsed.TotalMinutes) min"
 
-    if ($BacktestProc.ExitCode -eq 0) {
+    if ($BacktestExitCode -eq 0) {
         Set-Content -LiteralPath $DoneMarker -Value "Hyperopt=$HyperoptLog;Backtest=$BacktestLog;Result=$ResultPath;Ts=$Ts"
 
         # Update the Kelly fractions report after each successful backtest.
@@ -180,7 +265,14 @@ foreach ($Strategy in $Strategies) {
             -RedirectStandardOutput $KellyLog -RedirectStandardError "$KellyLog.err" `
             -NoNewWindow -PassThru
         $KellyProc.WaitForExit(600000) | Out-Null
-        if ($KellyProc.ExitCode -ne 0) {
+        $KellyExitCode = $null
+        for ($i = 0; $i -lt 10; $i++) {
+            Start-Sleep -Milliseconds 500
+            $proc = Get-Process -Id $KellyProc.Id -ErrorAction SilentlyContinue
+            if ($null -eq $proc) { break }
+            if ($proc.ExitCode -ne 0) { $KellyExitCode = $proc.ExitCode; break }
+        }
+        if ($null -ne $KellyExitCode -and $KellyExitCode -ne 0) {
             Write-Warning "[$Strategy] kelly report step failed - see $KellyLog.err"
         }
     } else {

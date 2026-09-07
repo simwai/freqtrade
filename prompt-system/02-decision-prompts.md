@@ -153,7 +153,7 @@ The ask uses the decision format above (this file owns the format; the style-pol
 - `A` (preserve-local)  -> agent writes `policy: preserve-local` to `STYLE_POLICY.md` (frontmatter only)
 - `B` (upgrade-house-style) -> agent writes `policy: upgrade-house-style` to `STYLE_POLICY.md` (frontmatter only)
 
-**Pre-emptiveness.** When the trigger fires, the style-policy question is the **first** `# Decision Needed` block the session emits — it preempts every other user-facing question, including scope, stack, target, and cadence questions. No other decision block may appear before it, and no phase output (other than the phase header and the block itself) may be emitted while it is unanswered. The reason is that every downstream question ("which path?", "which stack?") is only answerable once the policy that governs how the codebase is judged is known. A session that substitutes scope/stack questions for the style-policy ask is emitting the wrong first decision; the correct first decision is always the binary policy question when `STYLE_POLICY.md` is missing and the project is not greenfield.
+**Pre-emptiveness.** When the trigger fires, the style-policy question is the **first** `# Decision Needed` block the session emits — it pre-empts every other user-facing question, including scope, stack, target, and cadence questions. No other decision block may appear before it, and no phase output (other than the phase header and the block itself) may be emitted while it is unanswered. The reason is that every downstream question ("which path?", "which stack?") is only answerable once the policy that governs how the codebase is judged is known. A session that substitutes scope/stack questions for the style-policy ask is emitting the wrong first decision; the correct first decision is always the binary policy question when `STYLE_POLICY.md` is missing and the project is not greenfield.
 
 The artifact is a markdown file with frontmatter only:
 
@@ -251,6 +251,8 @@ In `DIRECT` mode, do not emit a phase template. Use `[MODE: DIRECT]`, act on a c
 The ScrumMaster phrase "direct mode" for a concrete target means "skip the optional upstream planning pipeline" (`INTAKE -> BACKLOG -> SPRINT -> TASK_PLAN -> SPEC`). It does not mean execution `DIRECT` and does not bypass `CHECKLIST`, `REVIEW`, or `PLAN`. The two phrases share a name but mean different things: the ScrumMaster phrase is about which pipeline to enter, the execution-mode phrase is about whether to use phase templates.
 
 ## Required inputs by phase (unblock rules)
+
+`BLOCKED -> STARTUP`: always (every session starts here).
 
 `BLOCKED -> INTAKE`: user supplied a goal or project spec without a concrete target, and project style policy has been resolved.
 
