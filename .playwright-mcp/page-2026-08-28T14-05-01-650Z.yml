@@ -1,0 +1,146 @@
+- generic [active] [ref=f22e1]:
+  - banner [ref=f22e2]:
+    - generic [ref=f22e5]:
+      - heading "Strategy Lab" [level=1] [ref=f22e6]
+      - generic [ref=f22e7]: freqtrade strategy overview · 2026-08-28 16:02
+  - generic [ref=f22e8]:
+    - generic [ref=f22e1654]:
+      - generic [ref=f22e1655]: running
+      - generic [ref=f22e1656]: report-refresh-1787925894
+      - generic [ref=f22e1657]: report-refresh-1787925894-1787925894 · step 1/1
+      - button "Logs" [ref=f22e1658] [cursor=pointer]
+      - button "Pause" [ref=f22e1659] [cursor=pointer]
+      - button "Stop" [ref=f22e1660] [cursor=pointer]
+    - generic [ref=f22e1661]:
+      - generic [ref=f22e1662]: running
+      - generic [ref=f22e1663]: report-refresh-1787925876
+      - generic [ref=f22e1664]: report-refresh-1787925876-1787925876 · step 1/1
+      - button "Logs" [ref=f22e1665] [cursor=pointer]
+      - button "Pause" [ref=f22e1666] [cursor=pointer]
+      - button "Stop" [ref=f22e1667] [cursor=pointer]
+    - generic [ref=f22e1668]:
+      - generic [ref=f22e1669]: running
+      - generic [ref=f22e1670]: refresh
+      - generic [ref=f22e1671]: refresh-1787925876 · step 1/1
+      - button "Logs" [ref=f22e1672] [cursor=pointer]
+      - button "Pause" [ref=f22e1673] [cursor=pointer]
+      - button "Stop" [ref=f22e1674] [cursor=pointer]
+    - generic [ref=f22e1675]:
+      - generic [ref=f22e1676]: running
+      - generic [ref=f22e1677]: report-refresh-1787925861
+      - generic [ref=f22e1678]: report-refresh-1787925861-1787925861 · step 1/1
+      - button "Logs" [ref=f22e1679] [cursor=pointer]
+      - button "Pause" [ref=f22e1680] [cursor=pointer]
+      - button "Stop" [ref=f22e1681] [cursor=pointer]
+    - generic [ref=f22e1682]:
+      - generic [ref=f22e1683]: error
+      - generic [ref=f22e1684]: refresh
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\ingest_results.py" [ref=f22e1685]: "Traceback (most recent call last): | sqlite3.OperationalError: database is locked"
+      - button "View log" [ref=f22e1686] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1687] [cursor=pointer]
+    - generic [ref=f22e1688]:
+      - generic [ref=f22e1689]: error
+      - generic [ref=f22e1690]: refresh
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\ingest_results.py" [ref=f22e1691]: "Traceback (most recent call last): | sqlite3.OperationalError: database is locked"
+      - button "View log" [ref=f22e1692] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1693] [cursor=pointer]
+    - generic [ref=f22e1694]:
+      - generic [ref=f22e1695]: done
+      - generic [ref=f22e1696]: report-refresh-1787925851
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\build_report.py" [ref=f22e1697]: Dashboard written to M:\Documents\Programming\Python\freqtrade\user_data\analysis\dashboard.html (3879 KB)
+      - button "View log" [ref=f22e1698] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1699] [cursor=pointer]
+  - generic [ref=f22e27]:
+    - button "Dashboard" [ref=f22e28] [cursor=pointer]
+    - button "Strategies" [ref=f22e29] [cursor=pointer]
+    - button "History" [ref=f22e30] [cursor=pointer]
+    - button "Benchmark" [ref=f22e31] [cursor=pointer]
+    - button "Walk-Forward" [ref=f22e32] [cursor=pointer]
+    - button "Hyperopt" [ref=f22e33] [cursor=pointer]
+    - button "Trades" [ref=f22e34] [cursor=pointer]
+    - button "Lab" [ref=f22e35] [cursor=pointer]
+  - main [ref=f22e36]:
+    - generic [ref=f22e1634]:
+      - generic [ref=f22e1635]:
+        - heading "History" [level=2] [ref=f22e1636]
+        - generic [ref=f22e1637]: profit & sortino per strategy over all runs
+      - generic [ref=f22e1638]:
+        - generic [ref=f22e1639]:
+          - checkbox "Profit % (log scale)" [checked] [ref=f22e1640]
+          - text: Profit % (log scale)
+        - listbox [ref=f22e1641]:
+          - option "Top by run count" [selected]
+          - option "All"
+          - option "BigZ08"
+          - option "BigZ06AtrSl"
+          - option "BigZ06"
+          - option "HoffmanIRBStrategy"
+          - option "SmokeStrategyTemplateV21"
+          - option "NostalgiaForInfinityX7"
+          - option "NostalgiaForInfinityX7Guarded"
+          - option "NostalgiaForInfinityX7GuardedRelative"
+          - option "OctopusNestStrategy"
+          - option "adaptive"
+          - option "CombinedBinHClucAndMADV3"
+          - option "HybridRegimeSwitcher"
+          - option "NostalgiaForInfinityX4"
+          - option "BigZ06Original"
+          - option "LuxAlgo15mBTCLowRisk"
+          - option "NostalgiaForInfinityX7GuardedCat15"
+          - option "newstrategy51"
+          - option "newstrategy53"
+          - option "BigZ07Next2"
+          - option "HarmonicDivergence"
+          - option "HoffmanIRBStrategy5mFee"
+          - option "NFIX7GuardedCat15"
+          - option "NFIX7GuardedCat25"
+          - option "NFIX7GuardedCat30"
+          - option "NostalgiaForInfinityX7GuardedAge10"
+          - option "NostalgiaForInfinityX7GuardedAge21"
+          - option "NostalgiaForInfinityX7GuardedCat25"
+          - option "NostalgiaForInfinityX7GuardedCat30"
+          - option "ClucHAnix_5m"
+          - option "MfiEmaWaveTrend"
+          - option "MfiEmaWaveTrend2"
+          - option "NFIX7GuardedAge10"
+          - option "NFIX7GuardedAge21"
+          - option "GKDAdaptiveAcademicFinal"
+          - option "HoffmanIRBStrategy15m"
+          - option "HoffmanIRBStrategy1h"
+          - option "HoffmanIRBStrategy5mFeeVolRegime"
+          - option "HoffmanIRBStrategyRR05"
+          - option "Ichi"
+          - option "NostalgiaForInfinityX6"
+          - option "StrategyTemplateV21"
+          - option "SupertrendKeltner"
+          - option "WildersVolatilityBingAi"
+          - option "ichiV1"
+        - button "Select all" [ref=f22e1642] [cursor=pointer]
+        - button "Top 8" [ref=f22e1643] [cursor=pointer]
+        - button "Clear" [ref=f22e1644] [cursor=pointer]
+  - complementary [ref=f22e1488]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=f22e1492]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

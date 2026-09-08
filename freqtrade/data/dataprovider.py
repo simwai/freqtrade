@@ -7,7 +7,7 @@ Common Interface for bot and strategy to access data.
 
 import logging
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from pandas import DataFrame, Timedelta, Timestamp, to_timedelta
@@ -23,7 +23,7 @@ from freqtrade.data.history import get_datahandler, load_pair_history
 from freqtrade.enums import CandleType, RPCMessageType, RunMode, TradingMode
 from freqtrade.exceptions import ExchangeError, OperationalException
 from freqtrade.exchange import Exchange, timeframe_to_prev_date, timeframe_to_seconds
-from freqtrade.exchange.exchange_types import OrderBook
+from freqtrade.exchange.exchange_types import FundingRate, OrderBook
 from freqtrade.misc import append_candles_to_dataframe
 from freqtrade.rpc import RPCManager
 from freqtrade.rpc.rpc_types import RPCAnalyzedDFMsg
@@ -95,10 +95,11 @@ class DataProvider:
         :param pair: pair to get the data for
         :param timeframe: Timeframe to get data for
         :param dataframe: analyzed dataframe
-        :param candle_type: Any of the enum CandleType (must match trading mode!)
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
+                            Must match the trading mode.
         """
         pair_key = (pair, timeframe, candle_type)
-        self.__cached_pairs[pair_key] = (dataframe, datetime.now(timezone.utc))
+        self.__cached_pairs[pair_key] = (dataframe, datetime.now(UTC))
 
     # For multiple producers we will want to merge the pairlists instead of overwriting
     def _set_producer_pairs(self, pairlist: list[str], producer_name: str = "default"):
@@ -131,7 +132,7 @@ class DataProvider:
                 "data": {
                     "key": pair_key,
                     "df": dataframe.tail(1),
-                    "la": datetime.now(timezone.utc),
+                    "la": datetime.now(UTC),
                 },
             }
             self.__rpc.send_msg(msg)
@@ -157,14 +158,15 @@ class DataProvider:
 
         :param pair: pair to get the data for
         :param timeframe: Timeframe to get data for
-        :param candle_type: Any of the enum CandleType (must match trading mode!)
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
+                            Must match the trading mode.
         """
         pair_key = (pair, timeframe, candle_type)
 
         if producer_name not in self.__producer_pairs_df:
             self.__producer_pairs_df[producer_name] = {}
 
-        _last_analyzed = datetime.now(timezone.utc) if not last_analyzed else last_analyzed
+        _last_analyzed = datetime.now(UTC) if not last_analyzed else last_analyzed
 
         self.__producer_pairs_df[producer_name][pair_key] = (dataframe, _last_analyzed)
         logger.debug(f"External DataFrame for {pair_key} from {producer_name} added.")
@@ -184,7 +186,8 @@ class DataProvider:
 
         :param pair: pair to get the data for
         :param timeframe: Timeframe to get data for
-        :param candle_type: Any of the enum CandleType (must match trading mode!)
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
+                            Must match the trading mode.
         :returns: False if the candle could not be appended, or the int number of missing candles.
         """
         pair_key = (pair, timeframe, candle_type)
@@ -264,7 +267,7 @@ class DataProvider:
 
         :param pair: pair to get the data for
         :param timeframe: Timeframe to get data for
-        :param candle_type: Any of the enum CandleType (must match trading mode!)
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
         :returns: Tuple of the DataFrame and last analyzed timestamp
         """
         _timeframe = self._default_timeframe if not timeframe else timeframe
@@ -275,12 +278,12 @@ class DataProvider:
         # If we have no data from this Producer yet
         if producer_name not in self.__producer_pairs_df:
             # We don't have this data yet, return empty DataFrame and datetime (01-01-1970)
-            return (DataFrame(), datetime.fromtimestamp(0, tz=timezone.utc))
+            return (DataFrame(), datetime.fromtimestamp(0, tz=UTC))
 
         # If we do have data from that Producer, but no data on this pair_key
         if pair_key not in self.__producer_pairs_df[producer_name]:
             # We don't have this data yet, return empty DataFrame and datetime (01-01-1970)
-            return (DataFrame(), datetime.fromtimestamp(0, tz=timezone.utc))
+            return (DataFrame(), datetime.fromtimestamp(0, tz=UTC))
 
         # We have it, return this data
         df, la = self.__producer_pairs_df[producer_name][pair_key]
@@ -297,7 +300,8 @@ class DataProvider:
         Get stored historical candle (OHLCV) data
         :param pair: pair to get the data for
         :param timeframe: timeframe to get data for
-        :param candle_type: '', mark, index, premiumIndex, or funding_rate
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
+                            '' (the default) resolves to the trading mode's candle type.
         """
         _candle_type = (
             CandleType.from_string(candle_type)
@@ -348,6 +352,22 @@ class DataProvider:
             )
         return total_candles
 
+    def __fix_funding_rate_timeframe(
+        self, pair: str, timeframe: str | None, candle_type: str
+    ) -> str | None:
+        if (
+            candle_type == CandleType.FUNDING_RATE
+            and (ff_tf := self.get_funding_rate_timeframe()) != timeframe
+        ):
+            # TODO: does this message make sense? might be pointless as funding fees don't
+            # have a timeframe
+            logger.warning(
+                f"{pair}, {timeframe} requested - funding rate timeframe not matching {ff_tf}."
+            )
+            return ff_tf
+
+        return timeframe
+
     def get_pair_dataframe(
         self, pair: str, timeframe: str | None = None, candle_type: str = ""
     ) -> DataFrame:
@@ -358,9 +378,11 @@ class DataProvider:
         will be available.
         :param pair: pair to get the data for
         :param timeframe: timeframe to get data for
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
+                            '' (the default) resolves to the trading mode's candle type.
         :return: Dataframe for this pair
-        :param candle_type: '', mark, index, premiumIndex, or funding_rate
         """
+        timeframe = self.__fix_funding_rate_timeframe(pair, timeframe, candle_type)
         if self.runmode in (RunMode.DRY_RUN, RunMode.LIVE):
             # Get live OHLCV data.
             data = self.ohlcv(pair=pair, timeframe=timeframe, candle_type=candle_type)
@@ -396,16 +418,16 @@ class DataProvider:
                 if (max_index := self.__slice_index.get(pair)) is not None:
                     df = df.iloc[max(0, max_index - MAX_DATAFRAME_CANDLES) : max_index]
                 else:
-                    return (DataFrame(), datetime.fromtimestamp(0, tz=timezone.utc))
+                    return (DataFrame(), datetime.fromtimestamp(0, tz=UTC))
             return df, date
         else:
-            return (DataFrame(), datetime.fromtimestamp(0, tz=timezone.utc))
+            return (DataFrame(), datetime.fromtimestamp(0, tz=UTC))
 
     @property
     def runmode(self) -> RunMode:
         """
         Get runmode of the bot
-        can be "live", "dry-run", "backtest", "edgecli", "hyperopt" or "other".
+        can be "live", "dry-run", "backtest", "hyperopt" or "other".
         """
         return RunMode(self._config.get("runmode", RunMode.OTHER))
 
@@ -457,9 +479,8 @@ class DataProvider:
         """
 
         use_public_trades = self._config.get("exchange", {}).get("use_public_trades", False)
-        if use_public_trades:
-            if self._exchange:
-                self._exchange.refresh_latest_trades(pairlist)
+        if use_public_trades and self._exchange:
+            self._exchange.refresh_latest_trades(pairlist)
 
     @property
     def available_pairs(self) -> ListPairsWithTimeframes:
@@ -479,7 +500,8 @@ class DataProvider:
         Please use the `available_pairs` method to verify which pairs are currently cached.
         :param pair: pair to get the data for
         :param timeframe: Timeframe to get data for
-        :param candle_type: '', mark, index, premiumIndex, or funding_rate
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
+                            '' (the default) resolves to the trading mode's candle type.
         :param copy: copy dataframe before returning if True.
                      Use False only for read-only operations (where the dataframe is not modified)
         """
@@ -498,7 +520,12 @@ class DataProvider:
             return DataFrame()
 
     def trades(
-        self, pair: str, timeframe: str | None = None, copy: bool = True, candle_type: str = ""
+        self,
+        pair: str,
+        timeframe: str | None = None,
+        copy: bool = True,
+        candle_type: str = "",
+        timerange: TimeRange | None = None,
     ) -> DataFrame:
         """
         Get candle (TRADES) data for the given pair as DataFrame
@@ -506,7 +533,8 @@ class DataProvider:
         This is not meant to be used in callbacks because of lookahead bias.
         :param pair: pair to get the data for
         :param timeframe: Timeframe to get data for
-        :param candle_type: '', mark, index, premiumIndex, or funding_rate
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
+                            '' (the default) resolves to the trading mode's candle type.
         :param copy: copy dataframe before returning if True.
                      Use False only for read-only operations (where the dataframe is not modified)
         """
@@ -526,7 +554,7 @@ class DataProvider:
                 self._config["datadir"], data_format=self._config["dataformat_trades"]
             )
             trades_df = data_handler.trades_load(
-                pair, self._config.get("trading_mode", TradingMode.SPOT)
+                pair, self._config.get("trading_mode", TradingMode.SPOT), timerange=timerange
             )
             return trades_df
 
@@ -543,6 +571,7 @@ class DataProvider:
     def ticker(self, pair: str):
         """
         Return last ticker data from exchange
+        Warning: Performs a network request - so use with common sense.
         :param pair: Pair to get the data for
         :return: Ticker dict from exchange or empty dict if ticker is not available for the pair
         """
@@ -556,7 +585,7 @@ class DataProvider:
     def orderbook(self, pair: str, maximum: int) -> OrderBook:
         """
         Fetch latest l2 orderbook data
-        Warning: Does a network request - so use with common sense.
+        Warning: Performs a network request - so use with common sense.
         :param pair: pair to get the data for
         :param maximum: Maximum number of orderbook entries to query
         :return: dict including bids/asks with a total of `maximum` entries.
@@ -564,6 +593,23 @@ class DataProvider:
         if self._exchange is None:
             raise OperationalException(NO_EXCHANGE_EXCEPTION)
         return self._exchange.fetch_l2_order_book(pair, maximum)
+
+    def funding_rate(self, pair: str) -> FundingRate:
+        """
+        Return Funding rate from the exchange
+        Warning: Performs a network request - so use with common sense.
+        :param pair: Pair to get the data for
+        :return: Funding rate dict from exchange or empty dict if funding rate is not available
+            If available, the "fundingRate" field will contain the funding rate.
+            "fundingTimestamp" and "fundingDatetime" will contain the next funding times.
+            Actually filled fields may vary between exchanges.
+        """
+        if self._exchange is None:
+            raise OperationalException(NO_EXCHANGE_EXCEPTION)
+        try:
+            return self._exchange.fetch_funding_rate(pair)
+        except ExchangeError:
+            return {}
 
     def send_msg(self, message: str, *, always_send: bool = False) -> None:
         """
@@ -581,3 +627,28 @@ class DataProvider:
         if always_send or message not in self.__msg_cache:
             self._msg_queue.append(message)
         self.__msg_cache[message] = True
+
+    def check_delisting(self, pair: str) -> datetime | None:
+        """
+        Check if a pair gonna be delisted on the exchange.
+        Will only return datetime if the pair is gonna be delisted.
+        :param pair: Pair to check
+        :return: Datetime of the pair's delisting, None otherwise
+        """
+        if self._exchange is None:
+            raise OperationalException(NO_EXCHANGE_EXCEPTION)
+
+        try:
+            return self._exchange.check_delisting_time(pair)
+        except ExchangeError:
+            logger.warning(f"Could not fetch market data for {pair}. Assuming no delisting.")
+            return None
+
+    def get_funding_rate_timeframe(self) -> str:
+        """
+        Get the funding rate timeframe from exchange options
+        :return: Timeframe string
+        """
+        if self._exchange is None:
+            raise OperationalException(NO_EXCHANGE_EXCEPTION)
+        return self._exchange.get_option("funding_fee_timeframe")

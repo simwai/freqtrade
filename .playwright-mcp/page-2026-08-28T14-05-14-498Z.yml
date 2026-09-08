@@ -1,0 +1,115 @@
+- generic [active] [ref=f22e1]:
+  - banner [ref=f22e2]:
+    - generic [ref=f22e5]:
+      - heading "Strategy Lab" [level=1] [ref=f22e6]
+      - generic [ref=f22e7]: freqtrade strategy overview · 2026-08-28 16:02
+  - generic [ref=f22e8]:
+    - generic [ref=f22e1700]:
+      - generic [ref=f22e1701]: running
+      - generic [ref=f22e1702]: report-refresh-1787925894
+      - generic [ref=f22e1703]: report-refresh-1787925894-1787925894 · step 1/1
+      - button "Logs" [ref=f22e1704] [cursor=pointer]
+      - button "Pause" [ref=f22e1705] [cursor=pointer]
+      - button "Stop" [ref=f22e1706] [cursor=pointer]
+    - generic [ref=f22e1707]:
+      - generic [ref=f22e1708]: running
+      - generic [ref=f22e1709]: report-refresh-1787925876
+      - generic [ref=f22e1710]: report-refresh-1787925876-1787925876 · step 1/1
+      - button "Logs" [ref=f22e1711] [cursor=pointer]
+      - button "Pause" [ref=f22e1712] [cursor=pointer]
+      - button "Stop" [ref=f22e1713] [cursor=pointer]
+    - generic [ref=f22e1714]:
+      - generic [ref=f22e1715]: running
+      - generic [ref=f22e1716]: refresh
+      - generic [ref=f22e1717]: refresh-1787925876 · step 1/1
+      - button "Logs" [ref=f22e1718] [cursor=pointer]
+      - button "Pause" [ref=f22e1719] [cursor=pointer]
+      - button "Stop" [ref=f22e1720] [cursor=pointer]
+    - generic [ref=f22e1721]:
+      - generic [ref=f22e1722]: error
+      - generic [ref=f22e1723]: refresh
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\ingest_results.py" [ref=f22e1724]: "Traceback (most recent call last): | sqlite3.OperationalError: database is locked"
+      - button "View log" [ref=f22e1725] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1726] [cursor=pointer]
+    - generic [ref=f22e1727]:
+      - generic [ref=f22e1728]: done
+      - generic [ref=f22e1729]: report-refresh-1787925861
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\build_report.py" [ref=f22e1730]: Dashboard written to M:\Documents\Programming\Python\freqtrade\user_data\analysis\dashboard.html (3982 KB)
+      - button "View log" [ref=f22e1731] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1732] [cursor=pointer]
+    - generic [ref=f22e1733]:
+      - generic [ref=f22e1734]: error
+      - generic [ref=f22e1735]: refresh
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\ingest_results.py" [ref=f22e1736]: "Traceback (most recent call last): | sqlite3.OperationalError: database is locked"
+      - button "View log" [ref=f22e1737] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1738] [cursor=pointer]
+  - generic [ref=f22e27]:
+    - button "Dashboard" [ref=f22e28] [cursor=pointer]
+    - button "Strategies" [ref=f22e29] [cursor=pointer]
+    - button "History" [ref=f22e30] [cursor=pointer]
+    - button "Benchmark" [ref=f22e31] [cursor=pointer]
+    - button "Walk-Forward" [ref=f22e32] [cursor=pointer]
+    - button "Hyperopt" [ref=f22e33] [cursor=pointer]
+    - button "Trades" [ref=f22e34] [cursor=pointer]
+    - button "Lab" [ref=f22e35] [cursor=pointer]
+  - main [ref=f22e36]:
+    - generic [ref=f22e1526]:
+      - generic [ref=f22e1527]:
+        - heading "Benchmark" [level=2] [ref=f22e1528]
+        - generic [ref=f22e1529]: one box per strategy, one dot per run · outliers visible at a glance
+      - group [ref=f22e1530]:
+        - generic "How to read this (plain English)" [ref=f22e1531] [cursor=pointer]
+      - generic [ref=f22e1532]:
+        - generic [ref=f22e1533]:
+          - text: "Metric:"
+          - combobox "Metric:" [ref=f22e1534]:
+            - option "Sortino" [selected]
+            - option "Total Profit"
+            - option "Calmar"
+            - option "Profit Factor"
+            - option "Max Drawdown"
+        - generic [ref=f22e1535]:
+          - text: "Source:"
+          - combobox "Source:" [ref=f22e1536]:
+            - option "Benchmark + backtest (default)" [selected]
+            - option "Benchmark only"
+            - option "Backtest only"
+        - generic [ref=f22e1537]:
+          - text: "Sort by:"
+          - combobox "Sort by:" [ref=f22e1538]:
+            - option "Median (default)" [selected]
+            - option "Run count"
+            - option "Strategy name"
+        - generic [ref=f22e1539]:
+          - checkbox "Log scale" [ref=f22e1540]
+          - text: Log scale
+        - generic [ref=f22e1541]:
+          - checkbox "Show every run" [checked] [ref=f22e1542]
+          - text: Show every run
+      - paragraph [ref=f22e1544]: 72 strategies · 369 runs · 62 outliers (|z|>2.5) · 3 benchmarked · 69 backtest-only
+  - complementary [ref=f22e1488]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=f22e1492]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

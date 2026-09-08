@@ -26,10 +26,19 @@ Alternatively (e.g. if your system is not supported by the setup.sh script), fol
 
 This will install all required tools for development, including `pytest`, `ruff`, `mypy`, and `coveralls`.
 
-Then install the git hook scripts by running `pre-commit install`, so your changes will be verified locally before committing.
-This avoids a lot of waiting for CI already, as some basic formatting checks are done locally on your machine.
+Run the following command to install the git hook scripts:
 
-Before opening a pull request, please familiarize yourself with our [Contributing Guidelines](https://github.com/freqtrade/freqtrade/blob/develop/CONTRIBUTING.md).
+``` bash
+pre-commit install
+```
+
+These pre-commit scripts check your changes automatically before each commit.  
+If any formatting issues are found, the commit will fail and will prompt for fixes.
+This reduces unnecessary CI failures, reduces maintenance burden, and improves code quality.
+
+You can run the checks manually when necessary with `pre-commit run -a`.  
+
+Before opening a pull request, please also familiarize yourself with our [Contributing Guidelines](https://github.com/freqtrade/freqtrade/blob/develop/CONTRIBUTING.md).
 
 ### Devcontainer setup
 
@@ -304,6 +313,13 @@ The `IProtection` parent class provides a helper method for this in `calculate_l
 
 Most exchanges supported by CCXT should work out of the box.
 
+If you need to implement a specific exchange class, these are found in the `freqtrade/exchange` source folder. You'll also need to add the import to `freqtrade/exchange/__init__.py` to make the loading logic aware of the new exchange.  
+We recommend looking at existing exchange implementations to get an idea of what might be required.
+
+!!! Warning
+    Implementing and testing an exchange can be a lot of trial and error, so please bear this in mind.
+    You should also have some development experience, as this is not a beginner task.
+
 To quickly test the public endpoints of an exchange, add a configuration for your exchange to `tests/exchange_online/conftest.py` and run these tests with `pytest --longrun tests/exchange_online/test_ccxt_compat.py`.
 Completing these tests successfully a good basis point (it's a requirement, actually), however these won't guarantee correct exchange functioning, as this only tests public endpoints, but no private endpoint (like generate order or similar).
 
@@ -401,6 +417,21 @@ jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace freqtrade/tem
 jupyter nbconvert --ClearOutputPreprocessor.enabled=True --to markdown freqtrade/templates/strategy_analysis_example.ipynb --stdout > docs/strategy_analysis_example.md
 ```
 
+## Backtest documentation results
+
+To generate backtest outputs, please use the following commands:
+
+``` bash
+# Assume a dedicated user directory for this output
+freqtrade create-userdir --userdir user_data_bttest/
+# set can_short = True
+sed -i "s/can_short: bool = False/can_short: bool = True/" user_data_bttest/strategies/sample_strategy.py
+
+freqtrade download-data --timerange 20250625-20250801 --config tests/testdata/config.tests.usdt.json --userdir user_data_bttest/ -t 5m
+
+freqtrade backtesting --config tests/testdata/config.tests.usdt.json -s SampleStrategy --userdir user_data_bttest/ --cache none --timerange 20250701-20250801
+```
+
 ## Continuous integration
 
 This documents some decisions taken for the CI Pipeline.
@@ -411,7 +442,6 @@ This documents some decisions taken for the CI Pipeline.
 * Docker images contain a file, `/freqtrade/freqtrade_commit` containing the commit this image is based of.
 * Full docker image rebuilds are run once a week via schedule.
 * Deployments run on ubuntu.
-* ta-lib binaries are contained in the build_helpers directory to avoid fails related to external unavailability.
 * All tests must pass for a PR to be merged to `stable` or `develop`.
 
 ## Creating a release
@@ -433,10 +463,10 @@ git checkout -b new_release <commitid>
 Determine if crucial bugfixes have been made between this commit and the current state, and eventually cherry-pick these.
 
 * Merge the release branch (stable) into this branch.
-* Edit `freqtrade/__init__.py` and add the version matching the current date (for example `2019.7` for July 2019). Minor versions can be `2019.7.1` should we need to do a second release that month. Version numbers must follow allowed versions from PEP0440 to avoid failures pushing to pypi.
+* Edit `freqtrade/__init__.py` and add the version matching the current date (for example `2025.7` for July 2025). Minor versions can be `2025.7.1` should we need to do a second release that month. Version numbers must follow allowed versions from PEP0440 to avoid failures pushing to pypi.
 * Commit this part.
 * Push that branch to the remote and create a PR against the **stable branch**.
-* Update develop version to next version following the pattern `2019.8-dev`.
+* Update develop version to next version following the pattern `2025.8-dev`.
 
 ### Create changelog from git commits
 

@@ -1,24 +1,26 @@
 """Kraken exchange subclass"""
 
 import logging
-from datetime import datetime
 from typing import Any
 
 import ccxt
-from pandas import DataFrame
 
 from freqtrade.constants import BuySell
 from freqtrade.enums import MarginMode, TradingMode
 from freqtrade.exceptions import DDosProtection, OperationalException, TemporaryError
 from freqtrade.exchange import Exchange
 from freqtrade.exchange.common import retrier
-from freqtrade.exchange.exchange_types import CcxtBalances, FtHas, Tickers
+from freqtrade.exchange.exchange_types import CcxtBalances, FtHas
 
 
 logger = logging.getLogger(__name__)
 
 
 class Kraken(Exchange):
+    """Kraken exchange class.
+    Contains adjustments needed for Freqtrade to work with this exchange.
+    """
+
     _params: dict = {"trading_agreement": "agree"}
     _ft_has: FtHas = {
         "stoploss_on_exchange": True,
@@ -31,13 +33,11 @@ class Kraken(Exchange):
         "trades_pagination_arg": "since",
         "trades_pagination_overlap": False,
         "trades_has_history": True,
-        "mark_ohlcv_timeframe": "4h",
     }
 
     _supported_trading_mode_margin_pairs: list[tuple[TradingMode, MarginMode]] = [
-        # TradingMode.SPOT always supported and not required in this list
+        (TradingMode.SPOT, MarginMode.NONE),
         # (TradingMode.MARGIN, MarginMode.CROSS),
-        # (TradingMode.FUTURES, MarginMode.CROSS)
     ]
 
     def market_is_tradable(self, market: dict[str, Any]) -> bool:
@@ -49,18 +49,6 @@ class Kraken(Exchange):
 
         return parent_check and market.get("darkpool", False) is False
 
-    def get_tickers(
-        self,
-        symbols: list[str] | None = None,
-        *,
-        cached: bool = False,
-        market_type: TradingMode | None = None,
-    ) -> Tickers:
-        # Only fetch tickers for current stake currency
-        # Otherwise the request for kraken becomes too large.
-        symbols = list(self.get_markets(quote_currencies=[self._config["stake_currency"]]))
-        return super().get_tickers(symbols=symbols, cached=cached, market_type=market_type)
-
     def consolidate_balances(self, balances: CcxtBalances) -> CcxtBalances:
         """
         Consolidate balances for the same currency.
@@ -68,7 +56,7 @@ class Kraken(Exchange):
         """
         consolidated: CcxtBalances = {}
         for currency, balance in balances.items():
-            base_currency = currency[:-2] if currency.endswith(".F") else currency
+            base_currency = currency.removesuffix(".F")
 
             if base_currency in consolidated:
                 consolidated[base_currency]["free"] += balance["free"]
@@ -79,7 +67,7 @@ class Kraken(Exchange):
         return consolidated
 
     @retrier
-    def get_balances(self) -> CcxtBalances:
+    def get_balances(self, params: dict | None = None) -> CcxtBalances:
         if self._config["dry_run"]:
             return {}
 
@@ -90,7 +78,7 @@ class Kraken(Exchange):
             balances.pop("free", None)
             balances.pop("total", None)
             balances.pop("used", None)
-            self._log_exchange_response("fetch_balances", balances)
+            self._log_exchange_response("fetch_balance", balances)
 
             # Consolidate balances
             balances = self.consolidate_balances(balances)
@@ -112,7 +100,7 @@ class Kraken(Exchange):
                 balances[bal]["used"] = sum(order[1] for order in order_list if order[0] == bal)
                 balances[bal]["free"] = balances[bal]["total"] - balances[bal]["used"]
 
-            self._log_exchange_response("fetch_balances2", balances)
+            self._log_exchange_response("fetch_balance2", balances)
             return balances
         except ccxt.DDoSProtection as e:
             raise DDosProtection(e) from e
@@ -122,18 +110,6 @@ class Kraken(Exchange):
             ) from e
         except ccxt.BaseError as e:
             raise OperationalException(e) from e
-
-    def _set_leverage(
-        self,
-        leverage: float,
-        pair: str | None = None,
-        accept_fail: bool = False,
-    ):
-        """
-        Kraken set's the leverage as an option in the order object, so we need to
-        add it to params
-        """
-        return
 
     def _get_params(
         self,
@@ -156,41 +132,6 @@ class Kraken(Exchange):
             params.pop("timeInForce", None)
             params["postOnly"] = True
         return params
-
-    def calculate_funding_fees(
-        self,
-        df: DataFrame,
-        amount: float,
-        is_short: bool,
-        open_date: datetime,
-        close_date: datetime,
-        time_in_ratio: float | None = None,
-    ) -> float:
-        """
-        # ! This method will always error when run by Freqtrade because time_in_ratio is never
-        # ! passed to _get_funding_fee. For kraken futures to work in dry run and backtesting
-        # ! functionality must be added that passes the parameter time_in_ratio to
-        # ! _get_funding_fee when using Kraken
-        calculates the sum of all funding fees that occurred for a pair during a futures trade
-        :param df: Dataframe containing combined funding and mark rates
-                   as `open_fund` and `open_mark`.
-        :param amount: The quantity of the trade
-        :param is_short: trade direction
-        :param open_date: The date and time that the trade started
-        :param close_date: The date and time that the trade ended
-        :param time_in_ratio: Not used by most exchange classes
-        """
-        if not time_in_ratio:
-            raise OperationalException(
-                f"time_in_ratio is required for {self.name}._get_funding_fee"
-            )
-        fees: float = 0
-
-        if not df.empty:
-            df = df[(df["date"] >= open_date) & (df["date"] <= close_date)]
-            fees = sum(df["open_fund"] * df["open_mark"] * amount * time_in_ratio)
-
-        return fees if is_short else -fees
 
     def _get_trade_pagination_next_value(self, trades: list[dict]):
         """

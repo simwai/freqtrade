@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import json
 import os
 from pathlib import Path
@@ -12,7 +11,12 @@ secret = os.environ.get("FREQTRADE__EXCHANGE__SECRET")
 proxy = os.environ.get("CI_WEB_PROXY")
 
 exchange = ccxt.binance(
-    {"apiKey": key, "secret": secret, "httpsProxy": proxy, "options": {"defaultType": "swap"}}
+    {
+        "apiKey": key,
+        "secret": secret,
+        "httpsProxy": proxy,
+        "options": {"defaultType": "swap"},
+    }
 )
 _ = exchange.load_markets()
 

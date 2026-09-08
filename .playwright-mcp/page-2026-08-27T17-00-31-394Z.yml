@@ -1,0 +1,528 @@
+- generic [active] [ref=f5e1]:
+  - banner [ref=f5e2]:
+    - generic [ref=f5e5]:
+      - heading "Strategy Lab" [level=1] [ref=f5e6]
+      - generic [ref=f5e7]: freqtrade strategy overview · 2026-08-27 18:55
+  - generic [ref=f5e8]:
+    - button "Dashboard" [ref=f5e9] [cursor=pointer]
+    - button "Strategies" [ref=f5e10] [cursor=pointer]
+    - button "History" [ref=f5e11] [cursor=pointer]
+    - button "Benchmark" [ref=f5e12] [cursor=pointer]
+    - button "Walk-Forward" [ref=f5e13] [cursor=pointer]
+    - button "Hyperopt" [ref=f5e14] [cursor=pointer]
+    - button "Trades" [ref=f5e15] [cursor=pointer]
+    - button "Lab" [ref=f5e16] [cursor=pointer]
+  - main [ref=f5e17]:
+    - generic [ref=f5e19]:
+      - generic [ref=f5e20]:
+        - heading "Trades" [level=2] [ref=f5e21]
+        - generic [ref=f5e22]: equity curve, profit distribution & per-trade detail (SL/TP, exit reason). Use lab.py serve to browse all runs.
+      - generic [ref=f5e23]:
+        - generic [ref=f5e24]:
+          - text: "Run:"
+          - combobox "Run:" [ref=f5e25]:
+            - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-37-03.zip (14 trades · 2026-08-27 11:36)" [selected]
+            - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-36-28.zip (14 trades · 2026-08-27 11:36)"
+            - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-35-53.zip (14 trades · 2026-08-27 11:35)"
+            - option "NFIX7GuardedAge21 — backtest-result-2026-08-27_13-35-20.zip (31 trades · 2026-08-27 11:34)"
+            - option "NFIX7GuardedAge10 — backtest-result-2026-08-27_13-34-15.zip (32 trades · 2026-08-27 11:33)"
+            - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-33-20.zip (32 trades · 2026-08-27 11:32)"
+            - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-32-22.zip (32 trades · 2026-08-27 11:31)"
+            - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-31-22.zip (32 trades · 2026-08-27 11:30)"
+            - option "NFIX7GuardedAge21 — backtest-result-2026-08-27_13-30-25.zip (126 trades · 2026-08-27 11:29)"
+            - option "NFIX7GuardedAge10 — backtest-result-2026-08-27_13-29-44.zip (126 trades · 2026-08-27 11:29)"
+            - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-29-05.zip (126 trades · 2026-08-27 11:28)"
+            - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-28-25.zip (126 trades · 2026-08-27 11:27)"
+            - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-27-45.zip (126 trades · 2026-08-27 11:27)"
+            - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_13-27-02.zip (36 trades · 2026-08-27 11:25)"
+            - option "newstrategy53 — backtest-result-2026-08-27_13-27-51.zip (184 trades · 2026-08-27 11:22)"
+            - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_13-25-39.zip (36 trades · 2026-08-27 11:22)"
+            - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_13-22-13.zip (58 trades · 2026-08-27 11:21)"
+            - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_13-21-34.zip (58 trades · 2026-08-27 11:20)"
+            - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_12-36-19.zip (47 trades · 2026-08-27 10:33)"
+            - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_12-33-28.zip (47 trades · 2026-08-27 10:32)"
+            - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_12-31-57.zip (126 trades · 2026-08-27 10:31)"
+            - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-54-56.zip (40 trades · 2026-08-27 09:53)"
+            - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-51-30.zip (14 trades · 2026-08-27 09:50)"
+            - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-49-29.zip (14 trades · 2026-08-27 09:48)"
+            - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-47-45.zip (32 trades · 2026-08-27 09:46)"
+            - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-46-24.zip (31 trades · 2026-08-27 09:45)"
+            - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-44-40.zip (79 trades · 2026-08-27 09:44)"
+            - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-41-51.zip (126 trades · 2026-08-27 09:40)"
+            - option "newstrategy53 — backtest-result-2026-08-27_11-43-26.zip (205 trades · 2026-08-27 09:34)"
+            - option "newstrategy53 — backtest-result-2026-08-26_21-23-49.zip (3 trades · 2026-08-26 19:23)"
+            - option "newstrategy53 — backtest-result-2026-08-26_21-21-34.zip (3 trades · 2026-08-26 19:21)"
+            - option "ScreenerDpoEveningStar — backtest-result-2026-08-26_20-51-11.zip (2018 trades · 2026-08-26 18:50)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-26_20-45-18.zip (6 trades · 2026-08-26 18:45)"
+            - option "NostalgiaForInfinityX6 — backtest-result-2026-08-26_13-13-36.zip (30 trades · 2026-08-26 11:09)"
+            - option "NostalgiaForInfinityX7 — backtest-result-2026-08-26_13-09-01.zip (41 trades · 2026-08-26 11:07)"
+            - option "NostalgiaForInfinityX6 — backtest-result-2026-08-26_13-06-52.zip (6 trades · 2026-08-26 11:05)"
+            - option "NostalgiaForInfinityX7 — backtest-result-2026-08-26_13-05-25.zip (9 trades · 2026-08-26 11:05)"
+            - option "Ichi — backtest-result-2026-08-26_12-58-49.zip (1451 trades · 2026-08-26 10:58)"
+            - option "HarmonicDivergence — backtest-result-2026-08-26_13-35-21.zip (21933 trades · 2026-08-26 10:54)"
+            - option "EntryFloodControl — backtest-result-2026-08-26_12-53-00.zip (3123 trades · 2026-08-26 10:52)"
+            - option "HarmonicDivergence — backtest-result-2026-08-26_12-49-28.zip (1326 trades · 2026-08-26 10:48)"
+            - option "HarmonicDivergence — backtest-result-2026-08-26_02-07-09.zip (561 trades · 2026-08-26 00:06)"
+            - option "Ichi — backtest-result-2026-08-24_12-28-17.zip (4 trades · 2026-08-24 10:28)"
+            - option "HarmonicDivergence — backtest-result-2026-08-24_12-25-40.zip (522 trades · 2026-08-24 10:25)"
+            - option "TrendOMaticStrategySpot — backtest-result-2026-08-23_20-20-21.zip (1734 trades · 2026-08-23 18:17)"
+            - option "HoffmanIRBStrategy1h — backtest-result-2026-08-23_20-04-39.zip (1075 trades · 2026-08-23 18:04)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_20-04-06.zip (1450 trades · 2026-08-23 18:03)"
+            - option "HoffmanIRBStrategy4h — backtest-result-2026-08-23_20-03-25.zip (347 trades · 2026-08-23 18:03)"
+            - option "HoffmanIRBStrategy1h — backtest-result-2026-08-23_20-03-08.zip (1075 trades · 2026-08-23 18:02)"
+            - option "NadarayaWatsonSpot — backtest-result-2026-08-23_20-16-51.zip (3012 trades · 2026-08-23 18:01)"
+            - option "MfiEmaWaveTrend2Spot — backtest-result-2026-08-23_20-01-31.zip (10178 trades · 2026-08-23 17:58)"
+            - option "MfiEmaWaveTrendSpot — backtest-result-2026-08-23_19-58-35.zip (1524 trades · 2026-08-23 17:51)"
+            - option "SuperKeltnerStrategy — backtest-result-2026-08-23_19-50-38.zip (222 trades · 2026-08-23 17:50)"
+            - option "HoffmanIRBStrategyPct20 — backtest-result-2026-08-23_19-50-13.zip (1753 trades · 2026-08-23 17:49)"
+            - option "HoffmanIRBStrategyPct25 — backtest-result-2026-08-23_19-48-58.zip (1743 trades · 2026-08-23 17:48)"
+            - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-23_19-47-51.zip (2405 trades · 2026-08-23 17:47)"
+            - option "HoffmanIRBStrategyRR20 — backtest-result-2026-08-23_19-47-02.zip (1739 trades · 2026-08-23 17:46)"
+            - option "HoffmanIRBStrategyRR10 — backtest-result-2026-08-23_19-45-53.zip (1755 trades · 2026-08-23 17:45)"
+            - option "ClucHAnix_5m — backtest-result-2026-08-23_19-46-34.zip (180 trades · 2026-08-23 17:44)"
+            - option "HoffmanIRBStrategyRR05 — backtest-result-2026-08-23_19-44-52.zip (1774 trades · 2026-08-23 17:44)"
+            - option "BigZ08 — backtest-result-2026-08-23_19-44-13.zip (9 trades · 2026-08-23 17:43)"
+            - option "BigZ06AtrSl — backtest-result-2026-08-23_19-43-47.zip (735 trades · 2026-08-23 17:43)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2026-08-23_19-42-55.zip (66 trades · 2026-08-23 17:42)"
+            - option "HoffmanIRBStrategyRR05 — backtest-result-2026-08-23_19-42-17.zip (1774 trades · 2026-08-23 17:41)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-31-51.zip (1714 trades · 2026-08-23 17:31)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-29-59.zip (1714 trades · 2026-08-23 17:29)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-27-02.zip (13 trades · 2026-08-23 17:27)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-24-00.zip (1661 trades · 2026-08-23 17:23)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-17-05.zip (43 trades · 2026-08-23 17:17)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-14-57.zip (43 trades · 2026-08-23 17:14)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-13-11.zip (1778 trades · 2026-08-23 17:12)"
+            - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-10-18.zip (1778 trades · 2026-08-23 17:09)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-23_17-03-42.zip (30 trades · 2026-08-23 15:03)"
+            - option "StrategyTemplateV21 — backtest-result-2026-08-23_14-04-46.zip (33 trades · 2026-08-23 12:04)"
+            - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_14-03-10.zip (531 trades · 2026-08-23 12:02)"
+            - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-56-47.zip (672 trades · 2026-08-23 11:56)"
+            - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-54-57.zip (672 trades · 2026-08-23 11:54)"
+            - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-54-12.zip (672 trades · 2026-08-23 11:53)"
+            - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-19-18.zip (59 trades · 2026-08-22 14:19)"
+            - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-15-26.zip (374 trades · 2026-08-22 14:15)"
+            - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-14-58.zip (965 trades · 2026-08-22 14:14)"
+            - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-04-34.zip (8407 trades · 2026-08-22 14:03)"
+            - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-03-19.zip (3262 trades · 2026-08-22 14:02)"
+            - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-02-31.zip (111 trades · 2026-08-22 14:02)"
+            - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-02-16.zip (338 trades · 2026-08-22 14:02)"
+            - option "HybridRegimeSwitcher — backtest-result-2026-08-22_15-51-01.zip (64 trades · 2026-08-22 13:50)"
+            - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_15-49-50.zip (374 trades · 2026-08-22 13:49)"
+            - option "HybridRegimeSwitcher — backtest-result-2026-08-22_15-49-35.zip (2 trades · 2026-08-22 13:49)"
+            - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_15-44-14.zip (9841 trades · 2026-08-22 13:42)"
+            - option "GKDAdaptiveAcademicFinal — backtest-result-2026-08-22_15-12-15.zip (6 trades · 2026-08-22 13:12)"
+            - option "GKDAdaptiveAcademicFinal — backtest-result-2026-08-22_14-59-52.zip (12 trades · 2026-08-22 12:59)"
+            - option "OctopusNestATR — backtest-result-2026-08-21_14-00-21.zip (39 trades · 2026-08-21 12:00)"
+            - option "OctopusNestHighestLowestATR — backtest-result-2026-08-21_14-00-47.zip (23 trades · 2026-08-21 12:00)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-21_13-59-47.zip (37 trades · 2026-08-21 11:59)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-21_13-45-33.zip (28 trades · 2026-08-21 11:45)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-21_13-39-26.zip (122 trades · 2026-08-21 11:39)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-20_18-29-40.zip (537 trades · 2026-08-20 16:29)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-20_18-15-50.zip (139 trades · 2026-08-20 16:15)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-20_16-56-01.zip (3 trades · 2026-08-20 14:56)"
+            - option "WolfeFuturesShortStrategy — backtest-result-2026-08-20_15-47-26.zip (9 trades · 2026-08-20 13:47)"
+            - option "OctopusNestStrategy — backtest-result-2026-08-20_15-34-28.zip (7 trades · 2026-08-20 13:34)"
+            - option "BigZ08 — backtest-result-2024-12-01_17-37-30.json (165 trades · 2024-12-01 16:34)"
+            - option "BigZ08 — backtest-result-2024-07-28_13-51-02.json (163 trades · 2024-07-28 11:49)"
+            - option "BigZ08 — backtest-result-2024-07-28_13-18-05.json (242 trades · 2024-07-28 11:15)"
+            - option "BigZ08 — backtest-result-2024-07-28_12-48-35.json (242 trades · 2024-07-28 10:46)"
+            - option "BigZ08 — backtest-result-2024-07-28_12-41-02.json (163 trades · 2024-07-28 10:39)"
+            - option "BigZ08 — backtest-result-2024-07-28_12-38-36.json (163 trades · 2024-07-28 10:36)"
+            - option "BigZ08 — backtest-result-2024-07-28_12-35-44.json (242 trades · 2024-07-28 10:32)"
+            - option "BigZ08 — backtest-result-2024-07-22_21-25-28.json (215 trades · 2024-07-22 19:23)"
+            - option "BigZ08 — backtest-result-2024-07-22_13-19-04.json (215 trades · 2024-07-22 11:17)"
+            - option "BigZ08 — backtest-result-2024-07-22_13-00-43.json (271 trades · 2024-07-22 10:58)"
+            - option "BigZ08 — backtest-result-2024-07-22_11-18-39.json (239 trades · 2024-07-22 09:16)"
+            - option "BigZ08 — backtest-result-2024-07-22_11-15-09.json (263 trades · 2024-07-22 09:13)"
+            - option "BigZ08 — backtest-result-2024-07-22_11-11-23.json (268 trades · 2024-07-22 09:09)"
+            - option "BigZ08 — backtest-result-2024-07-22_11-08-08.json (259 trades · 2024-07-22 09:06)"
+            - option "BigZ08 — backtest-result-2024-07-22_11-01-15.json (250 trades · 2024-07-22 08:59)"
+            - option "BigZ08 — backtest-result-2024-07-22_10-41-36.json (231 trades · 2024-07-22 08:39)"
+            - option "BigZ08 — backtest-result-2024-07-22_09-08-54.json (250 trades · 2024-07-22 07:06)"
+            - option "BigZ08 — backtest-result-2024-07-22_09-05-08.json (399 trades · 2024-07-22 07:02)"
+            - option "BigZ08 — backtest-result-2024-07-22_09-01-00.json (399 trades · 2024-07-22 06:58)"
+            - option "BigZ08 — backtest-result-2024-07-22_08-57-53.json (403 trades · 2024-07-22 06:55)"
+            - option "BigZ08 — backtest-result-2024-07-22_08-50-32.json (403 trades · 2024-07-22 06:47)"
+            - option "BigZ08 — backtest-result-2024-07-22_00-01-00.json (403 trades · 2024-07-21 21:58)"
+            - option "BigZ08 — backtest-result-2024-07-21_23-56-34.json (346 trades · 2024-07-21 21:54)"
+            - option "BigZ08 — backtest-result-2024-07-21_23-38-15.json (265 trades · 2024-07-21 21:35)"
+            - option "BigZ08 — backtest-result-2024-07-21_23-33-14.json (265 trades · 2024-07-21 21:30)"
+            - option "BigZ08 — backtest-result-2024-07-21_23-29-26.json (265 trades · 2024-07-21 21:26)"
+            - option "BigZ08 — backtest-result-2024-07-21_23-25-08.json (517 trades · 2024-07-21 21:24)"
+            - option "BigZ08 — backtest-result-2024-07-21_23-21-52.json (673 trades · 2024-07-21 21:21)"
+            - option "BigZ08 — backtest-result-2024-07-21_23-19-34.json (517 trades · 2024-07-21 21:18)"
+            - option "BigZ08 — backtest-result-2024-07-21_20-34-48.json (673 trades · 2024-07-21 12:34)"
+            - option "BigZ08 — backtest-result-2024-07-21_14-32-37.json (673 trades · 2024-07-21 12:31)"
+            - option "BigZ08 — backtest-result-2024-07-21_14-28-23.json (673 trades · 2024-07-21 12:27)"
+            - option "BigZ08 — backtest-result-2024-07-21_14-25-20.json (673 trades · 2024-07-21 12:24)"
+            - option "BigZ08 — backtest-result-2024-07-21_14-12-51.json (517 trades · 2024-07-21 12:12)"
+            - option "BigZ08 — backtest-result-2024-07-21_14-09-45.json (517 trades · 2024-07-21 12:08)"
+            - option "BigZ08 — backtest-result-2024-07-21_14-03-51.json (517 trades · 2024-07-21 12:01)"
+            - option "BigZ08 — backtest-result-2024-07-21_13-46-30.json (517 trades · 2024-07-21 11:45)"
+            - option "BigZ08 — backtest-result-2024-07-21_13-43-38.json (517 trades · 2024-07-21 11:42)"
+            - option "BigZ08 — backtest-result-2024-07-19_21-34-57.json (517 trades · 2024-07-19 19:31)"
+            - option "BigZ08 — backtest-result-2024-07-19_21-26-23.json (517 trades · 2024-07-19 19:25)"
+            - option "BigZ08 — backtest-result-2024-07-19_21-18-24.json (517 trades · 2024-07-19 19:17)"
+            - option "BigZ08 — backtest-result-2024-07-19_21-14-32.json (517 trades · 2024-07-19 15:49)"
+            - option "BigZ08 — backtest-result-2024-07-19_14-47-21.json (517 trades · 2024-07-19 12:46)"
+            - option "BigZ08 — backtest-result-2024-07-19_14-33-31.json (517 trades · 2024-07-19 12:32)"
+            - option "BigZ08 — backtest-result-2024-07-19_14-19-35.json (517 trades · 2024-07-19 12:18)"
+            - option "BigZ08 — backtest-result-2024-07-19_14-02-23.json (673 trades · 2024-07-19 12:01)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-46-15.json (673 trades · 2024-07-19 10:45)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-42-39.json (673 trades · 2024-07-19 10:41)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-37-46.json (673 trades · 2024-07-19 10:36)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-36-21.json (673 trades · 2024-07-19 10:35)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-32-32.json (673 trades · 2024-07-19 10:31)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-26-39.json (673 trades · 2024-07-19 10:25)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-23-43.json (673 trades · 2024-07-19 10:22)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-22-00.json (673 trades · 2024-07-19 10:21)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-16-13.json (673 trades · 2024-07-19 10:15)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-12-37.json (673 trades · 2024-07-19 10:11)"
+            - option "BigZ08 — backtest-result-2024-07-19_12-04-28.json (673 trades · 2024-07-19 10:03)"
+            - option "BigZ08 — backtest-result-2024-07-18_23-02-35.json (517 trades · 2024-07-18 21:01)"
+            - option "BigZ08 — backtest-result-2024-07-18_23-01-33.json (517 trades · 2024-07-18 21:00)"
+            - option "BigZ08 — backtest-result-2024-07-18_20-22-24.json (517 trades · 2024-07-18 18:21)"
+            - option "BigZ08 — backtest-result-2024-07-18_20-11-05.json (517 trades · 2024-07-18 18:10)"
+            - option "BigZ08 — backtest-result-2024-07-18_20-05-48.json (517 trades · 2024-07-18 18:05)"
+            - option "BigZ08 — backtest-result-2024-07-18_20-04-13.json (517 trades · 2024-07-18 18:03)"
+            - option "BigZ08 — backtest-result-2024-07-18_19-57-13.json (517 trades · 2024-07-18 17:56)"
+            - option "BigZ06AtrSl — backtest-result-2024-06-25_19-21-09.json (3913 trades · 2024-06-25 17:19)"
+            - option "StrategyTemplate — backtest-result-2024-06-18_12-32-24.json (4906 trades · 2024-06-18 10:31)"
+            - option "BigZ08 — backtest-result-2024-05-22_11-09-30.json (503 trades · 2024-05-22 09:08)"
+            - option "BigZ08 — backtest-result-2024-05-21_23-14-30.json (3236 trades · 2024-05-21 21:12)"
+            - option "BigZ08 — backtest-result-2024-05-21_23-02-20.json (3357 trades · 2024-05-21 21:00)"
+            - option "BigZ08 — backtest-result-2024-05-20_15-40-44.json (3236 trades · 2024-05-20 13:39)"
+            - option "BigZ08 — backtest-result-2024-05-20_15-37-08.json (3935 trades · 2024-05-20 13:35)"
+            - option "BigZ08 — backtest-result-2024-05-20_15-32-31.json (4996 trades · 2024-05-20 13:31)"
+            - option "BigZ08 — backtest-result-2024-05-20_15-29-30.json (3817 trades · 2024-05-20 13:28)"
+            - option "BigZ08 — backtest-result-2024-05-20_15-25-04.json (4114 trades · 2024-05-20 13:23)"
+            - option "BigZ08 — backtest-result-2024-05-20_15-20-56.json (3463 trades · 2024-05-20 13:19)"
+            - option "BigZ08 — backtest-result-2024-05-20_14-45-55.json (3463 trades · 2024-05-20 12:44)"
+            - option "BigZ08 — backtest-result-2024-05-20_12-15-20.json (3536 trades · 2024-05-20 10:12)"
+            - option "BigZ08 — backtest-result-2024-05-20_11-21-14.json (3536 trades · 2024-05-20 09:19)"
+            - option "BigZ08 — backtest-result-2024-05-19_19-48-48.json (3536 trades · 2024-05-19 17:47)"
+            - option "BigZ08 — backtest-result-2024-05-19_19-13-11.json (3536 trades · 2024-05-19 17:11)"
+            - option "BigZ08 — backtest-result-2024-05-19_19-02-45.json (3536 trades · 2024-05-19 17:01)"
+            - option "BigZ08 — backtest-result-2024-05-19_18-17-14.json (5440 trades · 2024-05-19 16:16)"
+            - option "BigZ08 — backtest-result-2024-05-19_18-07-19.json (3536 trades · 2024-05-19 16:05)"
+            - option "BigZ08 — backtest-result-2024-05-19_18-00-16.json (3561 trades · 2024-05-19 15:58)"
+            - option "BigZ08 — backtest-result-2024-05-19_17-52-11.json (6342 trades · 2024-05-19 15:51)"
+            - option "BigZ08 — backtest-result-2024-05-19_17-23-12.json (6342 trades · 2024-05-19 15:22)"
+            - option "BigZ08 — backtest-result-2024-05-19_17-20-37.json (4866 trades · 2024-05-19 15:19)"
+            - option "BigZ08 — backtest-result-2024-05-19_17-10-05.json (4866 trades · 2024-05-19 15:09)"
+            - option "BigZ08 — backtest-result-2024-05-19_13-01-26.json (3262 trades · 2024-05-19 10:53)"
+            - option "BigZ08 — backtest-result-2024-05-18_19-04-17.json (3262 trades · 2024-05-18 16:57)"
+            - option "BigZ08 — backtest-result-2024-05-18_18-32-29.json (3262 trades · 2024-05-18 16:25)"
+            - option "BigZ07Next2 — backtest-result-2024-02-17_13-16-32.json (3606 trades · 2024-02-17 12:14)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-17_13-16-32.json (3607 trades · 2024-02-17 12:13)"
+            - option "BigZ06AtrSl — backtest-result-2024-02-17_13-16-32.json (4040 trades · 2024-02-17 12:12)"
+            - option "BigZ06Original — backtest-result-2024-02-17_13-16-32.json (3450 trades · 2024-02-17 12:11)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-16_13-22-34.json (3618 trades · 2024-02-16 12:21)"
+            - option "BigZ06AtrSl — backtest-result-2024-02-16_13-22-34.json (4046 trades · 2024-02-16 12:20)"
+            - option "BigZ06Original — backtest-result-2024-02-16_13-22-34.json (3458 trades · 2024-02-16 12:19)"
+            - option "newstrategy51 — backtest-result-2024-02-16_13-22-34.json (138 trades · 2024-02-16 12:10)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-16_12-06-20.json (3618 trades · 2024-02-16 11:05)"
+            - option "BigZ06Original — backtest-result-2024-02-16_12-06-20.json (3458 trades · 2024-02-16 11:04)"
+            - option "newstrategy51 — backtest-result-2024-02-16_12-06-20.json (138 trades · 2024-02-16 10:57)"
+            - option "BigZ06Original — backtest-result-2024-02-16_11-47-32.json (3458 trades · 2024-02-16 10:46)"
+            - option "newstrategy51 — backtest-result-2024-02-16_11-47-32.json (138 trades · 2024-02-16 10:39)"
+            - option "BigZ06Original — backtest-result-2024-02-15_22-53-32.json (3638 trades · 2024-02-15 21:52)"
+            - option "newstrategy51 — backtest-result-2024-02-15_22-53-32.json (1048 trades · 2024-02-15 21:35)"
+            - option "BigZ06Original — backtest-result-2024-02-14_12-25-37.json (3524 trades · 2024-02-14 11:24)"
+            - option "newstrategy51 — backtest-result-2024-02-14_12-25-37.json (1014 trades · 2024-02-14 11:07)"
+            - option "ClucHAnix_5m — backtest-result-2024-02-13_16-41-46.json (7136 trades · 2024-02-13 15:29)"
+            - option "newstrategy53 — backtest-result-2024-02-13_16-41-46.json (1250 trades · 2024-02-13 15:02)"
+            - option "newstrategy51 — backtest-result-2024-02-13_16-41-46.json (1008 trades · 2024-02-13 14:25)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-19_21-14-12.json (4225 trades · 2024-01-19 20:11)"
+            - option "BigZ07Next2 — backtest-result-2024-01-19_21-14-12.json (2494 trades · 2024-01-19 20:05)"
+            - option "BigZ06Original — backtest-result-2024-01-19_21-14-12.json (3516 trades · 2024-01-19 20:02)"
+            - option "ClucHAnix_5m — backtest-result-2024-01-18_23-12-23.json (7136 trades · 2024-01-18 22:02)"
+            - option "BB_RPB_TSLmeneguzzo — backtest-result-2024-01-18_23-12-23.json (1239 trades · 2024-01-18 21:49)"
+            - option "adaptive — backtest-result-2024-01-18_23-12-23.json (2210 trades · 2024-01-18 21:47)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2024-01-18_23-12-23.json (90 trades · 2024-01-18 21:47)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-18_23-12-23.json (4225 trades · 2024-01-18 21:46)"
+            - option "BigZ07Next2 — backtest-result-2024-01-18_23-12-23.json (2494 trades · 2024-01-18 21:44)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-10_15-41-05.json (4231 trades · 2024-01-10 14:40)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-10_15-28-12.json (4231 trades · 2024-01-10 14:27)"
+            - option "BigZ06 — backtest-result-2024-01-10_12-36-28.json (3451 trades · 2024-01-10 11:32)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-10_12-36-28.json (3721 trades · 2024-01-10 11:29)"
+            - option "BigZ06 — backtest-result-2024-01-10_12-15-30.json (3451 trades · 2024-01-10 11:13)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-10_12-15-30.json (3988 trades · 2024-01-10 11:10)"
+            - option "BigZ06 — backtest-result-2024-01-10_11-51-33.json (3451 trades · 2024-01-10 10:49)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-10_11-51-33.json (3988 trades · 2024-01-10 10:48)"
+            - option "BigZ06 — backtest-result-2024-01-10_11-27-58.json (3451 trades · 2024-01-10 10:26)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-10_11-27-58.json (4048 trades · 2024-01-10 10:25)"
+            - option "BigZ06 — backtest-result-2024-01-10_09-31-52.json (3451 trades · 2024-01-10 08:31)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-10_09-31-52.json (800 trades · 2024-01-10 08:30)"
+            - option "BigZ06 — backtest-result-2024-01-09_02-25-13.json (3451 trades · 2024-01-09 01:24)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_02-25-13.json (4231 trades · 2024-01-09 01:23)"
+            - option "BigZ06 — backtest-result-2024-01-09_02-21-15.json (3451 trades · 2024-01-09 01:20)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_02-21-15.json (4228 trades · 2024-01-09 01:19)"
+            - option "BigZ06 — backtest-result-2024-01-09_02-18-02.json (3451 trades · 2024-01-09 01:17)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_02-18-02.json (4218 trades · 2024-01-09 01:16)"
+            - option "BigZ06 — backtest-result-2024-01-09_02-12-52.json (3451 trades · 2024-01-09 01:12)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_02-12-52.json (4231 trades · 2024-01-09 01:11)"
+            - option "BigZ06 — backtest-result-2024-01-09_02-01-59.json (3451 trades · 2024-01-09 01:01)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_02-01-59.json (3720 trades · 2024-01-09 01:00)"
+            - option "BigZ06 — backtest-result-2024-01-09_01-57-20.json (3451 trades · 2024-01-09 00:56)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_01-57-20.json (3721 trades · 2024-01-09 00:55)"
+            - option "BigZ06 — backtest-result-2024-01-09_01-53-46.json (3451 trades · 2024-01-09 00:53)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_01-53-46.json (3721 trades · 2024-01-09 00:52)"
+            - option "BigZ06 — backtest-result-2024-01-09_01-44-58.json (3451 trades · 2024-01-09 00:44)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_01-44-58.json (3721 trades · 2024-01-09 00:43)"
+            - option "BigZ06 — backtest-result-2024-01-09_01-39-30.json (3451 trades · 2024-01-09 00:38)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_01-39-30.json (3721 trades · 2024-01-09 00:38)"
+            - option "BigZ06 — backtest-result-2024-01-09_01-05-45.json (3451 trades · 2024-01-09 00:05)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_01-05-45.json (3451 trades · 2024-01-09 00:04)"
+            - option "BigZ06AtrSl — backtest-result-2024-01-09_00-23-48.json (3720 trades · 2024-01-08 23:23)"
+            - option "BigZ06 — backtest-result-2024-01-07_02-41-35.json (3444 trades · 2024-01-07 01:40)"
+            - option "BigZ07Next2 — backtest-result-2024-01-07_02-41-35.json (2494 trades · 2024-01-07 01:38)"
+            - option "NostalgiaForInfinityX4 — backtest-result-2023-12-20_16-14-42.json (7 trades · 2023-12-20 15:09)"
+            - option "NostalgiaForInfinityX4 — backtest-result-2023-12-19_22-01-15.json (7 trades · 2023-12-19 20:55)"
+            - option "NostalgiaForInfinityX4 — backtest-result-2023-12-09_02-46-45.json (38 trades · 2023-12-09 01:34)"
+            - option "NostalgiaForInfinityX4 — backtest-result-2023-12-09_01-47-22.json (55 trades · 2023-12-09 00:34)"
+            - option "NostalgiaForInfinityX4 — backtest-result-2023-12-04_10-20-18.json (282 trades · 2023-12-04 08:32)"
+            - option "NostalgiaForInfinityX4 — backtest-result-2023-12-03_13-55-52.json (273 trades · 2023-12-03 12:19)"
+            - option "NostalgiaForInfinityX3 — backtest-result-2023-06-08_21-48-55.json (271 trades · 2023-06-08 19:05)"
+            - option "SupertrendKeltner — backtest-result-2023-03-27_12-55-38.json (31202 trades · 2023-03-27 10:08)"
+            - option "NostalgiaForInfinityX — backtest-result-2023-03-24_13-00-24.json (433 trades · 2023-03-24 11:50)"
+            - option "MfiEmaWaveTrend2 — backtest-result-2023-03-18_08-07-03.json (30695 trades · 2023-03-18 06:53)"
+            - option "MfiEmaWaveTrend2 — backtest-result-2023-03-17_14-35-11.json (3172 trades · 2023-03-17 13:21)"
+            - option "MfiEmaWaveTrend2 — backtest-result-2023-03-17_14-06-34.json (763 trades · 2023-03-17 12:48)"
+            - option "MfiEmaWaveTrend — backtest-result-2023-03-17_13-46-07.json (4452 trades · 2023-03-17 12:31)"
+            - option "MfiEmaWaveTrend — backtest-result-2023-03-16_20-48-15.json (111 trades · 2023-03-16 19:43)"
+            - option "MfiEmaWaveTrend — backtest-result-2023-03-15_18-34-26.json (1970 trades · 2023-03-15 17:21)"
+            - option "NadarayaWatson — backtest-result-2022-12-18_21-44-03.json (24617 trades · 2022-12-18 19:46)"
+            - option "NWEv6_new — backtest-result-2022-12-17_12-27-45.json (5046 trades · 2022-12-17 10:46)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-16_11-47-10.json (1644 trades · 2022-12-16 10:46)"
+            - option "BigZ06 — backtest-result-2022-12-09_10-42-37.json (6405 trades · 2022-12-09 09:40)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_20-03-45.json (1642 trades · 2022-12-08 19:02)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_19-17-10.json (1642 trades · 2022-12-08 18:16)"
+            - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_19-11-00.json (1642 trades · 2022-12-08 18:09)"
+        - button "Load" [ref=f5e26] [cursor=pointer]
+      - generic [ref=f5e36]:
+        - table [ref=f5e38]:
+          - rowgroup [ref=f5e53]:
+            - row [ref=f5e54]:
+              - columnheader "Pair" [ref=f5e55] [cursor=pointer]
+              - columnheader "Side" [ref=f5e56] [cursor=pointer]
+              - columnheader "Enter tag" [ref=f5e57] [cursor=pointer]
+              - columnheader "Exit reason" [ref=f5e58] [cursor=pointer]
+              - columnheader "Open" [ref=f5e59] [cursor=pointer]
+              - columnheader "Close" [ref=f5e60] [cursor=pointer]
+              - columnheader "Open rate" [ref=f5e61] [cursor=pointer]
+              - columnheader "Close rate" [ref=f5e62] [cursor=pointer]
+              - columnheader "Profit%" [ref=f5e63] [cursor=pointer]
+              - columnheader "Profit abs" [ref=f5e64] [cursor=pointer]
+              - columnheader "Stop loss" [ref=f5e65] [cursor=pointer]
+              - columnheader "SL%" [ref=f5e66] [cursor=pointer]
+              - columnheader "Duration" [ref=f5e67] [cursor=pointer]
+        - generic [ref=f5e69]:
+          - paragraph [ref=f5e70]: Showing 14 of 14 trades for NFIX7GuardedCat30
+          - table [ref=f5e71]:
+            - rowgroup [ref=f5e86]:
+              - row [ref=f5e87]:
+                - cell "ETHFI/USDC:USDC" [ref=f5e88]
+                - cell "long" [ref=f5e89]
+                - cell "64" [ref=f5e90]
+                - cell "exit_long_rebuy_w_0_16 ( 64 )" [ref=f5e91]
+                - cell "2025-06-03 06:30" [ref=f5e92]
+                - cell "2025-06-03 09:35" [ref=f5e93]
+                - cell "1.207" [ref=f5e94]
+                - cell "1.213" [ref=f5e95]
+                - cell "1.39%" [ref=f5e96]
+                - cell "0.344" [ref=f5e98]
+                - cell "0.809" [ref=f5e99]
+                - cell "-99%" [ref=f5e100]
+                - cell "0h3m" [ref=f5e101]
+              - row [ref=f5e102]:
+                - cell "TIA/USDC:USDC" [ref=f5e103]
+                - cell "long" [ref=f5e104]
+                - cell "141" [ref=f5e105]
+                - cell "exit_long_tc_u_1 ( 141 )" [ref=f5e106]
+                - cell "2025-06-05 19:20" [ref=f5e107]
+                - cell "2025-06-05 19:30" [ref=f5e108]
+                - cell "2.001" [ref=f5e109]
+                - cell "2.03" [ref=f5e110]
+                - cell "3.97%" [ref=f5e111]
+                - cell "3.92" [ref=f5e113]
+                - cell "1.341" [ref=f5e114]
+                - cell "-99%" [ref=f5e115]
+                - cell "0h0m" [ref=f5e116]
+              - row [ref=f5e117]:
+                - cell "DOGE/USDC:USDC" [ref=f5e118]
+                - cell "short" [ref=f5e119]
+                - cell "562" [ref=f5e120]
+                - cell "exit_short_rebuy_w_3_17 ( 562 )" [ref=f5e121]
+                - cell "2025-06-12 15:50" [ref=f5e122]
+                - cell "2025-06-12 20:50" [ref=f5e123]
+                - cell "0.187" [ref=f5e124]
+                - cell "0.181" [ref=f5e125]
+                - cell "8.80%" [ref=f5e126]
+                - cell "2.183" [ref=f5e128]
+                - cell "0.248" [ref=f5e129]
+                - cell "-99%" [ref=f5e130]
+                - cell "0h5m" [ref=f5e131]
+              - row [ref=f5e132]:
+                - cell "SOL/USDC:USDC" [ref=f5e133]
+                - cell "long" [ref=f5e134]
+                - cell "141" [ref=f5e135]
+                - cell "exit_long_tc_d_1_20 ( 141 )" [ref=f5e136]
+                - cell "2025-06-13 00:35" [ref=f5e137]
+                - cell "2025-06-13 01:00" [ref=f5e138]
+                - cell "143.67" [ref=f5e139]
+                - cell "145.53" [ref=f5e140]
+                - cell "3.58%" [ref=f5e141]
+                - cell "3.568" [ref=f5e143]
+                - cell "96.26" [ref=f5e144]
+                - cell "-99%" [ref=f5e145]
+                - cell "0h0m" [ref=f5e146]
+              - row [ref=f5e147]:
+                - cell "SUI/USDC:USDC" [ref=f5e148]
+                - cell "long" [ref=f5e149]
+                - cell "143" [ref=f5e150]
+                - cell "exit_long_tc_w_1_11 ( 143 )" [ref=f5e151]
+                - cell "2025-06-13 01:00" [ref=f5e152]
+                - cell "2025-06-13 03:35" [ref=f5e153]
+                - cell "2.993" [ref=f5e154]
+                - cell "3.042" [ref=f5e155]
+                - cell "4.66%" [ref=f5e156]
+                - cell "4.656" [ref=f5e158]
+                - cell "2.005" [ref=f5e159]
+                - cell "-99%" [ref=f5e160]
+                - cell "0h3m" [ref=f5e161]
+              - row [ref=f5e162]:
+                - cell "LINK/USDC:USDC" [ref=f5e163]
+                - cell "long" [ref=f5e164]
+                - cell "141" [ref=f5e165]
+                - cell "exit_long_tc_d_1_14 ( 141 )" [ref=f5e166]
+                - cell "2025-06-13 00:40" [ref=f5e167]
+                - cell "2025-06-13 08:15" [ref=f5e168]
+                - cell "13.209" [ref=f5e169]
+                - cell "13.391" [ref=f5e170]
+                - cell "3.87%" [ref=f5e171]
+                - cell "3.858" [ref=f5e173]
+                - cell "8.851" [ref=f5e174]
+                - cell "-99%" [ref=f5e175]
+                - cell "0h8m" [ref=f5e176]
+              - row [ref=f5e177]:
+                - cell "ARB/USDC:USDC" [ref=f5e178]
+                - cell "long" [ref=f5e179]
+                - cell "145" [ref=f5e180]
+                - cell "exit_long_tc_d_1_95 ( 145 )" [ref=f5e181]
+                - cell "2025-06-30 15:35" [ref=f5e182]
+                - cell "2025-06-30 16:55" [ref=f5e183]
+                - cell "0.34" [ref=f5e184]
+                - cell "0.344" [ref=f5e185]
+                - cell "3.29%" [ref=f5e186]
+                - cell "3.323" [ref=f5e188]
+                - cell "0.228" [ref=f5e189]
+                - cell "-99%" [ref=f5e190]
+                - cell "0h1m" [ref=f5e191]
+              - row [ref=f5e192]:
+                - cell "CRV/USDC:USDC" [ref=f5e193]
+                - cell "long" [ref=f5e194]
+                - cell "141" [ref=f5e195]
+                - cell "exit_long_tc_d_1_53 ( 141 )" [ref=f5e196]
+                - cell "2025-07-25 16:25" [ref=f5e197]
+                - cell "2025-07-25 17:50" [ref=f5e198]
+                - cell "0.977" [ref=f5e199]
+                - cell "0.989" [ref=f5e200]
+                - cell "3.53%" [ref=f5e201]
+                - cell "3.577" [ref=f5e203]
+                - cell "0.655" [ref=f5e204]
+                - cell "-99%" [ref=f5e205]
+                - cell "0h1m" [ref=f5e206]
+              - row [ref=f5e207]:
+                - cell "BOME/USDC:USDC" [ref=f5e208]
+                - cell "long" [ref=f5e209]
+                - cell "64" [ref=f5e210]
+                - cell "exit_long_rebuy_w_2_1 ( 64 )" [ref=f5e211]
+                - cell "2025-07-28 01:00" [ref=f5e212]
+                - cell "2025-07-28 05:25" [ref=f5e213]
+                - cell "0.002" [ref=f5e214]
+                - cell "0.002" [ref=f5e215]
+                - cell "6.36%" [ref=f5e216]
+                - cell "1.615" [ref=f5e218]
+                - cell "0.001" [ref=f5e219]
+                - cell "-99%" [ref=f5e220]
+                - cell "0h4m" [ref=f5e221]
+              - row [ref=f5e222]:
+                - cell "CRV/USDC:USDC" [ref=f5e223]
+                - cell "long" [ref=f5e224]
+                - cell "120" [ref=f5e225]
+                - cell "guarded_catastrophe" [ref=f5e226]
+                - cell "2025-07-29 14:05" [ref=f5e227]
+                - cell "2025-08-14 13:05" [ref=f5e228]
+                - cell "1.025" [ref=f5e229]
+                - cell "0.928" [ref=f5e230]
+                - cell "0.99%" [ref=f5e231]
+                - cell "2.268" [ref=f5e233]
+                - cell "0.687" [ref=f5e234]
+                - cell "-99%" [ref=f5e235]
+                - cell "6h23m" [ref=f5e236]
+              - row [ref=f5e237]:
+                - cell "AVAX/USDC:USDC" [ref=f5e238]
+                - cell "long" [ref=f5e239]
+                - cell "142" [ref=f5e240]
+                - cell "exit_long_tc_d_1_120 ( 142 )" [ref=f5e241]
+                - cell "2025-08-14 12:35" [ref=f5e242]
+                - cell "2025-08-14 13:15" [ref=f5e243]
+                - cell "23.622" [ref=f5e244]
+                - cell "23.961" [ref=f5e245]
+                - cell "4.00%" [ref=f5e246]
+                - cell "4.117" [ref=f5e248]
+                - cell "15.827" [ref=f5e249]
+                - cell "-99%" [ref=f5e250]
+                - cell "0h1m" [ref=f5e251]
+              - row [ref=f5e252]:
+                - cell "NEAR/USDC:USDC" [ref=f5e253]
+                - cell "long" [ref=f5e254]
+                - cell "142" [ref=f5e255]
+                - cell "exit_long_tc_d_1_87 ( 142 )" [ref=f5e256]
+                - cell "2025-08-14 12:35" [ref=f5e257]
+                - cell "2025-08-14 13:15" [ref=f5e258]
+                - cell "2.795" [ref=f5e259]
+                - cell "2.838" [ref=f5e260]
+                - cell "4.31%" [ref=f5e261]
+                - cell "4.42" [ref=f5e263]
+                - cell "1.873" [ref=f5e264]
+                - cell "-99%" [ref=f5e265]
+                - cell "0h1m" [ref=f5e266]
+              - row [ref=f5e267]:
+                - cell "SOL/USDC:USDC" [ref=f5e268]
+                - cell "long" [ref=f5e269]
+                - cell "142" [ref=f5e270]
+                - cell "exit_long_tc_d_3_120 ( 142 )" [ref=f5e271]
+                - cell "2025-08-14 13:05" [ref=f5e272]
+                - cell "2025-08-14 13:15" [ref=f5e273]
+                - cell "188.42" [ref=f5e274]
+                - cell "195.59" [ref=f5e275]
+                - cell "11.10%" [ref=f5e276]
+                - cell "11.304" [ref=f5e278]
+                - cell "126.25" [ref=f5e279]
+                - cell "-99%" [ref=f5e280]
+                - cell "0h0m" [ref=f5e281]
+              - row [ref=f5e282]:
+                - cell "NEO/USDC:USDC" [ref=f5e283]
+                - cell "long" [ref=f5e284]
+                - cell "145" [ref=f5e285]
+                - cell "exit_long_tc_d_2_120 ( 145 )" [ref=f5e286]
+                - cell "2025-08-25 00:40" [ref=f5e287]
+                - cell "2025-08-25 01:00" [ref=f5e288]
+                - cell "7.597" [ref=f5e289]
+                - cell "7.761" [ref=f5e290]
+                - cell "6.17%" [ref=f5e291]
+                - cell "6.412" [ref=f5e293]
+                - cell "5.09" [ref=f5e294]
+                - cell "-99%" [ref=f5e295]
+                - cell "0h0m" [ref=f5e296]
+  - complementary [ref=f5e297]
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=f5e301]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

@@ -14,9 +14,12 @@ from freqtrade.optimize.hyperopt_tools import HyperoptStateContainer
 
 
 with suppress(ImportError):
-    from skopt.space import Categorical, Integer, Real
-
-    from freqtrade.optimize.space import SKDecimal
+    from freqtrade.optimize.space import (
+        Categorical,
+        Integer,
+        Real,
+        SKDecimal,
+    )
 
 from freqtrade.exceptions import OperationalException
 
@@ -29,11 +32,11 @@ class BaseParameter(ABC):
     Defines a parameter that can be optimized by hyperopt.
     """
 
-    category: str | None
+    space: str | None
     default: Any
-    value: Any
     in_space: bool = False
     name: str
+    _warned_static_use: bool = False
 
     def __init__(
         self,
@@ -46,25 +49,62 @@ class BaseParameter(ABC):
     ):
         """
         Initialize hyperopt-optimizable parameter.
-        :param space: A parameter category. Can be 'buy' or 'sell'. This parameter is optional if
-         parameter field
-         name is prefixed with 'buy_' or 'sell_'.
+        :param space: The parameter space. Can be 'buy', 'sell', or a string that's also a
+                valid python identifier.
+                This parameter is optional if parameter name is prefixed with 'buy_' or 'sell_'.
         :param optimize: Include parameter in hyperopt optimizations.
         :param load: Load parameter value from {space}_params.
-        :param kwargs: Extra parameters to skopt.space.(Integer|Real|Categorical).
+        :param kwargs: Extra parameters to optuna.distributions.
+                (IntDistribution|FloatDistribution|CategoricalDistribution).
         """
         if "name" in kwargs:
             raise OperationalException(
                 "Name is determined by parameter field name and can not be specified manually."
             )
-        self.category = space
+        self.space = space
         self._space_params = kwargs
         self.value = default
         self.optimize = optimize
         self.load = load
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.value})"
+        return f"{self.__class__.__name__}({self._value})"
+
+    @property
+    def value(self) -> Any:
+        self._warn_static_indicator_use()
+        return self._value
+
+    @value.setter
+    def value(self, new_value: Any) -> None:
+        self._value = new_value
+
+    def _warn_static_indicator_use(self) -> None:
+        """
+        Warn once if the value of an optimized parameter is used while hyperopt calculates
+        indicators. Without --analyze-per-epoch, indicators are only calculated once at
+        hyperopt startup - so the optimizer will never see the effect of such a parameter,
+        and all epochs are evaluated with its static start value.
+        """
+        if (
+            not self._warned_static_use
+            and self.in_space
+            and self.optimize
+            and HyperoptStateContainer.state == HyperoptState.INDICATORS
+        ):
+            self._warned_static_use = True
+            logger.warning(
+                f"Parameter '{getattr(self, 'name', '')}' is part of this hyperopt run, but its "
+                "value is used during indicator calculation, which only runs once at hyperopt "
+                f"startup. All epochs will be evaluated with its static start value "
+                f"({self._value}) - values sampled by the optimizer will not affect the results. "
+                "Use the '.range' functionality or run hyperopt with '--analyze-per-epoch' to "
+                "properly optimize this parameter."
+            )
+
+    @property
+    def param_type(self) -> str:
+        return self.__class__.__name__
 
     @abstractmethod
     def get_space(self, name: str) -> Union["Integer", "Real", "SKDecimal", "Categorical"]:
@@ -105,11 +145,12 @@ class NumericParameter(BaseParameter):
         :param high: Upper end (inclusive) of optimization space.
                      Must be none of entire range is passed first parameter.
         :param default: A default value.
-        :param space: A parameter category. Can be 'buy' or 'sell'. This parameter is optional if
-                      parameter fieldname is prefixed with 'buy_' or 'sell_'.
+        :param space: The parameter space. Can be 'buy', 'sell', or a string that's also a
+                valid python identifier.
+                This parameter is optional if parameter name is prefixed with 'buy_' or 'sell_'.
         :param optimize: Include parameter in hyperopt optimizations.
         :param load: Load parameter value from {space}_params.
-        :param kwargs: Extra parameters to skopt.space.*.
+        :param kwargs: Extra parameters to optuna.distributions.*.
         """
         if high is not None and isinstance(low, Sequence):
             raise OperationalException(f"{self.__class__.__name__} space invalid.")
@@ -147,11 +188,12 @@ class IntParameter(NumericParameter):
         :param high: Upper end (inclusive) of optimization space.
                      Must be none of entire range is passed first parameter.
         :param default: A default value.
-        :param space: A parameter category. Can be 'buy' or 'sell'. This parameter is optional if
-                      parameter fieldname is prefixed with 'buy_' or 'sell_'.
+        :param space: The parameter space. Can be 'buy', 'sell', or a string that's also a
+                valid python identifier.
+                This parameter is optional if parameter name is prefixed with 'buy_' or 'sell_'.
         :param optimize: Include parameter in hyperopt optimizations.
         :param load: Load parameter value from {space}_params.
-        :param kwargs: Extra parameters to skopt.space.Integer.
+        :param kwargs: Extra parameters to optuna.distributions.IntDistribution.
         """
 
         super().__init__(
@@ -160,7 +202,7 @@ class IntParameter(NumericParameter):
 
     def get_space(self, name: str) -> "Integer":
         """
-        Create skopt optimization space.
+        Create optuna distribution space.
         :param name: A name of parameter field.
         """
         return Integer(low=self.low, high=self.high, name=name, **self._space_params)
@@ -174,7 +216,7 @@ class IntParameter(NumericParameter):
         calculating 100ds of indicators.
         """
         if self.can_optimize():
-            # Scikit-optimize ranges are "inclusive", while python's "range" is exclusive
+            # optuna distributions ranges are "inclusive", while python's "range" is exclusive
             return range(self.low, self.high + 1)
         else:
             return range(self.value, self.value + 1)
@@ -201,11 +243,12 @@ class RealParameter(NumericParameter):
         :param high: Upper end (inclusive) of optimization space.
                      Must be none if entire range is passed first parameter.
         :param default: A default value.
-        :param space: A parameter category. Can be 'buy' or 'sell'. This parameter is optional if
-                      parameter fieldname is prefixed with 'buy_' or 'sell_'.
+        :param space: The parameter space. Can be 'buy', 'sell', or a string that's also a
+                valid python identifier.
+                This parameter is optional if parameter name is prefixed with 'buy_' or 'sell_'.
         :param optimize: Include parameter in hyperopt optimizations.
         :param load: Load parameter value from {space}_params.
-        :param kwargs: Extra parameters to skopt.space.Real.
+        :param kwargs: Extra parameters to optuna.distributions.FloatDistribution.
         """
         super().__init__(
             low=low, high=high, default=default, space=space, optimize=optimize, load=load, **kwargs
@@ -213,7 +256,7 @@ class RealParameter(NumericParameter):
 
     def get_space(self, name: str) -> "Real":
         """
-        Create skopt optimization space.
+        Create optimization space.
         :param name: A name of parameter field.
         """
         return Real(low=self.low, high=self.high, name=name, **self._space_params)
@@ -221,7 +264,6 @@ class RealParameter(NumericParameter):
 
 class DecimalParameter(NumericParameter):
     default: float
-    value: float
 
     def __init__(
         self,
@@ -242,26 +284,36 @@ class DecimalParameter(NumericParameter):
                      Must be none if entire range is passed first parameter.
         :param default: A default value.
         :param decimals: A number of decimals after floating point to be included in testing.
-        :param space: A parameter category. Can be 'buy' or 'sell'. This parameter is optional if
-                      parameter fieldname is prefixed with 'buy_' or 'sell_'.
+        :param space: The parameter space. Can be 'buy', 'sell', or a string that's also a
+                valid python identifier.
+                This parameter is optional if parameter name is prefixed with 'buy_' or 'sell_'.
         :param optimize: Include parameter in hyperopt optimizations.
         :param load: Load parameter value from {space}_params.
-        :param kwargs: Extra parameters to skopt.space.Integer.
+        :param kwargs: Extra parameters to optuna's NumericParameter.
         """
-        self._decimals = decimals
-        default = round(default, self._decimals)
+        self.decimals = decimals
+        default = round(default, self.decimals)
 
         super().__init__(
             low=low, high=high, default=default, space=space, optimize=optimize, load=load, **kwargs
         )
 
+    @property
+    def value(self) -> float:
+        self._warn_static_indicator_use()
+        return self._value
+
+    @value.setter
+    def value(self, new_value: float):
+        self._value = round(new_value, self.decimals)
+
     def get_space(self, name: str) -> "SKDecimal":
         """
-        Create skopt optimization space.
+        Create optimization space.
         :param name: A name of parameter field.
         """
         return SKDecimal(
-            low=self.low, high=self.high, decimals=self._decimals, name=name, **self._space_params
+            low=self.low, high=self.high, decimals=self.decimals, name=name, **self._space_params
         )
 
     @property
@@ -273,9 +325,9 @@ class DecimalParameter(NumericParameter):
         calculating 100ds of indicators.
         """
         if self.can_optimize():
-            low = int(self.low * pow(10, self._decimals))
-            high = int(self.high * pow(10, self._decimals)) + 1
-            return [round(n * pow(0.1, self._decimals), self._decimals) for n in range(low, high)]
+            low = int(self.low * pow(10, self.decimals))
+            high = int(self.high * pow(10, self.decimals)) + 1
+            return [round(n * pow(0.1, self.decimals), self.decimals) for n in range(low, high)]
         else:
             return [self.value]
 
@@ -299,13 +351,14 @@ class CategoricalParameter(BaseParameter):
         Initialize hyperopt-optimizable parameter.
         :param categories: Optimization space, [a, b, ...].
         :param default: A default value. If not specified, first item from specified space will be
-         used.
-        :param space: A parameter category. Can be 'buy' or 'sell'. This parameter is optional if
-         parameter field
-         name is prefixed with 'buy_' or 'sell_'.
+                used.
+        :param space: The parameter space. Can be 'buy', 'sell', or a string that's also a
+                valid python identifier.
+                This parameter is optional if parameter name is prefixed with 'buy_' or 'sell_'.
         :param optimize: Include parameter in hyperopt optimizations.
         :param load: Load parameter value from {space}_params.
-        :param kwargs: Extra parameters to skopt.space.Categorical.
+        :param kwargs: Compatibility. Optuna's CategoricalDistribution does not
+                       accept extra parameters
         """
         if len(categories) < 2:
             raise OperationalException(
@@ -316,10 +369,10 @@ class CategoricalParameter(BaseParameter):
 
     def get_space(self, name: str) -> "Categorical":
         """
-        Create skopt optimization space.
+        Create optuna distribution space.
         :param name: A name of parameter field.
         """
-        return Categorical(self.opt_range, name=name, **self._space_params)
+        return Categorical(self.opt_range, name=name)
 
     @property
     def range(self):
@@ -349,13 +402,13 @@ class BooleanParameter(CategoricalParameter):
         Initialize hyperopt-optimizable Boolean Parameter.
         It's a shortcut to `CategoricalParameter([True, False])`.
         :param default: A default value. If not specified, first item from specified space will be
-         used.
-        :param space: A parameter category. Can be 'buy' or 'sell'. This parameter is optional if
-         parameter field
-         name is prefixed with 'buy_' or 'sell_'.
+                used.
+        :param space: The parameter space. Can be 'buy', 'sell', or a string that's also a
+                valid python identifier.
+                This parameter is optional if parameter name is prefixed with 'buy_' or 'sell_'.
         :param optimize: Include parameter in hyperopt optimizations.
         :param load: Load parameter value from {space}_params.
-        :param kwargs: Extra parameters to skopt.space.Categorical.
+        :param kwargs: Extra parameters to optuna.distributions.CategoricalDistribution.
         """
 
         categories = [True, False]

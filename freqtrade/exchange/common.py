@@ -5,7 +5,6 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeVar, cast, overload
 
-from freqtrade.constants import ExchangeConfig
 from freqtrade.exceptions import DDosProtection, RetryableOrderError, TemporaryError
 from freqtrade.mixins import LoggingMixin
 
@@ -37,34 +36,36 @@ API_RETRY_COUNT = 4
 API_FETCH_ORDER_RETRY_COUNT = 5
 
 BAD_EXCHANGES = {
-    "bitmex": "Various reasons.",
-    "probit": "Requires additional, regular calls to `signIn()`.",
-    "poloniex": "Does not provide fetch_order endpoint to fetch both open and closed orders.",
-    "kucoinfutures": "Unsupported futures exchange.",
-    "poloniexfutures": "Unsupported futures exchange.",
-    "binancecoinm": "Unsupported futures exchange.",
+    "bitmex": "Various reasons",
+    "probit": "Requires additional, regular calls to `signIn()`",
+    "poloniex": "Does not provide fetch_order endpoint to fetch both open and closed orders",
+    "kucoinfutures": "Unsupported futures exchange",
+    "poloniexfutures": "Unsupported futures exchange",
+    "binancecoinm": "Unsupported futures exchange",
 }
 
 MAP_EXCHANGE_CHILDCLASS = {
-    "binanceus": "binance",
-    "binanceje": "binance",
-    "binanceusdm": "binance",
-    "okex": "okx",
-    "myokx": "okx",
     "gateio": "gate",
     "huboi": "htx",
+    "kucoineu": "kucoin",
 }
 
 SUPPORTED_EXCHANGES = [
     "binance",
+    "binanceus",
+    "binanceusdm",
     "bingx",
-    "bitmart",
+    "bitget",
     "bybit",
+    "bybiteu",
     "gate",
+    "gateeu",
     "htx",
     "hyperliquid",
     "kraken",
+    "krakenfutures",
     "okx",
+    "myokx",
 ]
 
 # either the main, or replacement methods (array) is required
@@ -79,50 +80,45 @@ EXCHANGE_HAS_REQUIRED: dict[str, list[str]] = {
     "fetchOHLCV": [],
 }
 
-EXCHANGE_HAS_OPTIONAL = [
+EXCHANGE_HAS_OPTIONAL: dict[str, list[str]] = {
     # Private
-    "fetchMyTrades",  # Trades for order - fee detection
-    "createLimitOrder",
-    "createMarketOrder",  # Either OR for orders
-    # 'setLeverage',  # Margin/Futures trading
-    # 'setMarginMode',  # Margin/Futures trading
-    # 'fetchFundingHistory', # Futures trading
+    "fetchMyTrades": [],  # Trades for order - fee detection
+    "createLimitOrder": [],
+    "createMarketOrder": [],  # Either OR for orders
     # Public
-    "fetchOrderBook",
-    "fetchL2OrderBook",
-    "fetchTicker",  # OR for pricing
-    "fetchTickers",  # For volumepairlist?
-    "fetchTrades",  # Downloading trades data
-    # 'fetchFundingRateHistory',  # Futures trading
-    # 'fetchPositions',  # Futures trading
-    # 'fetchLeverageTiers',  # Futures initialization
-    # 'fetchMarketLeverageTiers',  # Futures initialization
-    # 'fetchOpenOrder', 'fetchClosedOrder',  # replacement for fetchOrder
-    # 'fetchOpenOrders', 'fetchClosedOrders',  # 'fetchOrders',  # Refinding balance...
+    "fetchOrderBook": [],
+    "fetchL2OrderBook": [],
+    "fetchTicker": [],  # OR for pricing
+    "fetchTickers": [],  # For volumepairlist?
+    "fetchTrades": [],  # Downloading trades data
+    "fetchOrders": ["fetchOpenOrders", "fetchClosedOrders"],  # ,  # Refinding balance...
     # ccxt.pro
-    "watchOHLCV",
-]
+    "watchOHLCV": [],
+}
+
+EXCHANGE_HAS_OPTIONAL_FUTURES: dict[str, list[str]] = {
+    # private
+    "setLeverage": [],  # Margin/Futures trading
+    "setMarginMode": [],  # Margin/Futures trading
+    "fetchFundingHistory": [],  # Futures trading
+    # Public
+    "fetchFundingRateHistory": [],  # Futures trading
+    "fetchPositions": [],  # Futures trading
+    "fetchLeverageTiers": ["fetchMarketLeverageTiers"],  # Futures initialization
+    "fetchMarkOHLCV": [],
+    "fetchIndexOHLCV": [],  # Futures additional data
+    "fetchPremiumIndexOHLCV": [],
+}
 
 
-def remove_exchange_credentials(exchange_config: ExchangeConfig, dry_run: bool) -> None:
-    """
-    Removes exchange keys from the configuration and specifies dry-run
-    Used for backtesting / hyperopt / edge and utils.
-    Modifies the input dict!
-    """
-    if dry_run:
-        exchange_config["key"] = ""
-        exchange_config["apiKey"] = ""
-        exchange_config["secret"] = ""
-        exchange_config["password"] = ""
-        exchange_config["uid"] = ""
-
-
-def calculate_backoff(retrycount, max_retries):
+def calculate_backoff(remaining_retries, max_retries):
     """
     Calculate backoff
+    :param remaining_retries: Number of retries left - counts down with each attempt,
+                              so the delay increases with each retry.
+    :param max_retries: Maximum number of retries
     """
-    return (max_retries - retrycount) ** 2 + 1
+    return (max_retries - remaining_retries) ** 2 + 1
 
 
 def retrier_async(f):
@@ -157,7 +153,7 @@ def retrier_async(f):
                 return await wrapper(*args, **kwargs)
             else:
                 logger.warning(msg + "Giving up.")
-                raise ex
+                raise
 
     return wrapper
 
@@ -199,7 +195,7 @@ def retrier(_func: F | None = None, *, retries=API_RETRY_COUNT):
                     return wrapper(*args, **kwargs)
                 else:
                     logger.warning(msg + "Giving up.")
-                    raise ex
+                    raise
 
         return cast(F, wrapper)
 

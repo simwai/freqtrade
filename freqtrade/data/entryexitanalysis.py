@@ -7,11 +7,9 @@ from freqtrade.configuration import TimeRange
 from freqtrade.constants import Config
 from freqtrade.data.btanalysis import (
     BT_DATA_COLUMNS,
+    load_backtest_analysis_data,
     load_backtest_data,
     load_backtest_stats,
-    load_exit_signal_candles,
-    load_rejected_signals,
-    load_signal_candles,
 )
 from freqtrade.exceptions import ConfigurationError, OperationalException
 from freqtrade.util import print_df_rich_table
@@ -65,10 +63,7 @@ def _analyze_candles_and_indicators(
                 trades_red["signal_date"] = pd.to_datetime(trades_red["signal_date"], utc=True)
                 trades_red.set_index("signal_date", inplace=True)
 
-                try:
-                    trades_red = pd.merge(trades_red, trades_inds, on="signal_date", how="outer")
-                except Exception as e:
-                    raise e
+                trades_red = pd.merge(trades_red, trades_inds, on="signal_date", how="outer")
         return trades_red
     else:
         return pd.DataFrame()
@@ -213,7 +208,7 @@ def prepare_results(
     analysed_trades, stratname, enter_reason_list, exit_reason_list, timerange=None
 ) -> pd.DataFrame:
     res_df = pd.DataFrame()
-    for pair, trades in analysed_trades[stratname].items():
+    for trades in analysed_trades[stratname].values():
         if trades.shape[0] > 0:
             trades.dropna(subset=["close_date"], inplace=True)
             res_df = pd.concat([res_df, trades], ignore_index=True)
@@ -331,7 +326,9 @@ def process_entry_exit_reasons(config: Config):
         exit_only = config.get("exit_only", False)
         do_rejected = config.get("analysis_rejected", False)
         to_csv = config.get("analysis_to_csv", False)
-        csv_path = Path(config.get("analysis_csv_path", config["exportfilename"]))
+        csv_path = Path(
+            config.get("analysis_csv_path", config["exportdirectory"]),  # type: ignore[arg-type]
+        )
 
         if entry_only is True and exit_only is True:
             raise OperationalException(
@@ -344,20 +341,30 @@ def process_entry_exit_reasons(config: Config):
             None if config.get("timerange") is None else str(config.get("timerange"))
         )
         try:
-            backtest_stats = load_backtest_stats(config["exportfilename"])
+            backtest_stats = load_backtest_stats(
+                config["exportdirectory"], config["exportfilename"]
+            )
         except ValueError as e:
             raise ConfigurationError(e) from e
 
-        for strategy_name, results in backtest_stats["strategy"].items():
-            trades = load_backtest_data(config["exportfilename"], strategy_name)
+        for strategy_name in backtest_stats["strategy"]:
+            trades = load_backtest_data(
+                config["exportdirectory"], strategy_name, config["exportfilename"]
+            )
 
             if trades is not None and not trades.empty:
-                signal_candles = load_signal_candles(config["exportfilename"])
-                exit_signals = load_exit_signal_candles(config["exportfilename"])
+                signal_candles = load_backtest_analysis_data(
+                    config["exportdirectory"], "signals", config["exportfilename"]
+                )
+                exit_signals = load_backtest_analysis_data(
+                    config["exportdirectory"], "exited", config["exportfilename"]
+                )
 
                 rej_df = None
                 if do_rejected:
-                    rejected_signals_dict = load_rejected_signals(config["exportfilename"])
+                    rejected_signals_dict = load_backtest_analysis_data(
+                        config["exportdirectory"], "rejected", config["exportfilename"]
+                    )
                     rej_df = prepare_results(
                         rejected_signals_dict,
                         strategy_name,

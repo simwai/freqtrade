@@ -4,8 +4,8 @@ from datetime import datetime
 
 import talib.abstract as ta
 from pandas import DataFrame
+from technical import qtpylib
 
-import freqtrade.vendor.qtpylib.indicators as qtpylib
 from freqtrade.persistence import Trade
 from freqtrade.strategy import (
     BooleanParameter,
@@ -23,6 +23,16 @@ class StrategyTestV3(IStrategy):
     Please look at the SampleStrategy in the user_data/strategy directory
     or strategy repository https://github.com/freqtrade/freqtrade-strategies
     for samples and inspiration.
+
+    ---
+
+    Some test asian characters.
+    Ensures that unicode characters are handled correctly when reading strategy files.
+    Otherwise this may break on windows systems.
+    All roughly translate to "hello world".
+        chinese string: "你好世界"
+        korean string: "안녕하세요,세계"
+        japanese string: "こんにちは、世界"
     """
 
     INTERFACE_VERSION = 3

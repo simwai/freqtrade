@@ -7,9 +7,7 @@ use_directory_urls: True
 nav:
     - Home: index.md
     - Quickstart with Docker: docker_quickstart.md
-    - Installation:
-        - Linux/MacOS/Raspberry: installation.md
-        - Windows: windows_installation.md
+    - Installation: installation.md
     - Freqtrade Basics: bot-basics.md
     - Configuration: configuration.md
     - Strategy Quickstart: strategy-101.md
@@ -26,7 +24,6 @@ nav:
     - Data Downloading: data-download.md
     - Backtesting: backtesting.md
     - Hyperopt: hyperopt.md
-    - Walk-forward Optimization: walk-forward.md
     - FreqAI:
         - Introduction: freqai.md
         - Configuration: freqai-configuration.md
@@ -53,7 +50,6 @@ nav:
         - Orderflow: advanced-orderflow.md
         - Producer/Consumer mode: producer-consumer.md
         - SQL Cheat-sheet: sql_cheatsheet.md
-        - Edge Positioning: edge.md
     - FAQ: faq.md
     - Strategy migration: strategy_migration.md
     - Updating Freqtrade: updating.md
@@ -63,11 +59,14 @@ theme:
   name: material
   logo: "images/logo.png"
   favicon: "images/logo.png"
+  icon:
+    repo: fontawesome/brands/github
   custom_dir: "docs/overrides"
   features:
     - content.code.annotate
     - search.share
     - content.code.copy
+    - content.action.edit
     - navigation.top
     - navigation.footer
   palette:
@@ -87,8 +86,10 @@ extra_css:
   - "stylesheets/ft.extra.css"
 extra_javascript:
   - javascripts/config.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+exclude_docs: |
+    /commands/*
+    /includes/*
 markdown_extensions:
   - attr_list
   - admonition
@@ -114,6 +115,9 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
   - mdx_truly_sane_lists
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 extra:
   version:
     provider: mike

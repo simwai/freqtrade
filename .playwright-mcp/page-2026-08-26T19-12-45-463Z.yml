@@ -1,0 +1,1378 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - heading "Strategy Lab" [level=1] [ref=e6]
+      - generic [ref=e7]: freqtrade strategy overview · 2026-08-26 20:57
+  - generic [ref=e8]:
+    - button "Dashboard" [ref=e9] [cursor=pointer]
+    - button "Strategies" [ref=e10] [cursor=pointer]
+    - button "History" [ref=e11] [cursor=pointer]
+    - button "Benchmark" [ref=e12] [cursor=pointer]
+    - button "Walk-Forward" [ref=e13] [cursor=pointer]
+    - button "Hyperopt" [ref=e14] [cursor=pointer]
+    - button "Trades" [ref=e15] [cursor=pointer]
+    - button "Lab" [ref=e16] [cursor=pointer]
+  - main [ref=e872]:
+    - generic [ref=e874]:
+      - button "← Back" [ref=e875] [cursor=pointer]
+      - generic [ref=e876]:
+        - generic [ref=e877]:
+          - generic [ref=e878]: BigZ08
+          - generic [ref=e879]: C
+          - generic [ref=e880]: active
+          - generic [ref=e881]: "grade basis: backtest"
+          - generic [ref=e882]: code current*
+          - 'button "{ } config & code" [ref=e883] [cursor=pointer]'
+        - generic [ref=e884]: 6 pass, 0 warn, 1 fail
+    - generic [ref=e885]:
+      - heading "Latest run" [level=2] [ref=e887]
+      - generic [ref=e888]:
+        - generic [ref=e889]:
+          - generic [ref=e890]: Profit
+          - generic [ref=e891]: 53.7%
+        - generic [ref=e892]:
+          - generic [ref=e893]: Sortino
+          - generic [ref=e894]: "44.112"
+        - generic [ref=e895]:
+          - generic [ref=e896]: Calmar
+          - generic [ref=e897]: 2,065.606
+        - generic [ref=e898]:
+          - generic [ref=e899]: Profit factor
+          - generic [ref=e900]: "732.491"
+        - generic [ref=e901]:
+          - generic [ref=e902]: Max drawdown
+          - generic [ref=e903]: 0.1%
+        - generic [ref=e904]:
+          - generic [ref=e905]: Win rate
+          - generic [ref=e906]: 77.8%
+        - generic [ref=e907]:
+          - generic [ref=e908]: Trades
+          - generic [ref=e909]: "9"
+        - generic [ref=e910]:
+          - generic [ref=e911]: Holding avg
+          - generic [ref=e912]: 1.2h
+    - generic [ref=e913]:
+      - generic [ref=e914]:
+        - heading "Scorecard breakdown" [level=2] [ref=e915]
+        - generic [ref=e916]: why this grade — each metric vs its threshold
+      - generic [ref=e917]:
+        - table [ref=e919]:
+          - rowgroup [ref=e926]:
+            - row [ref=e927]:
+              - columnheader "Metric" [ref=e928] [cursor=pointer]
+              - columnheader "Value" [ref=e929] [cursor=pointer]
+              - columnheader "Status" [ref=e930] [cursor=pointer]
+              - columnheader "Pass ≥" [ref=e931] [cursor=pointer]
+              - columnheader "Warn ≥" [ref=e932] [cursor=pointer]
+        - table [ref=e935]:
+          - rowgroup [ref=e942]:
+            - row [ref=e943]:
+              - cell "Sortino" [ref=e944]
+              - cell "44.112" [ref=e945]
+              - cell "pass" [ref=e946]
+              - cell "1" [ref=e948]
+              - cell "0.3" [ref=e949]
+            - row [ref=e950]:
+              - cell "Calmar" [ref=e951]
+              - cell "2,065.606" [ref=e952]
+              - cell "pass" [ref=e953]
+              - cell "1" [ref=e955]
+              - cell "0.3" [ref=e956]
+            - row [ref=e957]:
+              - cell "Profit factor" [ref=e958]
+              - cell "732.491" [ref=e959]
+              - cell "pass" [ref=e960]
+              - cell "1.2" [ref=e962]
+              - cell "1" [ref=e963]
+            - row [ref=e964]:
+              - cell "Max drawdown" [ref=e965]
+              - cell "0.1%" [ref=e966]
+              - cell "pass" [ref=e967]
+              - cell "≤ 20.0%" [ref=e969]
+              - cell "≤ 40.0%" [ref=e970]
+            - row [ref=e971]:
+              - cell "Win rate" [ref=e972]
+              - cell "77.8%" [ref=e973]
+              - cell "pass" [ref=e974]
+              - cell "0.45" [ref=e976]
+              - cell "0.35" [ref=e977]
+            - row [ref=e978]:
+              - cell "Trades" [ref=e979]
+              - cell "9" [ref=e980]
+              - cell "fail" [ref=e981]
+              - cell "100" [ref=e983]
+              - cell "30" [ref=e984]
+            - row [ref=e985]:
+              - cell "Worst trade" [ref=e986]
+              - cell "-0.3%" [ref=e987]
+              - cell "pass" [ref=e988]
+              - cell "≤ -8.0%" [ref=e990]
+              - cell "≤ -15.0%" [ref=e991]
+    - generic [ref=e992]:
+      - generic [ref=e993]:
+        - heading "Diagnostics" [level=2] [ref=e994]
+        - generic [ref=e995]: streaks, MFE/MAE, payoff & capture — from trade history
+      - generic [ref=e996]:
+        - generic [ref=e997]:
+          - generic [ref=e998]: Max loss streak
+          - generic [ref=e999]: "1"
+        - generic [ref=e1000]:
+          - generic [ref=e1001]: Max win streak
+          - generic [ref=e1002]: "5"
+        - generic [ref=e1003]:
+          - generic [ref=e1004]: Payoff (avg win/loss)
+          - generic [ref=e1005]: "205.212"
+        - generic [ref=e1006]:
+          - generic [ref=e1007]: Avg MFE
+          - generic [ref=e1008]: 35.46%
+        - generic [ref=e1009]:
+          - generic [ref=e1010]: Avg MAE
+          - generic [ref=e1011]: 15.67%
+        - generic [ref=e1012]:
+          - generic [ref=e1013]: Capture of MFE
+          - generic [ref=e1014]: 66%
+        - generic [ref=e1015]:
+          - generic [ref=e1016]: Avg win
+          - generic [ref=e1017]: 30.35%
+        - generic [ref=e1018]:
+          - generic [ref=e1019]: Avg loss
+          - generic [ref=e1020]: "-0.15%"
+        - generic [ref=e1021]:
+          - generic [ref=e1022]: Worst trade · ADA/USDC
+          - generic [ref=e1023]: "-0.28%"
+      - generic [ref=e1024]:
+        - generic [ref=e1025]:
+          - generic [ref=e1026]: fail
+          - generic [ref=e1028]:
+            - text: Too few trades
+            - generic [ref=e1029]: n<30 is not significant. Widen entry, lower filters, or extend timerange (>6 months).
+        - generic [ref=e1030]:
+          - generic [ref=e1031]: info
+          - generic [ref=e1033]:
+            - text: Low activity
+            - generic [ref=e1034]: 0.01 trades/day — may miss regimes. Test more pairs or lower timeframe.
+    - generic [ref=e1035]:
+      - heading "All backtest runs" [level=2] [ref=e1037]
+      - generic [ref=e1038]:
+        - table [ref=e1040]:
+          - rowgroup [ref=e1052]:
+            - row [ref=e1053]:
+              - columnheader "Run" [ref=e1054] [cursor=pointer]
+              - columnheader "Grade" [ref=e1055] [cursor=pointer]
+              - columnheader "Profit%" [ref=e1056] [cursor=pointer]
+              - columnheader "Trades" [ref=e1057] [cursor=pointer]
+              - columnheader "PF" [ref=e1058] [cursor=pointer]
+              - columnheader "Sortino" [ref=e1059] [cursor=pointer]
+              - columnheader "MaxDD" [ref=e1060] [cursor=pointer]
+              - columnheader "TF" [ref=e1061] [cursor=pointer]
+              - columnheader "Source" [ref=e1062] [cursor=pointer]
+              - columnheader [ref=e1063] [cursor=pointer]
+        - table [ref=e1066]:
+          - rowgroup [ref=e1078]:
+            - row [ref=e1079]:
+              - cell "2026-08-23 17:43" [ref=e1080]
+              - cell "C" [ref=e1081]
+              - cell "53.7%" [ref=e1083]
+              - cell "9" [ref=e1084]
+              - cell "732.491" [ref=e1085]
+              - cell "44.112" [ref=e1086]
+              - cell "0.1%" [ref=e1087]
+              - cell "5m" [ref=e1088]
+              - cell "sult-2026-08-23_19-44-13.zip" [ref=e1089]
+              - cell [ref=e1090]:
+                - 'button "{ }" [ref=e1091] [cursor=pointer]'
+            - row [ref=e1092]:
+              - cell "2026-08-23 17:40" [ref=e1093]
+              - cell "D" [ref=e1094]
+              - cell "0%" [ref=e1096]
+              - cell "0" [ref=e1097]
+              - cell "0" [ref=e1098]
+              - cell "0" [ref=e1099]
+              - cell "0.0%" [ref=e1100]
+              - cell "5m" [ref=e1101]
+              - cell "sult-2026-08-23_19-40-34.zip" [ref=e1102]
+              - cell [ref=e1103]:
+                - 'button "{ }" [ref=e1104] [cursor=pointer]'
+            - row [ref=e1105]:
+              - cell "2024-12-01 16:34" [ref=e1106]
+              - cell "D" [ref=e1107]
+              - cell "446.1%" [ref=e1109]
+              - cell "165" [ref=e1110]
+              - cell "1.209" [ref=e1111]
+              - cell "0.11" [ref=e1112]
+              - cell "85.8%" [ref=e1113]
+              - cell "5m" [ref=e1114]
+              - cell "ult-2024-12-01_17-37-30.json" [ref=e1115]
+              - cell [ref=e1116]:
+                - 'button "{ }" [ref=e1117] [cursor=pointer]'
+            - row [ref=e1118]:
+              - cell "2024-07-28 11:49" [ref=e1119]
+              - cell "D" [ref=e1120]
+              - cell "1,504%" [ref=e1122]
+              - cell "163" [ref=e1123]
+              - cell "1.619" [ref=e1124]
+              - cell "0.303" [ref=e1125]
+              - cell "65.3%" [ref=e1126]
+              - cell "5m" [ref=e1127]
+              - cell "ult-2024-07-28_13-51-02.json" [ref=e1128]
+              - cell [ref=e1129]:
+                - 'button "{ }" [ref=e1130] [cursor=pointer]'
+            - row [ref=e1131]:
+              - cell "2024-07-28 11:15" [ref=e1132]
+              - cell "D" [ref=e1133]
+              - cell "224.6%" [ref=e1135]
+              - cell "242" [ref=e1136]
+              - cell "1.094" [ref=e1137]
+              - cell "0.062" [ref=e1138]
+              - cell "95.3%" [ref=e1139]
+              - cell "5m" [ref=e1140]
+              - cell "ult-2024-07-28_13-18-05.json" [ref=e1141]
+              - cell [ref=e1142]:
+                - 'button "{ }" [ref=e1143] [cursor=pointer]'
+            - row [ref=e1144]:
+              - cell "2024-07-28 10:46" [ref=e1145]
+              - cell "D" [ref=e1146]
+              - cell "224.6%" [ref=e1148]
+              - cell "242" [ref=e1149]
+              - cell "1.094" [ref=e1150]
+              - cell "0.062" [ref=e1151]
+              - cell "95.3%" [ref=e1152]
+              - cell "5m" [ref=e1153]
+              - cell "ult-2024-07-28_12-48-35.json" [ref=e1154]
+              - cell [ref=e1155]:
+                - 'button "{ }" [ref=e1156] [cursor=pointer]'
+            - row [ref=e1157]:
+              - cell "2024-07-28 10:39" [ref=e1158]
+              - cell "D" [ref=e1159]
+              - cell "1,504%" [ref=e1161]
+              - cell "163" [ref=e1162]
+              - cell "1.619" [ref=e1163]
+              - cell "0.303" [ref=e1164]
+              - cell "65.3%" [ref=e1165]
+              - cell "5m" [ref=e1166]
+              - cell "ult-2024-07-28_12-41-02.json" [ref=e1167]
+              - cell [ref=e1168]:
+                - 'button "{ }" [ref=e1169] [cursor=pointer]'
+            - row [ref=e1170]:
+              - cell "2024-07-28 10:36" [ref=e1171]
+              - cell "D" [ref=e1172]
+              - cell "1,504%" [ref=e1174]
+              - cell "163" [ref=e1175]
+              - cell "1.619" [ref=e1176]
+              - cell "0.303" [ref=e1177]
+              - cell "65.3%" [ref=e1178]
+              - cell "5m" [ref=e1179]
+              - cell "ult-2024-07-28_12-38-36.json" [ref=e1180]
+              - cell [ref=e1181]:
+                - 'button "{ }" [ref=e1182] [cursor=pointer]'
+            - row [ref=e1183]:
+              - cell "2024-07-28 10:32" [ref=e1184]
+              - cell "D" [ref=e1185]
+              - cell "224.6%" [ref=e1187]
+              - cell "242" [ref=e1188]
+              - cell "1.094" [ref=e1189]
+              - cell "0.062" [ref=e1190]
+              - cell "95.3%" [ref=e1191]
+              - cell "5m" [ref=e1192]
+              - cell "ult-2024-07-28_12-35-44.json" [ref=e1193]
+              - cell [ref=e1194]:
+                - 'button "{ }" [ref=e1195] [cursor=pointer]'
+            - row [ref=e1196]:
+              - cell "2024-07-22 19:23" [ref=e1197]
+              - cell "D" [ref=e1198]
+              - cell "220.3%" [ref=e1200]
+              - cell "215" [ref=e1201]
+              - cell "1.184" [ref=e1202]
+              - cell "0.192" [ref=e1203]
+              - cell "68.7%" [ref=e1204]
+              - cell "5m" [ref=e1205]
+              - cell "ult-2024-07-22_21-25-28.json" [ref=e1206]
+              - cell [ref=e1207]:
+                - 'button "{ }" [ref=e1208] [cursor=pointer]'
+            - row [ref=e1209]:
+              - cell "2024-07-22 11:17" [ref=e1210]
+              - cell "D" [ref=e1211]
+              - cell "220.3%" [ref=e1213]
+              - cell "215" [ref=e1214]
+              - cell "1.184" [ref=e1215]
+              - cell "0.192" [ref=e1216]
+              - cell "68.7%" [ref=e1217]
+              - cell "5m" [ref=e1218]
+              - cell "ult-2024-07-22_13-19-04.json" [ref=e1219]
+              - cell [ref=e1220]:
+                - 'button "{ }" [ref=e1221] [cursor=pointer]'
+            - row [ref=e1222]:
+              - cell "2024-07-22 10:58" [ref=e1223]
+              - cell "D" [ref=e1224]
+              - cell "20%" [ref=e1226]
+              - cell "271" [ref=e1227]
+              - cell "1.067" [ref=e1228]
+              - cell "0.142" [ref=e1229]
+              - cell "54.0%" [ref=e1230]
+              - cell "5m" [ref=e1231]
+              - cell "ult-2024-07-22_13-00-43.json" [ref=e1232]
+              - cell [ref=e1233]:
+                - 'button "{ }" [ref=e1234] [cursor=pointer]'
+            - row [ref=e1235]:
+              - cell "2024-07-22 09:16" [ref=e1236]
+              - cell "D" [ref=e1237]
+              - cell "35.9%" [ref=e1239]
+              - cell "239" [ref=e1240]
+              - cell "1.082" [ref=e1241]
+              - cell "0.131" [ref=e1242]
+              - cell "68.8%" [ref=e1243]
+              - cell "5m" [ref=e1244]
+              - cell "ult-2024-07-22_11-18-39.json" [ref=e1245]
+              - cell [ref=e1246]:
+                - 'button "{ }" [ref=e1247] [cursor=pointer]'
+            - row [ref=e1248]:
+              - cell "2024-07-22 09:13" [ref=e1249]
+              - cell "D" [ref=e1250]
+              - cell "44.3%" [ref=e1252]
+              - cell "263" [ref=e1253]
+              - cell "1.118" [ref=e1254]
+              - cell "0.233" [ref=e1255]
+              - cell "54.4%" [ref=e1256]
+              - cell "5m" [ref=e1257]
+              - cell "ult-2024-07-22_11-15-09.json" [ref=e1258]
+              - cell [ref=e1259]:
+                - 'button "{ }" [ref=e1260] [cursor=pointer]'
+            - row [ref=e1261]:
+              - cell "2024-07-22 09:09" [ref=e1262]
+              - cell "D" [ref=e1263]
+              - cell "48%" [ref=e1265]
+              - cell "268" [ref=e1266]
+              - cell "1.121" [ref=e1267]
+              - cell "0.221" [ref=e1268]
+              - cell "56.0%" [ref=e1269]
+              - cell "5m" [ref=e1270]
+              - cell "ult-2024-07-22_11-11-23.json" [ref=e1271]
+              - cell [ref=e1272]:
+                - 'button "{ }" [ref=e1273] [cursor=pointer]'
+            - row [ref=e1274]:
+              - cell "2024-07-22 09:06" [ref=e1275]
+              - cell "D" [ref=e1276]
+              - cell "89.1%" [ref=e1278]
+              - cell "259" [ref=e1279]
+              - cell "1.138" [ref=e1280]
+              - cell "0.208" [ref=e1281]
+              - cell "71.5%" [ref=e1282]
+              - cell "5m" [ref=e1283]
+              - cell "ult-2024-07-22_11-08-08.json" [ref=e1284]
+              - cell [ref=e1285]:
+                - 'button "{ }" [ref=e1286] [cursor=pointer]'
+            - row [ref=e1287]:
+              - cell "2024-07-22 08:59" [ref=e1288]
+              - cell "D" [ref=e1289]
+              - cell "23.3%" [ref=e1291]
+              - cell "250" [ref=e1292]
+              - cell "1.054" [ref=e1293]
+              - cell "0.1" [ref=e1294]
+              - cell "67.7%" [ref=e1295]
+              - cell "5m" [ref=e1296]
+              - cell "ult-2024-07-22_11-01-15.json" [ref=e1297]
+              - cell [ref=e1298]:
+                - 'button "{ }" [ref=e1299] [cursor=pointer]'
+            - row [ref=e1300]:
+              - cell "2024-07-22 08:39" [ref=e1301]
+              - cell "D" [ref=e1302]
+              - cell "19.3%" [ref=e1304]
+              - cell "231" [ref=e1305]
+              - cell "1.048" [ref=e1306]
+              - cell "0.079" [ref=e1307]
+              - cell "70.0%" [ref=e1308]
+              - cell "5m" [ref=e1309]
+              - cell "ult-2024-07-22_10-41-36.json" [ref=e1310]
+              - cell [ref=e1311]:
+                - 'button "{ }" [ref=e1312] [cursor=pointer]'
+            - row [ref=e1313]:
+              - cell "2024-07-22 07:06" [ref=e1314]
+              - cell "D" [ref=e1315]
+              - cell "17.1%" [ref=e1317]
+              - cell "250" [ref=e1318]
+              - cell "1.042" [ref=e1319]
+              - cell "0.08" [ref=e1320]
+              - cell "66.4%" [ref=e1321]
+              - cell "5m" [ref=e1322]
+              - cell "ult-2024-07-22_09-08-54.json" [ref=e1323]
+              - cell [ref=e1324]:
+                - 'button "{ }" [ref=e1325] [cursor=pointer]'
+            - row [ref=e1326]:
+              - cell "2024-07-22 07:02" [ref=e1327]
+              - cell "D" [ref=e1328]
+              - cell "299.1%" [ref=e1330]
+              - cell "399" [ref=e1331]
+              - cell "1.318" [ref=e1332]
+              - cell "0.817" [ref=e1333]
+              - cell "69.2%" [ref=e1334]
+              - cell "5m" [ref=e1335]
+              - cell "ult-2024-07-22_09-05-08.json" [ref=e1336]
+              - cell [ref=e1337]:
+                - 'button "{ }" [ref=e1338] [cursor=pointer]'
+            - row [ref=e1339]:
+              - cell "2024-07-22 06:58" [ref=e1340]
+              - cell "D" [ref=e1341]
+              - cell "299.1%" [ref=e1343]
+              - cell "399" [ref=e1344]
+              - cell "1.318" [ref=e1345]
+              - cell "0.817" [ref=e1346]
+              - cell "69.2%" [ref=e1347]
+              - cell "5m" [ref=e1348]
+              - cell "ult-2024-07-22_09-01-00.json" [ref=e1349]
+              - cell [ref=e1350]:
+                - 'button "{ }" [ref=e1351] [cursor=pointer]'
+            - row [ref=e1352]:
+              - cell "2024-07-22 06:55" [ref=e1353]
+              - cell "D" [ref=e1354]
+              - cell "246.5%" [ref=e1356]
+              - cell "403" [ref=e1357]
+              - cell "1.294" [ref=e1358]
+              - cell "0.701" [ref=e1359]
+              - cell "69.2%" [ref=e1360]
+              - cell "5m" [ref=e1361]
+              - cell "ult-2024-07-22_08-57-53.json" [ref=e1362]
+              - cell [ref=e1363]:
+                - 'button "{ }" [ref=e1364] [cursor=pointer]'
+            - row [ref=e1365]:
+              - cell "2024-07-22 06:47" [ref=e1366]
+              - cell "D" [ref=e1367]
+              - cell "246.5%" [ref=e1369]
+              - cell "403" [ref=e1370]
+              - cell "1.294" [ref=e1371]
+              - cell "0.701" [ref=e1372]
+              - cell "69.2%" [ref=e1373]
+              - cell "5m" [ref=e1374]
+              - cell "ult-2024-07-22_08-50-32.json" [ref=e1375]
+              - cell [ref=e1376]:
+                - 'button "{ }" [ref=e1377] [cursor=pointer]'
+            - row [ref=e1378]:
+              - cell "2024-07-21 21:58" [ref=e1379]
+              - cell "D" [ref=e1380]
+              - cell "246.5%" [ref=e1382]
+              - cell "403" [ref=e1383]
+              - cell "1.294" [ref=e1384]
+              - cell "0.701" [ref=e1385]
+              - cell "69.2%" [ref=e1386]
+              - cell "5m" [ref=e1387]
+              - cell "ult-2024-07-22_00-01-00.json" [ref=e1388]
+              - cell [ref=e1389]:
+                - 'button "{ }" [ref=e1390] [cursor=pointer]'
+            - row [ref=e1391]:
+              - cell "2024-07-21 21:54" [ref=e1392]
+              - cell "D" [ref=e1393]
+              - cell "414.8%" [ref=e1395]
+              - cell "346" [ref=e1396]
+              - cell "1.336" [ref=e1397]
+              - cell "0.616" [ref=e1398]
+              - cell "70.5%" [ref=e1399]
+              - cell "5m" [ref=e1400]
+              - cell "ult-2024-07-21_23-56-34.json" [ref=e1401]
+              - cell [ref=e1402]:
+                - 'button "{ }" [ref=e1403] [cursor=pointer]'
+            - row [ref=e1404]:
+              - cell "2024-07-21 21:35" [ref=e1405]
+              - cell "D" [ref=e1406]
+              - cell "850.2%" [ref=e1408]
+              - cell "265" [ref=e1409]
+              - cell "1.503" [ref=e1410]
+              - cell "0.198" [ref=e1411]
+              - cell "84.2%" [ref=e1412]
+              - cell "5m" [ref=e1413]
+              - cell "ult-2024-07-21_23-38-15.json" [ref=e1414]
+              - cell [ref=e1415]:
+                - 'button "{ }" [ref=e1416] [cursor=pointer]'
+            - row [ref=e1417]:
+              - cell "2024-07-21 21:30" [ref=e1418]
+              - cell "D" [ref=e1419]
+              - cell "850.2%" [ref=e1421]
+              - cell "265" [ref=e1422]
+              - cell "1.503" [ref=e1423]
+              - cell "0.198" [ref=e1424]
+              - cell "84.2%" [ref=e1425]
+              - cell "5m" [ref=e1426]
+              - cell "ult-2024-07-21_23-33-14.json" [ref=e1427]
+              - cell [ref=e1428]:
+                - 'button "{ }" [ref=e1429] [cursor=pointer]'
+            - row [ref=e1430]:
+              - cell "2024-07-21 21:26" [ref=e1431]
+              - cell "D" [ref=e1432]
+              - cell "850.2%" [ref=e1434]
+              - cell "265" [ref=e1435]
+              - cell "1.503" [ref=e1436]
+              - cell "0.198" [ref=e1437]
+              - cell "84.2%" [ref=e1438]
+              - cell "5m" [ref=e1439]
+              - cell "ult-2024-07-21_23-29-26.json" [ref=e1440]
+              - cell [ref=e1441]:
+                - 'button "{ }" [ref=e1442] [cursor=pointer]'
+            - row [ref=e1443]:
+              - cell "2024-07-21 21:24" [ref=e1444]
+              - cell "D" [ref=e1445]
+              - cell "59.2%" [ref=e1447]
+              - cell "517" [ref=e1448]
+              - cell "1.396" [ref=e1449]
+              - cell "0.207" [ref=e1450]
+              - cell "64.0%" [ref=e1451]
+              - cell "5m" [ref=e1452]
+              - cell "ult-2024-07-21_23-25-08.json" [ref=e1453]
+              - cell [ref=e1454]:
+                - 'button "{ }" [ref=e1455] [cursor=pointer]'
+            - row [ref=e1456]:
+              - cell "2024-07-21 21:21" [ref=e1457]
+              - cell "D" [ref=e1458]
+              - cell "-22.1%" [ref=e1460]
+              - cell "673" [ref=e1461]
+              - cell "0" [ref=e1462]
+              - cell "-104.763" [ref=e1463]
+              - cell "22.1%" [ref=e1464]
+              - cell "5m" [ref=e1465]
+              - cell "ult-2024-07-21_23-21-52.json" [ref=e1466]
+              - cell [ref=e1467]:
+                - 'button "{ }" [ref=e1468] [cursor=pointer]'
+            - row [ref=e1469]:
+              - cell "2024-07-21 21:18" [ref=e1470]
+              - cell "D" [ref=e1471]
+              - cell "59.2%" [ref=e1473]
+              - cell "517" [ref=e1474]
+              - cell "1.396" [ref=e1475]
+              - cell "0.207" [ref=e1476]
+              - cell "64.0%" [ref=e1477]
+              - cell "5m" [ref=e1478]
+              - cell "ult-2024-07-21_23-19-34.json" [ref=e1479]
+              - cell [ref=e1480]:
+                - 'button "{ }" [ref=e1481] [cursor=pointer]'
+            - row [ref=e1482]:
+              - cell "2024-07-21 12:34" [ref=e1483]
+              - cell "D" [ref=e1484]
+              - cell "-22.1%" [ref=e1486]
+              - cell "673" [ref=e1487]
+              - cell "0" [ref=e1488]
+              - cell "-104.763" [ref=e1489]
+              - cell "22.1%" [ref=e1490]
+              - cell "5m" [ref=e1491]
+              - cell "ult-2024-07-21_20-34-48.json" [ref=e1492]
+              - cell [ref=e1493]:
+                - 'button "{ }" [ref=e1494] [cursor=pointer]'
+            - row [ref=e1495]:
+              - cell "2024-07-21 12:31" [ref=e1496]
+              - cell "D" [ref=e1497]
+              - cell "-22.1%" [ref=e1499]
+              - cell "673" [ref=e1500]
+              - cell "0" [ref=e1501]
+              - cell "-104.763" [ref=e1502]
+              - cell "22.1%" [ref=e1503]
+              - cell "5m" [ref=e1504]
+              - cell "ult-2024-07-21_14-32-37.json" [ref=e1505]
+              - cell [ref=e1506]:
+                - 'button "{ }" [ref=e1507] [cursor=pointer]'
+            - row [ref=e1508]:
+              - cell "2024-07-21 12:27" [ref=e1509]
+              - cell "D" [ref=e1510]
+              - cell "-22.1%" [ref=e1512]
+              - cell "673" [ref=e1513]
+              - cell "0" [ref=e1514]
+              - cell "-104.763" [ref=e1515]
+              - cell "22.1%" [ref=e1516]
+              - cell "5m" [ref=e1517]
+              - cell "ult-2024-07-21_14-28-23.json" [ref=e1518]
+              - cell [ref=e1519]:
+                - 'button "{ }" [ref=e1520] [cursor=pointer]'
+            - row [ref=e1521]:
+              - cell "2024-07-21 12:24" [ref=e1522]
+              - cell "D" [ref=e1523]
+              - cell "-22.1%" [ref=e1525]
+              - cell "673" [ref=e1526]
+              - cell "0" [ref=e1527]
+              - cell "-104.763" [ref=e1528]
+              - cell "22.1%" [ref=e1529]
+              - cell "5m" [ref=e1530]
+              - cell "ult-2024-07-21_14-25-20.json" [ref=e1531]
+              - cell [ref=e1532]:
+                - 'button "{ }" [ref=e1533] [cursor=pointer]'
+            - row [ref=e1534]:
+              - cell "2024-07-21 12:12" [ref=e1535]
+              - cell "D" [ref=e1536]
+              - cell "59.2%" [ref=e1538]
+              - cell "517" [ref=e1539]
+              - cell "1.396" [ref=e1540]
+              - cell "0.207" [ref=e1541]
+              - cell "64.0%" [ref=e1542]
+              - cell "5m" [ref=e1543]
+              - cell "ult-2024-07-21_14-12-51.json" [ref=e1544]
+              - cell [ref=e1545]:
+                - 'button "{ }" [ref=e1546] [cursor=pointer]'
+            - row [ref=e1547]:
+              - cell "2024-07-21 12:08" [ref=e1548]
+              - cell "D" [ref=e1549]
+              - cell "59.2%" [ref=e1551]
+              - cell "517" [ref=e1552]
+              - cell "1.396" [ref=e1553]
+              - cell "0.207" [ref=e1554]
+              - cell "64.0%" [ref=e1555]
+              - cell "5m" [ref=e1556]
+              - cell "ult-2024-07-21_14-09-45.json" [ref=e1557]
+              - cell [ref=e1558]:
+                - 'button "{ }" [ref=e1559] [cursor=pointer]'
+            - row [ref=e1560]:
+              - cell "2024-07-21 12:01" [ref=e1561]
+              - cell "D" [ref=e1562]
+              - cell "59.2%" [ref=e1564]
+              - cell "517" [ref=e1565]
+              - cell "1.396" [ref=e1566]
+              - cell "0.207" [ref=e1567]
+              - cell "64.0%" [ref=e1568]
+              - cell "5m" [ref=e1569]
+              - cell "ult-2024-07-21_14-03-51.json" [ref=e1570]
+              - cell [ref=e1571]:
+                - 'button "{ }" [ref=e1572] [cursor=pointer]'
+            - row [ref=e1573]:
+              - cell "2024-07-21 11:45" [ref=e1574]
+              - cell "D" [ref=e1575]
+              - cell "59.2%" [ref=e1577]
+              - cell "517" [ref=e1578]
+              - cell "1.396" [ref=e1579]
+              - cell "0.207" [ref=e1580]
+              - cell "64.0%" [ref=e1581]
+              - cell "5m" [ref=e1582]
+              - cell "ult-2024-07-21_13-46-30.json" [ref=e1583]
+              - cell [ref=e1584]:
+                - 'button "{ }" [ref=e1585] [cursor=pointer]'
+            - row [ref=e1586]:
+              - cell "2024-07-21 11:42" [ref=e1587]
+              - cell "D" [ref=e1588]
+              - cell "59.2%" [ref=e1590]
+              - cell "517" [ref=e1591]
+              - cell "1.396" [ref=e1592]
+              - cell "0.207" [ref=e1593]
+              - cell "64.0%" [ref=e1594]
+              - cell "5m" [ref=e1595]
+              - cell "ult-2024-07-21_13-43-38.json" [ref=e1596]
+              - cell [ref=e1597]:
+                - 'button "{ }" [ref=e1598] [cursor=pointer]'
+            - row [ref=e1599]:
+              - cell "2024-07-19 19:31" [ref=e1600]
+              - cell "D" [ref=e1601]
+              - cell "59.2%" [ref=e1603]
+              - cell "517" [ref=e1604]
+              - cell "1.396" [ref=e1605]
+              - cell "0.207" [ref=e1606]
+              - cell "64.0%" [ref=e1607]
+              - cell "5m" [ref=e1608]
+              - cell "ult-2024-07-19_21-34-57.json" [ref=e1609]
+              - cell [ref=e1610]:
+                - 'button "{ }" [ref=e1611] [cursor=pointer]'
+            - row [ref=e1612]:
+              - cell "2024-07-19 19:25" [ref=e1613]
+              - cell "D" [ref=e1614]
+              - cell "59.2%" [ref=e1616]
+              - cell "517" [ref=e1617]
+              - cell "1.396" [ref=e1618]
+              - cell "0.207" [ref=e1619]
+              - cell "64.0%" [ref=e1620]
+              - cell "5m" [ref=e1621]
+              - cell "ult-2024-07-19_21-26-23.json" [ref=e1622]
+              - cell [ref=e1623]:
+                - 'button "{ }" [ref=e1624] [cursor=pointer]'
+            - row [ref=e1625]:
+              - cell "2024-07-19 19:17" [ref=e1626]
+              - cell "D" [ref=e1627]
+              - cell "59.2%" [ref=e1629]
+              - cell "517" [ref=e1630]
+              - cell "1.396" [ref=e1631]
+              - cell "0.207" [ref=e1632]
+              - cell "64.0%" [ref=e1633]
+              - cell "5m" [ref=e1634]
+              - cell "ult-2024-07-19_21-18-24.json" [ref=e1635]
+              - cell [ref=e1636]:
+                - 'button "{ }" [ref=e1637] [cursor=pointer]'
+            - row [ref=e1638]:
+              - cell "2024-07-19 15:49" [ref=e1639]
+              - cell "D" [ref=e1640]
+              - cell "59.2%" [ref=e1642]
+              - cell "517" [ref=e1643]
+              - cell "1.396" [ref=e1644]
+              - cell "0.207" [ref=e1645]
+              - cell "64.0%" [ref=e1646]
+              - cell "5m" [ref=e1647]
+              - cell "ult-2024-07-19_21-14-32.json" [ref=e1648]
+              - cell [ref=e1649]:
+                - 'button "{ }" [ref=e1650] [cursor=pointer]'
+            - row [ref=e1651]:
+              - cell "2024-07-19 12:46" [ref=e1652]
+              - cell "D" [ref=e1653]
+              - cell "59.2%" [ref=e1655]
+              - cell "517" [ref=e1656]
+              - cell "1.396" [ref=e1657]
+              - cell "0.207" [ref=e1658]
+              - cell "64.0%" [ref=e1659]
+              - cell "5m" [ref=e1660]
+              - cell "ult-2024-07-19_14-47-21.json" [ref=e1661]
+              - cell [ref=e1662]:
+                - 'button "{ }" [ref=e1663] [cursor=pointer]'
+            - row [ref=e1664]:
+              - cell "2024-07-19 12:32" [ref=e1665]
+              - cell "D" [ref=e1666]
+              - cell "59.2%" [ref=e1668]
+              - cell "517" [ref=e1669]
+              - cell "1.396" [ref=e1670]
+              - cell "0.207" [ref=e1671]
+              - cell "64.0%" [ref=e1672]
+              - cell "5m" [ref=e1673]
+              - cell "ult-2024-07-19_14-33-31.json" [ref=e1674]
+              - cell [ref=e1675]:
+                - 'button "{ }" [ref=e1676] [cursor=pointer]'
+            - row [ref=e1677]:
+              - cell "2024-07-19 12:18" [ref=e1678]
+              - cell "D" [ref=e1679]
+              - cell "59.2%" [ref=e1681]
+              - cell "517" [ref=e1682]
+              - cell "1.396" [ref=e1683]
+              - cell "0.207" [ref=e1684]
+              - cell "64.0%" [ref=e1685]
+              - cell "5m" [ref=e1686]
+              - cell "ult-2024-07-19_14-19-35.json" [ref=e1687]
+              - cell [ref=e1688]:
+                - 'button "{ }" [ref=e1689] [cursor=pointer]'
+            - row [ref=e1690]:
+              - cell "2024-07-19 12:01" [ref=e1691]
+              - cell "D" [ref=e1692]
+              - cell "-22.1%" [ref=e1694]
+              - cell "673" [ref=e1695]
+              - cell "0" [ref=e1696]
+              - cell "-104.763" [ref=e1697]
+              - cell "22.1%" [ref=e1698]
+              - cell "5m" [ref=e1699]
+              - cell "ult-2024-07-19_14-02-23.json" [ref=e1700]
+              - cell [ref=e1701]:
+                - 'button "{ }" [ref=e1702] [cursor=pointer]'
+            - row [ref=e1703]:
+              - cell "2024-07-19 10:45" [ref=e1704]
+              - cell "D" [ref=e1705]
+              - cell "-22.1%" [ref=e1707]
+              - cell "673" [ref=e1708]
+              - cell "0" [ref=e1709]
+              - cell "-104.763" [ref=e1710]
+              - cell "22.1%" [ref=e1711]
+              - cell "5m" [ref=e1712]
+              - cell "ult-2024-07-19_12-46-15.json" [ref=e1713]
+              - cell [ref=e1714]:
+                - 'button "{ }" [ref=e1715] [cursor=pointer]'
+            - row [ref=e1716]:
+              - cell "2024-07-19 10:41" [ref=e1717]
+              - cell "D" [ref=e1718]
+              - cell "-22.1%" [ref=e1720]
+              - cell "673" [ref=e1721]
+              - cell "0" [ref=e1722]
+              - cell "-104.763" [ref=e1723]
+              - cell "22.1%" [ref=e1724]
+              - cell "5m" [ref=e1725]
+              - cell "ult-2024-07-19_12-42-39.json" [ref=e1726]
+              - cell [ref=e1727]:
+                - 'button "{ }" [ref=e1728] [cursor=pointer]'
+            - row [ref=e1729]:
+              - cell "2024-07-19 10:36" [ref=e1730]
+              - cell "D" [ref=e1731]
+              - cell "-22.1%" [ref=e1733]
+              - cell "673" [ref=e1734]
+              - cell "0" [ref=e1735]
+              - cell "-104.763" [ref=e1736]
+              - cell "22.1%" [ref=e1737]
+              - cell "5m" [ref=e1738]
+              - cell "ult-2024-07-19_12-37-46.json" [ref=e1739]
+              - cell [ref=e1740]:
+                - 'button "{ }" [ref=e1741] [cursor=pointer]'
+            - row [ref=e1742]:
+              - cell "2024-07-19 10:35" [ref=e1743]
+              - cell "D" [ref=e1744]
+              - cell "-22.1%" [ref=e1746]
+              - cell "673" [ref=e1747]
+              - cell "0" [ref=e1748]
+              - cell "-104.763" [ref=e1749]
+              - cell "22.1%" [ref=e1750]
+              - cell "5m" [ref=e1751]
+              - cell "ult-2024-07-19_12-36-21.json" [ref=e1752]
+              - cell [ref=e1753]:
+                - 'button "{ }" [ref=e1754] [cursor=pointer]'
+            - row [ref=e1755]:
+              - cell "2024-07-19 10:31" [ref=e1756]
+              - cell "D" [ref=e1757]
+              - cell "-22.1%" [ref=e1759]
+              - cell "673" [ref=e1760]
+              - cell "0" [ref=e1761]
+              - cell "-104.763" [ref=e1762]
+              - cell "22.1%" [ref=e1763]
+              - cell "5m" [ref=e1764]
+              - cell "ult-2024-07-19_12-32-32.json" [ref=e1765]
+              - cell [ref=e1766]:
+                - 'button "{ }" [ref=e1767] [cursor=pointer]'
+            - row [ref=e1768]:
+              - cell "2024-07-19 10:25" [ref=e1769]
+              - cell "D" [ref=e1770]
+              - cell "-22.1%" [ref=e1772]
+              - cell "673" [ref=e1773]
+              - cell "0" [ref=e1774]
+              - cell "-104.763" [ref=e1775]
+              - cell "22.1%" [ref=e1776]
+              - cell "5m" [ref=e1777]
+              - cell "ult-2024-07-19_12-26-39.json" [ref=e1778]
+              - cell [ref=e1779]:
+                - 'button "{ }" [ref=e1780] [cursor=pointer]'
+            - row [ref=e1781]:
+              - cell "2024-07-19 10:22" [ref=e1782]
+              - cell "D" [ref=e1783]
+              - cell "-22.1%" [ref=e1785]
+              - cell "673" [ref=e1786]
+              - cell "0" [ref=e1787]
+              - cell "-104.763" [ref=e1788]
+              - cell "22.1%" [ref=e1789]
+              - cell "5m" [ref=e1790]
+              - cell "ult-2024-07-19_12-23-43.json" [ref=e1791]
+              - cell [ref=e1792]:
+                - 'button "{ }" [ref=e1793] [cursor=pointer]'
+            - row [ref=e1794]:
+              - cell "2024-07-19 10:21" [ref=e1795]
+              - cell "D" [ref=e1796]
+              - cell "-22.1%" [ref=e1798]
+              - cell "673" [ref=e1799]
+              - cell "0" [ref=e1800]
+              - cell "-104.763" [ref=e1801]
+              - cell "22.1%" [ref=e1802]
+              - cell "5m" [ref=e1803]
+              - cell "ult-2024-07-19_12-22-00.json" [ref=e1804]
+              - cell [ref=e1805]:
+                - 'button "{ }" [ref=e1806] [cursor=pointer]'
+            - row [ref=e1807]:
+              - cell "2024-07-19 10:15" [ref=e1808]
+              - cell "D" [ref=e1809]
+              - cell "-22.1%" [ref=e1811]
+              - cell "673" [ref=e1812]
+              - cell "0" [ref=e1813]
+              - cell "-104.763" [ref=e1814]
+              - cell "22.1%" [ref=e1815]
+              - cell "5m" [ref=e1816]
+              - cell "ult-2024-07-19_12-16-13.json" [ref=e1817]
+              - cell [ref=e1818]:
+                - 'button "{ }" [ref=e1819] [cursor=pointer]'
+            - row [ref=e1820]:
+              - cell "2024-07-19 10:11" [ref=e1821]
+              - cell "D" [ref=e1822]
+              - cell "-22.1%" [ref=e1824]
+              - cell "673" [ref=e1825]
+              - cell "0" [ref=e1826]
+              - cell "-104.763" [ref=e1827]
+              - cell "22.1%" [ref=e1828]
+              - cell "5m" [ref=e1829]
+              - cell "ult-2024-07-19_12-12-37.json" [ref=e1830]
+              - cell [ref=e1831]:
+                - 'button "{ }" [ref=e1832] [cursor=pointer]'
+            - row [ref=e1833]:
+              - cell "2024-07-19 10:03" [ref=e1834]
+              - cell "D" [ref=e1835]
+              - cell "-22.1%" [ref=e1837]
+              - cell "673" [ref=e1838]
+              - cell "0" [ref=e1839]
+              - cell "-104.763" [ref=e1840]
+              - cell "22.1%" [ref=e1841]
+              - cell "5m" [ref=e1842]
+              - cell "ult-2024-07-19_12-04-28.json" [ref=e1843]
+              - cell [ref=e1844]:
+                - 'button "{ }" [ref=e1845] [cursor=pointer]'
+            - row [ref=e1846]:
+              - cell "2024-07-18 21:01" [ref=e1847]
+              - cell "D" [ref=e1848]
+              - cell "59.2%" [ref=e1850]
+              - cell "517" [ref=e1851]
+              - cell "1.396" [ref=e1852]
+              - cell "0.207" [ref=e1853]
+              - cell "64.0%" [ref=e1854]
+              - cell "5m" [ref=e1855]
+              - cell "ult-2024-07-18_23-02-35.json" [ref=e1856]
+              - cell [ref=e1857]:
+                - 'button "{ }" [ref=e1858] [cursor=pointer]'
+            - row [ref=e1859]:
+              - cell "2024-07-18 21:00" [ref=e1860]
+              - cell "D" [ref=e1861]
+              - cell "59.2%" [ref=e1863]
+              - cell "517" [ref=e1864]
+              - cell "1.396" [ref=e1865]
+              - cell "0.207" [ref=e1866]
+              - cell "64.0%" [ref=e1867]
+              - cell "5m" [ref=e1868]
+              - cell "ult-2024-07-18_23-01-33.json" [ref=e1869]
+              - cell [ref=e1870]:
+                - 'button "{ }" [ref=e1871] [cursor=pointer]'
+            - row [ref=e1872]:
+              - cell "2024-07-18 18:21" [ref=e1873]
+              - cell "D" [ref=e1874]
+              - cell "59.2%" [ref=e1876]
+              - cell "517" [ref=e1877]
+              - cell "1.396" [ref=e1878]
+              - cell "0.207" [ref=e1879]
+              - cell "64.0%" [ref=e1880]
+              - cell "5m" [ref=e1881]
+              - cell "ult-2024-07-18_20-22-24.json" [ref=e1882]
+              - cell [ref=e1883]:
+                - 'button "{ }" [ref=e1884] [cursor=pointer]'
+            - row [ref=e1885]:
+              - cell "2024-07-18 18:10" [ref=e1886]
+              - cell "D" [ref=e1887]
+              - cell "59.2%" [ref=e1889]
+              - cell "517" [ref=e1890]
+              - cell "1.396" [ref=e1891]
+              - cell "0.207" [ref=e1892]
+              - cell "64.0%" [ref=e1893]
+              - cell "5m" [ref=e1894]
+              - cell "ult-2024-07-18_20-11-05.json" [ref=e1895]
+              - cell [ref=e1896]:
+                - 'button "{ }" [ref=e1897] [cursor=pointer]'
+            - row [ref=e1898]:
+              - cell "2024-07-18 18:05" [ref=e1899]
+              - cell "D" [ref=e1900]
+              - cell "59.2%" [ref=e1902]
+              - cell "517" [ref=e1903]
+              - cell "1.396" [ref=e1904]
+              - cell "0.207" [ref=e1905]
+              - cell "64.0%" [ref=e1906]
+              - cell "5m" [ref=e1907]
+              - cell "ult-2024-07-18_20-05-48.json" [ref=e1908]
+              - cell [ref=e1909]:
+                - 'button "{ }" [ref=e1910] [cursor=pointer]'
+            - row [ref=e1911]:
+              - cell "2024-07-18 18:03" [ref=e1912]
+              - cell "D" [ref=e1913]
+              - cell "59.2%" [ref=e1915]
+              - cell "517" [ref=e1916]
+              - cell "1.396" [ref=e1917]
+              - cell "0.207" [ref=e1918]
+              - cell "64.0%" [ref=e1919]
+              - cell "5m" [ref=e1920]
+              - cell "ult-2024-07-18_20-04-13.json" [ref=e1921]
+              - cell [ref=e1922]:
+                - 'button "{ }" [ref=e1923] [cursor=pointer]'
+            - row [ref=e1924]:
+              - cell "2024-07-18 17:56" [ref=e1925]
+              - cell "D" [ref=e1926]
+              - cell "59.2%" [ref=e1928]
+              - cell "517" [ref=e1929]
+              - cell "1.396" [ref=e1930]
+              - cell "0.207" [ref=e1931]
+              - cell "64.0%" [ref=e1932]
+              - cell "5m" [ref=e1933]
+              - cell "ult-2024-07-18_19-57-13.json" [ref=e1934]
+              - cell [ref=e1935]:
+                - 'button "{ }" [ref=e1936] [cursor=pointer]'
+            - row [ref=e1937]:
+              - cell "2024-05-22 09:08" [ref=e1938]
+              - cell "D" [ref=e1939]
+              - cell "44.5%" [ref=e1941]
+              - cell "503" [ref=e1942]
+              - cell "1.282" [ref=e1943]
+              - cell "0.058" [ref=e1944]
+              - cell "63.7%" [ref=e1945]
+              - cell "5m" [ref=e1946]
+              - cell "ult-2024-05-22_11-09-30.json" [ref=e1947]
+              - cell [ref=e1948]:
+                - 'button "{ }" [ref=e1949] [cursor=pointer]'
+            - row [ref=e1950]:
+              - cell "2024-05-21 21:12" [ref=e1951]
+              - cell "D" [ref=e1952]
+              - cell "243.8%" [ref=e1954]
+              - cell "3,236" [ref=e1955]
+              - cell "1.155" [ref=e1956]
+              - cell "0.26" [ref=e1957]
+              - cell "88.1%" [ref=e1958]
+              - cell "5m" [ref=e1959]
+              - cell "ult-2024-05-21_23-14-30.json" [ref=e1960]
+              - cell [ref=e1961]:
+                - 'button "{ }" [ref=e1962] [cursor=pointer]'
+            - row [ref=e1963]:
+              - cell "2024-05-21 21:00" [ref=e1964]
+              - cell "D" [ref=e1965]
+              - cell "123.6%" [ref=e1967]
+              - cell "3,357" [ref=e1968]
+              - cell "1.1" [ref=e1969]
+              - cell "0.235" [ref=e1970]
+              - cell "83.2%" [ref=e1971]
+              - cell "5m" [ref=e1972]
+              - cell "ult-2024-05-21_23-02-20.json" [ref=e1973]
+              - cell [ref=e1974]:
+                - 'button "{ }" [ref=e1975] [cursor=pointer]'
+            - row [ref=e1976]:
+              - cell "2024-05-20 13:39" [ref=e1977]
+              - cell "D" [ref=e1978]
+              - cell "243.8%" [ref=e1980]
+              - cell "3,236" [ref=e1981]
+              - cell "1.155" [ref=e1982]
+              - cell "0.26" [ref=e1983]
+              - cell "88.1%" [ref=e1984]
+              - cell "5m" [ref=e1985]
+              - cell "ult-2024-05-20_15-40-44.json" [ref=e1986]
+              - cell [ref=e1987]:
+                - 'button "{ }" [ref=e1988] [cursor=pointer]'
+            - row [ref=e1989]:
+              - cell "2024-05-20 13:35" [ref=e1990]
+              - cell "D" [ref=e1991]
+              - cell "-96.9%" [ref=e1993]
+              - cell "3,935" [ref=e1994]
+              - cell "0.617" [ref=e1995]
+              - cell "-2.993" [ref=e1996]
+              - cell "97.2%" [ref=e1997]
+              - cell "5m" [ref=e1998]
+              - cell "ult-2024-05-20_15-37-08.json" [ref=e1999]
+              - cell [ref=e2000]:
+                - 'button "{ }" [ref=e2001] [cursor=pointer]'
+            - row [ref=e2002]:
+              - cell "2024-05-20 13:31" [ref=e2003]
+              - cell "D" [ref=e2004]
+              - cell "-96%" [ref=e2006]
+              - cell "4,996" [ref=e2007]
+              - cell "0.641" [ref=e2008]
+              - cell "-12.315" [ref=e2009]
+              - cell "96.2%" [ref=e2010]
+              - cell "5m" [ref=e2011]
+              - cell "ult-2024-05-20_15-32-31.json" [ref=e2012]
+              - cell [ref=e2013]:
+                - 'button "{ }" [ref=e2014] [cursor=pointer]'
+            - row [ref=e2015]:
+              - cell "2024-05-20 13:28" [ref=e2016]
+              - cell "D" [ref=e2017]
+              - cell "-97.6%" [ref=e2019]
+              - cell "3,817" [ref=e2020]
+              - cell "0.609" [ref=e2021]
+              - cell "-2.323" [ref=e2022]
+              - cell "97.7%" [ref=e2023]
+              - cell "5m" [ref=e2024]
+              - cell "ult-2024-05-20_15-29-30.json" [ref=e2025]
+              - cell [ref=e2026]:
+                - 'button "{ }" [ref=e2027] [cursor=pointer]'
+            - row [ref=e2028]:
+              - cell "2024-05-20 13:23" [ref=e2029]
+              - cell "D" [ref=e2030]
+              - cell "-97.2%" [ref=e2032]
+              - cell "4,114" [ref=e2033]
+              - cell "0.643" [ref=e2034]
+              - cell "-4.199" [ref=e2035]
+              - cell "97.4%" [ref=e2036]
+              - cell "5m" [ref=e2037]
+              - cell "ult-2024-05-20_15-25-04.json" [ref=e2038]
+              - cell [ref=e2039]:
+                - 'button "{ }" [ref=e2040] [cursor=pointer]'
+            - row [ref=e2041]:
+              - cell "2024-05-20 13:19" [ref=e2042]
+              - cell "D" [ref=e2043]
+              - cell "474.3%" [ref=e2045]
+              - cell "3,463" [ref=e2046]
+              - cell "1.185" [ref=e2047]
+              - cell "0.425" [ref=e2048]
+              - cell "81.3%" [ref=e2049]
+              - cell "5m" [ref=e2050]
+              - cell "ult-2024-05-20_15-20-56.json" [ref=e2051]
+              - cell [ref=e2052]:
+                - 'button "{ }" [ref=e2053] [cursor=pointer]'
+            - row [ref=e2054]:
+              - cell "2024-05-20 12:44" [ref=e2055]
+              - cell "D" [ref=e2056]
+              - cell "474.3%" [ref=e2058]
+              - cell "3,463" [ref=e2059]
+              - cell "1.185" [ref=e2060]
+              - cell "0.425" [ref=e2061]
+              - cell "81.3%" [ref=e2062]
+              - cell "5m" [ref=e2063]
+              - cell "ult-2024-05-20_14-45-55.json" [ref=e2064]
+              - cell [ref=e2065]:
+                - 'button "{ }" [ref=e2066] [cursor=pointer]'
+            - row [ref=e2067]:
+              - cell "2024-05-20 10:12" [ref=e2068]
+              - cell "D" [ref=e2069]
+              - cell "1,805.3%" [ref=e2071]
+              - cell "3,536" [ref=e2072]
+              - cell "1.343" [ref=e2073]
+              - cell "0.88" [ref=e2074]
+              - cell "71.2%" [ref=e2075]
+              - cell "5m" [ref=e2076]
+              - cell "ult-2024-05-20_12-15-20.json" [ref=e2077]
+              - cell [ref=e2078]:
+                - 'button "{ }" [ref=e2079] [cursor=pointer]'
+            - row [ref=e2080]:
+              - cell "2024-05-20 09:19" [ref=e2081]
+              - cell "D" [ref=e2082]
+              - cell "1,805.3%" [ref=e2084]
+              - cell "3,536" [ref=e2085]
+              - cell "1.343" [ref=e2086]
+              - cell "0.88" [ref=e2087]
+              - cell "71.2%" [ref=e2088]
+              - cell "5m" [ref=e2089]
+              - cell "ult-2024-05-20_11-21-14.json" [ref=e2090]
+              - cell [ref=e2091]:
+                - 'button "{ }" [ref=e2092] [cursor=pointer]'
+            - row [ref=e2093]:
+              - cell "2024-05-19 17:47" [ref=e2094]
+              - cell "D" [ref=e2095]
+              - cell "1,805.3%" [ref=e2097]
+              - cell "3,536" [ref=e2098]
+              - cell "1.343" [ref=e2099]
+              - cell "0.88" [ref=e2100]
+              - cell "71.2%" [ref=e2101]
+              - cell "5m" [ref=e2102]
+              - cell "ult-2024-05-19_19-48-48.json" [ref=e2103]
+              - cell [ref=e2104]:
+                - 'button "{ }" [ref=e2105] [cursor=pointer]'
+            - row [ref=e2106]:
+              - cell "2024-05-19 17:11" [ref=e2107]
+              - cell "D" [ref=e2108]
+              - cell "1,805.3%" [ref=e2110]
+              - cell "3,536" [ref=e2111]
+              - cell "1.343" [ref=e2112]
+              - cell "0.88" [ref=e2113]
+              - cell "71.2%" [ref=e2114]
+              - cell "5m" [ref=e2115]
+              - cell "ult-2024-05-19_19-13-11.json" [ref=e2116]
+              - cell [ref=e2117]:
+                - 'button "{ }" [ref=e2118] [cursor=pointer]'
+            - row [ref=e2119]:
+              - cell "2024-05-19 17:01" [ref=e2120]
+              - cell "D" [ref=e2121]
+              - cell "1,805.3%" [ref=e2123]
+              - cell "3,536" [ref=e2124]
+              - cell "1.343" [ref=e2125]
+              - cell "0.88" [ref=e2126]
+              - cell "71.2%" [ref=e2127]
+              - cell "5m" [ref=e2128]
+              - cell "ult-2024-05-19_19-02-45.json" [ref=e2129]
+              - cell [ref=e2130]:
+                - 'button "{ }" [ref=e2131] [cursor=pointer]'
+            - row [ref=e2132]:
+              - cell "2024-05-19 16:16" [ref=e2133]
+              - cell "C" [ref=e2134]
+              - cell "977.2%" [ref=e2136]
+              - cell "5,440" [ref=e2137]
+              - cell "1.149" [ref=e2138]
+              - cell "4.386" [ref=e2139]
+              - cell "37.5%" [ref=e2140]
+              - cell "5m" [ref=e2141]
+              - cell "ult-2024-05-19_18-17-14.json" [ref=e2142]
+              - cell [ref=e2143]:
+                - 'button "{ }" [ref=e2144] [cursor=pointer]'
+            - row [ref=e2145]:
+              - cell "2024-05-19 16:05" [ref=e2146]
+              - cell "D" [ref=e2147]
+              - cell "1,805.3%" [ref=e2149]
+              - cell "3,536" [ref=e2150]
+              - cell "1.343" [ref=e2151]
+              - cell "0.88" [ref=e2152]
+              - cell "71.2%" [ref=e2153]
+              - cell "5m" [ref=e2154]
+              - cell "ult-2024-05-19_18-07-19.json" [ref=e2155]
+              - cell [ref=e2156]:
+                - 'button "{ }" [ref=e2157] [cursor=pointer]'
+            - row [ref=e2158]:
+              - cell "2024-05-19 15:58" [ref=e2159]
+              - cell "D" [ref=e2160]
+              - cell "1,022.6%" [ref=e2162]
+              - cell "3,561" [ref=e2163]
+              - cell "1.208" [ref=e2164]
+              - cell "0.594" [ref=e2165]
+              - cell "70.5%" [ref=e2166]
+              - cell "5m" [ref=e2167]
+              - cell "ult-2024-05-19_18-00-16.json" [ref=e2168]
+              - cell [ref=e2169]:
+                - 'button "{ }" [ref=e2170] [cursor=pointer]'
+            - row [ref=e2171]:
+              - cell "2024-05-19 15:51" [ref=e2172]
+              - cell "D" [ref=e2173]
+              - cell "4,367.7%" [ref=e2175]
+              - cell "6,342" [ref=e2176]
+              - cell "1.237" [ref=e2177]
+              - cell "10.718" [ref=e2178]
+              - cell "51.9%" [ref=e2179]
+              - cell "5m" [ref=e2180]
+              - cell "ult-2024-05-19_17-52-11.json" [ref=e2181]
+              - cell [ref=e2182]:
+                - 'button "{ }" [ref=e2183] [cursor=pointer]'
+            - row [ref=e2184]:
+              - cell "2024-05-19 15:22" [ref=e2185]
+              - cell "D" [ref=e2186]
+              - cell "4,367.7%" [ref=e2188]
+              - cell "6,342" [ref=e2189]
+              - cell "1.237" [ref=e2190]
+              - cell "10.718" [ref=e2191]
+              - cell "51.9%" [ref=e2192]
+              - cell "5m" [ref=e2193]
+              - cell "ult-2024-05-19_17-23-12.json" [ref=e2194]
+              - cell [ref=e2195]:
+                - 'button "{ }" [ref=e2196] [cursor=pointer]'
+            - row [ref=e2197]:
+              - cell "2024-05-19 15:19" [ref=e2198]
+              - cell "C" [ref=e2199]
+              - cell "4,336.3%" [ref=e2201]
+              - cell "4,866" [ref=e2202]
+              - cell "1.592" [ref=e2203]
+              - cell "3.524" [ref=e2204]
+              - cell "21.6%" [ref=e2205]
+              - cell "5m" [ref=e2206]
+              - cell "ult-2024-05-19_17-20-37.json" [ref=e2207]
+              - cell [ref=e2208]:
+                - 'button "{ }" [ref=e2209] [cursor=pointer]'
+            - row [ref=e2210]:
+              - cell "2024-05-19 15:09" [ref=e2211]
+              - cell "C" [ref=e2212]
+              - cell "4,336.3%" [ref=e2214]
+              - cell "4,866" [ref=e2215]
+              - cell "1.592" [ref=e2216]
+              - cell "3.524" [ref=e2217]
+              - cell "21.6%" [ref=e2218]
+              - cell "5m" [ref=e2219]
+              - cell "ult-2024-05-19_17-10-05.json" [ref=e2220]
+              - cell [ref=e2221]:
+                - 'button "{ }" [ref=e2222] [cursor=pointer]'
+            - row [ref=e2223]:
+              - cell "2024-05-19 10:53" [ref=e2224]
+              - cell "D" [ref=e2225]
+              - cell "242.6%" [ref=e2227]
+              - cell "3,262" [ref=e2228]
+              - cell "1.057" [ref=e2229]
+              - cell "0.063" [ref=e2230]
+              - cell "74.9%" [ref=e2231]
+              - cell "5m" [ref=e2232]
+              - cell "ult-2024-05-19_13-01-26.json" [ref=e2233]
+              - cell [ref=e2234]:
+                - 'button "{ }" [ref=e2235] [cursor=pointer]'
+            - row [ref=e2236]:
+              - cell "2024-05-18 16:57" [ref=e2237]
+              - cell "D" [ref=e2238]
+              - cell "239%" [ref=e2240]
+              - cell "3,262" [ref=e2241]
+              - cell "1.056" [ref=e2242]
+              - cell "0.063" [ref=e2243]
+              - cell "74.9%" [ref=e2244]
+              - cell "5m" [ref=e2245]
+              - cell "ult-2024-05-18_19-04-17.json" [ref=e2246]
+              - cell [ref=e2247]:
+                - 'button "{ }" [ref=e2248] [cursor=pointer]'
+            - row [ref=e2249]:
+              - cell "2024-05-18 16:25" [ref=e2250]
+              - cell "D" [ref=e2251]
+              - cell "239%" [ref=e2253]
+              - cell "3,262" [ref=e2254]
+              - cell "1.056" [ref=e2255]
+              - cell "0.063" [ref=e2256]
+              - cell "74.9%" [ref=e2257]
+              - cell "5m" [ref=e2258]
+              - cell "ult-2024-05-18_18-32-29.json" [ref=e2259]
+              - cell [ref=e2260]:
+                - 'button "{ }" [ref=e2261] [cursor=pointer]'
+    - generic [ref=e2262]:
+      - heading "Benchmark runs" [level=2] [ref=e2264]
+      - generic [ref=e2265]:
+        - table [ref=e2267]:
+          - rowgroup [ref=e2275]:
+            - row [ref=e2276]:
+              - columnheader "Run" [ref=e2277] [cursor=pointer]
+              - columnheader "Grade" [ref=e2278] [cursor=pointer]
+              - columnheader "Profit%" [ref=e2279] [cursor=pointer]
+              - columnheader "Sortino" [ref=e2280] [cursor=pointer]
+              - columnheader "PF" [ref=e2281] [cursor=pointer]
+              - columnheader [ref=e2282] [cursor=pointer]
+        - table [ref=e2285]:
+          - rowgroup [ref=e2293]:
+            - row [ref=e2294]:
+              - cell "No benchmark runs." [ref=e2295]
+    - generic [ref=e2296]:
+      - heading "Hyperopt runs" [level=2] [ref=e2298]
+      - generic [ref=e2299]:
+        - table [ref=e2301]:
+          - rowgroup [ref=e2309]:
+            - row [ref=e2310]:
+              - columnheader "Run" [ref=e2311] [cursor=pointer]
+              - columnheader "Epochs" [ref=e2312] [cursor=pointer]
+              - columnheader "Best loss" [ref=e2313] [cursor=pointer]
+              - columnheader "Best profit" [ref=e2314] [cursor=pointer]
+              - columnheader "Best sortino" [ref=e2315] [cursor=pointer]
+              - columnheader [ref=e2316] [cursor=pointer]
+        - table [ref=e2319]:
+          - rowgroup [ref=e2327]:
+            - row [ref=e2328]:
+              - cell "2024-07-22" [ref=e2329]
+              - cell "5" [ref=e2330]
+              - cell "0.01" [ref=e2331]
+              - cell "-8.6%" [ref=e2332]
+              - cell "-0.015" [ref=e2333]
+              - cell [ref=e2334]:
+                - 'button "{ }" [ref=e2335] [cursor=pointer]'
+            - row [ref=e2336]:
+              - cell "2024-07-22" [ref=e2337]
+              - cell "27" [ref=e2338]
+              - cell "-1.27" [ref=e2339]
+              - cell "243.4%" [ref=e2340]
+              - cell "0.294" [ref=e2341]
+              - cell [ref=e2342]:
+                - 'button "{ }" [ref=e2343] [cursor=pointer]'
+            - row [ref=e2344]:
+              - cell "2024-07-22" [ref=e2345]
+              - cell "3" [ref=e2346]
+              - cell "-0.03" [ref=e2347]
+              - cell "3.7%" [ref=e2348]
+              - cell "0.008" [ref=e2349]
+              - cell [ref=e2350]:
+                - 'button "{ }" [ref=e2351] [cursor=pointer]'
+            - row [ref=e2352]:
+              - cell "2024-07-23" [ref=e2353]
+              - cell "200" [ref=e2354]
+              - cell "-14.98" [ref=e2355]
+              - cell "501.2%" [ref=e2356]
+              - cell "0.81" [ref=e2357]
+              - cell [ref=e2358]:
+                - 'button "{ }" [ref=e2359] [cursor=pointer]'
+            - row [ref=e2360]:
+              - cell "2024-07-23" [ref=e2361]
+              - cell "10" [ref=e2362]
+              - cell "-2.68" [ref=e2363]
+              - cell "1,247.8%" [ref=e2364]
+              - cell "0.268" [ref=e2365]
+              - cell [ref=e2366]:
+                - 'button "{ }" [ref=e2367] [cursor=pointer]'
+            - row [ref=e2368]:
+              - cell "2024-07-24" [ref=e2369]
+              - cell "4" [ref=e2370]
+              - cell "0.07" [ref=e2371]
+              - cell "-98.3%" [ref=e2372]
+              - cell "-0.023" [ref=e2373]
+              - cell [ref=e2374]:
+                - 'button "{ }" [ref=e2375] [cursor=pointer]'
+            - row [ref=e2376]:
+              - cell "2024-07-24" [ref=e2377]
+              - cell "102" [ref=e2378]
+              - cell "-0.04" [ref=e2379]
+              - cell "243.1%" [ref=e2380]
+              - cell "0.019" [ref=e2381]
+              - cell [ref=e2382]:
+                - 'button "{ }" [ref=e2383] [cursor=pointer]'
+            - row [ref=e2384]:
+              - cell "2024-07-25" [ref=e2385]
+              - cell "200" [ref=e2386]
+              - cell "-0.82" [ref=e2387]
+              - cell "1,168.2%" [ref=e2388]
+              - cell "0.325" [ref=e2389]
+              - cell [ref=e2390]:
+                - 'button "{ }" [ref=e2391] [cursor=pointer]'
+    - generic [ref=e2392]:
+      - heading "Walk-forward runs" [level=2] [ref=e2394]
+      - generic [ref=e2395]:
+        - table [ref=e2397]:
+          - rowgroup [ref=e2405]:
+            - row [ref=e2406]:
+              - columnheader "Run" [ref=e2407] [cursor=pointer]
+              - columnheader "Windows" [ref=e2408] [cursor=pointer]
+              - columnheader "Profitable" [ref=e2409] [cursor=pointer]
+              - columnheader "OOS profit" [ref=e2410] [cursor=pointer]
+              - columnheader "Avg sortino" [ref=e2411] [cursor=pointer]
+              - columnheader [ref=e2412] [cursor=pointer]
+        - table [ref=e2415]:
+          - rowgroup [ref=e2423]:
+            - row [ref=e2424]:
+              - cell "No walk-forward runs." [ref=e2425]
+    - generic [ref=e2427]:
+      - heading "Latest trades" [level=2] [ref=e2428]
+      - generic [ref=e2429]: Loading trades for backtest-result-2026-08-23_19-44-13.zip (9)…
+  - complementary [ref=e867]
+  - contentinfo [ref=e871]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

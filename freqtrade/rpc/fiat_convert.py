@@ -4,15 +4,14 @@ e.g BTC to USD
 """
 
 import logging
-from datetime import datetime
-from typing import Any
 
-from cachetools import TTLCache
 from requests.exceptions import RequestException
 
 from freqtrade.constants import SUPPORTED_FIAT, Config
 from freqtrade.mixins.logging_mixin import LoggingMixin
+from freqtrade.util import FtTTLCache, dt_ts
 from freqtrade.util.coin_gecko import FtCoinGeckoApi
+from freqtrade.util.singleton import SingletonMeta
 
 
 logger = logging.getLogger(__name__)
@@ -32,29 +31,19 @@ coingecko_mapping = {
 }
 
 
-class CryptoToFiatConverter(LoggingMixin):
+class CryptoToFiatConverter(LoggingMixin, metaclass=SingletonMeta):
     """
     Main class to initiate Crypto to FIAT.
     This object contains a list of pair Crypto, FIAT
     This object is also a Singleton
     """
 
-    __instance = None
-
     _coinlistings: list[dict] = []
     _backoff: float = 0.0
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
-        """
-        Singleton pattern to ensure only one instance is created.
-        """
-        if not cls.__instance:
-            cls.__instance = super().__new__(cls)
-        return cls.__instance
-
     def __init__(self, config: Config) -> None:
         # Timeout: 6h
-        self._pair_price: TTLCache = TTLCache(maxsize=500, ttl=6 * 60 * 60)
+        self._pair_price: FtTTLCache = FtTTLCache(maxsize=500, ttl=6 * 60 * 60)
 
         _coingecko_config = config.get("coingecko", {})
         self._coingecko = FtCoinGeckoApi(
@@ -75,7 +64,7 @@ class CryptoToFiatConverter(LoggingMixin):
                     "Too many requests for CoinGecko API, backing off and trying again later."
                 )
                 # Set backoff timestamp to 60 seconds in the future
-                self._backoff = datetime.now().timestamp() + 60
+                self._backoff = dt_ts() + 60
                 return
             # If the request is not a 429 error we want to raise the normal error
             logger.error(
@@ -89,7 +78,7 @@ class CryptoToFiatConverter(LoggingMixin):
 
     def _get_gecko_id(self, crypto_symbol):
         if not self._coinlistings:
-            if self._backoff <= datetime.now().timestamp():
+            if self._backoff <= dt_ts():
                 self._load_cryptomap()
                 # Still not loaded.
                 if not self._coinlistings:
@@ -98,7 +87,7 @@ class CryptoToFiatConverter(LoggingMixin):
                 return None
         found = [x for x in self._coinlistings if x["symbol"].lower() == crypto_symbol]
 
-        if crypto_symbol in coingecko_mapping.keys():
+        if crypto_symbol in coingecko_mapping:
             found = [x for x in self._coinlistings if x["id"] == coingecko_mapping[crypto_symbol]]
 
         if len(found) == 1:

@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from freqtrade.constants import Config, LongShort
@@ -102,7 +102,9 @@ class IProtection(LoggingMixin, ABC):
         """
 
     @abstractmethod
-    def global_stop(self, date_now: datetime, side: LongShort) -> ProtectionReturn | None:
+    def global_stop(
+        self, date_now: datetime, side: LongShort, starting_balance: float
+    ) -> ProtectionReturn | None:
         """
         Stops trading (position entering) for all pairs
         This must evaluate to true for the whole period of the "cooldown period".
@@ -110,7 +112,7 @@ class IProtection(LoggingMixin, ABC):
 
     @abstractmethod
     def stop_per_pair(
-        self, pair: str, date_now: datetime, side: LongShort
+        self, pair: str, date_now: datetime, side: LongShort, starting_balance: float
     ) -> ProtectionReturn | None:
         """
         Stops trading (position entering) for this pair
@@ -127,7 +129,7 @@ class IProtection(LoggingMixin, ABC):
         max_date: datetime = max([trade.close_date for trade in trades if trade.close_date])
         # coming from Database, tzinfo is not set.
         if max_date.tzinfo is None:
-            max_date = max_date.replace(tzinfo=timezone.utc)
+            max_date = max_date.replace(tzinfo=UTC)
 
         if self._unlock_at is not None:
             # unlock_at case with fixed hour of the day

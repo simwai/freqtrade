@@ -1,6 +1,6 @@
 import logging
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -59,7 +59,7 @@ async def validate_ws_token(
     api_config: dict[str, Any] = Depends(get_api_config),
 ):
     secret_ws_token = api_config.get("ws_token", None)
-    secret_jwt_key = api_config.get("jwt_secret_key", "super-secret")
+    secret_jwt_key = api_config["jwt_secret_key"]
 
     # Check if ws_token is/in secret_ws_token
     if ws_token and secret_ws_token:
@@ -68,7 +68,7 @@ async def validate_ws_token(
             is_valid_ws_token = secrets.compare_digest(secret_ws_token, ws_token)
         elif isinstance(secret_ws_token, list):
             is_valid_ws_token = any(
-                [secrets.compare_digest(potential, ws_token) for potential in secret_ws_token]
+                secrets.compare_digest(potential, ws_token) for potential in secret_ws_token
             )
 
         if is_valid_ws_token:
@@ -89,15 +89,15 @@ async def validate_ws_token(
 def create_token(data: dict, secret_key: str, token_type: str = "access") -> str:  # noqa: S107
     to_encode = data.copy()
     if token_type == "access":  # noqa: S105
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(UTC) + timedelta(minutes=15)
     elif token_type == "refresh":  # noqa: S105
-        expire = datetime.now(timezone.utc) + timedelta(days=30)
+        expire = datetime.now(UTC) + timedelta(days=30)
     else:
         raise ValueError()
     to_encode.update(
         {
             "exp": expire,
-            "iat": datetime.now(timezone.utc),
+            "iat": datetime.now(UTC),
             "type": token_type,
         }
     )
@@ -111,7 +111,7 @@ def http_basic_or_jwt_token(
     api_config=Depends(get_api_config),
 ):
     if token:
-        return get_user_from_token(token, api_config.get("jwt_secret_key", "super-secret"))
+        return get_user_from_token(token, api_config["jwt_secret_key"])
     elif form_data and verify_auth(api_config, form_data.username, form_data.password):
         return form_data.username
 
@@ -129,12 +129,12 @@ def token_login(
         token_data = {"identity": {"u": form_data.username}}
         access_token = create_token(
             token_data,
-            api_config.get("jwt_secret_key", "super-secret"),
+            api_config["jwt_secret_key"],
             token_type="access",  # noqa: S106
         )
         refresh_token = create_token(
             token_data,
-            api_config.get("jwt_secret_key", "super-secret"),
+            api_config["jwt_secret_key"],
             token_type="refresh",  # noqa: S106
         )
         return {
@@ -151,11 +151,11 @@ def token_login(
 @router_login.post("/token/refresh", response_model=AccessToken)
 def token_refresh(token: str = Depends(oauth2_scheme), api_config=Depends(get_api_config)):
     # Refresh token
-    u = get_user_from_token(token, api_config.get("jwt_secret_key", "super-secret"), "refresh")
+    u = get_user_from_token(token, api_config["jwt_secret_key"], "refresh")
     token_data = {"identity": {"u": u}}
     access_token = create_token(
         token_data,
-        api_config.get("jwt_secret_key", "super-secret"),
+        api_config["jwt_secret_key"],
         token_type="access",  # noqa: S106
     )
     return {"access_token": access_token}

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -43,9 +43,9 @@ def test_volume_change_pair_list_init_exchange_support(mocker, rpl_config):
 
     with pytest.raises(
         OperationalException,
-        match=r"Exchange does not support dynamic whitelist in this configuration. "
+        match=r"Exchange .* does not support dynamic whitelist in this configuration. "
         r"Please edit your config and either remove PercentChangePairList, "
-        r"or switch to using candles. and restart the bot.",
+        r"or switch to using candles and restart the bot.",
     ):
         get_patched_freqtradebot(mocker, rpl_config)
 
@@ -100,13 +100,32 @@ def test_volume_change_pair_list_init_wrong_lookback_period(mocker, rpl_config):
             "sort_key": "percentage",
             "min_value": 0,
             "refresh_period": 86400,
+            "lookback_days": 10,
+            "lookback_timeframe": "1h",
+        }
+    ]
+
+    with pytest.raises(
+        OperationalException,
+        match=r"Ambiguous configuration: lookback_days implies a lookback_timeframe "
+        r"of 1d, but lookback_timeframe is set to 1h\..*",
+    ):
+        get_patched_freqtradebot(mocker, rpl_config)
+
+    rpl_config["pairlists"] = [
+        {
+            "method": "PercentChangePairList",
+            "number_assets": 2,
+            "sort_key": "percentage",
+            "min_value": 0,
+            "refresh_period": 86400,
             "lookback_days": 1001,
         }
     ]
 
     with pytest.raises(
         OperationalException,
-        match=r"ChangeFilter requires lookback_period to not exceed"
+        match=r"PercentChangePairList requires lookback_period to not exceed"
         r" exchange max request size \(\d+\)",
     ):
         get_patched_freqtradebot(mocker, rpl_config)
@@ -141,7 +160,7 @@ def test_gen_pairlist_with_valid_change_pair_list_config(mocker, rpl_config, tic
             "lookback_days": 4,
         }
     ]
-    start = datetime(2024, 8, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
+    start = datetime(2024, 8, 1, 0, 0, 0, 0, tzinfo=UTC)
     time_machine.move_to(start, tick=False)
 
     mock_ohlcv_data = {
@@ -224,7 +243,7 @@ def test_filter_pairlist_with_empty_ticker(mocker, rpl_config, tickers, time_mac
             "lookback_days": 4,
         }
     ]
-    start = datetime(2024, 8, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
+    start = datetime(2024, 8, 1, 0, 0, 0, 0, tzinfo=UTC)
     time_machine.move_to(start, tick=False)
 
     mock_ohlcv_data = {
@@ -291,7 +310,7 @@ def test_filter_pairlist_with_max_value_set(mocker, rpl_config, tickers, time_ma
         }
     ]
 
-    start = datetime(2024, 8, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
+    start = datetime(2024, 8, 1, 0, 0, 0, 0, tzinfo=UTC)
     time_machine.move_to(start, tick=False)
 
     mock_ohlcv_data = {
@@ -365,9 +384,7 @@ def test_gen_pairlist_from_tickers(mocker, rpl_config, tickers):
     # The generator returns BTC ETH and TKN - filtering the first ensures removing pairs
     # in this step ain't problematic.
     def _validate_pair(pair, ticker):
-        if pair == "BTC/USDT":
-            return False
-        return True
+        return pair != "BTC/USDT"
 
     remote_pairlist._validate_pair = _validate_pair
 

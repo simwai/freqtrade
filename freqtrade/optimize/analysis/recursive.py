@@ -8,14 +8,15 @@ from typing import Any
 
 from pandas import DataFrame
 
+from freqtrade.exceptions import ConfigurationError
 from freqtrade.exchange import timeframe_to_minutes
 from freqtrade.loggers.set_log_levels import (
     reduce_verbosity_for_bias_tester,
     restore_verbosity_for_bias_tester,
 )
+from freqtrade.optimize.analysis.base_analysis import BaseAnalysis, VarHolder
 from freqtrade.optimize.backtesting import Backtesting
-from freqtrade.optimize.base_analysis import BaseAnalysis, VarHolder
-from freqtrade.resolvers import StrategyResolver
+from freqtrade.util import CustomProgress
 
 
 logger = logging.getLogger(__name__)
@@ -33,22 +34,18 @@ class RecursiveAnalysis(BaseAnalysis):
 
         super().__init__(config, strategy_obj)
 
-        strat = StrategyResolver.load_strategy(config)
-        self._strat_scc = strat.startup_candle_count
-
-        if self._strat_scc not in self._startup_candle:
-            self._startup_candle.append(self._strat_scc)
-        self._startup_candle.sort()
-
         self.partial_varHolder_array: list[VarHolder] = []
         self.partial_varHolder_lookahead_array: list[VarHolder] = []
 
-        self.dict_recursive: dict[str, Any] = dict()
+        self.dict_recursive: dict[str, dict[int, float]] = {}
+
+        self.pair_to_used: str | None = None
+        self._strat_scc: int | None = None
 
     # For recursive bias check
     # analyzes two data frames with processed indicators and shows differences between them.
     def analyze_indicators(self):
-        pair_to_check = self.local_config["pairs"][0]
+        pair_to_check = self.pair_to_used
         logger.info("Start checking for recursive bias")
 
         # check and report signals
@@ -80,11 +77,12 @@ class RecursiveAnalysis(BaseAnalysis):
                             and is_number(values_diff_self)
                             and is_number(values_diff_other)
                         ):
-                            diff = (values_diff_other - values_diff_self) / values_diff_self * 100
-                            str_diff = f"{diff:.3f}%"
+                            diff = round(
+                                (values_diff_other - values_diff_self) / values_diff_self, 12
+                            )
                         else:
-                            str_diff = "NaN"
-                        self.dict_recursive[indicator][part.startup_candle] = str_diff
+                            diff = "nan"
+                        self.dict_recursive[indicator][part.startup_candle] = float(diff)
 
             else:
                 logger.info("No variance on indicator(s) found due to recursive formula.")
@@ -93,7 +91,7 @@ class RecursiveAnalysis(BaseAnalysis):
     # For lookahead bias check
     # analyzes two data frames with processed indicators and shows differences between them.
     def analyze_indicators_lookahead(self):
-        pair_to_check = self.local_config["pairs"][0]
+        pair_to_check = self.pair_to_used
         logger.info("Start checking for lookahead bias on indicators only")
 
         part = self.partial_varHolder_lookahead_array[0]
@@ -146,10 +144,31 @@ class RecursiveAnalysis(BaseAnalysis):
 
         backtesting = Backtesting(prepare_data_config, self.exchange)
         self.exchange = backtesting.exchange
+        if self.pair_to_used is None:
+            self.pair_to_used = backtesting.pairlists.whitelist[0]
+            logger.info(
+                f"Using pair {self.pair_to_used} only for recursive analysis. Replacing whitelist."
+            )
+        self.local_config["candle_type_def"] = prepare_data_config["candle_type_def"]
+        backtesting.pairlists._whitelist = [self.pair_to_used]
         backtesting._set_strategy(backtesting.strategylist[0])
 
+        strat = backtesting.strategy
+        if self._strat_scc is None:
+            self._strat_scc = strat.startup_candle_count
+
+        if self._strat_scc < 1:
+            raise ConfigurationError(
+                f"The strategy defines invalid startup candle count of {self._strat_scc}. "
+                f"This will lead to recursive issues on some indicators. "
+                f"Please define a proper startup_candle_count in the strategy."
+            )
+
+        if self._strat_scc not in self._startup_candle:
+            self._startup_candle.append(self._strat_scc)
+        self._startup_candle.sort()
+
         varholder.data, varholder.timerange = backtesting.load_bt_data()
-        backtesting.load_bt_data_detail()
         varholder.timeframe = backtesting.timeframe
 
         varholder.indicators = backtesting.strategy.advise_all_indicators(varholder.data)
@@ -180,8 +199,8 @@ class RecursiveAnalysis(BaseAnalysis):
 
         self.partial_varHolder_lookahead_array.append(partial_varHolder)
 
-    def start(self) -> None:
-        super().start()
+    def start(self, progress: CustomProgress) -> None:
+        self.fill_full_varholder()
 
         reduce_verbosity_for_bias_tester()
         start_date_full = self.full_varHolder.from_dt
@@ -197,8 +216,11 @@ class RecursiveAnalysis(BaseAnalysis):
 
         start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
 
+        candle_task = progress.add_task("Startup candles", total=len(self._startup_candle))
         for startup_candle in self._startup_candle:
+            progress.update(candle_task, description=f"Startup candle {startup_candle}")
             self.fill_partial_varholder(start_date_partial, startup_candle)
+            progress.update(candle_task, advance=1)
 
         # Restore verbosity, so it's not too quiet for the next strategy
         restore_verbosity_for_bias_tester()

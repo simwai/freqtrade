@@ -1,0 +1,2251 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - heading "Strategy Lab" [level=1] [ref=e6]
+      - generic [ref=e7]: freqtrade strategy overview · 2026-08-31 12:56
+    - button "Jobs" [ref=e8] [cursor=pointer]
+  - generic:
+    - generic:
+      - generic: Jobs
+      - button: ✕ Close
+  - generic [ref=e9]:
+    - button "Dashboard" [ref=e10] [cursor=pointer]
+    - button "Strategies" [ref=e11] [cursor=pointer]
+    - button "History" [ref=e12] [cursor=pointer]
+    - button "Benchmark" [ref=e13] [cursor=pointer]
+    - button "Walk-Forward" [ref=e14] [cursor=pointer]
+    - button "Hyperopt" [ref=e15] [cursor=pointer]
+    - button "Trades" [ref=e16] [cursor=pointer]
+    - button "Lab" [ref=e17] [cursor=pointer]
+  - main [ref=e18]:
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - heading "Run strategy" [level=2] [ref=e22]
+          - generic [ref=e23]: backtest / hyperopt / walk-forward for one strategy — requires the web server (lab.py serve)
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - text: "Strategy:"
+              - combobox "Strategy:" [ref=e27]:
+                - option "(choose…)"
+                - option "BBModCEV1"
+                - option "BB_RPB_TSLmeneguzzo"
+                - option "BB_RTR"
+                - option "BigZ06"
+                - option "BigZ06AtrSl"
+                - option "BigZ06Original"
+                - option "BigZ07Next2"
+                - option "BigZ08"
+                - option "ClucHAnix_5m"
+                - option "CombinedBinHClucAndMADV3"
+                - option "EntryFloodControl"
+                - option "GKDAdaptiveAcademicFinal"
+                - option "HarmonicDivergence"
+                - option "HarmonicDivergenceRegime"
+                - option "HoffmanIRBStrategy"
+                - option "HoffmanIRBStrategy15m"
+                - option "HoffmanIRBStrategy15mBase"
+                - option "HoffmanIRBStrategy15mVRPB"
+                - option "HoffmanIRBStrategy1h"
+                - option "HoffmanIRBStrategy1hFee"
+                - option "HoffmanIRBStrategy1hVRPB"
+                - option "HoffmanIRBStrategy4h"
+                - option "HoffmanIRBStrategy4hFee"
+                - option "HoffmanIRBStrategy4hVRPB"
+                - option "HoffmanIRBStrategy5mFee"
+                - option "HoffmanIRBStrategy5mFeePB"
+                - option "HoffmanIRBStrategy5mFeeVR50PB"
+                - option "HoffmanIRBStrategy5mFeeVRChV"
+                - option "HoffmanIRBStrategy5mFeeVRDC"
+                - option "HoffmanIRBStrategy5mFeeVRLocked"
+                - option "HoffmanIRBStrategy5mFeeVRPB"
+                - option "HoffmanIRBStrategy5mFeeVRPB25"
+                - option "HoffmanIRBStrategy5mFeeVRPB50"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10Hyp"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10WF"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_lowrisk"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr0_5"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr0_75"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_0"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_25"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_5"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_75"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr2_0"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr2_25"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr2_5"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr2_75"
+                - option "HoffmanIRBStrategy5mFeeVRPBN10_rr3_0"
+                - option "HoffmanIRBStrategy5mFeeVRPBN15"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr0_5"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr0_75"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr1_0"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr1_25"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr1_5"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr1_75"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr2_0"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr2_25"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr2_5"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr2_75"
+                - option "HoffmanIRBStrategy5mFeeVRPB_rr3_0"
+                - option "HoffmanIRBStrategy5mFeeVRSPBF"
+                - option "HoffmanIRBStrategy5mFeeVRSPBFChV"
+                - option "HoffmanIRBStrategy5mFeeVRSPBFDC"
+                - option "HoffmanIRBStrategy5mFeeVRSPBFPB"
+                - option "HoffmanIRBStrategy5mFeeVolRegime"
+                - option "HoffmanIRBStrategyPct20"
+                - option "HoffmanIRBStrategyPct25"
+                - option "HoffmanIRBStrategyRR05"
+                - option "HoffmanIRBStrategyRR10"
+                - option "HoffmanIRBStrategyRR20"
+                - option "HoffmanWF_rr0_5_tol0_0"
+                - option "HoffmanWF_rr0_5_tol0_25"
+                - option "HoffmanWF_rr0_5_tol0_5"
+                - option "HoffmanWF_rr0_5_tolm0_1"
+                - option "HoffmanWF_rr0_5_tolm0_15"
+                - option "HoffmanWF_rr0_75_tol0_0"
+                - option "HoffmanWF_rr0_75_tol0_25"
+                - option "HoffmanWF_rr0_75_tol0_5"
+                - option "HoffmanWF_rr0_75_tolm0_1"
+                - option "HoffmanWF_rr0_75_tolm0_15"
+                - option "HoffmanWF_rr1_0_tol0_0"
+                - option "HoffmanWF_rr1_0_tol0_25"
+                - option "HoffmanWF_rr1_0_tol0_5"
+                - option "HoffmanWF_rr1_0_tolm0_1"
+                - option "HoffmanWF_rr1_0_tolm0_15"
+                - option "HoffmanWF_rr1_25_tol0_0"
+                - option "HoffmanWF_rr1_25_tol0_25"
+                - option "HoffmanWF_rr1_25_tol0_5"
+                - option "HoffmanWF_rr1_25_tolm0_1"
+                - option "HoffmanWF_rr1_25_tolm0_15"
+                - option "HoffmanWF_rr1_5_tol0_0"
+                - option "HoffmanWF_rr1_5_tol0_25"
+                - option "HoffmanWF_rr1_5_tol0_5"
+                - option "HoffmanWF_rr1_5_tolm0_1"
+                - option "HoffmanWF_rr1_5_tolm0_15"
+                - option "HoffmanWF_rr1_75_tol0_0"
+                - option "HoffmanWF_rr1_75_tol0_25"
+                - option "HoffmanWF_rr1_75_tol0_5"
+                - option "HoffmanWF_rr1_75_tolm0_1"
+                - option "HoffmanWF_rr1_75_tolm0_15"
+                - option "HoffmanWF_rr2_0_tol0_0"
+                - option "HoffmanWF_rr2_0_tol0_25"
+                - option "HoffmanWF_rr2_0_tol0_5"
+                - option "HoffmanWF_rr2_0_tolm0_1"
+                - option "HoffmanWF_rr2_0_tolm0_15"
+                - option "HoffmanWF_rr2_5_tol0_0"
+                - option "HoffmanWF_rr2_5_tol0_25"
+                - option "HoffmanWF_rr2_5_tol0_5"
+                - option "HoffmanWF_rr2_5_tolm0_1"
+                - option "HoffmanWF_rr2_5_tolm0_15"
+                - option "HoffmanWF_rr3_0_tol0_0"
+                - option "HoffmanWF_rr3_0_tol0_25"
+                - option "HoffmanWF_rr3_0_tol0_5"
+                - option "HoffmanWF_rr3_0_tolm0_1"
+                - option "HoffmanWF_rr3_0_tolm0_15"
+                - option "HybridRegimeSwitcher"
+                - option "Ichi"
+                - option "LuxAlgo15mBTCLowRisk"
+                - option "MfiEmaWaveTrend"
+                - option "MfiEmaWaveTrend2"
+                - option "MfiEmaWaveTrend2Spot"
+                - option "MfiEmaWaveTrendSpot"
+                - option "NFIX7Guarded"
+                - option "NFIX7GuardedAge10"
+                - option "NFIX7GuardedAge21"
+                - option "NFIX7GuardedCat15"
+                - option "NFIX7GuardedCat25"
+                - option "NFIX7GuardedCat30"
+                - option "NFIX7GuardedRel"
+                - option "NFIX7GuardedRelative"
+                - option "NFIX7GuardedSweep"
+                - option "NWEv6"
+                - option "NWEv6_new"
+                - option "NadarayaWatson"
+                - option "NadarayaWatsonSpot"
+                - option "NostalgiaForInfinityX"
+                - option "NostalgiaForInfinityX3"
+                - option "NostalgiaForInfinityX4"
+                - option "NostalgiaForInfinityX6"
+                - option "NostalgiaForInfinityX7"
+                - option "NostalgiaForInfinityX7Guarded"
+                - option "NostalgiaForInfinityX7GuardedAge10"
+                - option "NostalgiaForInfinityX7GuardedAge21"
+                - option "NostalgiaForInfinityX7GuardedCat15"
+                - option "NostalgiaForInfinityX7GuardedCat25"
+                - option "NostalgiaForInfinityX7GuardedCat30"
+                - option "NostalgiaForInfinityX7GuardedRelative"
+                - option "OctopusNestATR"
+                - option "OctopusNestHighestLowestATR"
+                - option "OctopusNestHyperoptDiagnostic"
+                - option "OctopusNestStrategy"
+                - option "ScreenerDpoBbwpWick"
+                - option "ScreenerDpoEveningStar" [selected]
+                - option "ScreenerDpoShootingStar"
+                - option "SmokeStrategyTemplateV21"
+                - option "StrategyTemplate"
+                - option "StrategyTemplateV21"
+                - option "SuperKeltnerStrategy"
+                - option "SupertrendKeltner"
+                - option "TrendOMaticDoubleSupertrendStrategy"
+                - option "TrendOMaticHPHSuperKeltnerStrategy"
+                - option "TrendOMaticNadarayaBaselineStrategy"
+                - option "TrendOMaticNadarayaStrategy"
+                - option "TrendOMaticStrategySpot"
+                - option "TrendOMaticVHFStrategy"
+                - option "TrendOMaticVixFixStrategy"
+                - option "TrendOMaticWildersStrategy"
+                - option "VixFixBb"
+                - option "WildersVolatilityBingAi"
+                - option "WolfeFuturesShortStrategy"
+                - option "_hyp_ns53"
+                - option "adaptive"
+                - option "ichiV1"
+                - option "newstrategy51"
+                - option "newstrategy53"
+                - option "turbov8"
+            - generic [ref=e28]:
+              - text: "Run:"
+              - combobox "Run:" [ref=e29]:
+                - option "Backtest" [selected]
+                - option "Hyperopt"
+                - option "Walk-Forward"
+            - generic [ref=e30]:
+              - generic [ref=e31] [cursor=pointer]:
+                - text: "From:"
+                - textbox "From:" [ref=e32]: 2019-09-08
+              - generic [ref=e33]: →
+              - generic [ref=e34] [cursor=pointer]:
+                - text: "To:"
+                - textbox "To:" [ref=e35]: 2026-08-28
+            - generic [ref=e36]:
+              - text: "TF:"
+              - textbox "TF:" [ref=e37]: 5m
+            - generic [ref=e38]:
+              - text: "Config:"
+              - combobox "Config:" [ref=e39]:
+                - option "auto (optional)" [selected]
+                - option "config_hoffman_irb_basket.json (hoffman_irb_basket)"
+                - option "config_benchmark.json (benchmark)"
+                - option "config_hoffman_irb.json (hoffman_irb)"
+                - option "config_hoffman_irb_xrp.json (hoffman_irb_xrp)"
+                - option "config_nfi_test_usdc.json (nfi_test_usdc)"
+                - option "config_nfi_test_usdt.json (nfi_test_usdt)"
+                - option "config_madv3.json (madv3)"
+                - option "config_madv3_walkforward.json (madv3_walkforward)"
+                - option "config_analysis.json (analysis)"
+                - option "config_wolfe_validation.json (wolfe_validation)"
+                - option "config_trendomatic_research.json (trendomatic_research)"
+                - option "config_nfix4.json (nfix4)"
+                - option "config_luxalgo_hybrid.json (luxalgo_hybrid)"
+                - option "config_hyperopt_override.json (hyperopt_override)"
+                - option "config_gkd_academic.json (gkd_academic)"
+                - option "config_delisting_test.json (delisting_test)"
+                - option "config_btc_usdc.json (btc_usdc)"
+                - option "config_bigz08.json (bigz08)"
+                - option "config_bigz07next2.json (bigz07next2)"
+                - option "config_bigz06original.json (bigz06original)"
+                - option "config_bigz06atrsl.json (bigz06atrsl)"
+                - option "config_backtest_smoke.json (backtest_smoke)"
+                - option "config_analysis_usdc.json (analysis_usdc)"
+            - generic [ref=e40]:
+              - checkbox "Rebuild report when done" [checked] [ref=e41]
+              - text: Rebuild report when done
+            - button "▶ Run" [ref=e42] [cursor=pointer]
+            - button "↻ Refresh data" [ref=e43] [cursor=pointer]
+            - button "Rebuild report" [ref=e44] [cursor=pointer]
+          - generic [ref=e45]: "Auto: user_data/config_<strategy>.json or config_benchmark.json, or pick one from the dropdown."
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - heading "Benchmark" [level=2] [ref=e48]
+          - generic [ref=e49]: run every strategy on the shared config and compare distributions
+        - generic [ref=e51]:
+          - button "Run benchmark" [ref=e52] [cursor=pointer]
+          - generic [ref=e53]:
+            - text: "Strategies:"
+            - textbox "Strategies:" [ref=e54]:
+              - /placeholder: comma separated (empty = all)
+          - generic [ref=e55]:
+            - text: "Range:"
+            - textbox "Range:" [ref=e56]: 20230101-20240101
+          - generic [ref=e57]:
+            - text: "TF:"
+            - textbox "TF:" [ref=e58]: 5m
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - heading "Strategy status" [level=2] [ref=e61]
+          - generic [ref=e62]: active / experimental / retired + notes (stored in DB) · changes save automatically
+        - generic [ref=e63]:
+          - table [ref=e65]:
+            - rowgroup [ref=e72]:
+              - row [ref=e73]:
+                - columnheader "Strategy" [ref=e74] [cursor=pointer]
+                - columnheader "Status" [ref=e75] [cursor=pointer]
+                - columnheader "Backtests" [ref=e76] [cursor=pointer]
+                - columnheader "Trades" [ref=e77] [cursor=pointer]
+                - columnheader "Notes" [ref=e78] [cursor=pointer]
+          - table [ref=e81]:
+            - rowgroup [ref=e88]:
+              - row [ref=e89]:
+                - cell "BBModCEV1" [ref=e90]
+                - cell "active" [ref=e91]:
+                  - combobox [ref=e92] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "12" [ref=e93]
+                - cell "0" [ref=e94]
+                - cell [ref=e95]:
+                  - textbox "notes" [ref=e96]
+              - row [ref=e97]:
+                - cell "BB_RPB_TSLmeneguzzo" [ref=e98]
+                - cell "active" [ref=e99]:
+                  - combobox [ref=e100] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e101]
+                - cell "1,239" [ref=e102]
+                - cell [ref=e103]:
+                  - textbox "notes" [ref=e104]
+              - row [ref=e105]:
+                - cell "BB_RTR" [ref=e106]
+                - cell "active" [ref=e107]:
+                  - combobox [ref=e108] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e109]
+                - cell "0" [ref=e110]
+                - cell [ref=e111]:
+                  - textbox "notes" [ref=e112]
+              - row [ref=e113]:
+                - cell "BigZ06" [ref=e114]
+                - cell "active" [ref=e115]:
+                  - combobox [ref=e116] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "17" [ref=e117]
+                - cell "61,614" [ref=e118]
+                - cell [ref=e119]:
+                  - textbox "notes" [ref=e120]
+              - row [ref=e121]:
+                - cell "BigZ06AtrSl" [ref=e122]
+                - cell "active" [ref=e123]:
+                  - combobox [ref=e124] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "24" [ref=e125]
+                - cell "88,874" [ref=e126]
+                - cell [ref=e127]:
+                  - textbox "notes" [ref=e128]
+              - row [ref=e129]:
+                - cell "BigZ06Original" [ref=e130]
+                - cell "active" [ref=e131]:
+                  - combobox [ref=e132] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "7" [ref=e133]
+                - cell "24,502" [ref=e134]
+                - cell [ref=e135]:
+                  - textbox "notes" [ref=e136]
+              - row [ref=e137]:
+                - cell "BigZ07Next2" [ref=e138]
+                - cell "active" [ref=e139]:
+                  - combobox [ref=e140] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e141]
+                - cell "11,088" [ref=e142]
+                - cell [ref=e143]:
+                  - textbox "notes" [ref=e144]
+              - row [ref=e145]:
+                - cell "BigZ08" [ref=e146]
+                - cell "active" [ref=e147]:
+                  - combobox [ref=e148] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "91" [ref=e149]
+                - cell "125,835" [ref=e150]
+                - cell [ref=e151]:
+                  - textbox "notes" [ref=e152]
+              - row [ref=e153]:
+                - cell "ClucHAnix_5m" [ref=e154]
+                - cell "active" [ref=e155]:
+                  - combobox [ref=e156] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e157]
+                - cell "14,452" [ref=e158]
+                - cell [ref=e159]:
+                  - textbox "notes" [ref=e160]
+              - row [ref=e161]:
+                - cell "CombinedBinHClucAndMADV3" [ref=e162]
+                - cell "active" [ref=e163]:
+                  - combobox [ref=e164] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "9" [ref=e165]
+                - cell "17,569" [ref=e166]
+                - cell [ref=e167]:
+                  - textbox "notes" [ref=e168]
+              - row [ref=e169]:
+                - cell "EntryFloodControl" [ref=e170]
+                - cell "retired" [ref=e171]:
+                  - combobox [ref=e172] [cursor=pointer]:
+                    - option "active"
+                    - option "experimental"
+                    - option "retired" [selected]
+                - cell "1" [ref=e173]
+                - cell "3,123" [ref=e174]
+                - cell [ref=e175]:
+                  - textbox "notes" [ref=e176]
+              - row [ref=e177]:
+                - cell "GKDAdaptiveAcademicFinal" [ref=e178]
+                - cell "active" [ref=e179]:
+                  - combobox [ref=e180] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e181]
+                - cell "18" [ref=e182]
+                - cell [ref=e183]:
+                  - textbox "notes" [ref=e184]
+              - row [ref=e185]:
+                - cell "HarmonicDivergence" [ref=e186]
+                - cell "active" [ref=e187]:
+                  - combobox [ref=e188] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "5" [ref=e189]
+                - cell "24,638" [ref=e190]
+                - cell [ref=e191]:
+                  - textbox "notes" [ref=e192]
+              - row [ref=e193]:
+                - cell "HarmonicDivergenceRegime" [ref=e194]
+                - cell "active" [ref=e195]:
+                  - combobox [ref=e196] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e197]
+                - cell "15,546" [ref=e198]
+                - cell [ref=e199]:
+                  - textbox "notes" [ref=e200]
+              - row [ref=e201]:
+                - cell "HoffmanIRBStrategy" [ref=e202]
+                - cell "active" [ref=e203]:
+                  - combobox [ref=e204] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "13" [ref=e205]
+                - cell "13,358" [ref=e206]
+                - cell [ref=e207]:
+                  - textbox "notes" [ref=e208]
+              - row [ref=e209]:
+                - cell "HoffmanIRBStrategy15m" [ref=e210]
+                - cell "active" [ref=e211]:
+                  - combobox [ref=e212] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e213]
+                - cell "1,924" [ref=e214]
+                - cell [ref=e215]:
+                  - textbox "notes" [ref=e216]
+              - row [ref=e217]:
+                - cell "HoffmanIRBStrategy15mBase" [ref=e218]
+                - cell "active" [ref=e219]:
+                  - combobox [ref=e220] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e221]
+                - cell "1,411" [ref=e222]
+                - cell [ref=e223]:
+                  - textbox "notes" [ref=e224]
+              - row [ref=e225]:
+                - cell "HoffmanIRBStrategy15mVRPB" [ref=e226]
+                - cell "active" [ref=e227]:
+                  - combobox [ref=e228] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e229]
+                - cell "243" [ref=e230]
+                - cell [ref=e231]:
+                  - textbox "notes" [ref=e232]
+              - row [ref=e233]:
+                - cell "HoffmanIRBStrategy1h" [ref=e234]
+                - cell "active" [ref=e235]:
+                  - combobox [ref=e236] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e237]
+                - cell "2,150" [ref=e238]
+                - cell [ref=e239]:
+                  - textbox "notes" [ref=e240]
+              - row [ref=e241]:
+                - cell "HoffmanIRBStrategy1hFee" [ref=e242]
+                - cell "active" [ref=e243]:
+                  - combobox [ref=e244] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e245]
+                - cell "1,052" [ref=e246]
+                - cell [ref=e247]:
+                  - textbox "notes" [ref=e248]
+              - row [ref=e249]:
+                - cell "HoffmanIRBStrategy1hVRPB" [ref=e250]
+                - cell "active" [ref=e251]:
+                  - combobox [ref=e252] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e253]
+                - cell "243" [ref=e254]
+                - cell [ref=e255]:
+                  - textbox "notes" [ref=e256]
+              - row [ref=e257]:
+                - cell "HoffmanIRBStrategy4h" [ref=e258]
+                - cell "active" [ref=e259]:
+                  - combobox [ref=e260] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e261]
+                - cell "347" [ref=e262]
+                - cell [ref=e263]:
+                  - textbox "notes" [ref=e264]
+              - row [ref=e265]:
+                - cell "HoffmanIRBStrategy4hFee" [ref=e266]
+                - cell "active" [ref=e267]:
+                  - combobox [ref=e268] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e269]
+                - cell "346" [ref=e270]
+                - cell [ref=e271]:
+                  - textbox "notes" [ref=e272]
+              - row [ref=e273]:
+                - cell "HoffmanIRBStrategy4hVRPB" [ref=e274]
+                - cell "active" [ref=e275]:
+                  - combobox [ref=e276] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e277]
+                - cell "219" [ref=e278]
+                - cell [ref=e279]:
+                  - textbox "notes" [ref=e280]
+              - row [ref=e281]:
+                - cell "HoffmanIRBStrategy5mFee" [ref=e282]
+                - cell "active" [ref=e283]:
+                  - combobox [ref=e284] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e285]
+                - cell "6,054" [ref=e286]
+                - cell [ref=e287]:
+                  - textbox "notes" [ref=e288]
+              - row [ref=e289]:
+                - cell "HoffmanIRBStrategy5mFeePB" [ref=e290]
+                - cell "active" [ref=e291]:
+                  - combobox [ref=e292] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e293]
+                - cell "1,157" [ref=e294]
+                - cell [ref=e295]:
+                  - textbox "notes" [ref=e296]
+              - row [ref=e297]:
+                - cell "HoffmanIRBStrategy5mFeeVR50PB" [ref=e298]
+                - cell "active" [ref=e299]:
+                  - combobox [ref=e300] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e301]
+                - cell "628" [ref=e302]
+                - cell [ref=e303]:
+                  - textbox "notes" [ref=e304]
+              - row [ref=e305]:
+                - cell "HoffmanIRBStrategy5mFeeVRChV" [ref=e306]
+                - cell "active" [ref=e307]:
+                  - combobox [ref=e308] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e309]
+                - cell "1,527" [ref=e310]
+                - cell [ref=e311]:
+                  - textbox "notes" [ref=e312]
+              - row [ref=e313]:
+                - cell "HoffmanIRBStrategy5mFeeVRDC" [ref=e314]
+                - cell "active" [ref=e315]:
+                  - combobox [ref=e316] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e317]
+                - cell "1,671" [ref=e318]
+                - cell [ref=e319]:
+                  - textbox "notes" [ref=e320]
+              - row [ref=e321]:
+                - cell "HoffmanIRBStrategy5mFeeVRLocked" [ref=e322]
+                - cell "active" [ref=e323]:
+                  - combobox [ref=e324] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "6" [ref=e325]
+                - cell "8,790" [ref=e326]
+                - cell [ref=e327]:
+                  - textbox "notes" [ref=e328]
+              - row [ref=e329]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB" [ref=e330]
+                - cell "active" [ref=e331]:
+                  - combobox [ref=e332] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e333]
+                - cell "344" [ref=e334]
+                - cell [ref=e335]:
+                  - textbox "notes" [ref=e336]
+              - row [ref=e337]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB25" [ref=e338]
+                - cell "active" [ref=e339]:
+                  - combobox [ref=e340] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e341]
+                - cell "394" [ref=e342]
+                - cell [ref=e343]:
+                  - textbox "notes" [ref=e344]
+              - row [ref=e345]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB50" [ref=e346]
+                - cell "active" [ref=e347]:
+                  - combobox [ref=e348] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e349]
+                - cell "1,236" [ref=e350]
+                - cell [ref=e351]:
+                  - textbox "notes" [ref=e352]
+              - row [ref=e353]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10" [ref=e354]
+                - cell "active" [ref=e355]:
+                  - combobox [ref=e356] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e357]
+                - cell "208" [ref=e358]
+                - cell [ref=e359]:
+                  - textbox "notes" [ref=e360]
+              - row [ref=e361]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10Hyp" [ref=e362]
+                - cell "active" [ref=e363]:
+                  - combobox [ref=e364] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e365]
+                - cell "0" [ref=e366]
+                - cell [ref=e367]:
+                  - textbox "notes" [ref=e368]
+              - row [ref=e369]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10WF" [ref=e370]
+                - cell "active" [ref=e371]:
+                  - combobox [ref=e372] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e373]
+                - cell "309" [ref=e374]
+                - cell [ref=e375]:
+                  - textbox "notes" [ref=e376]
+              - row [ref=e377]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_lowrisk" [ref=e378]
+                - cell "active" [ref=e379]:
+                  - combobox [ref=e380] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e381]
+                - cell "1,476" [ref=e382]
+                - cell [ref=e383]:
+                  - textbox "notes" [ref=e384]
+              - row [ref=e385]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr0_5" [ref=e386]
+                - cell "active" [ref=e387]:
+                  - combobox [ref=e388] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e389]
+                - cell "99" [ref=e390]
+                - cell [ref=e391]:
+                  - textbox "notes" [ref=e392]
+              - row [ref=e393]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr0_75" [ref=e394]
+                - cell "active" [ref=e395]:
+                  - combobox [ref=e396] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e397]
+                - cell "41" [ref=e398]
+                - cell [ref=e399]:
+                  - textbox "notes" [ref=e400]
+              - row [ref=e401]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr1_0" [ref=e402]
+                - cell "active" [ref=e403]:
+                  - combobox [ref=e404] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e405]
+                - cell "146" [ref=e406]
+                - cell [ref=e407]:
+                  - textbox "notes" [ref=e408]
+              - row [ref=e409]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr1_25" [ref=e410]
+                - cell "active" [ref=e411]:
+                  - combobox [ref=e412] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e413]
+                - cell "56" [ref=e414]
+                - cell [ref=e415]:
+                  - textbox "notes" [ref=e416]
+              - row [ref=e417]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr1_5" [ref=e418]
+                - cell "active" [ref=e419]:
+                  - combobox [ref=e420] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e421]
+                - cell "172" [ref=e422]
+                - cell [ref=e423]:
+                  - textbox "notes" [ref=e424]
+              - row [ref=e425]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr1_75" [ref=e426]
+                - cell "active" [ref=e427]:
+                  - combobox [ref=e428] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e429]
+                - cell "71" [ref=e430]
+                - cell [ref=e431]:
+                  - textbox "notes" [ref=e432]
+              - row [ref=e433]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr2_0" [ref=e434]
+                - cell "active" [ref=e435]:
+                  - combobox [ref=e436] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e437]
+                - cell "75" [ref=e438]
+                - cell [ref=e439]:
+                  - textbox "notes" [ref=e440]
+              - row [ref=e441]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr2_25" [ref=e442]
+                - cell "active" [ref=e443]:
+                  - combobox [ref=e444] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e445]
+                - cell "77" [ref=e446]
+                - cell [ref=e447]:
+                  - textbox "notes" [ref=e448]
+              - row [ref=e449]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr2_5" [ref=e450]
+                - cell "active" [ref=e451]:
+                  - combobox [ref=e452] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e453]
+                - cell "79" [ref=e454]
+                - cell [ref=e455]:
+                  - textbox "notes" [ref=e456]
+              - row [ref=e457]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr2_75" [ref=e458]
+                - cell "active" [ref=e459]:
+                  - combobox [ref=e460] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e461]
+                - cell "79" [ref=e462]
+                - cell [ref=e463]:
+                  - textbox "notes" [ref=e464]
+              - row [ref=e465]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN10_rr3_0" [ref=e466]
+                - cell "active" [ref=e467]:
+                  - combobox [ref=e468] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e469]
+                - cell "78" [ref=e470]
+                - cell [ref=e471]:
+                  - textbox "notes" [ref=e472]
+              - row [ref=e473]:
+                - cell "HoffmanIRBStrategy5mFeeVRPBN15" [ref=e474]
+                - cell "active" [ref=e475]:
+                  - combobox [ref=e476] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e477]
+                - cell "70" [ref=e478]
+                - cell [ref=e479]:
+                  - textbox "notes" [ref=e480]
+              - row [ref=e481]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr0_5" [ref=e482]
+                - cell "active" [ref=e483]:
+                  - combobox [ref=e484] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e485]
+                - cell "111" [ref=e486]
+                - cell [ref=e487]:
+                  - textbox "notes" [ref=e488]
+              - row [ref=e489]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr0_75" [ref=e490]
+                - cell "active" [ref=e491]:
+                  - combobox [ref=e492] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e493]
+                - cell "71" [ref=e494]
+                - cell [ref=e495]:
+                  - textbox "notes" [ref=e496]
+              - row [ref=e497]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr1_0" [ref=e498]
+                - cell "active" [ref=e499]:
+                  - combobox [ref=e500] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e501]
+                - cell "89" [ref=e502]
+                - cell [ref=e503]:
+                  - textbox "notes" [ref=e504]
+              - row [ref=e505]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr1_25" [ref=e506]
+                - cell "active" [ref=e507]:
+                  - combobox [ref=e508] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e509]
+                - cell "97" [ref=e510]
+                - cell [ref=e511]:
+                  - textbox "notes" [ref=e512]
+              - row [ref=e513]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr1_5" [ref=e514]
+                - cell "active" [ref=e515]:
+                  - combobox [ref=e516] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e517]
+                - cell "290" [ref=e518]
+                - cell [ref=e519]:
+                  - textbox "notes" [ref=e520]
+              - row [ref=e521]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr1_75" [ref=e522]
+                - cell "active" [ref=e523]:
+                  - combobox [ref=e524] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e525]
+                - cell "131" [ref=e526]
+                - cell [ref=e527]:
+                  - textbox "notes" [ref=e528]
+              - row [ref=e529]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr2_0" [ref=e530]
+                - cell "active" [ref=e531]:
+                  - combobox [ref=e532] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e533]
+                - cell "136" [ref=e534]
+                - cell [ref=e535]:
+                  - textbox "notes" [ref=e536]
+              - row [ref=e537]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr2_25" [ref=e538]
+                - cell "active" [ref=e539]:
+                  - combobox [ref=e540] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e541]
+                - cell "139" [ref=e542]
+                - cell [ref=e543]:
+                  - textbox "notes" [ref=e544]
+              - row [ref=e545]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr2_5" [ref=e546]
+                - cell "active" [ref=e547]:
+                  - combobox [ref=e548] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e549]
+                - cell "142" [ref=e550]
+                - cell [ref=e551]:
+                  - textbox "notes" [ref=e552]
+              - row [ref=e553]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr2_75" [ref=e554]
+                - cell "active" [ref=e555]:
+                  - combobox [ref=e556] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e557]
+                - cell "143" [ref=e558]
+                - cell [ref=e559]:
+                  - textbox "notes" [ref=e560]
+              - row [ref=e561]:
+                - cell "HoffmanIRBStrategy5mFeeVRPB_rr3_0" [ref=e562]
+                - cell "active" [ref=e563]:
+                  - combobox [ref=e564] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e565]
+                - cell "142" [ref=e566]
+                - cell [ref=e567]:
+                  - textbox "notes" [ref=e568]
+              - row [ref=e569]:
+                - cell "HoffmanIRBStrategy5mFeeVRSPBF" [ref=e570]
+                - cell "active" [ref=e571]:
+                  - combobox [ref=e572] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e573]
+                - cell "1,360" [ref=e574]
+                - cell [ref=e575]:
+                  - textbox "notes" [ref=e576]
+              - row [ref=e577]:
+                - cell "HoffmanIRBStrategy5mFeeVRSPBFChV" [ref=e578]
+                - cell "active" [ref=e579]:
+                  - combobox [ref=e580] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e581]
+                - cell "1,234" [ref=e582]
+                - cell [ref=e583]:
+                  - textbox "notes" [ref=e584]
+              - row [ref=e585]:
+                - cell "HoffmanIRBStrategy5mFeeVRSPBFDC" [ref=e586]
+                - cell "active" [ref=e587]:
+                  - combobox [ref=e588] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e589]
+                - cell "1,352" [ref=e590]
+                - cell [ref=e591]:
+                  - textbox "notes" [ref=e592]
+              - row [ref=e593]:
+                - cell "HoffmanIRBStrategy5mFeeVRSPBFPB" [ref=e594]
+                - cell "active" [ref=e595]:
+                  - combobox [ref=e596] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e597]
+                - cell "54" [ref=e598]
+                - cell [ref=e599]:
+                  - textbox "notes" [ref=e600]
+              - row [ref=e601]:
+                - cell "HoffmanIRBStrategy5mFeeVolRegime" [ref=e602]
+                - cell "active" [ref=e603]:
+                  - combobox [ref=e604] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e605]
+                - cell "3,113" [ref=e606]
+                - cell [ref=e607]:
+                  - textbox "notes" [ref=e608]
+              - row [ref=e609]:
+                - cell "HoffmanIRBStrategyPct20" [ref=e610]
+                - cell "active" [ref=e611]:
+                  - combobox [ref=e612] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e613]
+                - cell "1,753" [ref=e614]
+                - cell [ref=e615]:
+                  - textbox "notes" [ref=e616]
+              - row [ref=e617]:
+                - cell "HoffmanIRBStrategyPct25" [ref=e618]
+                - cell "active" [ref=e619]:
+                  - combobox [ref=e620] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e621]
+                - cell "1,743" [ref=e622]
+                - cell [ref=e623]:
+                  - textbox "notes" [ref=e624]
+              - row [ref=e625]:
+                - cell "HoffmanIRBStrategyRR05" [ref=e626]
+                - cell "active" [ref=e627]:
+                  - combobox [ref=e628] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e629]
+                - cell "3,548" [ref=e630]
+                - cell [ref=e631]:
+                  - textbox "notes" [ref=e632]
+              - row [ref=e633]:
+                - cell "HoffmanIRBStrategyRR10" [ref=e634]
+                - cell "active" [ref=e635]:
+                  - combobox [ref=e636] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e637]
+                - cell "1,755" [ref=e638]
+                - cell [ref=e639]:
+                  - textbox "notes" [ref=e640]
+              - row [ref=e641]:
+                - cell "HoffmanIRBStrategyRR20" [ref=e642]
+                - cell "active" [ref=e643]:
+                  - combobox [ref=e644] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e645]
+                - cell "1,739" [ref=e646]
+                - cell [ref=e647]:
+                  - textbox "notes" [ref=e648]
+              - row [ref=e649]:
+                - cell "HoffmanWF_rr0_5_tol0_0" [ref=e650]
+                - cell "active" [ref=e651]:
+                  - combobox [ref=e652] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e653]
+                - cell "115" [ref=e654]
+                - cell [ref=e655]:
+                  - textbox "notes" [ref=e656]
+              - row [ref=e657]:
+                - cell "HoffmanWF_rr0_5_tol0_25" [ref=e658]
+                - cell "active" [ref=e659]:
+                  - combobox [ref=e660] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e661]
+                - cell "276" [ref=e662]
+                - cell [ref=e663]:
+                  - textbox "notes" [ref=e664]
+              - row [ref=e665]:
+                - cell "HoffmanWF_rr0_5_tol0_5" [ref=e666]
+                - cell "active" [ref=e667]:
+                  - combobox [ref=e668] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e669]
+                - cell "391" [ref=e670]
+                - cell [ref=e671]:
+                  - textbox "notes" [ref=e672]
+              - row [ref=e673]:
+                - cell "HoffmanWF_rr0_5_tolm0_1" [ref=e674]
+                - cell "active" [ref=e675]:
+                  - combobox [ref=e676] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e677]
+                - cell "74" [ref=e678]
+                - cell [ref=e679]:
+                  - textbox "notes" [ref=e680]
+              - row [ref=e681]:
+                - cell "HoffmanWF_rr0_5_tolm0_15" [ref=e682]
+                - cell "active" [ref=e683]:
+                  - combobox [ref=e684] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e685]
+                - cell "49" [ref=e686]
+                - cell [ref=e687]:
+                  - textbox "notes" [ref=e688]
+              - row [ref=e689]:
+                - cell "HoffmanWF_rr0_75_tol0_0" [ref=e690]
+                - cell "active" [ref=e691]:
+                  - combobox [ref=e692] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e693]
+                - cell "180" [ref=e694]
+                - cell [ref=e695]:
+                  - textbox "notes" [ref=e696]
+              - row [ref=e697]:
+                - cell "HoffmanWF_rr0_75_tol0_25" [ref=e698]
+                - cell "active" [ref=e699]:
+                  - combobox [ref=e700] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e701]
+                - cell "428" [ref=e702]
+                - cell [ref=e703]:
+                  - textbox "notes" [ref=e704]
+              - row [ref=e705]:
+                - cell "HoffmanWF_rr0_75_tol0_5" [ref=e706]
+                - cell "active" [ref=e707]:
+                  - combobox [ref=e708] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e709]
+                - cell "605" [ref=e710]
+                - cell [ref=e711]:
+                  - textbox "notes" [ref=e712]
+              - row [ref=e713]:
+                - cell "HoffmanWF_rr0_75_tolm0_1" [ref=e714]
+                - cell "active" [ref=e715]:
+                  - combobox [ref=e716] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e717]
+                - cell "112" [ref=e718]
+                - cell [ref=e719]:
+                  - textbox "notes" [ref=e720]
+              - row [ref=e721]:
+                - cell "HoffmanWF_rr0_75_tolm0_15" [ref=e722]
+                - cell "active" [ref=e723]:
+                  - combobox [ref=e724] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e725]
+                - cell "80" [ref=e726]
+                - cell [ref=e727]:
+                  - textbox "notes" [ref=e728]
+              - row [ref=e729]:
+                - cell "HoffmanWF_rr1_0_tol0_0" [ref=e730]
+                - cell "active" [ref=e731]:
+                  - combobox [ref=e732] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e733]
+                - cell "218" [ref=e734]
+                - cell [ref=e735]:
+                  - textbox "notes" [ref=e736]
+              - row [ref=e737]:
+                - cell "HoffmanWF_rr1_0_tol0_25" [ref=e738]
+                - cell "active" [ref=e739]:
+                  - combobox [ref=e740] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e741]
+                - cell "518" [ref=e742]
+                - cell [ref=e743]:
+                  - textbox "notes" [ref=e744]
+              - row [ref=e745]:
+                - cell "HoffmanWF_rr1_0_tol0_5" [ref=e746]
+                - cell "active" [ref=e747]:
+                  - combobox [ref=e748] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e749]
+                - cell "742" [ref=e750]
+                - cell [ref=e751]:
+                  - textbox "notes" [ref=e752]
+              - row [ref=e753]:
+                - cell "HoffmanWF_rr1_0_tolm0_1" [ref=e754]
+                - cell "active" [ref=e755]:
+                  - combobox [ref=e756] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e757]
+                - cell "140" [ref=e758]
+                - cell [ref=e759]:
+                  - textbox "notes" [ref=e760]
+              - row [ref=e761]:
+                - cell "HoffmanWF_rr1_0_tolm0_15" [ref=e762]
+                - cell "active" [ref=e763]:
+                  - combobox [ref=e764] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e765]
+                - cell "97" [ref=e766]
+                - cell [ref=e767]:
+                  - textbox "notes" [ref=e768]
+              - row [ref=e769]:
+                - cell "HoffmanWF_rr1_25_tol0_0" [ref=e770]
+                - cell "active" [ref=e771]:
+                  - combobox [ref=e772] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e773]
+                - cell "205" [ref=e774]
+                - cell [ref=e775]:
+                  - textbox "notes" [ref=e776]
+              - row [ref=e777]:
+                - cell "HoffmanWF_rr1_25_tol0_25" [ref=e778]
+                - cell "active" [ref=e779]:
+                  - combobox [ref=e780] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e781]
+                - cell "466" [ref=e782]
+                - cell [ref=e783]:
+                  - textbox "notes" [ref=e784]
+              - row [ref=e785]:
+                - cell "HoffmanWF_rr1_25_tol0_5" [ref=e786]
+                - cell "active" [ref=e787]:
+                  - combobox [ref=e788] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e789]
+                - cell "656" [ref=e790]
+                - cell [ref=e791]:
+                  - textbox "notes" [ref=e792]
+              - row [ref=e793]:
+                - cell "HoffmanWF_rr1_25_tolm0_1" [ref=e794]
+                - cell "active" [ref=e795]:
+                  - combobox [ref=e796] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e797]
+                - cell "133" [ref=e798]
+                - cell [ref=e799]:
+                  - textbox "notes" [ref=e800]
+              - row [ref=e801]:
+                - cell "HoffmanWF_rr1_25_tolm0_15" [ref=e802]
+                - cell "active" [ref=e803]:
+                  - combobox [ref=e804] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e805]
+                - cell "89" [ref=e806]
+                - cell [ref=e807]:
+                  - textbox "notes" [ref=e808]
+              - row [ref=e809]:
+                - cell "HoffmanWF_rr1_5_tol0_0" [ref=e810]
+                - cell "active" [ref=e811]:
+                  - combobox [ref=e812] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e813]
+                - cell "205" [ref=e814]
+                - cell [ref=e815]:
+                  - textbox "notes" [ref=e816]
+              - row [ref=e817]:
+                - cell "HoffmanWF_rr1_5_tol0_25" [ref=e818]
+                - cell "active" [ref=e819]:
+                  - combobox [ref=e820] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e821]
+                - cell "473" [ref=e822]
+                - cell [ref=e823]:
+                  - textbox "notes" [ref=e824]
+              - row [ref=e825]:
+                - cell "HoffmanWF_rr1_5_tol0_5" [ref=e826]
+                - cell "active" [ref=e827]:
+                  - combobox [ref=e828] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e829]
+                - cell "660" [ref=e830]
+                - cell [ref=e831]:
+                  - textbox "notes" [ref=e832]
+              - row [ref=e833]:
+                - cell "HoffmanWF_rr1_5_tolm0_1" [ref=e834]
+                - cell "active" [ref=e835]:
+                  - combobox [ref=e836] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e837]
+                - cell "133" [ref=e838]
+                - cell [ref=e839]:
+                  - textbox "notes" [ref=e840]
+              - row [ref=e841]:
+                - cell "HoffmanWF_rr1_5_tolm0_15" [ref=e842]
+                - cell "active" [ref=e843]:
+                  - combobox [ref=e844] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e845]
+                - cell "89" [ref=e846]
+                - cell [ref=e847]:
+                  - textbox "notes" [ref=e848]
+              - row [ref=e849]:
+                - cell "HoffmanWF_rr1_75_tol0_0" [ref=e850]
+                - cell "active" [ref=e851]:
+                  - combobox [ref=e852] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e853]
+                - cell "209" [ref=e854]
+                - cell [ref=e855]:
+                  - textbox "notes" [ref=e856]
+              - row [ref=e857]:
+                - cell "HoffmanWF_rr1_75_tol0_25" [ref=e858]
+                - cell "active" [ref=e859]:
+                  - combobox [ref=e860] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e861]
+                - cell "467" [ref=e862]
+                - cell [ref=e863]:
+                  - textbox "notes" [ref=e864]
+              - row [ref=e865]:
+                - cell "HoffmanWF_rr1_75_tol0_5" [ref=e866]
+                - cell "active" [ref=e867]:
+                  - combobox [ref=e868] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e869]
+                - cell "663" [ref=e870]
+                - cell [ref=e871]:
+                  - textbox "notes" [ref=e872]
+              - row [ref=e873]:
+                - cell "HoffmanWF_rr1_75_tolm0_1" [ref=e874]
+                - cell "active" [ref=e875]:
+                  - combobox [ref=e876] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e877]
+                - cell "135" [ref=e878]
+                - cell [ref=e879]:
+                  - textbox "notes" [ref=e880]
+              - row [ref=e881]:
+                - cell "HoffmanWF_rr1_75_tolm0_15" [ref=e882]
+                - cell "active" [ref=e883]:
+                  - combobox [ref=e884] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e885]
+                - cell "89" [ref=e886]
+                - cell [ref=e887]:
+                  - textbox "notes" [ref=e888]
+              - row [ref=e889]:
+                - cell "HoffmanWF_rr2_0_tol0_0" [ref=e890]
+                - cell "active" [ref=e891]:
+                  - combobox [ref=e892] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e893]
+                - cell "209" [ref=e894]
+                - cell [ref=e895]:
+                  - textbox "notes" [ref=e896]
+              - row [ref=e897]:
+                - cell "HoffmanWF_rr2_0_tol0_25" [ref=e898]
+                - cell "active" [ref=e899]:
+                  - combobox [ref=e900] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e901]
+                - cell "473" [ref=e902]
+                - cell [ref=e903]:
+                  - textbox "notes" [ref=e904]
+              - row [ref=e905]:
+                - cell "HoffmanWF_rr2_0_tol0_5" [ref=e906]
+                - cell "active" [ref=e907]:
+                  - combobox [ref=e908] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e909]
+                - cell "667" [ref=e910]
+                - cell [ref=e911]:
+                  - textbox "notes" [ref=e912]
+              - row [ref=e913]:
+                - cell "HoffmanWF_rr2_0_tolm0_1" [ref=e914]
+                - cell "active" [ref=e915]:
+                  - combobox [ref=e916] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e917]
+                - cell "135" [ref=e918]
+                - cell [ref=e919]:
+                  - textbox "notes" [ref=e920]
+              - row [ref=e921]:
+                - cell "HoffmanWF_rr2_0_tolm0_15" [ref=e922]
+                - cell "active" [ref=e923]:
+                  - combobox [ref=e924] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e925]
+                - cell "89" [ref=e926]
+                - cell [ref=e927]:
+                  - textbox "notes" [ref=e928]
+              - row [ref=e929]:
+                - cell "HoffmanWF_rr2_5_tol0_0" [ref=e930]
+                - cell "active" [ref=e931]:
+                  - combobox [ref=e932] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e933]
+                - cell "205" [ref=e934]
+                - cell [ref=e935]:
+                  - textbox "notes" [ref=e936]
+              - row [ref=e937]:
+                - cell "HoffmanWF_rr2_5_tol0_25" [ref=e938]
+                - cell "active" [ref=e939]:
+                  - combobox [ref=e940] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e941]
+                - cell "452" [ref=e942]
+                - cell [ref=e943]:
+                  - textbox "notes" [ref=e944]
+              - row [ref=e945]:
+                - cell "HoffmanWF_rr2_5_tol0_5" [ref=e946]
+                - cell "active" [ref=e947]:
+                  - combobox [ref=e948] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e949]
+                - cell "645" [ref=e950]
+                - cell [ref=e951]:
+                  - textbox "notes" [ref=e952]
+              - row [ref=e953]:
+                - cell "HoffmanWF_rr2_5_tolm0_1" [ref=e954]
+                - cell "active" [ref=e955]:
+                  - combobox [ref=e956] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e957]
+                - cell "158" [ref=e958]
+                - cell [ref=e959]:
+                  - textbox "notes" [ref=e960]
+              - row [ref=e961]:
+                - cell "HoffmanWF_rr2_5_tolm0_15" [ref=e962]
+                - cell "active" [ref=e963]:
+                  - combobox [ref=e964] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e965]
+                - cell "116" [ref=e966]
+                - cell [ref=e967]:
+                  - textbox "notes" [ref=e968]
+              - row [ref=e969]:
+                - cell "HoffmanWF_rr3_0_tol0_0" [ref=e970]
+                - cell "active" [ref=e971]:
+                  - combobox [ref=e972] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e973]
+                - cell "116" [ref=e974]
+                - cell [ref=e975]:
+                  - textbox "notes" [ref=e976]
+              - row [ref=e977]:
+                - cell "HoffmanWF_rr3_0_tol0_25" [ref=e978]
+                - cell "active" [ref=e979]:
+                  - combobox [ref=e980] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e981]
+                - cell "263" [ref=e982]
+                - cell [ref=e983]:
+                  - textbox "notes" [ref=e984]
+              - row [ref=e985]:
+                - cell "HoffmanWF_rr3_0_tol0_5" [ref=e986]
+                - cell "active" [ref=e987]:
+                  - combobox [ref=e988] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e989]
+                - cell "379" [ref=e990]
+                - cell [ref=e991]:
+                  - textbox "notes" [ref=e992]
+              - row [ref=e993]:
+                - cell "HoffmanWF_rr3_0_tolm0_1" [ref=e994]
+                - cell "active" [ref=e995]:
+                  - combobox [ref=e996] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e997]
+                - cell "73" [ref=e998]
+                - cell [ref=e999]:
+                  - textbox "notes" [ref=e1000]
+              - row [ref=e1001]:
+                - cell "HoffmanWF_rr3_0_tolm0_15" [ref=e1002]
+                - cell "active" [ref=e1003]:
+                  - combobox [ref=e1004] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e1005]
+                - cell "45" [ref=e1006]
+                - cell [ref=e1007]:
+                  - textbox "notes" [ref=e1008]
+              - row [ref=e1009]:
+                - cell "HybridRegimeSwitcher" [ref=e1010]
+                - cell "active" [ref=e1011]:
+                  - combobox [ref=e1012] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "9" [ref=e1013]
+                - cell "3,498" [ref=e1014]
+                - cell [ref=e1015]:
+                  - textbox "notes" [ref=e1016]
+              - row [ref=e1017]:
+                - cell "Ichi" [ref=e1018]
+                - cell "active" [ref=e1019]:
+                  - combobox [ref=e1020] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e1021]
+                - cell "1,455" [ref=e1022]
+                - cell [ref=e1023]:
+                  - textbox "notes" [ref=e1024]
+              - row [ref=e1025]:
+                - cell "LuxAlgo15mBTCLowRisk" [ref=e1026]
+                - cell "active" [ref=e1027]:
+                  - combobox [ref=e1028] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "7" [ref=e1029]
+                - cell "22,704" [ref=e1030]
+                - cell [ref=e1031]:
+                  - textbox "notes" [ref=e1032]
+              - row [ref=e1033]:
+                - cell "MfiEmaWaveTrend" [ref=e1034]
+                - cell "active" [ref=e1035]:
+                  - combobox [ref=e1036] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e1037]
+                - cell "6,533" [ref=e1038]
+                - cell [ref=e1039]:
+                  - textbox "notes" [ref=e1040]
+              - row [ref=e1041]:
+                - cell "MfiEmaWaveTrend2" [ref=e1042]
+                - cell "active" [ref=e1043]:
+                  - combobox [ref=e1044] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e1045]
+                - cell "34,630" [ref=e1046]
+                - cell [ref=e1047]:
+                  - textbox "notes" [ref=e1048]
+              - row [ref=e1049]:
+                - cell "MfiEmaWaveTrend2Spot" [ref=e1050]
+                - cell "active" [ref=e1051]:
+                  - combobox [ref=e1052] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1053]
+                - cell "10,178" [ref=e1054]
+                - cell [ref=e1055]:
+                  - textbox "notes" [ref=e1056]
+              - row [ref=e1057]:
+                - cell "MfiEmaWaveTrendSpot" [ref=e1058]
+                - cell "active" [ref=e1059]:
+                  - combobox [ref=e1060] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1061]
+                - cell "1,524" [ref=e1062]
+                - cell [ref=e1063]:
+                  - textbox "notes" [ref=e1064]
+              - row [ref=e1065]:
+                - cell "NFIX7Guarded" [ref=e1066]
+                - cell "active" [ref=e1067]:
+                  - combobox [ref=e1068] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1069]
+                - cell "0" [ref=e1070]
+                - cell [ref=e1071]:
+                  - textbox "notes" [ref=e1072]
+              - row [ref=e1073]:
+                - cell "NFIX7GuardedAge10" [ref=e1074]
+                - cell "active" [ref=e1075]:
+                  - combobox [ref=e1076] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e1077]
+                - cell "172" [ref=e1078]
+                - cell [ref=e1079]:
+                  - textbox "notes" [ref=e1080]
+              - row [ref=e1081]:
+                - cell "NFIX7GuardedAge21" [ref=e1082]
+                - cell "active" [ref=e1083]:
+                  - combobox [ref=e1084] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "3" [ref=e1085]
+                - cell "171" [ref=e1086]
+                - cell [ref=e1087]:
+                  - textbox "notes" [ref=e1088]
+              - row [ref=e1089]:
+                - cell "NFIX7GuardedCat15" [ref=e1090]
+                - cell "active" [ref=e1091]:
+                  - combobox [ref=e1092] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e1093]
+                - cell "219" [ref=e1094]
+                - cell [ref=e1095]:
+                  - textbox "notes" [ref=e1096]
+              - row [ref=e1097]:
+                - cell "NFIX7GuardedCat25" [ref=e1098]
+                - cell "active" [ref=e1099]:
+                  - combobox [ref=e1100] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e1101]
+                - cell "219" [ref=e1102]
+                - cell [ref=e1103]:
+                  - textbox "notes" [ref=e1104]
+              - row [ref=e1105]:
+                - cell "NFIX7GuardedCat30" [ref=e1106]
+                - cell "active" [ref=e1107]:
+                  - combobox [ref=e1108] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e1109]
+                - cell "219" [ref=e1110]
+                - cell [ref=e1111]:
+                  - textbox "notes" [ref=e1112]
+              - row [ref=e1113]:
+                - cell "NFIX7GuardedRel" [ref=e1114]
+                - cell "active" [ref=e1115]:
+                  - combobox [ref=e1116] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1117]
+                - cell "0" [ref=e1118]
+                - cell [ref=e1119]:
+                  - textbox "notes" [ref=e1120]
+              - row [ref=e1121]:
+                - cell "NFIX7GuardedRelative" [ref=e1122]
+                - cell "active" [ref=e1123]:
+                  - combobox [ref=e1124] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1125]
+                - cell "0" [ref=e1126]
+                - cell [ref=e1127]:
+                  - textbox "notes" [ref=e1128]
+              - row [ref=e1129]:
+                - cell "NFIX7GuardedSweep" [ref=e1130]
+                - cell "active" [ref=e1131]:
+                  - combobox [ref=e1132] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1133]
+                - cell "0" [ref=e1134]
+                - cell [ref=e1135]:
+                  - textbox "notes" [ref=e1136]
+              - row [ref=e1137]:
+                - cell "NWEv6" [ref=e1138]
+                - cell "active" [ref=e1139]:
+                  - combobox [ref=e1140] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1141]
+                - cell "0" [ref=e1142]
+                - cell [ref=e1143]:
+                  - textbox "notes" [ref=e1144]
+              - row [ref=e1145]:
+                - cell "NWEv6_new" [ref=e1146]
+                - cell "active" [ref=e1147]:
+                  - combobox [ref=e1148] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1149]
+                - cell "5,046" [ref=e1150]
+                - cell [ref=e1151]:
+                  - textbox "notes" [ref=e1152]
+              - row [ref=e1153]:
+                - cell "NadarayaWatson" [ref=e1154]
+                - cell "active" [ref=e1155]:
+                  - combobox [ref=e1156] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1157]
+                - cell "24,617" [ref=e1158]
+                - cell [ref=e1159]:
+                  - textbox "notes" [ref=e1160]
+              - row [ref=e1161]:
+                - cell "NadarayaWatsonSpot" [ref=e1162]
+                - cell "active" [ref=e1163]:
+                  - combobox [ref=e1164] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1165]
+                - cell "3,012" [ref=e1166]
+                - cell [ref=e1167]:
+                  - textbox "notes" [ref=e1168]
+              - row [ref=e1169]:
+                - cell "NostalgiaForInfinityX" [ref=e1170]
+                - cell "active" [ref=e1171]:
+                  - combobox [ref=e1172] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1173]
+                - cell "433" [ref=e1174]
+                - cell [ref=e1175]:
+                  - textbox "notes" [ref=e1176]
+              - row [ref=e1177]:
+                - cell "NostalgiaForInfinityX3" [ref=e1178]
+                - cell "active" [ref=e1179]:
+                  - combobox [ref=e1180] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1181]
+                - cell "271" [ref=e1182]
+                - cell [ref=e1183]:
+                  - textbox "notes" [ref=e1184]
+              - row [ref=e1185]:
+                - cell "NostalgiaForInfinityX4" [ref=e1186]
+                - cell "active" [ref=e1187]:
+                  - combobox [ref=e1188] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "8" [ref=e1189]
+                - cell "662" [ref=e1190]
+                - cell [ref=e1191]:
+                  - textbox "notes" [ref=e1192]
+              - row [ref=e1193]:
+                - cell "NostalgiaForInfinityX6" [ref=e1194]
+                - cell "active" [ref=e1195]:
+                  - combobox [ref=e1196] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e1197]
+                - cell "36" [ref=e1198]
+                - cell [ref=e1199]:
+                  - textbox "notes" [ref=e1200]
+              - row [ref=e1201]:
+                - cell "NostalgiaForInfinityX7" [ref=e1202]
+                - cell "active" [ref=e1203]:
+                  - combobox [ref=e1204] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "10" [ref=e1205]
+                - cell "456" [ref=e1206]
+                - cell [ref=e1207]:
+                  - textbox "notes" [ref=e1208]
+              - row [ref=e1209]:
+                - cell "NostalgiaForInfinityX7Guarded" [ref=e1210]
+                - cell "active" [ref=e1211]:
+                  - combobox [ref=e1212] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "11" [ref=e1213]
+                - cell "527" [ref=e1214]
+                - cell [ref=e1215]:
+                  - textbox "notes" [ref=e1216]
+              - row [ref=e1217]:
+                - cell "NostalgiaForInfinityX7GuardedAge10" [ref=e1218]
+                - cell "active" [ref=e1219]:
+                  - combobox [ref=e1220] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e1221]
+                - cell "219" [ref=e1222]
+                - cell [ref=e1223]:
+                  - textbox "notes" [ref=e1224]
+              - row [ref=e1225]:
+                - cell "NostalgiaForInfinityX7GuardedAge21" [ref=e1226]
+                - cell "active" [ref=e1227]:
+                  - combobox [ref=e1228] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e1229]
+                - cell "218" [ref=e1230]
+                - cell [ref=e1231]:
+                  - textbox "notes" [ref=e1232]
+              - row [ref=e1233]:
+                - cell "NostalgiaForInfinityX7GuardedCat15" [ref=e1234]
+                - cell "active" [ref=e1235]:
+                  - combobox [ref=e1236] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "7" [ref=e1237]
+                - cell "597" [ref=e1238]
+                - cell [ref=e1239]:
+                  - textbox "notes" [ref=e1240]
+              - row [ref=e1241]:
+                - cell "NostalgiaForInfinityX7GuardedCat25" [ref=e1242]
+                - cell "active" [ref=e1243]:
+                  - combobox [ref=e1244] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e1245]
+                - cell "219" [ref=e1246]
+                - cell [ref=e1247]:
+                  - textbox "notes" [ref=e1248]
+              - row [ref=e1249]:
+                - cell "NostalgiaForInfinityX7GuardedCat30" [ref=e1250]
+                - cell "active" [ref=e1251]:
+                  - combobox [ref=e1252] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "4" [ref=e1253]
+                - cell "219" [ref=e1254]
+                - cell [ref=e1255]:
+                  - textbox "notes" [ref=e1256]
+              - row [ref=e1257]:
+                - cell "NostalgiaForInfinityX7GuardedRelative" [ref=e1258]
+                - cell "active" [ref=e1259]:
+                  - combobox [ref=e1260] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "10" [ref=e1261]
+                - cell "456" [ref=e1262]
+                - cell [ref=e1263]:
+                  - textbox "notes" [ref=e1264]
+              - row [ref=e1265]:
+                - cell "OctopusNestATR" [ref=e1266]
+                - cell "active" [ref=e1267]:
+                  - combobox [ref=e1268] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1269]
+                - cell "39" [ref=e1270]
+                - cell [ref=e1271]:
+                  - textbox "notes" [ref=e1272]
+              - row [ref=e1273]:
+                - cell "OctopusNestHighestLowestATR" [ref=e1274]
+                - cell "active" [ref=e1275]:
+                  - combobox [ref=e1276] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1277]
+                - cell "23" [ref=e1278]
+                - cell [ref=e1279]:
+                  - textbox "notes" [ref=e1280]
+              - row [ref=e1281]:
+                - cell "OctopusNestHyperoptDiagnostic" [ref=e1282]
+                - cell "active" [ref=e1283]:
+                  - combobox [ref=e1284] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1285]
+                - cell "0" [ref=e1286]
+                - cell [ref=e1287]:
+                  - textbox "notes" [ref=e1288]
+              - row [ref=e1289]:
+                - cell "OctopusNestStrategy" [ref=e1290]
+                - cell "active" [ref=e1291]:
+                  - combobox [ref=e1292] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "11" [ref=e1293]
+                - cell "911" [ref=e1294]
+                - cell [ref=e1295]:
+                  - textbox "notes" [ref=e1296]
+              - row [ref=e1297]:
+                - cell "ScreenerDpoBbwpWick" [ref=e1298]
+                - cell "active" [ref=e1299]:
+                  - combobox [ref=e1300] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1301]
+                - cell "0" [ref=e1302]
+                - cell [ref=e1303]:
+                  - textbox "notes" [ref=e1304]
+              - row [ref=e1305]:
+                - cell "ScreenerDpoEveningStar" [ref=e1306]
+                - cell "active" [ref=e1307]:
+                  - combobox [ref=e1308] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e1309]
+                - cell "2,018" [ref=e1310]
+                - cell [ref=e1311]:
+                  - textbox "notes" [ref=e1312]
+              - row [ref=e1313]:
+                - cell "ScreenerDpoShootingStar" [ref=e1314]
+                - cell "active" [ref=e1315]:
+                  - combobox [ref=e1316] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1317]
+                - cell "0" [ref=e1318]
+                - cell [ref=e1319]:
+                  - textbox "notes" [ref=e1320]
+              - row [ref=e1321]:
+                - cell "SmokeStrategyTemplateV21" [ref=e1322]
+                - cell "active" [ref=e1323]:
+                  - combobox [ref=e1324] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "12" [ref=e1325]
+                - cell "2,547" [ref=e1326]
+                - cell [ref=e1327]:
+                  - textbox "notes" [ref=e1328]
+              - row [ref=e1329]:
+                - cell "StrategyTemplate" [ref=e1330]
+                - cell "active" [ref=e1331]:
+                  - combobox [ref=e1332] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1333]
+                - cell "4,906" [ref=e1334]
+                - cell [ref=e1335]:
+                  - textbox "notes" [ref=e1336]
+              - row [ref=e1337]:
+                - cell "StrategyTemplateV21" [ref=e1338]
+                - cell "active" [ref=e1339]:
+                  - combobox [ref=e1340] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e1341]
+                - cell "33" [ref=e1342]
+                - cell [ref=e1343]:
+                  - textbox "notes" [ref=e1344]
+              - row [ref=e1345]:
+                - cell "SuperKeltnerStrategy" [ref=e1346]
+                - cell "active" [ref=e1347]:
+                  - combobox [ref=e1348] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1349]
+                - cell "222" [ref=e1350]
+                - cell [ref=e1351]:
+                  - textbox "notes" [ref=e1352]
+              - row [ref=e1353]:
+                - cell "SupertrendKeltner" [ref=e1354]
+                - cell "active" [ref=e1355]:
+                  - combobox [ref=e1356] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e1357]
+                - cell "31,202" [ref=e1358]
+                - cell [ref=e1359]:
+                  - textbox "notes" [ref=e1360]
+              - row [ref=e1361]:
+                - cell "TrendOMaticDoubleSupertrendStrategy" [ref=e1362]
+                - cell "active" [ref=e1363]:
+                  - combobox [ref=e1364] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1365]
+                - cell "0" [ref=e1366]
+                - cell [ref=e1367]:
+                  - textbox "notes" [ref=e1368]
+              - row [ref=e1369]:
+                - cell "TrendOMaticHPHSuperKeltnerStrategy" [ref=e1370]
+                - cell "active" [ref=e1371]:
+                  - combobox [ref=e1372] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1373]
+                - cell "0" [ref=e1374]
+                - cell [ref=e1375]:
+                  - textbox "notes" [ref=e1376]
+              - row [ref=e1377]:
+                - cell "TrendOMaticNadarayaBaselineStrategy" [ref=e1378]
+                - cell "active" [ref=e1379]:
+                  - combobox [ref=e1380] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1381]
+                - cell "4" [ref=e1382]
+                - cell [ref=e1383]:
+                  - textbox "notes" [ref=e1384]
+              - row [ref=e1385]:
+                - cell "TrendOMaticNadarayaStrategy" [ref=e1386]
+                - cell "active" [ref=e1387]:
+                  - combobox [ref=e1388] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1389]
+                - cell "4" [ref=e1390]
+                - cell [ref=e1391]:
+                  - textbox "notes" [ref=e1392]
+              - row [ref=e1393]:
+                - cell "TrendOMaticStrategySpot" [ref=e1394]
+                - cell "active" [ref=e1395]:
+                  - combobox [ref=e1396] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1397]
+                - cell "1,734" [ref=e1398]
+                - cell [ref=e1399]:
+                  - textbox "notes" [ref=e1400]
+              - row [ref=e1401]:
+                - cell "TrendOMaticVHFStrategy" [ref=e1402]
+                - cell "active" [ref=e1403]:
+                  - combobox [ref=e1404] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1405]
+                - cell "0" [ref=e1406]
+                - cell [ref=e1407]:
+                  - textbox "notes" [ref=e1408]
+              - row [ref=e1409]:
+                - cell "TrendOMaticVixFixStrategy" [ref=e1410]
+                - cell "active" [ref=e1411]:
+                  - combobox [ref=e1412] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1413]
+                - cell "428" [ref=e1414]
+                - cell [ref=e1415]:
+                  - textbox "notes" [ref=e1416]
+              - row [ref=e1417]:
+                - cell "TrendOMaticWildersStrategy" [ref=e1418]
+                - cell "active" [ref=e1419]:
+                  - combobox [ref=e1420] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1421]
+                - cell "0" [ref=e1422]
+                - cell [ref=e1423]:
+                  - textbox "notes" [ref=e1424]
+              - row [ref=e1425]:
+                - cell "VixFixBb" [ref=e1426]
+                - cell "active" [ref=e1427]:
+                  - combobox [ref=e1428] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1429]
+                - cell "0" [ref=e1430]
+                - cell [ref=e1431]:
+                  - textbox "notes" [ref=e1432]
+              - row [ref=e1433]:
+                - cell "WildersVolatilityBingAi" [ref=e1434]
+                - cell "active" [ref=e1435]:
+                  - combobox [ref=e1436] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e1437]
+                - cell "0" [ref=e1438]
+                - cell [ref=e1439]:
+                  - textbox "notes" [ref=e1440]
+              - row [ref=e1441]:
+                - cell "WolfeFuturesShortStrategy" [ref=e1442]
+                - cell "active" [ref=e1443]:
+                  - combobox [ref=e1444] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1445]
+                - cell "9" [ref=e1446]
+                - cell [ref=e1447]:
+                  - textbox "notes" [ref=e1448]
+              - row [ref=e1449]:
+                - cell "_hyp_ns53" [ref=e1450]
+                - cell "active" [ref=e1451]:
+                  - combobox [ref=e1452] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "0" [ref=e1453]
+                - cell "0" [ref=e1454]
+                - cell [ref=e1455]:
+                  - textbox "notes" [ref=e1456]
+              - row [ref=e1457]:
+                - cell "adaptive" [ref=e1458]
+                - cell "active" [ref=e1459]:
+                  - combobox [ref=e1460] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "51" [ref=e1461]
+                - cell "14,936" [ref=e1462]
+                - cell [ref=e1463]:
+                  - textbox "notes" [ref=e1464]
+              - row [ref=e1465]:
+                - cell "ichiV1" [ref=e1466]
+                - cell "active" [ref=e1467]:
+                  - combobox [ref=e1468] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "2" [ref=e1469]
+                - cell "0" [ref=e1470]
+                - cell [ref=e1471]:
+                  - textbox "notes" [ref=e1472]
+              - row [ref=e1473]:
+                - cell "newstrategy51" [ref=e1474]
+                - cell "active" [ref=e1475]:
+                  - combobox [ref=e1476] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "6" [ref=e1477]
+                - cell "3,484" [ref=e1478]
+                - cell [ref=e1479]:
+                  - textbox "notes" [ref=e1480]
+              - row [ref=e1481]:
+                - cell "newstrategy53" [ref=e1482]
+                - cell "active" [ref=e1483]:
+                  - combobox [ref=e1484] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "6" [ref=e1485]
+                - cell "1,645" [ref=e1486]
+                - cell [ref=e1487]:
+                  - textbox "notes" [ref=e1488]
+              - row [ref=e1489]:
+                - cell "turbov8" [ref=e1490]
+                - cell "active" [ref=e1491]:
+                  - combobox [ref=e1492] [cursor=pointer]:
+                    - option "active" [selected]
+                    - option "experimental"
+                    - option "retired"
+                - cell "1" [ref=e1493]
+                - cell "0" [ref=e1494]
+                - cell [ref=e1495]:
+                  - textbox "notes" [ref=e1496]
+  - complementary [ref=e1497]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=e1501]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

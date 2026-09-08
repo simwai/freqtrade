@@ -1,0 +1,907 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - heading "Strategy Lab" [level=1] [ref=e6]
+      - generic [ref=e7]: freqtrade strategy overview · 2026-08-26 20:57
+  - generic [ref=e8]:
+    - button "Dashboard" [ref=e9] [cursor=pointer]
+    - button "Strategies" [ref=e10] [cursor=pointer]
+    - button "History" [ref=e11] [cursor=pointer]
+    - button "Benchmark" [ref=e12] [cursor=pointer]
+    - button "Walk-Forward" [ref=e13] [cursor=pointer]
+    - button "Hyperopt" [ref=e14] [cursor=pointer]
+    - button "Trades" [ref=e15] [cursor=pointer]
+    - button "Lab" [ref=e16] [cursor=pointer]
+  - main [ref=e17]:
+    - generic [ref=e2785]:
+      - generic [ref=e2786]:
+        - heading "Hyperopt" [level=2] [ref=e2787]
+        - generic [ref=e2788]: best epoch per run · Drill loads top 200 epochs sorted by loss (MAE/exit_eff + corr)
+      - generic [ref=e2789]:
+        - textbox "Filter strategy/loss..." [ref=e2790]
+        - generic [ref=e2791]:
+          - text: Min trades
+          - spinbutton "Min trades" [ref=e2792]: "0"
+        - generic [ref=e2793]:
+          - text: Limit
+          - combobox "Limit" [ref=e2794]:
+            - option "100"
+            - option "200" [selected]
+            - option "500"
+        - combobox [ref=e2795]:
+          - option "strategy_ScreenerDpoEveningStar_2026-08-26_20-57-29.fthypt (1.1 MB)" [selected]
+          - option "strategy_OctopusNestStrategy_2026-08-23_19-32-36.fthypt (63.8 MB)"
+          - option "strategy_OctopusNestStrategy_2026-08-22_16-48-27.fthypt (70.8 MB)"
+          - option "strategy_OctopusNestStrategy_2026-08-22_16-15-04.fthypt (70.7 MB)"
+          - option "strategy_OctopusNestStrategy_2026-08-21_13-54-43.fthypt (7.4 MB)"
+          - option "strategy_OctopusNestStrategy_2026-08-21_13-39-50.fthypt (2.5 MB)"
+          - option "strategy_OctopusNestStrategy_2026-08-21_13-28-15.fthypt (4.5 MB)"
+          - option "strategy_OctopusNestStrategy_2026-08-21_13-23-28.fthypt (0.7 MB)"
+        - generic [ref=e2796]: 59/59 runs
+      - generic [ref=e2797]:
+        - table [ref=e2799]:
+          - rowgroup [ref=e2812]:
+            - row [ref=e2813]:
+              - columnheader "Strategy" [ref=e2814] [cursor=pointer]
+              - columnheader "Epochs" [ref=e2815] [cursor=pointer]
+              - columnheader "Best Loss" [ref=e2816] [cursor=pointer]
+              - columnheader "Best Profit" [ref=e2817] [cursor=pointer]
+              - columnheader "Best Sortino" [ref=e2818] [cursor=pointer]
+              - columnheader "Best PF" [ref=e2819] [cursor=pointer]
+              - columnheader "Trades" [ref=e2820] [cursor=pointer]
+              - columnheader "Loss" [ref=e2821] [cursor=pointer]
+              - columnheader "Spaces" [ref=e2822] [cursor=pointer]
+              - columnheader "Run" [ref=e2823] [cursor=pointer]
+              - columnheader [ref=e2824] [cursor=pointer]
+        - table [ref=e2827]:
+          - rowgroup [ref=e2840]:
+            - row [ref=e2841]:
+              - cell "BigZ06" [ref=e2842]
+              - cell "444" [ref=e2843]
+              - cell "-20.3" [ref=e2844]
+              - cell "59,156.7%" [ref=e2845]
+              - cell "—" [ref=e2846]
+              - cell "1.127" [ref=e2847]
+              - cell "11,023" [ref=e2848]
+              - cell [ref=e2849]
+              - cell [ref=e2850]
+              - cell "2022-12-10 16:16" [ref=e2851]
+              - cell [ref=e2852]:
+                - button "Drill" [ref=e2853] [cursor=pointer]
+                - 'button "{ }" [ref=e2854] [cursor=pointer]'
+            - row [ref=e2855]:
+              - cell "BigZ08" [ref=e2856]
+              - cell "200" [ref=e2857]
+              - cell "-14.98" [ref=e2858]
+              - cell "501.2%" [ref=e2859]
+              - cell "0.81" [ref=e2860]
+              - cell "4.33" [ref=e2861]
+              - cell "37" [ref=e2862]
+              - cell [ref=e2863]
+              - cell [ref=e2864]
+              - cell "2024-07-23 05:52" [ref=e2865]
+              - cell [ref=e2866]:
+                - button "Drill" [ref=e2867] [cursor=pointer]
+                - 'button "{ }" [ref=e2868] [cursor=pointer]'
+            - row [ref=e2869]:
+              - cell "BigZ08" [ref=e2870]
+              - cell "200" [ref=e2871]
+              - cell "-0.82" [ref=e2872]
+              - cell "1,168.2%" [ref=e2873]
+              - cell "0.325" [ref=e2874]
+              - cell "1.277" [ref=e2875]
+              - cell "183" [ref=e2876]
+              - cell [ref=e2877]
+              - cell [ref=e2878]
+              - cell "2024-07-25 10:14" [ref=e2879]
+              - cell [ref=e2880]:
+                - button "Drill" [ref=e2881] [cursor=pointer]
+                - 'button "{ }" [ref=e2882] [cursor=pointer]'
+            - row [ref=e2883]:
+              - cell "NWEv6" [ref=e2884]
+              - cell "200" [ref=e2885]
+              - cell "-3.54" [ref=e2886]
+              - cell "384.8%" [ref=e2887]
+              - cell "—" [ref=e2888]
+              - cell "1.088" [ref=e2889]
+              - cell "4,212" [ref=e2890]
+              - cell [ref=e2891]
+              - cell [ref=e2892]
+              - cell "2022-12-18 23:46" [ref=e2893]
+              - cell [ref=e2894]:
+                - button "Drill" [ref=e2895] [cursor=pointer]
+                - 'button "{ }" [ref=e2896] [cursor=pointer]'
+            - row [ref=e2897]:
+              - cell "NadarayaWatson" [ref=e2898]
+              - cell "200" [ref=e2899]
+              - cell "9.93" [ref=e2900]
+              - cell "81.4%" [ref=e2901]
+              - cell "—" [ref=e2902]
+              - cell "1.006" [ref=e2903]
+              - cell "28,409" [ref=e2904]
+              - cell [ref=e2905]
+              - cell [ref=e2906]
+              - cell "2022-12-29 18:18" [ref=e2907]
+              - cell [ref=e2908]:
+                - button "Drill" [ref=e2909] [cursor=pointer]
+                - 'button "{ }" [ref=e2910] [cursor=pointer]'
+            - row [ref=e2911]:
+              - cell "BigZ06" [ref=e2912]
+              - cell "180" [ref=e2913]
+              - cell "-7.94" [ref=e2914]
+              - cell "489.7%" [ref=e2915]
+              - cell "—" [ref=e2916]
+              - cell "1.019" [ref=e2917]
+              - cell "9,415" [ref=e2918]
+              - cell [ref=e2919]
+              - cell [ref=e2920]
+              - cell "2022-12-09 13:53" [ref=e2921]
+              - cell [ref=e2922]:
+                - button "Drill" [ref=e2923] [cursor=pointer]
+                - 'button "{ }" [ref=e2924] [cursor=pointer]'
+            - row [ref=e2925]:
+              - cell "BigZ08" [ref=e2926]
+              - cell "173" [ref=e2927]
+              - cell "-16,658.56" [ref=e2928]
+              - cell "2,079.7%" [ref=e2929]
+              - cell "0.245" [ref=e2930]
+              - cell "1.469" [ref=e2931]
+              - cell "175" [ref=e2932]
+              - cell [ref=e2933]
+              - cell [ref=e2934]
+              - cell "2024-07-27 20:43" [ref=e2935]
+              - cell [ref=e2936]:
+                - button "Drill" [ref=e2937] [cursor=pointer]
+                - 'button "{ }" [ref=e2938] [cursor=pointer]'
+            - row [ref=e2939]:
+              - cell "BigZ08" [ref=e2940]
+              - cell "168" [ref=e2941]
+              - cell "-1.69" [ref=e2942]
+              - cell "429.5%" [ref=e2943]
+              - cell "0.237" [ref=e2944]
+              - cell "1.412" [ref=e2945]
+              - cell "173" [ref=e2946]
+              - cell [ref=e2947]
+              - cell [ref=e2948]
+              - cell "2024-07-26 12:16" [ref=e2949]
+              - cell [ref=e2950]:
+                - button "Drill" [ref=e2951] [cursor=pointer]
+                - 'button "{ }" [ref=e2952] [cursor=pointer]'
+            - row [ref=e2953]:
+              - cell "BigZ08" [ref=e2954]
+              - cell "126" [ref=e2955]
+              - cell "-9,145.13" [ref=e2956]
+              - cell "1,155.7%" [ref=e2957]
+              - cell "0.262" [ref=e2958]
+              - cell "1.53" [ref=e2959]
+              - cell "153" [ref=e2960]
+              - cell [ref=e2961]
+              - cell [ref=e2962]
+              - cell "2024-08-02 15:02" [ref=e2963]
+              - cell [ref=e2964]:
+                - button "Drill" [ref=e2965] [cursor=pointer]
+                - 'button "{ }" [ref=e2966] [cursor=pointer]'
+            - row [ref=e2967]:
+              - cell "BigZ08" [ref=e2968]
+              - cell "102" [ref=e2969]
+              - cell "-0.04" [ref=e2970]
+              - cell "243.1%" [ref=e2971]
+              - cell "0.019" [ref=e2972]
+              - cell "1.026" [ref=e2973]
+              - cell "208" [ref=e2974]
+              - cell [ref=e2975]
+              - cell [ref=e2976]
+              - cell "2024-07-24 23:46" [ref=e2977]
+              - cell [ref=e2978]:
+                - button "Drill" [ref=e2979] [cursor=pointer]
+                - 'button "{ }" [ref=e2980] [cursor=pointer]'
+            - row [ref=e2981]:
+              - cell "NadarayaWatson" [ref=e2982]
+              - cell "100" [ref=e2983]
+              - cell "0.13" [ref=e2984]
+              - cell "-41.6%" [ref=e2985]
+              - cell "—" [ref=e2986]
+              - cell "0.412" [ref=e2987]
+              - cell "16" [ref=e2988]
+              - cell [ref=e2989]
+              - cell [ref=e2990]
+              - cell "2023-01-03 22:44" [ref=e2991]
+              - cell [ref=e2992]:
+                - button "Drill" [ref=e2993] [cursor=pointer]
+                - 'button "{ }" [ref=e2994] [cursor=pointer]'
+            - row [ref=e2995]:
+              - cell "BigZ08" [ref=e2996]
+              - cell "62" [ref=e2997]
+              - cell "-0.86" [ref=e2998]
+              - cell "3,138.8%" [ref=e2999]
+              - cell "0.325" [ref=e3000]
+              - cell "1.323" [ref=e3001]
+              - cell "181" [ref=e3002]
+              - cell [ref=e3003]
+              - cell [ref=e3004]
+              - cell "2024-07-25 23:13" [ref=e3005]
+              - cell [ref=e3006]:
+                - button "Drill" [ref=e3007] [cursor=pointer]
+                - 'button "{ }" [ref=e3008] [cursor=pointer]'
+            - row [ref=e3009]:
+              - cell "BigZ08" [ref=e3010]
+              - cell "54" [ref=e3011]
+              - cell "-2,065.66" [ref=e3012]
+              - cell "293.5%" [ref=e3013]
+              - cell "0.184" [ref=e3014]
+              - cell "1.36" [ref=e3015]
+              - cell "147" [ref=e3016]
+              - cell [ref=e3017]
+              - cell [ref=e3018]
+              - cell "2024-07-27 10:11" [ref=e3019]
+              - cell [ref=e3020]:
+                - button "Drill" [ref=e3021] [cursor=pointer]
+                - 'button "{ }" [ref=e3022] [cursor=pointer]'
+            - row [ref=e3023]:
+              - cell "OctopusNestStrategy" [ref=e3024]
+              - cell "50" [ref=e3025]
+              - cell "-28.22" [ref=e3026]
+              - cell "1.4%" [ref=e3027]
+              - cell "5.376" [ref=e3028]
+              - cell "1.05" [ref=e3029]
+              - cell "123" [ref=e3030]
+              - cell [ref=e3031]
+              - cell [ref=e3032]
+              - cell "2026-08-21 11:59" [ref=e3033]
+              - cell [ref=e3034]:
+                - button "Drill" [ref=e3035] [cursor=pointer]
+                - 'button "{ }" [ref=e3036] [cursor=pointer]'
+            - row [ref=e3037]:
+              - cell "BigZ08" [ref=e3038]
+              - cell "43" [ref=e3039]
+              - cell "-0.05" [ref=e3040]
+              - cell "38.9%" [ref=e3041]
+              - cell "0.013" [ref=e3042]
+              - cell "1.029" [ref=e3043]
+              - cell "107" [ref=e3044]
+              - cell [ref=e3045]
+              - cell [ref=e3046]
+              - cell "2024-07-25 19:20" [ref=e3047]
+              - cell [ref=e3048]:
+                - button "Drill" [ref=e3049] [cursor=pointer]
+                - 'button "{ }" [ref=e3050] [cursor=pointer]'
+            - row [ref=e3051]:
+              - cell "BigZ08" [ref=e3052]
+              - cell "36" [ref=e3053]
+              - cell "-634.12" [ref=e3054]
+              - cell "278.7%" [ref=e3055]
+              - cell "0.019" [ref=e3056]
+              - cell "1.032" [ref=e3057]
+              - cell "155" [ref=e3058]
+              - cell [ref=e3059]
+              - cell [ref=e3060]
+              - cell "2024-07-27 08:52" [ref=e3061]
+              - cell [ref=e3062]:
+                - button "Drill" [ref=e3063] [cursor=pointer]
+                - 'button "{ }" [ref=e3064] [cursor=pointer]'
+            - row [ref=e3065]:
+              - cell "BigZ08" [ref=e3066]
+              - cell "27" [ref=e3067]
+              - cell "-1.27" [ref=e3068]
+              - cell "243.4%" [ref=e3069]
+              - cell "0.294" [ref=e3070]
+              - cell "1.2" [ref=e3071]
+              - cell "278" [ref=e3072]
+              - cell [ref=e3073]
+              - cell [ref=e3074]
+              - cell "2024-07-22 21:15" [ref=e3075]
+              - cell [ref=e3076]:
+                - button "Drill" [ref=e3077] [cursor=pointer]
+                - 'button "{ }" [ref=e3078] [cursor=pointer]'
+            - row [ref=e3079]:
+              - cell "NWEv6" [ref=e3080]
+              - cell "24" [ref=e3081]
+              - cell "0.5" [ref=e3082]
+              - cell "-33.7%" [ref=e3083]
+              - cell "—" [ref=e3084]
+              - cell "0.977" [ref=e3085]
+              - cell "3,605" [ref=e3086]
+              - cell [ref=e3087]
+              - cell [ref=e3088]
+              - cell "2022-12-17 13:11" [ref=e3089]
+              - cell [ref=e3090]:
+                - button "Drill" [ref=e3091] [cursor=pointer]
+                - 'button "{ }" [ref=e3092] [cursor=pointer]'
+            - row [ref=e3093]:
+              - cell "OctopusNestStrategy" [ref=e3094]
+              - cell "20" [ref=e3095]
+              - cell "129.65" [ref=e3096]
+              - cell "-7.2%" [ref=e3097]
+              - cell "-11.861" [ref=e3098]
+              - cell "0.822" [ref=e3099]
+              - cell "269" [ref=e3100]
+              - cell [ref=e3101]
+              - cell [ref=e3102]
+              - cell "2026-08-21 11:38" [ref=e3103]
+              - cell [ref=e3104]:
+                - button "Drill" [ref=e3105] [cursor=pointer]
+                - 'button "{ }" [ref=e3106] [cursor=pointer]'
+            - row [ref=e3107]:
+              - cell "OctopusNestStrategy" [ref=e3108]
+              - cell "20" [ref=e3109]
+              - cell "22.16" [ref=e3110]
+              - cell "-1.1%" [ref=e3111]
+              - cell "-3.667" [ref=e3112]
+              - cell "0.967" [ref=e3113]
+              - cell "121" [ref=e3114]
+              - cell [ref=e3115]
+              - cell [ref=e3116]
+              - cell "2026-08-21 11:45" [ref=e3117]
+              - cell [ref=e3118]:
+                - button "Drill" [ref=e3119] [cursor=pointer]
+                - 'button "{ }" [ref=e3120] [cursor=pointer]'
+            - row [ref=e3121]:
+              - cell "BigZ08" [ref=e3122]
+              - cell "18" [ref=e3123]
+              - cell "0.05" [ref=e3124]
+              - cell "-38%" [ref=e3125]
+              - cell "-0.012" [ref=e3126]
+              - cell "0.97" [ref=e3127]
+              - cell "104" [ref=e3128]
+              - cell [ref=e3129]
+              - cell [ref=e3130]
+              - cell "2024-07-25 18:12" [ref=e3131]
+              - cell [ref=e3132]:
+                - button "Drill" [ref=e3133] [cursor=pointer]
+                - 'button "{ }" [ref=e3134] [cursor=pointer]'
+            - row [ref=e3135]:
+              - cell "BigZ08" [ref=e3136]
+              - cell "10" [ref=e3137]
+              - cell "-2.68" [ref=e3138]
+              - cell "1,247.8%" [ref=e3139]
+              - cell "0.268" [ref=e3140]
+              - cell "1.44" [ref=e3141]
+              - cell "143" [ref=e3142]
+              - cell [ref=e3143]
+              - cell [ref=e3144]
+              - cell "2024-07-23 12:50" [ref=e3145]
+              - cell [ref=e3146]:
+                - button "Drill" [ref=e3147] [cursor=pointer]
+                - 'button "{ }" [ref=e3148] [cursor=pointer]'
+            - row [ref=e3149]:
+              - cell "OctopusNestStrategy" [ref=e3150]
+              - cell "10" [ref=e3151]
+              - cell "1,825.58" [ref=e3152]
+              - cell "-91.3%" [ref=e3153]
+              - cell "-1.761" [ref=e3154]
+              - cell "0.948" [ref=e3155]
+              - cell "6,944" [ref=e3156]
+              - cell [ref=e3157]
+              - cell [ref=e3158]
+              - cell "2026-08-22 14:44" [ref=e3159]
+              - cell [ref=e3160]:
+                - button "Drill" [ref=e3161] [cursor=pointer]
+                - 'button "{ }" [ref=e3162] [cursor=pointer]'
+            - row [ref=e3163]:
+              - cell "OctopusNestStrategy" [ref=e3164]
+              - cell "10" [ref=e3165]
+              - cell "-0" [ref=e3166]
+              - cell "-86.7%" [ref=e3167]
+              - cell "-1.878" [ref=e3168]
+              - cell "0.954" [ref=e3169]
+              - cell "7,846" [ref=e3170]
+              - cell [ref=e3171]
+              - cell [ref=e3172]
+              - cell "2026-08-23 18:02" [ref=e3173]
+              - cell [ref=e3174]:
+                - button "Drill" [ref=e3175] [cursor=pointer]
+                - 'button "{ }" [ref=e3176] [cursor=pointer]'
+            - row [ref=e3177]:
+              - cell "OctopusNestStrategy" [ref=e3178]
+              - cell "8" [ref=e3179]
+              - cell "1,872.35" [ref=e3180]
+              - cell "-93.6%" [ref=e3181]
+              - cell "-3.257" [ref=e3182]
+              - cell "0.922" [ref=e3183]
+              - cell "8,390" [ref=e3184]
+              - cell [ref=e3185]
+              - cell [ref=e3186]
+              - cell "2026-08-22 15:17" [ref=e3187]
+              - cell [ref=e3188]:
+                - button "Drill" [ref=e3189] [cursor=pointer]
+                - 'button "{ }" [ref=e3190] [cursor=pointer]'
+            - row [ref=e3191]:
+              - cell "BigZ08" [ref=e3192]
+              - cell "5" [ref=e3193]
+              - cell "0.01" [ref=e3194]
+              - cell "-8.6%" [ref=e3195]
+              - cell "-0.015" [ref=e3196]
+              - cell "0.987" [ref=e3197]
+              - cell "222" [ref=e3198]
+              - cell [ref=e3199]
+              - cell [ref=e3200]
+              - cell "2024-07-22 20:10" [ref=e3201]
+              - cell [ref=e3202]:
+                - button "Drill" [ref=e3203] [cursor=pointer]
+                - 'button "{ }" [ref=e3204] [cursor=pointer]'
+            - row [ref=e3205]:
+              - cell "OctopusNestStrategy" [ref=e3206]
+              - cell "5" [ref=e3207]
+              - cell "141.2" [ref=e3208]
+              - cell "-15.5%" [ref=e3209]
+              - cell "-0.196" [ref=e3210]
+              - cell "0.981" [ref=e3211]
+              - cell "1,014" [ref=e3212]
+              - cell [ref=e3213]
+              - cell [ref=e3214]
+              - cell "2026-08-20 16:14" [ref=e3215]
+              - cell [ref=e3216]:
+                - button "Drill" [ref=e3217] [cursor=pointer]
+                - 'button "{ }" [ref=e3218] [cursor=pointer]'
+            - row [ref=e3219]:
+              - cell "OctopusNestStrategy" [ref=e3220]
+              - cell "5" [ref=e3221]
+              - cell "222.25" [ref=e3222]
+              - cell "-26.6%" [ref=e3223]
+              - cell "-0.354" [ref=e3224]
+              - cell "0.965" [ref=e3225]
+              - cell "1,091" [ref=e3226]
+              - cell [ref=e3227]
+              - cell [ref=e3228]
+              - cell "2026-08-20 16:28" [ref=e3229]
+              - cell [ref=e3230]:
+                - button "Drill" [ref=e3231] [cursor=pointer]
+                - 'button "{ }" [ref=e3232] [cursor=pointer]'
+            - row [ref=e3233]:
+              - cell "OctopusNestStrategy" [ref=e3234]
+              - cell "5" [ref=e3235]
+              - cell "412.05" [ref=e3236]
+              - cell "-54.4%" [ref=e3237]
+              - cell "-1.196" [ref=e3238]
+              - cell "0.905" [ref=e3239]
+              - cell "991" [ref=e3240]
+              - cell [ref=e3241]
+              - cell [ref=e3242]
+              - cell "2026-08-21 11:11" [ref=e3243]
+              - cell [ref=e3244]:
+                - button "Drill" [ref=e3245] [cursor=pointer]
+                - 'button "{ }" [ref=e3246] [cursor=pointer]'
+            - row [ref=e3247]:
+              - cell "OctopusNestStrategy" [ref=e3248]
+              - cell "5" [ref=e3249]
+              - cell "131.18" [ref=e3250]
+              - cell "-13.9%" [ref=e3251]
+              - cell "-0.161" [ref=e3252]
+              - cell "0.98" [ref=e3253]
+              - cell "1,312" [ref=e3254]
+              - cell [ref=e3255]
+              - cell [ref=e3256]
+              - cell "2026-08-21 11:21" [ref=e3257]
+              - cell [ref=e3258]:
+                - button "Drill" [ref=e3259] [cursor=pointer]
+                - 'button "{ }" [ref=e3260] [cursor=pointer]'
+            - row [ref=e3261]:
+              - cell "BigZ08" [ref=e3262]
+              - cell "4" [ref=e3263]
+              - cell "0.07" [ref=e3264]
+              - cell "-98.3%" [ref=e3265]
+              - cell "-0.023" [ref=e3266]
+              - cell "0.972" [ref=e3267]
+              - cell "247" [ref=e3268]
+              - cell [ref=e3269]
+              - cell [ref=e3270]
+              - cell "2024-07-24 18:32" [ref=e3271]
+              - cell [ref=e3272]:
+                - button "Drill" [ref=e3273] [cursor=pointer]
+                - 'button "{ }" [ref=e3274] [cursor=pointer]'
+            - row [ref=e3275]:
+              - cell "BigZ08" [ref=e3276]
+              - cell "4" [ref=e3277]
+              - cell "0.15" [ref=e3278]
+              - cell "-46.6%" [ref=e3279]
+              - cell "-0.053" [ref=e3280]
+              - cell "0.894" [ref=e3281]
+              - cell "118" [ref=e3282]
+              - cell [ref=e3283]
+              - cell [ref=e3284]
+              - cell "2024-07-26 07:13" [ref=e3285]
+              - cell [ref=e3286]:
+                - button "Drill" [ref=e3287] [cursor=pointer]
+                - 'button "{ }" [ref=e3288] [cursor=pointer]'
+            - row [ref=e3289]:
+              - cell "BigZ08" [ref=e3290]
+              - cell "3" [ref=e3291]
+              - cell "-0.03" [ref=e3292]
+              - cell "3.7%" [ref=e3293]
+              - cell "0.008" [ref=e3294]
+              - cell "1.013" [ref=e3295]
+              - cell "59" [ref=e3296]
+              - cell [ref=e3297]
+              - cell [ref=e3298]
+              - cell "2024-07-22 22:19" [ref=e3299]
+              - cell [ref=e3300]:
+                - button "Drill" [ref=e3301] [cursor=pointer]
+                - 'button "{ }" [ref=e3302] [cursor=pointer]'
+            - row [ref=e3303]:
+              - cell "BigZ08" [ref=e3304]
+              - cell "2" [ref=e3305]
+              - cell "0.78" [ref=e3306]
+              - cell "-99.9%" [ref=e3307]
+              - cell "-0.352" [ref=e3308]
+              - cell "0.824" [ref=e3309]
+              - cell "248" [ref=e3310]
+              - cell [ref=e3311]
+              - cell [ref=e3312]
+              - cell "2024-07-25 13:04" [ref=e3313]
+              - cell [ref=e3314]:
+                - button "Drill" [ref=e3315] [cursor=pointer]
+                - 'button "{ }" [ref=e3316] [cursor=pointer]'
+            - row [ref=e3317]:
+              - cell "OctopusNestStrategy" [ref=e3318]
+              - cell "2" [ref=e3319]
+              - cell "260.86" [ref=e3320]
+              - cell "-20.4%" [ref=e3321]
+              - cell "-0.659" [ref=e3322]
+              - cell "0.964" [ref=e3323]
+              - cell "1,260" [ref=e3324]
+              - cell [ref=e3325]
+              - cell [ref=e3326]
+              - cell "2026-08-21 10:57" [ref=e3327]
+              - cell [ref=e3328]:
+                - button "Drill" [ref=e3329] [cursor=pointer]
+                - 'button "{ }" [ref=e3330] [cursor=pointer]'
+            - row [ref=e3331]:
+              - cell "OctopusNestHyperoptDiagnostic" [ref=e3332]
+              - cell "1" [ref=e3333]
+              - cell "395.63" [ref=e3334]
+              - cell "-19.8%" [ref=e3335]
+              - cell "-100" [ref=e3336]
+              - cell "0" [ref=e3337]
+              - cell "1" [ref=e3338]
+              - cell [ref=e3339]
+              - cell [ref=e3340]
+              - cell "2026-08-21 10:48" [ref=e3341]
+              - cell [ref=e3342]:
+                - button "Drill" [ref=e3343] [cursor=pointer]
+                - 'button "{ }" [ref=e3344] [cursor=pointer]'
+            - row [ref=e3345]:
+              - cell "OctopusNestHyperoptDiagnostic" [ref=e3346]
+              - cell "1" [ref=e3347]
+              - cell "394.99" [ref=e3348]
+              - cell "-19.7%" [ref=e3349]
+              - cell "-100" [ref=e3350]
+              - cell "0" [ref=e3351]
+              - cell "1" [ref=e3352]
+              - cell [ref=e3353]
+              - cell [ref=e3354]
+              - cell "2026-08-21 10:49" [ref=e3355]
+              - cell [ref=e3356]:
+                - button "Drill" [ref=e3357] [cursor=pointer]
+                - 'button "{ }" [ref=e3358] [cursor=pointer]'
+            - row [ref=e3359]:
+              - cell "OctopusNestHyperoptDiagnostic" [ref=e3360]
+              - cell "1" [ref=e3361]
+              - cell "79.6" [ref=e3362]
+              - cell "-4%" [ref=e3363]
+              - cell "-100" [ref=e3364]
+              - cell "0" [ref=e3365]
+              - cell "1" [ref=e3366]
+              - cell [ref=e3367]
+              - cell [ref=e3368]
+              - cell "2026-08-21 10:50" [ref=e3369]
+              - cell [ref=e3370]:
+                - button "Drill" [ref=e3371] [cursor=pointer]
+                - 'button "{ }" [ref=e3372] [cursor=pointer]'
+            - row [ref=e3373]:
+              - cell "OctopusNestStrategy" [ref=e3374]
+              - cell "1" [ref=e3375]
+              - cell "-28.41" [ref=e3376]
+              - cell "1.4%" [ref=e3377]
+              - cell "197.287" [ref=e3378]
+              - cell "1.855" [ref=e3379]
+              - cell "7" [ref=e3380]
+              - cell [ref=e3381]
+              - cell [ref=e3382]
+              - cell "2026-08-20 14:54" [ref=e3383]
+              - cell [ref=e3384]:
+                - button "Drill" [ref=e3385] [cursor=pointer]
+                - 'button "{ }" [ref=e3386] [cursor=pointer]'
+            - row [ref=e3387]:
+              - cell "OctopusNestStrategy" [ref=e3388]
+              - cell "1" [ref=e3389]
+              - cell "-26.85" [ref=e3390]
+              - cell "1.3%" [ref=e3391]
+              - cell "-100" [ref=e3392]
+              - cell "0" [ref=e3393]
+              - cell "2" [ref=e3394]
+              - cell [ref=e3395]
+              - cell [ref=e3396]
+              - cell "2026-08-20 14:55" [ref=e3397]
+              - cell [ref=e3398]:
+                - button "Drill" [ref=e3399] [cursor=pointer]
+                - 'button "{ }" [ref=e3400] [cursor=pointer]'
+            - row [ref=e3401]:
+              - cell "OctopusNestStrategy" [ref=e3402]
+              - cell "1" [ref=e3403]
+              - cell "-4.75" [ref=e3404]
+              - cell "0.2%" [ref=e3405]
+              - cell "9.389" [ref=e3406]
+              - cell "1.122" [ref=e3407]
+              - cell "7" [ref=e3408]
+              - cell [ref=e3409]
+              - cell [ref=e3410]
+              - cell "2026-08-20 14:56" [ref=e3411]
+              - cell [ref=e3412]:
+                - button "Drill" [ref=e3413] [cursor=pointer]
+                - 'button "{ }" [ref=e3414] [cursor=pointer]'
+            - row [ref=e3415]:
+              - cell "OctopusNestStrategy" [ref=e3416]
+              - cell "1" [ref=e3417]
+              - cell "-26.85" [ref=e3418]
+              - cell "1.3%" [ref=e3419]
+              - cell "-100" [ref=e3420]
+              - cell "0" [ref=e3421]
+              - cell "2" [ref=e3422]
+              - cell [ref=e3423]
+              - cell [ref=e3424]
+              - cell "2026-08-20 14:57" [ref=e3425]
+              - cell [ref=e3426]:
+                - button "Drill" [ref=e3427] [cursor=pointer]
+                - 'button "{ }" [ref=e3428] [cursor=pointer]'
+            - row [ref=e3429]:
+              - cell "OctopusNestStrategy" [ref=e3430]
+              - cell "1" [ref=e3431]
+              - cell "245.34" [ref=e3432]
+              - cell "-19.6%" [ref=e3433]
+              - cell "-1.035" [ref=e3434]
+              - cell "0.964" [ref=e3435]
+              - cell "958" [ref=e3436]
+              - cell [ref=e3437]
+              - cell [ref=e3438]
+              - cell "2026-08-20 15:14" [ref=e3439]
+              - cell [ref=e3440]:
+                - button "Drill" [ref=e3441] [cursor=pointer]
+                - 'button "{ }" [ref=e3442] [cursor=pointer]'
+            - row [ref=e3443]:
+              - cell "OctopusNestStrategy" [ref=e3444]
+              - cell "1" [ref=e3445]
+              - cell "269.93" [ref=e3446]
+              - cell "-22.4%" [ref=e3447]
+              - cell "-1.246" [ref=e3448]
+              - cell "0.959" [ref=e3449]
+              - cell "1,314" [ref=e3450]
+              - cell [ref=e3451]
+              - cell [ref=e3452]
+              - cell "2026-08-20 15:55" [ref=e3453]
+              - cell [ref=e3454]:
+                - button "Drill" [ref=e3455] [cursor=pointer]
+                - 'button "{ }" [ref=e3456] [cursor=pointer]'
+            - row [ref=e3457]:
+              - cell "OctopusNestStrategy" [ref=e3458]
+              - cell "1" [ref=e3459]
+              - cell "513.52" [ref=e3460]
+              - cell "-50.6%" [ref=e3461]
+              - cell "-5.08" [ref=e3462]
+              - cell "0.832" [ref=e3463]
+              - cell "1,651" [ref=e3464]
+              - cell [ref=e3465]
+              - cell [ref=e3466]
+              - cell "2026-08-20 15:58" [ref=e3467]
+              - cell [ref=e3468]:
+                - button "Drill" [ref=e3469] [cursor=pointer]
+                - 'button "{ }" [ref=e3470] [cursor=pointer]'
+            - row [ref=e3471]:
+              - cell "OctopusNestStrategy" [ref=e3472]
+              - cell "1" [ref=e3473]
+              - cell "487.37" [ref=e3474]
+              - cell "-37.5%" [ref=e3475]
+              - cell "-7.028" [ref=e3476]
+              - cell "0.831" [ref=e3477]
+              - cell "1,625" [ref=e3478]
+              - cell [ref=e3479]
+              - cell [ref=e3480]
+              - cell "2026-08-20 16:31" [ref=e3481]
+              - cell [ref=e3482]:
+                - button "Drill" [ref=e3483] [cursor=pointer]
+                - 'button "{ }" [ref=e3484] [cursor=pointer]'
+            - row [ref=e3485]:
+              - cell "OctopusNestStrategy" [ref=e3486]
+              - cell "1" [ref=e3487]
+              - cell "145.39" [ref=e3488]
+              - cell "-7.3%" [ref=e3489]
+              - cell "-0.099" [ref=e3490]
+              - cell "0.972" [ref=e3491]
+              - cell "495" [ref=e3492]
+              - cell [ref=e3493]
+              - cell [ref=e3494]
+              - cell "2026-08-20 16:33" [ref=e3495]
+              - cell [ref=e3496]:
+                - button "Drill" [ref=e3497] [cursor=pointer]
+                - 'button "{ }" [ref=e3498] [cursor=pointer]'
+            - row [ref=e3499]:
+              - cell "OctopusNestStrategy" [ref=e3500]
+              - cell "1" [ref=e3501]
+              - cell "241.47" [ref=e3502]
+              - cell "-12.1%" [ref=e3503]
+              - cell "-8.863" [ref=e3504]
+              - cell "0.759" [ref=e3505]
+              - cell "124" [ref=e3506]
+              - cell [ref=e3507]
+              - cell [ref=e3508]
+              - cell "2026-08-20 16:34" [ref=e3509]
+              - cell [ref=e3510]:
+                - button "Drill" [ref=e3511] [cursor=pointer]
+                - 'button "{ }" [ref=e3512] [cursor=pointer]'
+            - row [ref=e3513]:
+              - cell "OctopusNestStrategy" [ref=e3514]
+              - cell "1" [ref=e3515]
+              - cell "233.73" [ref=e3516]
+              - cell "-11.7%" [ref=e3517]
+              - cell "-6.926" [ref=e3518]
+              - cell "0.759" [ref=e3519]
+              - cell "127" [ref=e3520]
+              - cell [ref=e3521]
+              - cell [ref=e3522]
+              - cell "2026-08-20 16:35" [ref=e3523]
+              - cell [ref=e3524]:
+                - button "Drill" [ref=e3525] [cursor=pointer]
+                - 'button "{ }" [ref=e3526] [cursor=pointer]'
+            - row [ref=e3527]:
+              - cell "OctopusNestStrategy" [ref=e3528]
+              - cell "1" [ref=e3529]
+              - cell "19.23" [ref=e3530]
+              - cell "-1%" [ref=e3531]
+              - cell "-0.895" [ref=e3532]
+              - cell "0.983" [ref=e3533]
+              - cell "122" [ref=e3534]
+              - cell [ref=e3535]
+              - cell [ref=e3536]
+              - cell "2026-08-21 10:51" [ref=e3537]
+              - cell [ref=e3538]:
+                - button "Drill" [ref=e3539] [cursor=pointer]
+                - 'button "{ }" [ref=e3540] [cursor=pointer]'
+            - row [ref=e3541]:
+              - cell "OctopusNestStrategy" [ref=e3542]
+              - cell "1" [ref=e3543]
+              - cell "464.06" [ref=e3544]
+              - cell "-34.2%" [ref=e3545]
+              - cell "-14.337" [ref=e3546]
+              - cell "0.77" [ref=e3547]
+              - cell "1,702" [ref=e3548]
+              - cell [ref=e3549]
+              - cell [ref=e3550]
+              - cell "2026-08-21 10:58" [ref=e3551]
+              - cell [ref=e3552]:
+                - button "Drill" [ref=e3553] [cursor=pointer]
+                - 'button "{ }" [ref=e3554] [cursor=pointer]'
+            - row [ref=e3555]:
+              - cell "OctopusNestStrategy" [ref=e3556]
+              - cell "1" [ref=e3557]
+              - cell "439.51" [ref=e3558]
+              - cell "-22%" [ref=e3559]
+              - cell "-1.158" [ref=e3560]
+              - cell "0.91" [ref=e3561]
+              - cell "409" [ref=e3562]
+              - cell [ref=e3563]
+              - cell [ref=e3564]
+              - cell "2026-08-21 11:23" [ref=e3565]
+              - cell [ref=e3566]:
+                - button "Drill" [ref=e3567] [cursor=pointer]
+                - 'button "{ }" [ref=e3568] [cursor=pointer]'
+            - row [ref=e3569]:
+              - cell "OctopusNestStrategy" [ref=e3570]
+              - cell "1" [ref=e3571]
+              - cell "547.87" [ref=e3572]
+              - cell "-27.4%" [ref=e3573]
+              - cell "-11.062" [ref=e3574]
+              - cell "0.64" [ref=e3575]
+              - cell "615" [ref=e3576]
+              - cell [ref=e3577]
+              - cell [ref=e3578]
+              - cell "2026-08-21 11:23" [ref=e3579]
+              - cell [ref=e3580]:
+                - button "Drill" [ref=e3581] [cursor=pointer]
+                - 'button "{ }" [ref=e3582] [cursor=pointer]'
+            - row [ref=e3583]:
+              - cell "TrendOMaticDoubleSupertrendStrategy" [ref=e3584]
+              - cell "1" [ref=e3585]
+              - cell "4.58" [ref=e3586]
+              - cell "-0.5%" [ref=e3587]
+              - cell "-100" [ref=e3588]
+              - cell "0.183" [ref=e3589]
+              - cell "2" [ref=e3590]
+              - cell [ref=e3591]
+              - cell [ref=e3592]
+              - cell "2026-08-20 14:58" [ref=e3593]
+              - cell [ref=e3594]:
+                - button "Drill" [ref=e3595] [cursor=pointer]
+                - 'button "{ }" [ref=e3596] [cursor=pointer]'
+            - row [ref=e3597]:
+              - cell "TrendOMaticHPHSuperKeltnerStrategy" [ref=e3598]
+              - cell "1" [ref=e3599]
+              - cell "5.46" [ref=e3600]
+              - cell "-0.5%" [ref=e3601]
+              - cell "-100" [ref=e3602]
+              - cell "0.315" [ref=e3603]
+              - cell "2" [ref=e3604]
+              - cell [ref=e3605]
+              - cell [ref=e3606]
+              - cell "2026-08-20 14:58" [ref=e3607]
+              - cell [ref=e3608]:
+                - button "Drill" [ref=e3609] [cursor=pointer]
+                - 'button "{ }" [ref=e3610] [cursor=pointer]'
+            - row [ref=e3611]:
+              - cell "TrendOMaticNadarayaStrategy" [ref=e3612]
+              - cell "1" [ref=e3613]
+              - cell "100,000" [ref=e3614]
+              - cell "0%" [ref=e3615]
+              - cell "0" [ref=e3616]
+              - cell "0" [ref=e3617]
+              - cell "0" [ref=e3618]
+              - cell [ref=e3619]
+              - cell [ref=e3620]
+              - cell "2026-08-20 14:57" [ref=e3621]
+              - cell [ref=e3622]:
+                - button "Drill" [ref=e3623] [cursor=pointer]
+                - 'button "{ }" [ref=e3624] [cursor=pointer]'
+            - row [ref=e3625]:
+              - cell "TrendOMaticVHFStrategy" [ref=e3626]
+              - cell "1" [ref=e3627]
+              - cell "-6.12" [ref=e3628]
+              - cell "0.6%" [ref=e3629]
+              - cell "-100" [ref=e3630]
+              - cell "5.976" [ref=e3631]
+              - cell "2" [ref=e3632]
+              - cell [ref=e3633]
+              - cell [ref=e3634]
+              - cell "2026-08-20 14:51" [ref=e3635]
+              - cell [ref=e3636]:
+                - button "Drill" [ref=e3637] [cursor=pointer]
+                - 'button "{ }" [ref=e3638] [cursor=pointer]'
+            - row [ref=e3639]:
+              - cell "TrendOMaticVixFixStrategy" [ref=e3640]
+              - cell "1" [ref=e3641]
+              - cell "100,000" [ref=e3642]
+              - cell "0%" [ref=e3643]
+              - cell "0" [ref=e3644]
+              - cell "0" [ref=e3645]
+              - cell "0" [ref=e3646]
+              - cell [ref=e3647]
+              - cell [ref=e3648]
+              - cell "2026-08-20 14:59" [ref=e3649]
+              - cell [ref=e3650]:
+                - button "Drill" [ref=e3651] [cursor=pointer]
+                - 'button "{ }" [ref=e3652] [cursor=pointer]'
+            - row [ref=e3653]:
+              - cell "TrendOMaticWildersStrategy" [ref=e3654]
+              - cell "1" [ref=e3655]
+              - cell "100,000" [ref=e3656]
+              - cell "0%" [ref=e3657]
+              - cell "0" [ref=e3658]
+              - cell "0" [ref=e3659]
+              - cell "0" [ref=e3660]
+              - cell [ref=e3661]
+              - cell [ref=e3662]
+              - cell "2026-08-20 14:58" [ref=e3663]
+              - cell [ref=e3664]:
+                - button "Drill" [ref=e3665] [cursor=pointer]
+                - 'button "{ }" [ref=e3666] [cursor=pointer]'
+      - paragraph [ref=e3667]:
+        - text: "Full analysis offline:"
+        - code [ref=e3668]: python user_data/scripts/analyze_hyperopt.py --results user_data/hyperopt_results/strategy_X.fthypt --top 15 --best-params 5
+  - complementary [ref=e867]:
+    - generic [ref=e868]:
+      - generic [ref=e3736]: BigZ06
+      - generic [ref=e3737]: hyperopt
+      - generic [ref=e3738]: rategy_BigZ06_2022-12-10_11-24-13.fthypt
+      - button [ref=e3739] [cursor=pointer]: ✕ Close
+    - generic [ref=e869]:
+      - button [ref=e3740] [cursor=pointer]: Overview
+      - button [ref=e3741] [cursor=pointer]: Config
+      - button [ref=e3742] [cursor=pointer]: Code
+      - button [ref=e3743] [cursor=pointer]: Params
+    - generic [ref=e3744]:
+      - generic [ref=e3745]:
+        - generic [ref=e3746]: code current*
+        - generic [ref=e3747]:
+          - text: snapshot 0d438f83bfa1… · 2024-01-07 02:19 ·
+          - code [ref=e3748]: M:\Documents\Programming\Python\freqtrade\user_data\strategies_legacy\backup\BigZ06.py
+      - generic [ref=e3749]:
+        - button [ref=e3750] [cursor=pointer]: View snapshot source
+        - text: (loads via server)
+  - contentinfo [ref=e871]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

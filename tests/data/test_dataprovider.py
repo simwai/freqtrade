@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -8,7 +8,8 @@ from freqtrade.data.dataprovider import DataProvider
 from freqtrade.enums import CandleType, RunMode
 from freqtrade.exceptions import ExchangeError, OperationalException
 from freqtrade.plugins.pairlistmanager import PairListManager
-from tests.conftest import EXMS, generate_test_data, get_patched_exchange
+from freqtrade.util import dt_utc
+from tests.conftest import EXMS, generate_test_data, get_patched_exchange, log_has_re
 
 
 @pytest.mark.parametrize(
@@ -184,6 +185,36 @@ def test_get_pair_dataframe(mocker, default_conf, ohlcv_history, candle_type):
     assert len(df) == 2  # ohlcv_history is limited to 2 rows now
 
 
+def test_get_pair_dataframe_funding_rate(mocker, default_conf, ohlcv_history, caplog):
+    default_conf["runmode"] = RunMode.DRY_RUN
+    timeframe = "1h"
+    exchange = get_patched_exchange(mocker, default_conf)
+    candletype = CandleType.FUNDING_RATE
+    # Funding rate data carries a single value, plus "open" as backwards-compat alias
+    funding_history = DataFrame(
+        {
+            "date": ohlcv_history["date"],
+            "funding_rate": ohlcv_history["open"],
+            "open": ohlcv_history["open"],
+        }
+    )
+    exchange._klines[("XRP/BTC", timeframe, candletype)] = funding_history
+    exchange._klines[("UNITTEST/BTC", timeframe, candletype)] = funding_history
+
+    dp = DataProvider(default_conf, exchange)
+    assert dp.runmode == RunMode.DRY_RUN
+    res = dp.get_pair_dataframe("UNITTEST/BTC", timeframe, candle_type="funding_rate")
+    assert funding_history.equals(res)
+    assert list(res.columns) == ["date", "funding_rate", "open"]
+    msg = r".*funding rate timeframe not matching"
+    assert not log_has_re(msg, caplog)
+
+    assert funding_history.equals(
+        dp.get_pair_dataframe("UNITTEST/BTC", "5h", candle_type="funding_rate")
+    )
+    assert log_has_re(msg, caplog)
+
+
 def test_available_pairs(mocker, default_conf, ohlcv_history):
     exchange = get_patched_exchange(mocker, default_conf)
     timeframe = default_conf["timeframe"]
@@ -222,8 +253,8 @@ def test_get_producer_df(default_conf):
     timeframe = default_conf["timeframe"]
     candle_type = CandleType.SPOT
 
-    empty_la = datetime.fromtimestamp(0, tz=timezone.utc)
-    now = datetime.now(timezone.utc)
+    empty_la = datetime.fromtimestamp(0, tz=UTC)
+    now = datetime.now(UTC)
 
     # no data has been added, any request should return an empty dataframe
     dataframe, la = dataprovider.get_producer_df(pair, timeframe, candle_type)
@@ -404,7 +435,7 @@ def test_get_analyzed_dataframe(mocker, default_conf, ohlcv_history):
     dataframe, time = dp.get_analyzed_dataframe("NOTHING/BTC", timeframe)
     assert dataframe.empty
     assert isinstance(time, datetime)
-    assert time == datetime(1970, 1, 1, tzinfo=timezone.utc)
+    assert time == datetime(1970, 1, 1, tzinfo=UTC)
 
     # Test backtest mode
     default_conf["runmode"] = RunMode.BACKTEST
@@ -449,6 +480,12 @@ def test_no_exchange_mode(default_conf):
     with pytest.raises(OperationalException, match=message):
         dp.available_pairs()
 
+    with pytest.raises(OperationalException, match=message):
+        dp.funding_rate("XRP/USDT:USDT")
+
+    with pytest.raises(OperationalException, match=message):
+        dp.check_delisting("XRP/USDT")
+
 
 def test_dp_send_msg(default_conf):
     default_conf["runmode"] = RunMode.DRY_RUN
@@ -478,7 +515,7 @@ def test_dp__add_external_df(default_conf_usdt):
     default_conf_usdt["timeframe"] = timeframe
     dp = DataProvider(default_conf_usdt, None)
     df = generate_test_data(timeframe, 24, "2022-01-01 00:00:00+00:00")
-    last_analyzed = datetime.now(timezone.utc)
+    last_analyzed = datetime.now(UTC)
 
     res = dp._add_external_df("ETH/USDT", df, last_analyzed, timeframe, CandleType.SPOT)
     assert res[0] is False
@@ -612,3 +649,38 @@ def test_dp_get_required_startup(default_conf_usdt):
     assert dp.get_required_startup("5m") == 51880
     assert dp.get_required_startup("1h") == 4360
     assert dp.get_required_startup("1d") == 220
+
+
+def test_check_delisting(mocker, default_conf_usdt):
+    delist_mock = MagicMock(return_value=None)
+    exchange = get_patched_exchange(mocker, default_conf_usdt)
+    mocker.patch.object(exchange, "check_delisting_time", delist_mock)
+    dp = DataProvider(default_conf_usdt, exchange)
+    res = dp.check_delisting("ETH/USDT")
+    assert res is None
+    assert delist_mock.call_count == 1
+
+    delist_mock2 = MagicMock(return_value=dt_utc(2025, 10, 2))
+    mocker.patch.object(exchange, "check_delisting_time", delist_mock2)
+    res = dp.check_delisting("XRP/USDT")
+    assert res == dt_utc(2025, 10, 2)
+
+    assert delist_mock2.call_count == 1
+
+
+def test_get_funding_rate_timeframe(mocker, default_conf_usdt):
+    default_conf_usdt["trading_mode"] = "futures"
+    default_conf_usdt["margin_mode"] = "isolated"
+    exchange = get_patched_exchange(mocker, default_conf_usdt)
+    mock_get_option = mocker.spy(exchange, "get_option")
+    dp = DataProvider(default_conf_usdt, exchange)
+
+    assert dp.get_funding_rate_timeframe() == "1h"
+    mock_get_option.assert_called_once_with("funding_fee_timeframe")
+
+
+def test_get_funding_rate_timeframe_no_exchange(default_conf_usdt):
+    dp = DataProvider(default_conf_usdt, None)
+
+    with pytest.raises(OperationalException, match=r"Exchange is not available to DataProvider."):
+        dp.get_funding_rate_timeframe()

@@ -76,7 +76,9 @@ _JOB_QUEUE: collections.deque = collections.deque()  # (job_id, cmds, single_fli
 _QUEUE_CV = threading.Condition()
 _QUEUE_THREAD: threading.Thread | None = None
 _REFRESH_LOCK = threading.Lock()
-_REFRESH_JOB_ACTIVE = [False]  # tracks if a refresh/report job is queued or running (list for mutability)
+_REFRESH_JOB_ACTIVE = [
+    False
+]  # tracks if a refresh/report job is queued or running (list for mutability)
 _KEEP_FINISHED_JOBS = 30  # finished jobs kept in the registry before eviction
 
 # Dry-run registry: a long-lived detached freqtrade trade process is intentionally
@@ -388,9 +390,7 @@ def _find_dryrun_stop_target(
         return requested_id, meta
     with _DRYRUN_LOCK:
         candidates = [
-            (key, value)
-            for key, value in _DRYRUN.items()
-            if _pid_alive(int(value.get("pid") or 0))
+            (key, value) for key, value in _DRYRUN.items() if _pid_alive(int(value.get("pid") or 0))
         ]
     if not candidates and not requested_id:
         raise ValueError("no active dry run")
@@ -556,7 +556,7 @@ def start_sequence(name: str, cmds: list[list[str]], single_flight: bool = False
 
 def _start_sequence_locked(name: str, cmds: list[list[str]], single_flight: bool = False) -> str:
     """Internal version of start_sequence that assumes JOB_LOCK is already held.
-    
+
     This avoids deadlock when called from API handlers that already hold JOB_LOCK.
     """
     date_str = time.strftime("%Y%m%d")
@@ -621,7 +621,7 @@ def _run_sequence(job_id: str, cmds: list[list[str]], single_flight: bool) -> No
                     JOBS[job_id]["finished"] = time.time()
                     job_name = JOBS[job_id].get("name", "")
                     if job_name in ("report-refresh", "report"):
-                                                _REFRESH_JOB_ACTIVE[0] = False
+                        _REFRESH_JOB_ACTIVE[0] = False
                     return
                 JOBS[job_id]["status"] = "running"
                 JOBS[job_id]["step"] = f"{idx + 1}/{len(cmds)}"
@@ -643,7 +643,7 @@ def _run_sequence(job_id: str, cmds: list[list[str]], single_flight: bool) -> No
                     JOBS[job_id]["finished"] = time.time()
                     job_name = JOBS[job_id].get("name", "")
                     if job_name in ("report-refresh", "report"):
-                                                _REFRESH_JOB_ACTIVE[0] = False
+                        _REFRESH_JOB_ACTIVE[0] = False
                     return
                 if code != 0:
                     JOBS[job_id]["status"] = "error"
@@ -651,7 +651,7 @@ def _run_sequence(job_id: str, cmds: list[list[str]], single_flight: bool) -> No
                     JOBS[job_id]["finished"] = time.time()
                     job_name = JOBS[job_id].get("name", "")
                     if job_name in ("report-refresh", "report"):
-                                                _REFRESH_JOB_ACTIVE[0] = False
+                        _REFRESH_JOB_ACTIVE[0] = False
                     return
         with JOB_LOCK:
             # don't overwrite a stop that raced the final return
@@ -662,7 +662,7 @@ def _run_sequence(job_id: str, cmds: list[list[str]], single_flight: bool) -> No
             JOBS[job_id].pop("pid", None)
             job_name = JOBS[job_id].get("name", "")
             if job_name in ("report-refresh", "report"):
-                                _REFRESH_JOB_ACTIVE[0] = False
+                _REFRESH_JOB_ACTIVE[0] = False
     finally:
         if holds_lock:
             _REFRESH_LOCK.release()
@@ -1388,7 +1388,10 @@ class LabHandler(BaseHTTPRequestHandler):
         if path == "/api/refresh":
             # periodic ingest+report: only queue if no report-refresh job is running or queued
             with JOB_LOCK:
-                print(f"DEBUG /api/refresh: _REFRESH_JOB_ACTIVE={_REFRESH_JOB_ACTIVE[0]}, _REFRESH_LOCK.locked()={_REFRESH_LOCK.locked()}", file=sys.stderr)
+                print(
+                    f"DEBUG /api/refresh: _REFRESH_JOB_ACTIVE={_REFRESH_JOB_ACTIVE[0]}, _REFRESH_LOCK.locked()={_REFRESH_LOCK.locked()}",
+                    file=sys.stderr,
+                )
                 if _REFRESH_JOB_ACTIVE[0] or _REFRESH_LOCK.locked():
                     self._send_json({"skipped": "report-refresh already running or queued"})
                     return
@@ -1406,7 +1409,10 @@ class LabHandler(BaseHTTPRequestHandler):
                 return
         if path == "/api/report":
             with JOB_LOCK:
-                print(f"DEBUG /api/report: _REFRESH_JOB_ACTIVE={_REFRESH_JOB_ACTIVE[0]}, _REFRESH_LOCK.locked()={_REFRESH_LOCK.locked()}", file=sys.stderr)
+                print(
+                    f"DEBUG /api/report: _REFRESH_JOB_ACTIVE={_REFRESH_JOB_ACTIVE[0]}, _REFRESH_LOCK.locked()={_REFRESH_LOCK.locked()}",
+                    file=sys.stderr,
+                )
                 if _REFRESH_JOB_ACTIVE[0] or _REFRESH_LOCK.locked():
                     self._send_json({"skipped": "report already running or queued"})
                     return
@@ -1433,9 +1439,12 @@ class LabHandler(BaseHTTPRequestHandler):
             cmd = [
                 PYTHON,
                 str(SCRIPTS / "benchmark_runner.py"),
-                "--mode", mode,
-                "--timerange", str(timerange),
-                "--timeframe", str(timeframe),
+                "--mode",
+                mode,
+                "--timerange",
+                str(timerange),
+                "--timeframe",
+                str(timeframe),
             ]
             if mode in ("hyperopt", "walkforward"):
                 if body.get("epochs") is not None:
@@ -1942,7 +1951,11 @@ class LabHandler(BaseHTTPRequestHandler):
         # inputs is a list of (param_name, column_name) tuples so we can call
         # the indicator with the original parameter names (e.g. open_ vs open)
         import sys as _sys
-        print(f"DEBUG _indicator_payload: name={name}, spec[inputs]={spec['inputs']}", file=_sys.stderr)
+
+        print(
+            f"DEBUG _indicator_payload: name={name}, spec[inputs]={spec['inputs']}",
+            file=_sys.stderr,
+        )
         kwargs = {pname: df[col] for pname, col in spec["inputs"]}
         print(f"DEBUG _indicator_payload: kwargs={list(kwargs.keys())}", file=_sys.stderr)
         applied_params: dict[str, object] = {}

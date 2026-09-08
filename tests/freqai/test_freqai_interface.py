@@ -8,6 +8,7 @@ import pytest
 from freqtrade.configuration import TimeRange
 from freqtrade.data.dataprovider import DataProvider
 from freqtrade.enums import RunMode
+from freqtrade.exceptions import OperationalException
 from freqtrade.freqai.data_kitchen import FreqaiDataKitchen
 from freqtrade.freqai.utils import download_all_data_for_training, get_required_data_timerange
 from freqtrade.optimize.backtesting import Backtesting
@@ -31,9 +32,6 @@ from tests.freqai.conftest import (
 def can_run_model(model: str) -> None:
     is_pytorch_model = "Reinforcement" in model or "PyTorch" in model
 
-    if is_arm() and "Catboost" in model:
-        pytest.skip("CatBoost is not supported on ARM.")
-
     if is_pytorch_model and is_mac():
         pytest.skip("Reinforcement learning / PyTorch module not available on intel based Mac OS.")
 
@@ -44,7 +42,6 @@ def can_run_model(model: str) -> None:
         ("LightGBMRegressor", True, False, True, True, False, 0, 0),
         ("XGBoostRegressor", False, True, False, True, False, 10, 0.05),
         ("XGBoostRFRegressor", False, False, False, True, False, 0, 0),
-        ("CatboostRegressor", False, False, False, True, True, 0, 0),
         ("PyTorchMLPRegressor", False, False, False, False, False, 0, 0),
         ("PyTorchTransformerRegressor", False, False, False, False, False, 0, 0),
         ("ReinforcementLearner", False, True, False, True, False, 0, 0),
@@ -138,11 +135,10 @@ def test_extract_data_and_train_model_Standard(
     [
         ("LightGBMRegressorMultiTarget", "freqai_test_multimodel_strat"),
         ("XGBoostRegressorMultiTarget", "freqai_test_multimodel_strat"),
-        ("CatboostRegressorMultiTarget", "freqai_test_multimodel_strat"),
         ("LightGBMClassifierMultiTarget", "freqai_test_multimodel_classifier_strat"),
-        ("CatboostClassifierMultiTarget", "freqai_test_multimodel_classifier_strat"),
     ],
 )
+@pytest.mark.filterwarnings(r"ignore:.*__sklearn_tags__.*:DeprecationWarning")
 def test_extract_data_and_train_model_MultiTargets(mocker, freqai_conf, model, strat):
     can_run_model(model)
 
@@ -183,7 +179,6 @@ def test_extract_data_and_train_model_MultiTargets(mocker, freqai_conf, model, s
     "model",
     [
         "LightGBMClassifier",
-        "CatboostClassifier",
         "XGBoostClassifier",
         "XGBoostRFClassifier",
         "SKLearnRandomForestClassifier",
@@ -218,7 +213,7 @@ def test_extract_data_and_train_model_Classifiers(mocker, freqai_conf, model):
         new_timerange, "ADA/BTC", strategy, freqai.dk, data_load_timerange
     )
 
-    if "PyTorchMLPClassifier":
+    if "PyTorch" in model:
         pytorch_mlp_mtp = mock_pytorch_mlp_model_training_parameters()
         freqai_conf["freqai"]["model_training_parameters"].update(pytorch_mlp_mtp)
 
@@ -245,13 +240,11 @@ def test_extract_data_and_train_model_Classifiers(mocker, freqai_conf, model):
     [
         ("LightGBMRegressor", 2, "freqai_test_strat"),
         ("XGBoostRegressor", 2, "freqai_test_strat"),
-        ("CatboostRegressor", 2, "freqai_test_strat"),
         ("PyTorchMLPRegressor", 2, "freqai_test_strat"),
         ("PyTorchTransformerRegressor", 2, "freqai_test_strat"),
         ("ReinforcementLearner", 3, "freqai_rl_test_strat"),
         ("XGBoostClassifier", 2, "freqai_test_classifier"),
         ("LightGBMClassifier", 2, "freqai_test_classifier"),
-        ("CatboostClassifier", 2, "freqai_test_classifier"),
         ("PyTorchMLPClassifier", 2, "freqai_test_classifier"),
     ],
 )
@@ -309,6 +302,63 @@ def test_start_backtesting(mocker, freqai_conf, model, num_files, strat, caplog)
     assert len(model_folders) == num_files
     Trade.use_db = True
     Backtesting.cleanup()
+    shutil.rmtree(Path(freqai.dk.full_path))
+
+
+def test_start_backtesting_appends_null_predictions_when_training_fails(mocker, freqai_conf):
+    freqai_conf.update({"freqaimodel": "LightGBMRegressor"})
+    freqai_conf.update({"timerange": "20180120-20180130"})
+    freqai_conf.update({"strategy": "freqai_test_strat"})
+    freqai_conf.get("freqai", {}).get("feature_parameters", {}).update(
+        {"indicator_periods_candles": [2]}
+    )
+
+    strategy = get_patched_freqai_strategy(mocker, freqai_conf)
+    exchange = get_patched_exchange(mocker, freqai_conf)
+    strategy.dp = DataProvider(freqai_conf, exchange)
+    strategy.freqai_info = freqai_conf.get("freqai", {})
+    freqai = strategy.freqai
+    freqai.live = False
+    freqai.dk = FreqaiDataKitchen(freqai_conf)
+    timerange = TimeRange.parse_timerange("20180110-20180130")
+    freqai.dd.load_all_pair_histories(timerange, freqai.dk)
+    sub_timerange = TimeRange.parse_timerange("20180110-20180130")
+    _, base_df = freqai.dd.get_base_and_corr_dataframes(sub_timerange, "LTC/BTC", freqai.dk)
+    df = base_df[freqai_conf["timeframe"]]
+
+    mocker.patch.object(
+        freqai,
+        "train",
+        side_effect=OperationalException("all training data dropped due to NaNs"),
+    )
+    predict_mock = mocker.patch.object(freqai, "predict")
+
+    metadata = {"pair": "LTC/BTC"}
+    freqai.dk.set_paths("LTC/BTC", None)
+    dk = freqai.start_backtesting(df, metadata, freqai.dk, strategy)
+
+    predict_mock.assert_not_called()
+    assert "do_predict" in dk.return_dataframe
+    assert dk.return_dataframe["do_predict"].eq(0).all()
+
+    # Second run reuses the cached predictions - ensure 2nd backtest run or
+    # API rendering does not trigger training or prediction
+    strategy2 = get_patched_freqai_strategy(mocker, freqai_conf)
+    strategy2.dp = DataProvider(freqai_conf, exchange)
+    strategy2.freqai_info = freqai_conf.get("freqai", {})
+    freqai2 = strategy2.freqai
+    freqai2.live = False
+    freqai2.dk = FreqaiDataKitchen(freqai_conf)
+    freqai2.dd.load_all_pair_histories(timerange, freqai2.dk)
+    train_mock = mocker.patch.object(freqai2, "train")
+    predict_mock2 = mocker.patch.object(freqai2, "predict")
+    freqai2.dk.set_paths("LTC/BTC", None)
+    dk2 = freqai2.start_backtesting(df, metadata, freqai2.dk, strategy2)
+
+    train_mock.assert_not_called()
+    predict_mock2.assert_not_called()
+    assert len(dk2.return_dataframe) == len(df)
+
     shutil.rmtree(Path(freqai.dk.full_path))
 
 

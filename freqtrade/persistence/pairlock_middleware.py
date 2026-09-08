@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Sequence
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 
@@ -42,6 +42,7 @@ class PairLocks:
     ) -> PairLock:
         """
         Create PairLock from now to "until".
+        Doesn't create a new lock if there is already a lock with the same Reason, side and endtime.
         Uses database by default, unless PairLocks.use_db is set to False,
         in which case a list is maintained.
         :param pair: pair to lock. use '*' to lock all pairs
@@ -50,10 +51,19 @@ class PairLocks:
         :param now: Current timestamp. Used to determine lock start time.
         :param side: Side to lock pair, can be 'long', 'short' or '*'
         """
+        lock_end_time = timeframe_to_next_date(PairLocks.timeframe, until)
+        existing_locks = PairLocks.get_pair_locks(pair, now, side=side)
+        for lock in existing_locks:
+            if (
+                lock.reason == reason
+                and lock.lock_end_time_utc == lock_end_time
+                and lock.side == side
+            ):
+                return lock
         lock = PairLock(
             pair=pair,
-            lock_time=now or datetime.now(timezone.utc),
-            lock_end_time=timeframe_to_next_date(PairLocks.timeframe, until),
+            lock_time=now or datetime.now(UTC),
+            lock_end_time=lock_end_time,
             reason=reason,
             side=side,
             active=True,
@@ -77,7 +87,7 @@ class PairLocks:
         :param side: Side get locks for, can be 'long', 'short', '*' or None
         """
         if not now:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
         if PairLocks.use_db:
             return PairLock.query_pair_locks(pair, now, side).all()
@@ -86,7 +96,7 @@ class PairLocks:
                 lock
                 for lock in PairLocks.locks
                 if (
-                    lock.lock_end_time >= now
+                    lock.lock_end_time > now
                     and lock.active is True
                     and (pair is None or lock.pair == pair)
                     and (side is None or lock.side == "*" or lock.side == side)
@@ -114,7 +124,7 @@ class PairLocks:
             defaults to datetime.now(timezone.utc)
         """
         if not now:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
         logger.info(f"Releasing all locks for {pair}.")
         locks = PairLocks.get_pair_locks(pair, now, side=side)
@@ -132,7 +142,7 @@ class PairLocks:
             defaults to datetime.now(timezone.utc)
         """
         if not now:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
         if PairLocks.use_db:
             # used in live modes
@@ -161,7 +171,7 @@ class PairLocks:
             defaults to datetime.now(timezone.utc)
         """
         if not now:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
         return len(PairLocks.get_pair_locks("*", now, side)) > 0
 
@@ -173,7 +183,7 @@ class PairLocks:
             defaults to datetime.now(timezone.utc)
         """
         if not now:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
         return len(PairLocks.get_pair_locks(pair, now, side)) > 0 or PairLocks.is_global_lock(
             now, side

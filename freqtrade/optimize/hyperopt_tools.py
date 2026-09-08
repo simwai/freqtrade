@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Iterator
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -9,7 +9,7 @@ import numpy as np
 import rapidjson
 from pandas import isna, json_normalize
 
-from freqtrade.constants import FTHYPT_FILEVERSION, Config
+from freqtrade.constants import FTHYPT_FILEVERSION, HYPEROPT_BUILTIN_SPACES, Config
 from freqtrade.enums import HyperoptState
 from freqtrade.exceptions import OperationalException
 from freqtrade.misc import deep_merge_dicts, round_dict, safe_value_fallback2
@@ -61,7 +61,7 @@ class HyperoptTools:
         return None
 
     @staticmethod
-    def export_params(params, strategy_name: str, filename: Path):
+    def export_params(params: dict[str, Any], strategy_name: str, filename: Path) -> None:
         """
         Generate files
         """
@@ -71,7 +71,7 @@ class HyperoptTools:
             "strategy_name": strategy_name,
             "params": final_params,
             "ft_stratparam_v": 1,
-            "export_time": datetime.now(timezone.utc),
+            "export_time": datetime.now(UTC),
         }
         logger.info(f"Dumping parameters to {filename}")
         with filename.open("w") as f:
@@ -84,7 +84,7 @@ class HyperoptTools:
             )
 
     @staticmethod
-    def load_params(filename: Path) -> dict:
+    def load_params(filename: Path) -> dict[str, Any]:
         """
         Load parameters from file
         """
@@ -107,55 +107,11 @@ class HyperoptTools:
         """
         Tell if the space value is contained in the configuration
         """
-        # 'trailing' and 'protection spaces are not included in the 'default' set of spaces
+        # The following spaces are not included in the 'default' set of spaces
         if space in ("trailing", "protection", "trades"):
             return any(s in config["spaces"] for s in [space, "all"])
         else:
             return any(s in config["spaces"] for s in [space, "all", "default"])
-
-    @staticmethod
-    def apply_params(config: Config, strategy: Any, result: dict[str, Any]) -> None:
-        """Apply a hyperopt result to a strategy without writing its parameter file."""
-        params_dict = result.get("params_dict", {})
-
-        for category in ("buy", "sell", "protection"):
-            if not HyperoptTools.has_space(config, category):
-                continue
-            for attr_name, attr in strategy.enumerate_parameters(category):
-                if attr_name in params_dict:
-                    attr.value = params_dict[attr_name]
-
-        details = deepcopy(result.get("params_not_optimized", {}))
-        deep_merge_dicts(result.get("params_details", {}), details)
-
-        if roi := details.get("roi"):
-            strategy.minimal_roi = {int(key): value for key, value in roi.items()}
-            config["minimal_roi"] = strategy.minimal_roi
-
-        if stoploss := details.get("stoploss"):
-            strategy.stoploss = float(stoploss["stoploss"])
-            config["stoploss"] = strategy.stoploss
-
-        if trailing := details.get("trailing"):
-            strategy.trailing_stop = trailing["trailing_stop"]
-            strategy.trailing_stop_positive = trailing["trailing_stop_positive"]
-            strategy.trailing_stop_positive_offset = trailing["trailing_stop_positive_offset"]
-            strategy.trailing_only_offset_is_reached = trailing["trailing_only_offset_is_reached"]
-            config.update(
-                {
-                    "trailing_stop": strategy.trailing_stop,
-                    "trailing_stop_positive": strategy.trailing_stop_positive,
-                    "trailing_stop_positive_offset": strategy.trailing_stop_positive_offset,
-                    "trailing_only_offset_is_reached": strategy.trailing_only_offset_is_reached,
-                }
-            )
-
-        if (max_open_trades := details.get("max_open_trades")) is not None:
-            max_trades = max_open_trades["max_open_trades"]
-            if max_trades == -1:
-                max_trades = float("inf")
-            strategy.max_open_trades = max_trades
-            config["max_open_trades"] = max_trades
 
     @staticmethod
     def _read_results(results_file: Path, batch_size: int = 10) -> Iterator[list[Any]]:
@@ -263,21 +219,22 @@ class HyperoptTools:
             print(rapidjson.dumps(result_dict, default=str, number_mode=HYPER_PARAMS_FILE_FORMAT))
 
         else:
-            HyperoptTools._params_pretty_print(
-                params, "buy", "Buy hyperspace params:", non_optimized
-            )
-            HyperoptTools._params_pretty_print(
-                params, "sell", "Sell hyperspace params:", non_optimized
-            )
-            HyperoptTools._params_pretty_print(
-                params, "protection", "Protection hyperspace params:", non_optimized
-            )
-            HyperoptTools._params_pretty_print(params, "roi", "ROI table:", non_optimized)
-            HyperoptTools._params_pretty_print(params, "stoploss", "Stoploss:", non_optimized)
-            HyperoptTools._params_pretty_print(params, "trailing", "Trailing stop:", non_optimized)
-            HyperoptTools._params_pretty_print(
-                params, "max_open_trades", "Max Open Trades:", non_optimized
-            )
+            all_spaces = list(params.keys() | non_optimized.keys())
+            # Explicitly listed to keep original sort order
+            spaces = ["buy", "sell", "protection", "roi", "stoploss", "trailing", "max_open_trades"]
+            spaces += [s for s in all_spaces if s not in spaces]
+            lookup = {
+                "roi": "ROI",
+                "trailing": "Trailing stop",
+            }
+            for space in spaces:
+                name = lookup.get(
+                    space, space.capitalize() if space in HYPEROPT_BUILTIN_SPACES else space
+                )
+
+                HyperoptTools._params_pretty_print(
+                    params, space, f"{name} parameters:", non_optimized
+                )
 
     @staticmethod
     def _params_update_for_json(result_dict, params, non_optimized, space: str) -> None:
@@ -439,7 +396,7 @@ class HyperoptTools:
         ]
         perc_multi = 100
 
-        param_metrics = [("params_dict." + param) for param in results[0]["params_dict"].keys()]
+        param_metrics = [("params_dict." + param) for param in results[0]["params_dict"]]
         trials = trials[base_metrics + param_metrics]
 
         base_columns = [

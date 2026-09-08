@@ -1,5 +1,5 @@
 # pragma pylint: disable=missing-docstring, C0103
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from types import FunctionType
 
 import pytest
@@ -265,7 +265,7 @@ def test_interest(fee, exchange, is_short, lev, minutes, rate, interest, trading
         stake_amount=20.0,
         amount=30.0,
         open_rate=2.0,
-        open_date=datetime.now(timezone.utc) - timedelta(minutes=minutes),
+        open_date=datetime.now(UTC) - timedelta(minutes=minutes),
         fee_open=fee.return_value,
         fee_close=fee.return_value,
         exchange=exchange,
@@ -372,8 +372,8 @@ def test_borrowed(fee, is_short, lev, borrowed, trading_mode):
 @pytest.mark.parametrize(
     "is_short,open_rate,close_rate,lev,profit,trading_mode",
     [
-        (False, 2.0, 2.2, 1.0, 0.09451372, spot),
-        (True, 2.2, 2.0, 3.0, 0.25894253, margin),
+        (False, 2, 2.2, 1, 0.09451372, spot),
+        (True, 2.2, 2.0, 3, 0.25894253, margin),
     ],
 )
 @pytest.mark.usefixtures("init_persistence")
@@ -493,8 +493,8 @@ def test_update_limit_order(
     assert trade.close_date is None
     assert log_has_re(
         f"LIMIT_{entry_side.upper()} has been fulfilled for "
-        r"Trade\(id=2, pair=ADA/USDT, amount=30.00000000, "
-        f"is_short={is_short}, leverage={lev}, open_rate={open_rate}0000000, "
+        r"Trade\(id=2, pair=ADA/USDT, amount=30, "
+        f"is_short={is_short}, leverage={lev}, open_rate={open_rate}, "
         r"open_since=.*\).",
         caplog,
     )
@@ -511,8 +511,8 @@ def test_update_limit_order(
     assert trade.close_date is not None
     assert log_has_re(
         f"LIMIT_{exit_side.upper()} has been fulfilled for "
-        r"Trade\(id=2, pair=ADA/USDT, amount=30.00000000, "
-        f"is_short={is_short}, leverage={lev}, open_rate={open_rate}0000000, "
+        r"Trade\(id=2, pair=ADA/USDT, amount=30, "
+        f"is_short={is_short}, leverage={lev}, open_rate={open_rate}, "
         r"open_since=.*\).",
         caplog,
     )
@@ -545,8 +545,8 @@ def test_update_market_order(market_buy_order_usdt, market_sell_order_usdt, fee,
     assert trade.close_date is None
     assert log_has_re(
         r"MARKET_BUY has been fulfilled for Trade\(id=1, "
-        r"pair=ADA/USDT, amount=30.00000000, is_short=False, leverage=1.0, "
-        r"open_rate=2.00000000, open_since=.*\).",
+        r"pair=ADA/USDT, amount=30, is_short=False, leverage=1, "
+        r"open_rate=2, open_since=.*\).",
         caplog,
     )
 
@@ -561,8 +561,8 @@ def test_update_market_order(market_buy_order_usdt, market_sell_order_usdt, fee,
     assert trade.close_date is not None
     assert log_has_re(
         r"MARKET_SELL has been fulfilled for Trade\(id=1, "
-        r"pair=ADA/USDT, amount=30.00000000, is_short=False, leverage=1.0, "
-        r"open_rate=2.00000000, open_since=.*\).",
+        r"pair=ADA/USDT, amount=30, is_short=False, leverage=1, "
+        r"open_rate=2, open_since=.*\).",
         caplog,
     )
 
@@ -605,7 +605,7 @@ def test_calc_open_close_trade_price(
         stake_amount=60.0,
         open_rate=2.0,
         amount=30.0,
-        open_date=datetime.now(tz=timezone.utc) - timedelta(minutes=10),
+        open_date=datetime.now(tz=UTC) - timedelta(minutes=10),
         interest_rate=0.0005,
         fee_open=fee.return_value,
         fee_close=fee.return_value,
@@ -638,6 +638,13 @@ def test_calc_open_close_trade_price(
     assert pytest.approx(trade.calc_close_trade_value(trade.close_rate)) == close_value
     assert pytest.approx(trade.close_profit_abs) == profit
     assert pytest.approx(trade.close_profit) == profit_ratio
+
+    # Reprocessing the same order (e.g. "Updating sell-fee" on a closed trade) must not
+    # wipe the funding fee already assigned to that order.
+    trade.update_trade(oobj)
+    assert trade.orders[-1].funding_fee == funding_fees
+    assert trade.funding_fees == funding_fees
+    assert pytest.approx(trade.close_profit_abs) == profit
 
 
 @pytest.mark.usefixtures("init_persistence")
@@ -781,10 +788,6 @@ def test_update_invalid_order(limit_buy_order_usdt):
     [
         (False, 0.003, 60.18),
         (False, 0.0025, 60.15),
-        (False, 0.003, 60.18),
-        (False, 0.0025, 60.15),
-        (True, 0.003, 59.82),
-        (True, 0.0025, 59.85),
         (True, 0.003, 59.82),
         (True, 0.0025, 59.85),
     ],
@@ -812,7 +815,7 @@ def test_calc_open_trade_value(
         stake_amount=60.0,
         amount=30.0,
         open_rate=2.0,
-        open_date=datetime.now(tz=timezone.utc) - timedelta(minutes=10),
+        open_date=datetime.now(tz=UTC) - timedelta(minutes=10),
         fee_open=fee_rate,
         fee_close=fee_rate,
         exchange=exchange,
@@ -863,7 +866,7 @@ def test_calc_close_trade_price(
         stake_amount=60.0,
         amount=30.0,
         open_rate=open_rate,
-        open_date=datetime.now(tz=timezone.utc) - timedelta(minutes=10),
+        open_date=datetime.now(tz=UTC) - timedelta(minutes=10),
         fee_open=fee_rate,
         fee_close=fee_rate,
         exchange=exchange,
@@ -1164,7 +1167,7 @@ def test_calc_profit(
         stake_amount=60.0,
         amount=30.0 * lev,
         open_rate=2.0,
-        open_date=datetime.now(tz=timezone.utc) - timedelta(minutes=10),
+        open_date=datetime.now(tz=UTC) - timedelta(minutes=10),
         interest_rate=0.0005,
         exchange=exchange,
         is_short=is_short,
@@ -1479,6 +1482,8 @@ def test_to_json(fee):
         "contract_size": 1,
         "orders": [],
         "has_open_orders": False,
+        "nr_of_successful_entries": 0,
+        "nr_of_successful_exits": 0,
     }
 
     # Simulate dry_run entries
@@ -1570,6 +1575,8 @@ def test_to_json(fee):
         "contract_size": 1,
         "orders": [],
         "has_open_orders": False,
+        "nr_of_successful_entries": 0,
+        "nr_of_successful_exits": 0,
     }
 
 
@@ -1882,7 +1889,7 @@ def test_get_trades_proxy(fee, use_db, is_short):
     assert len(trades) == 2
     assert not trades[0].is_open
 
-    opendate = datetime.now(tz=timezone.utc) - timedelta(minutes=15)
+    opendate = datetime.now(tz=UTC) - timedelta(minutes=15)
 
     assert len(Trade.get_trades_proxy(open_date=opendate)) == 3
 
@@ -1989,7 +1996,7 @@ def test_fully_canceled_entry_order_count(fee, is_short):
 
 @pytest.mark.usefixtures("init_persistence")
 def test_update_order_from_ccxt(caplog, time_machine):
-    start = datetime(2023, 1, 1, 4, tzinfo=timezone.utc)
+    start = datetime(2023, 1, 1, 4, tzinfo=UTC)
     time_machine.move_to(start, tick=False)
 
     # Most basic order return (only has orderid)
@@ -2071,45 +2078,169 @@ def test_select_order(fee, is_short):
     trades = Trade.get_trades().all()
 
     # Open buy order, no sell order
-    order = trades[0].select_order(trades[0].entry_side, True)
+    trade = trades[0]
+    order = trade.select_order(trade.entry_side, True)
     assert order is not None
-    order = trades[0].select_order(trades[0].entry_side, False)
+    order = trade.select_order(trade.entry_side, False)
     assert order is None
-    order = trades[0].select_order(trades[0].exit_side, None)
+    order = trade.select_order(trade.exit_side, None)
     assert order is None
+
+    # When is_open is None, ignore only_filled and return the last order with matching order side
+    # for current trade, there is only one open entry order and no exit order yet
+    order = trade.select_order(trade.entry_side, None, only_filled=True)
+    assert order is not None
+    assert order.ft_order_side == trade.entry_side
+    # Make sure the order is still open, which means the filter ignore only_filled param
+    assert order.ft_is_open is True
 
     # closed buy order, and open sell order
-    order = trades[1].select_order(trades[1].entry_side, True)
-    assert order is None
-    order = trades[1].select_order(trades[1].entry_side, False)
-    assert order is not None
-    order = trades[1].select_order(trades[1].entry_side, None)
-    assert order is not None
-    order = trades[1].select_order(trades[1].exit_side, True)
-    assert order is None
-    order = trades[1].select_order(trades[1].exit_side, False)
-    assert order is not None
+    trade1 = trades[1]
+    order1 = trade1.select_order(trade1.entry_side, True)
+    assert order1 is None
+    order1 = trade1.select_order(trade1.entry_side, False)
+    assert order1 is not None
+    order1 = trade1.select_order(trade1.entry_side, None)
+    assert order1 is not None
+    order1 = trade1.select_order(trade1.exit_side, True)
+    assert order1 is None
+    order1 = trade1.select_order(trade1.exit_side, False)
+    assert order1 is not None
 
     # Has open buy order
-    order = trades[3].select_order(trades[3].entry_side, True)
-    assert order is not None
-    order = trades[3].select_order(trades[3].entry_side, False)
-    assert order is None
+    trade3 = trades[3]
+    order3 = trade3.select_order(trade3.entry_side, True)
+    assert order3 is not None
+    order3 = trade3.select_order(trade3.entry_side, False)
+    assert order3 is None
 
     # Open sell order
-    order = trades[4].select_order(trades[4].entry_side, True)
+    trade4 = trades[4]
+    order4 = trade4.select_order(trade4.entry_side, True)
+    assert order4 is None
+    order4 = trade4.select_order(trade4.entry_side, False)
+    assert order4 is not None
+
+    trade4.orders[1].ft_order_side = trade4.exit_side
+    order4 = trade4.select_order(trade4.exit_side, True)
+    assert order4 is not None
+
+    trade4.orders[1].ft_order_side = "stoploss"
+    order4 = trade4.select_order("stoploss", None)
+    assert order4 is not None
+    assert order4.ft_order_side == "stoploss"
+
+
+@pytest.mark.usefixtures("init_persistence")
+def test_select_order_skip_unfilled_closed_order(fee):
+    """
+    Test that select_order skips closed orders with no filled amount when only_filled=True.
+    When only_filled=False, it should return the closed order even if filled amount is 0.
+    """
+    create_mock_trades(fee, False)
+    trades = Trade.get_trades().all()
+    trade = trades[1]
+
+    # Create an order with no filled amount
+    unfilled_order = trade.orders[0]
+    unfilled_order.ft_is_open = False
+    unfilled_order.filled = 0.0  # No filled amount
+    unfilled_order.status = "closed"
+    Trade.session.add(unfilled_order)
+    Trade.commit()
+
+    # When only_filled=True, should skip order with no filled amount
+    order = trade.select_order(unfilled_order.ft_order_side, is_open=False, only_filled=True)
     assert order is None
-    order = trades[4].select_order(trades[4].entry_side, False)
+    # When only_filled=False, should return order with no filled amount
+    order = trade.select_order(unfilled_order.ft_order_side, is_open=False, only_filled=False)
     assert order is not None
 
-    trades[4].orders[1].ft_order_side = trades[4].exit_side
-    order = trades[4].select_order(trades[4].exit_side, True)
+
+@pytest.mark.usefixtures("init_persistence")
+def test_select_order_only_filled_skip_wrong_status(fee):
+    """
+    Test that select_order skips orders with wrong status when only_filled=True.
+    Tests the condition: (... or o.status not in NON_OPEN_EXCHANGE_STATES)
+    When only_filled=False, it should return the order.
+    """
+    create_mock_trades(fee, False)
+    trades = Trade.get_trades().all()
+    trade = trades[1]
+
+    # Create an order with filled amount but wrong status
+    bad_status_order = trade.orders[0]
+    bad_status_order.ft_is_open = False
+    bad_status_order.filled = 10.0  # Has filled amount
+    bad_status_order.status = "pending"  # Not in NON_OPEN_EXCHANGE_STATES
+    Trade.session.add(bad_status_order)
+    Trade.commit()
+
+    # When only_filled=True, should skip order with non-standard status
+    order = trade.select_order(bad_status_order.ft_order_side, is_open=False, only_filled=True)
+    assert order is None
+    # When only_filled=False, should return order with non-standard status
+    order = trade.select_order(bad_status_order.ft_order_side, is_open=False, only_filled=False)
     assert order is not None
 
-    trades[4].orders[1].ft_order_side = "stoploss"
-    order = trades[4].select_order("stoploss", None)
+
+@pytest.mark.usefixtures("init_persistence")
+def test_select_order_only_filled_reversed_iteration(fee):
+    """
+    Test that select_order returns the LATEST order when multiple exist.
+    Verifies reversed() iteration works correctly with only_filled.
+    """
+    create_mock_trades(fee, False)
+    trades = Trade.get_trades().all()
+    trade = trades[1]
+
+    # Add multiple closed orders
+    for i in range(3):
+        order = Order(
+            ft_trade_id=trade.id,
+            ft_order_side=trade.entry_side,
+            ft_pair=trade.pair,
+            ft_is_open=False,
+            ft_amount=1.0,
+            ft_price=1.0,
+            order_id=f"test_order_{i}",
+            status="closed",
+            filled=1.0 if i < 2 else 0.0,  # Last one is unfilled
+        )
+        trade.orders.append(order)
+    Trade.session.add(trade)
+    Trade.commit()
+
+    # Should return the latest properly filled order (reversed iteration)
+    order = trade.select_order(trade.entry_side, is_open=False, only_filled=True)
+
     assert order is not None
-    assert order.ft_order_side == "stoploss"
+    # test_order_2 is unfilled, so it should return test_order_1
+    assert order.order_id == "test_order_1"
+    assert order.filled > 0, "Should return an order with filled amount"
+
+
+@pytest.mark.usefixtures("init_persistence")
+def test_select_order_only_filled_false_ignores_status(fee):
+    """
+    Test that when only_filled=False, status and filled amount don't matter.
+    """
+    create_mock_trades(fee, False)
+    trades = Trade.get_trades().all()
+    trade = trades[1]
+
+    # Create closed order with bad status
+    order = trade.orders[0]
+    order.ft_is_open = False
+    order.filled = 0.0  # No filled
+    order.status = "pending"  # Bad status
+    Trade.session.add(order)
+    Trade.commit()
+
+    # With only_filled=False, should still find the order
+    found_order = trade.select_order(order.ft_order_side, is_open=False, only_filled=False)
+
+    assert found_order is not None
 
 
 def test_Trade_object_idem():
@@ -2172,7 +2303,7 @@ def test_trade_truncates_string_fields():
         stake_amount=20.0,
         amount=30.0,
         open_rate=2.0,
-        open_date=datetime.now(timezone.utc) - timedelta(minutes=20),
+        open_date=datetime.now(UTC) - timedelta(minutes=20),
         fee_open=0.001,
         fee_close=0.001,
         exchange="binance",
@@ -2722,6 +2853,8 @@ def test_order_to_ccxt(limit_buy_order_open, limit_sell_order_usdt_open):
 
     order_resp = Order.order_by_id(limit_buy_order_open["id"])
     assert order_resp
+    assert Order.order_by_id(limit_buy_order_open["id"], "mocked") is order_resp
+    assert Order.order_by_id(limit_buy_order_open["id"], "ETH/USDT") is None
 
     raw_order = order_resp.to_ccxt_object()
     del raw_order["fee"]
@@ -2889,3 +3022,49 @@ def test_recalc_trade_from_orders_dca(data) -> None:
     trade = Trade.session.scalars(select(Trade)).first()
     assert trade
     assert not trade.has_open_orders
+
+
+@pytest.mark.parametrize(
+    "is_short,lev,trading_mode",
+    [
+        (False, 1, spot),
+        (False, 1, margin),
+        (False, 10, margin),
+        (False, 1, futures),
+        (False, 10, futures),
+        (True, 1, margin),
+        (True, 10, margin),
+        (True, 1, futures),
+        (True, 10, futures),
+    ],
+)
+@pytest.mark.usefixtures("init_persistence")
+def test_close_rate_for_roi(fee, is_short, lev, trading_mode):
+    """
+    Ensure calc_close_rate_for_roi is consistent with calc_profit_ratio.
+    """
+    open_dt = datetime.fromisoformat("2022-01-01 00:00:00")
+    trade_duration = timedelta(days=10)
+    trade = Trade(
+        id=2,
+        pair="ADA/USDT",
+        stake_amount=60.0,
+        open_rate=2.0,
+        amount=30.0,
+        is_open=True,
+        open_date=open_dt,
+        close_date=open_dt + trade_duration,  # to trigger interest calculation in margin mode
+        fee_open=fee.return_value,
+        fee_close=fee.return_value,
+        exchange="binance",
+        is_short=is_short,
+        leverage=lev,
+        trading_mode=trading_mode,
+        interest_rate=0.0005,
+        funding_fees=0.1234,
+    )
+    for roi in [0.1337, 0.5, -0.1, 0.25]:
+        close_rate = trade.calc_close_rate_for_roi(roi)
+        assert roi == trade.calc_profit_ratio(close_rate), (
+            f"Failed for ROI {roi}, close_rate {close_rate}"
+        )

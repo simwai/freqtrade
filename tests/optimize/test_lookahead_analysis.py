@@ -10,6 +10,7 @@ from freqtrade.data.history import get_timerange
 from freqtrade.exceptions import OperationalException
 from freqtrade.optimize.analysis.lookahead import Analysis, LookaheadAnalysis
 from freqtrade.optimize.analysis.lookahead_helpers import LookaheadAnalysisSubFunctions
+from freqtrade.util import get_progress_tracker
 from tests.conftest import EXMS, get_args, log_has_re, patch_exchange
 
 
@@ -123,7 +124,7 @@ def test_lookahead_helper_no_strategy_defined(lookahead_conf):
         LookaheadAnalysisSubFunctions.start(conf)
 
 
-def test_lookahead_helper_start(lookahead_conf, mocker) -> None:
+def test_lookahead_helper_start(lookahead_conf, mocker, caplog) -> None:
     single_mock = MagicMock()
     text_table_mock = MagicMock()
     mocker.patch.multiple(
@@ -131,12 +132,21 @@ def test_lookahead_helper_start(lookahead_conf, mocker) -> None:
         initialize_single_lookahead_analysis=single_mock,
         text_table_lookahead_analysis_instances=text_table_mock,
     )
-    LookaheadAnalysisSubFunctions.start(lookahead_conf)
+    LookaheadAnalysisSubFunctions.start(deepcopy(lookahead_conf))
     assert single_mock.call_count == 1
     assert text_table_mock.call_count == 1
+    assert log_has_re("Forced order_types to market orders.", caplog)
+    assert single_mock.call_args_list[0][0][0]["order_types"]["entry"] == "market"
 
     single_mock.reset_mock()
     text_table_mock.reset_mock()
+
+    lookahead_conf["lookahead_allow_limit_orders"] = True
+    LookaheadAnalysisSubFunctions.start(lookahead_conf)
+    assert single_mock.call_count == 1
+    assert text_table_mock.call_count == 1
+    assert log_has_re("Using configured order_types, skipping order_types override.", caplog)
+    assert "order_types" not in single_mock.call_args_list[0][0][0]
 
 
 @pytest.mark.parametrize(
@@ -439,7 +449,7 @@ def test_initialize_single_lookahead_analysis(lookahead_conf, mocker, caplog):
     }
 
     instance = LookaheadAnalysisSubFunctions.initialize_single_lookahead_analysis(
-        lookahead_conf, strategy_obj
+        lookahead_conf, strategy_obj, get_progress_tracker()
     )
     assert log_has_re(r"Bias test of .* started\.", caplog)
     assert start_mock.call_count == 1
@@ -471,7 +481,7 @@ def test_biased_strategy(lookahead_conf, mocker, caplog, scenario) -> None:
 
     strategy_obj = {"name": "strategy_test_v3_with_lookahead_bias"}
     instance = LookaheadAnalysis(lookahead_conf, strategy_obj)
-    instance.start()
+    instance.start(get_progress_tracker())
     # Assert init correct
     assert log_has_re(f"Strategy Parameter: scenario = {scenario}", caplog)
 
@@ -490,4 +500,4 @@ def test_config_overrides(lookahead_conf):
     lookahead_conf = LookaheadAnalysisSubFunctions.calculate_config_overrides(lookahead_conf)
 
     assert lookahead_conf["dry_run_wallet"] == 1000000000
-    assert lookahead_conf["max_open_trades"] == 3
+    assert lookahead_conf["max_open_trades"] == -1

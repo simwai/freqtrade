@@ -1,0 +1,153 @@
+- generic [active] [ref=f13e1]:
+  - banner [ref=f13e2]:
+    - generic [ref=f13e5]:
+      - heading "Strategy Lab" [level=1] [ref=f13e6]
+      - generic [ref=f13e7]: freqtrade strategy overview · 2026-08-29 22:37
+    - button "Jobs" [ref=f13e8] [cursor=pointer]
+  - generic:
+    - generic:
+      - generic: Jobs
+      - generic: 4 total
+      - button: ✕ Close
+  - generic [ref=f13e9]:
+    - button "Dashboard" [ref=f13e10] [cursor=pointer]
+    - button "Strategies" [ref=f13e11] [cursor=pointer]
+    - button "History" [ref=f13e12] [cursor=pointer]
+    - button "Benchmark" [ref=f13e13] [cursor=pointer]
+    - button "Walk-Forward" [ref=f13e14] [cursor=pointer]
+    - button "Hyperopt" [ref=f13e15] [cursor=pointer]
+    - button "Trades" [ref=f13e16] [cursor=pointer]
+    - button "Lab" [ref=f13e17] [cursor=pointer]
+  - main [ref=f13e18]:
+    - generic [ref=f13e20]:
+      - generic [ref=f13e21]:
+        - heading "History" [level=2] [ref=f13e22]
+        - generic [ref=f13e23]: profit & sortino per strategy over all runs
+      - generic [ref=f13e24]:
+        - generic [ref=f13e25]:
+          - checkbox "Profit % (log scale)" [checked] [ref=f13e26]
+          - text: Profit % (log scale)
+        - generic [ref=f13e27]:
+          - text: "2nd metric:"
+          - combobox "2nd metric:" [ref=f13e28]:
+            - option "Sortino" [selected]
+            - option "Calmar"
+            - option "Profit factor"
+            - option "Max drawdown"
+            - option "Win rate"
+            - option "Trades"
+        - listbox [ref=f13e29] [cursor=pointer]:
+          - option "Top by run count" [selected]
+          - option "All"
+          - option "BigZ08"
+          - option "adaptive"
+          - option "BigZ06AtrSl"
+          - option "BigZ06"
+          - option "HoffmanIRBStrategy"
+          - option "SmokeStrategyTemplateV21"
+          - option "NostalgiaForInfinityX7Guarded"
+          - option "OctopusNestStrategy"
+          - option "NostalgiaForInfinityX7"
+          - option "NostalgiaForInfinityX7GuardedRelative"
+          - option "CombinedBinHClucAndMADV3"
+          - option "HybridRegimeSwitcher"
+          - option "NostalgiaForInfinityX4"
+          - option "BigZ06Original"
+          - option "LuxAlgo15mBTCLowRisk"
+          - option "NostalgiaForInfinityX7GuardedCat15"
+          - option "HoffmanIRBStrategy5mFeeVRLocked"
+          - option "newstrategy51"
+          - option "newstrategy53"
+          - option "HarmonicDivergence"
+          - option "BigZ07Next2"
+          - option "HoffmanIRBStrategy5mFee"
+          - option "NFIX7GuardedCat15"
+          - option "NFIX7GuardedCat25"
+          - option "NFIX7GuardedCat30"
+          - option "NostalgiaForInfinityX7GuardedAge10"
+          - option "NostalgiaForInfinityX7GuardedAge21"
+          - option "NostalgiaForInfinityX7GuardedCat25"
+          - option "NostalgiaForInfinityX7GuardedCat30"
+          - option "ClucHAnix_5m"
+          - option "HoffmanIRBStrategy5mFeeVRPB"
+          - option "HoffmanIRBStrategy5mFeeVRPB50"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10"
+          - option "HoffmanIRBStrategy5mFeeVolRegime"
+          - option "MfiEmaWaveTrend"
+          - option "MfiEmaWaveTrend2"
+          - option "NFIX7GuardedAge10"
+          - option "NFIX7GuardedAge21"
+          - option "GKDAdaptiveAcademicFinal"
+          - option "HoffmanIRBStrategy15m"
+          - option "HoffmanIRBStrategy1h"
+          - option "HoffmanIRBStrategy5mFeePB"
+          - option "HoffmanIRBStrategy5mFeeVR50PB"
+          - option "HoffmanIRBStrategy5mFeeVRChV"
+          - option "HoffmanIRBStrategy5mFeeVRDC"
+          - option "HoffmanIRBStrategy5mFeeVRPB25"
+          - option "HoffmanIRBStrategy5mFeeVRPBN15"
+          - option "HoffmanIRBStrategy5mFeeVRSPBF"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFChV"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFDC"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFPB"
+          - option "HoffmanIRBStrategyRR05"
+          - option "Ichi"
+          - option "NostalgiaForInfinityX6"
+          - option "StrategyTemplateV21"
+          - option "SupertrendKeltner"
+          - option "WildersVolatilityBingAi"
+          - option "ichiV1"
+        - button "Select all" [ref=f13e30] [cursor=pointer]
+        - button "Top 8" [ref=f13e31] [cursor=pointer]
+        - button "Clear" [ref=f13e32] [cursor=pointer]
+      - generic [ref=f13e33]:
+        - generic [ref=f13e35]:
+          - generic [ref=f13e36]: BigZ08
+          - generic [ref=f13e37]: 91 runs
+        - generic [ref=f13e42]:
+          - generic [ref=f13e43]: adaptive
+          - generic [ref=f13e44]: 45 runs
+        - generic [ref=f13e49]:
+          - generic [ref=f13e50]: BigZ06AtrSl
+          - generic [ref=f13e51]: 24 runs
+        - generic [ref=f13e56]:
+          - generic [ref=f13e57]: BigZ06
+          - generic [ref=f13e58]: 17 runs
+        - generic [ref=f13e63]:
+          - generic [ref=f13e64]: HoffmanIRBStrategy
+          - generic [ref=f13e65]: 13 runs
+        - generic [ref=f13e70]:
+          - generic [ref=f13e71]: SmokeStrategyTemplateV21
+          - generic [ref=f13e72]: 12 runs
+        - generic [ref=f13e77]:
+          - generic [ref=f13e78]: NostalgiaForInfinityX7Guarded
+          - generic [ref=f13e79]: 11 runs
+        - generic [ref=f13e84]:
+          - generic [ref=f13e85]: OctopusNestStrategy
+          - generic [ref=f13e86]: 11 runs
+  - complementary [ref=f13e90]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=f13e94]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import ccxt
 from ccxt import ROUND_DOWN, ROUND_UP
@@ -27,6 +27,21 @@ def timeframe_to_msecs(timeframe: str) -> int:
     Same as timeframe_to_seconds, but returns milliseconds.
     """
     return ccxt.Exchange.parse_timeframe(timeframe) * 1000
+
+
+def timeframe_to_floor_freq(timeframe: str) -> str:
+    """
+    Translates the timeframe interval value written in the human readable
+    form ('1m', '5m', '1h', '1d', '1w', etc.) to the desired floor frequency used by pandas
+        ("1m", "5m", "1h", "1d", "1w", etc.).
+        Will use minute for most higher timeframes.
+    """
+    timeframe_seconds = timeframe_to_seconds(timeframe)
+    timeframe_minutes = timeframe_seconds // 60
+    if timeframe_minutes <= 1:
+        return "1s"
+    else:
+        return "1min"
 
 
 def timeframe_to_resample_freq(timeframe: str) -> str:
@@ -59,7 +74,7 @@ def timeframe_to_prev_date(timeframe: str, date: datetime | None = None) -> date
     :returns: date of previous candle (with utc timezone)
     """
     if not date:
-        date = datetime.now(timezone.utc)
+        date = datetime.now(UTC)
 
     new_timestamp = ccxt.Exchange.round_timeframe(timeframe, dt_ts(date), ROUND_DOWN) // 1000
     return dt_from_ts(new_timestamp)
@@ -73,6 +88,6 @@ def timeframe_to_next_date(timeframe: str, date: datetime | None = None) -> date
     :returns: date of next candle (with utc timezone)
     """
     if not date:
-        date = datetime.now(timezone.utc)
+        date = datetime.now(UTC)
     new_timestamp = ccxt.Exchange.round_timeframe(timeframe, dt_ts(date), ROUND_UP) // 1000
     return dt_from_ts(new_timestamp)

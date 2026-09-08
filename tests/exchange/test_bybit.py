@@ -1,11 +1,12 @@
-from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock
+from copy import deepcopy
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, PropertyMock
 
 import pytest
 
-from freqtrade.enums.marginmode import MarginMode
-from freqtrade.enums.tradingmode import TradingMode
-from tests.conftest import EXMS, get_mock_coro, get_patched_exchange, log_has
+from freqtrade.enums import MarginMode, RunMode, TradingMode
+from freqtrade.util import dt_utc
+from tests.conftest import EXMS, get_patched_exchange, log_has
 from tests.exchange.test_exchange import ccxt_exceptionhandlers
 
 
@@ -41,7 +42,7 @@ async def test_bybit_fetch_funding_rate(default_conf, mocker):
     default_conf["trading_mode"] = "futures"
     default_conf["margin_mode"] = "isolated"
     api_mock = MagicMock()
-    api_mock.fetch_funding_rate_history = get_mock_coro(return_value=[])
+    api_mock.fetch_funding_rate_history = AsyncMock(return_value=[])
     exchange = get_patched_exchange(mocker, default_conf, exchange="bybit", api_mock=api_mock)
     limit = 200
     # Test fetch_funding_rate_history (current data)
@@ -73,7 +74,7 @@ async def test_bybit_fetch_funding_rate(default_conf, mocker):
 
 
 def test_bybit_get_funding_fees(default_conf, mocker):
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     exchange = get_patched_exchange(mocker, default_conf, exchange="bybit")
     exchange._fetch_and_calculate_funding_fees = MagicMock()
     exchange.get_funding_fees("BTC/USDT:USDT", 1, False, now)
@@ -96,11 +97,26 @@ def test_bybit_fetch_orders(default_conf, mocker, limit_order):
             limit_order["sell"],
         ]
     )
-    api_mock.fetch_open_orders = MagicMock(return_value=[limit_order["buy"]])
-    api_mock.fetch_closed_orders = MagicMock(return_value=[limit_order["buy"]])
+    api_mock.fetch_open_orders = MagicMock(
+        side_effect=[
+            [{**limit_order["buy"], "id": 1}],
+            [{**limit_order["buy"], "id": 2}],
+            [{**limit_order["buy"], "id": 3}],
+        ]
+    )
+    api_mock.fetch_closed_orders = MagicMock(
+        side_effect=[
+            [{**limit_order["buy"], "id": 5}],
+            [{**limit_order["buy"], "id": 6}],
+            [{**limit_order["buy"], "id": 7}],
+        ]
+    )
 
-    mocker.patch(f"{EXMS}.exchange_has", return_value=True)
-    start_time = datetime.now(timezone.utc) - timedelta(days=20)
+    def exchange_has(value):
+        return value != "fetchOrders"
+
+    mocker.patch(f"{EXMS}.exchange_has", side_effect=exchange_has)
+    start_time = datetime.now(UTC) - timedelta(days=20)
 
     exchange = get_patched_exchange(mocker, default_conf, api_mock, exchange="bybit")
     # Not available in dry-run
@@ -111,9 +127,9 @@ def test_bybit_fetch_orders(default_conf, mocker, limit_order):
     exchange = get_patched_exchange(mocker, default_conf, api_mock, exchange="bybit")
     res = exchange.fetch_orders("mocked", start_time)
     # Bybit will call the endpoint 3 times, as it has a limit of 7 days per call
-    assert api_mock.fetch_orders.call_count == 3
-    assert api_mock.fetch_open_orders.call_count == 0
-    assert api_mock.fetch_closed_orders.call_count == 0
+    assert api_mock.fetch_orders.call_count == 0
+    assert api_mock.fetch_open_orders.call_count == 3
+    assert api_mock.fetch_closed_orders.call_count == 3
     assert len(res) == 2 * 3
 
 
@@ -197,3 +213,43 @@ def test_bybit__order_needs_price(
     exchange.unified_account = uta
 
     assert exchange._order_needs_price(side, order_type) == expected
+
+
+def test_check_delisting_time_bybit(default_conf_usdt, mocker):
+    exchange = get_patched_exchange(mocker, default_conf_usdt, exchange="bybit")
+    exchange._config["runmode"] = RunMode.BACKTEST
+    delist_fut_mock = MagicMock(return_value=None)
+    mocker.patch.object(exchange, "_check_delisting_futures", delist_fut_mock)
+
+    # Invalid run mode
+    resp = exchange.check_delisting_time("BTC/USDT:USDT")
+    assert resp is None
+    assert delist_fut_mock.call_count == 0
+
+    # Delist spot called
+    exchange._config["runmode"] = RunMode.DRY_RUN
+    resp1 = exchange.check_delisting_time("BTC/USDT")
+    assert resp1 is None
+    assert delist_fut_mock.call_count == 0
+
+    # Delist futures called
+    exchange.trading_mode = TradingMode.FUTURES
+    resp1 = exchange.check_delisting_time("BTC/USDT:USDT")
+    assert resp1 is None
+    assert delist_fut_mock.call_count == 1
+
+
+def test__check_delisting_futures_bybit(default_conf_usdt, mocker, markets):
+    markets["BTC/USDT:USDT"] = deepcopy(markets["SOL/BUSD:BUSD"])
+    markets["BTC/USDT:USDT"]["info"]["deliveryTime"] = "0"
+    markets["SOL/BUSD:BUSD"]["info"]["deliveryTime"] = "0"
+    markets["ADA/USDT:USDT"]["info"]["deliveryTime"] = "1760745600000"  # 2025-10-18
+    exchange = get_patched_exchange(mocker, default_conf_usdt, exchange="bybit")
+    mocker.patch(f"{EXMS}.markets", PropertyMock(return_value=markets))
+
+    resp_sol = exchange._check_delisting_futures("SOL/BUSD:BUSD")
+    # SOL has no delisting date
+    assert resp_sol is None
+    # Actually has a delisting date
+    resp_ada = exchange._check_delisting_futures("ADA/USDT:USDT")
+    assert resp_ada == dt_utc(2025, 10, 18)

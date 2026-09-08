@@ -25,7 +25,7 @@ def setup_optimize_configuration(args: dict[str, Any], method: RunMode) -> dict[
         RunMode.BACKTEST: "backtesting",
         RunMode.HYPEROPT: "hyperoptimization",
     }
-    if method in no_unlimited_runmodes.keys():
+    if method in no_unlimited_runmodes:
         wallet_size = get_dry_run_wallet(config) * config["tradable_balance_ratio"]
         # tradable_balance_ratio
         if (
@@ -72,7 +72,7 @@ def start_backtesting_show(args: dict[str, Any]) -> None:
     from freqtrade.data.btanalysis import load_backtest_stats
     from freqtrade.optimize.optimize_reports import show_backtest_results, show_sorted_pairlist
 
-    results = load_backtest_stats(config["exportfilename"])
+    results = load_backtest_stats(config["exportdirectory"], config["exportfilename"])
 
     show_backtest_results(config, results)
     show_sorted_pairlist(config, results)
@@ -123,55 +123,16 @@ def start_hyperopt(args: dict[str, Any]) -> None:
         # Same in Edge and Backtesting start() functions.
 
 
-def start_walk_forward(args: dict[str, Any]) -> None:
-    """Start historical or scheduled live walk-forward optimization."""
-    try:
-        from filelock import FileLock, Timeout
-
-        from freqtrade.optimize.hyperopt import Hyperopt
-        from freqtrade.optimize.walkforward import (
-            WalkForwardHistoricalRunner,
-            WalkForwardLiveRunner,
-        )
-    except ImportError as e:
-        raise OperationalException(
-            f"{e}. Please ensure that the hyperopt dependencies are installed."
-        ) from e
-
-    config = setup_optimize_configuration(args, RunMode.HYPEROPT)
-    logger.info("Starting freqtrade in Walk-forward mode")
-
-    try:
-        if args.get("walk_forward_live"):
-            runner = WalkForwardLiveRunner(config)
-            runner.run(run_now=args.get("walk_forward_run_now", False))
-            return
-
-        lock = FileLock(Hyperopt.get_lock_filename(config))
-        with lock.acquire(timeout=1):
-            WalkForwardHistoricalRunner(config).run()
-    except Timeout:
-        logger.info("Another running instance of freqtrade Hyperopt detected.")
-        logger.info("Simultaneous execution of multiple optimization commands is not supported.")
-    except ValueError as e:
-        raise ConfigurationError(str(e)) from e
-
-
 def start_edge(args: dict[str, Any]) -> None:
     """
     Start Edge script
     :param args: Cli args from Arguments()
     :return: None
     """
-    from freqtrade.optimize.edge_cli import EdgeCli
-
-    # Initialize configuration
-    config = setup_optimize_configuration(args, RunMode.EDGE)
-    logger.info("Starting freqtrade in Edge mode")
-
-    # Initialize Edge object
-    edge_cli = EdgeCli(config)
-    edge_cli.start()
+    raise ConfigurationError(
+        "The Edge module has been deprecated in 2023.9 and removed in 2025.6. "
+        "All functionalities of edge have been removed."
+    )
 
 
 def start_lookahead_analysis(args: dict[str, Any]) -> None:

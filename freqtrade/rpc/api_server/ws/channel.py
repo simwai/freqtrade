@@ -43,7 +43,7 @@ class WebSocketChannel:
         self._channel_tasks: list[asyncio.Task] = []
 
         # Deque for average send times
-        self._send_times: deque[float] = deque([], maxlen=10)
+        self._send_times: deque[float] = deque(maxlen=10)
         # High limit defaults to 3 to start
         self._send_high_limit = 3
         self._send_throttle = send_throttle
@@ -102,7 +102,7 @@ class WebSocketChannel:
             self._send_times.append(total_time)
 
             self._calc_send_limit()
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.info(f"Connection for {self} timed out, disconnecting")
             raise
 
@@ -201,8 +201,8 @@ class WebSocketChannel:
             try:
                 await task
             except (
+                TimeoutError,
                 asyncio.CancelledError,
-                asyncio.TimeoutError,
                 WebSocketDisconnect,
                 ConnectionClosed,
                 RuntimeError,

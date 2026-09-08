@@ -2,6 +2,7 @@
 This module contains the class to persist trades into SQLite
 """
 
+import functools
 import logging
 import threading
 from contextvars import ContextVar
@@ -19,6 +20,7 @@ from freqtrade.persistence.key_value_store import _KeyValueStoreModel
 from freqtrade.persistence.migrations import check_migrate
 from freqtrade.persistence.pairlock import PairLock
 from freqtrade.persistence.trade_model import Order, Trade
+from freqtrade.persistence.wallet_history import WalletHistory
 
 
 logger = logging.getLogger(__name__)
@@ -90,7 +92,27 @@ def init_db(db_url: str) -> None:
     _CustomData.session = scoped_session(
         sessionmaker(bind=engine, autoflush=True), scopefunc=get_request_or_thread_id
     )
+    WalletHistory.session = Trade.session
 
     previous_tables = inspect(engine).get_table_names()
     ModelBase.metadata.create_all(engine)
     check_migrate(engine, decl_base=ModelBase, previous_tables=previous_tables)
+
+
+def custom_data_rpc_wrapper(func):
+    """
+    Wrapper for RPC methods when using custom_data
+    Similar behavior to deps.get_rpc() - but limited to custom_data.
+    """
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            _CustomData.session.rollback()
+            return func(*args, **kwargs)
+        finally:
+            _CustomData.session.rollback()
+            # Ensure the session is removed after use
+            _CustomData.session.remove()
+
+    return wrapper

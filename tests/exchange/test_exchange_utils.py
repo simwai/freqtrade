@@ -1,6 +1,7 @@
 # pragma pylint: disable=missing-docstring, protected-access, invalid-name
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from math import isnan, nan
+from unittest.mock import MagicMock
 
 import pytest
 from ccxt import (
@@ -28,6 +29,8 @@ from freqtrade.exchange import (
     timeframe_to_seconds,
 )
 from freqtrade.exchange.check_exchange import check_exchange
+from freqtrade.exchange.exchange_utils import _exchange_has_helper
+from freqtrade.util import dt_from_ts, dt_now, dt_utc
 from tests.conftest import log_has_re
 
 
@@ -66,7 +69,7 @@ def test_check_exchange(default_conf, caplog) -> None:
     )
     caplog.clear()
     # Test an available exchange, supported by ccxt
-    default_conf.get("exchange").update({"name": "huobijp"})
+    default_conf.get("exchange").update({"name": "bittrade"})
     assert check_exchange(default_conf)
     assert log_has_re(
         r"Exchange .* is known to the ccxt library, available for the bot, "
@@ -117,7 +120,7 @@ def test_check_exchange(default_conf, caplog) -> None:
 
 
 def test_date_minus_candles():
-    date = datetime(2019, 8, 12, 13, 25, 0, tzinfo=timezone.utc)
+    date = dt_utc(2019, 8, 12, 13, 25, 0)
 
     assert date_minus_candles("5m", 3, date) == date - timedelta(minutes=15)
     assert date_minus_candles("5m", 5, date) == date - timedelta(minutes=25)
@@ -167,59 +170,59 @@ def test_timeframe_to_resample_freq(timeframe, expected):
 
 def test_timeframe_to_prev_date():
     # 2019-08-12 13:22:08
-    date = datetime.fromtimestamp(1565616128, tz=timezone.utc)
+    date = dt_utc(2019, 8, 12, 13, 22, 8)
 
     tf_list = [
         # 5m -> 2019-08-12 13:20:00
-        ("5m", datetime(2019, 8, 12, 13, 20, 0, tzinfo=timezone.utc)),
+        ("5m", dt_utc(2019, 8, 12, 13, 20, 0)),
         # 10m -> 2019-08-12 13:20:00
-        ("10m", datetime(2019, 8, 12, 13, 20, 0, tzinfo=timezone.utc)),
+        ("10m", dt_utc(2019, 8, 12, 13, 20, 0)),
         # 1h -> 2019-08-12 13:00:00
-        ("1h", datetime(2019, 8, 12, 13, 00, 0, tzinfo=timezone.utc)),
+        ("1h", dt_utc(2019, 8, 12, 13, 00, 0)),
         # 2h -> 2019-08-12 12:00:00
-        ("2h", datetime(2019, 8, 12, 12, 00, 0, tzinfo=timezone.utc)),
+        ("2h", dt_utc(2019, 8, 12, 12, 00, 0)),
         # 4h -> 2019-08-12 12:00:00
-        ("4h", datetime(2019, 8, 12, 12, 00, 0, tzinfo=timezone.utc)),
+        ("4h", dt_utc(2019, 8, 12, 12, 00, 0)),
         # 1d -> 2019-08-12 00:00:00
-        ("1d", datetime(2019, 8, 12, 00, 00, 0, tzinfo=timezone.utc)),
+        ("1d", dt_utc(2019, 8, 12, 00, 00, 0)),
     ]
     for interval, result in tf_list:
         assert timeframe_to_prev_date(interval, date) == result
 
-    date = datetime.now(tz=timezone.utc)
+    date = dt_now()
     assert timeframe_to_prev_date("5m") < date
     # Does not round
-    time = datetime(2019, 8, 12, 13, 20, 0, tzinfo=timezone.utc)
+    time = dt_utc(2019, 8, 12, 13, 20, 0)
     assert timeframe_to_prev_date("5m", time) == time
-    time = datetime(2019, 8, 12, 13, 0, 0, tzinfo=timezone.utc)
+    time = dt_utc(2019, 8, 12, 13, 0, 0)
     assert timeframe_to_prev_date("1h", time) == time
 
 
 def test_timeframe_to_next_date():
     # 2019-08-12 13:22:08
-    date = datetime.fromtimestamp(1565616128, tz=timezone.utc)
+    date = dt_from_ts(1565616128)
     tf_list = [
         # 5m -> 2019-08-12 13:25:00
-        ("5m", datetime(2019, 8, 12, 13, 25, 0, tzinfo=timezone.utc)),
+        ("5m", dt_utc(2019, 8, 12, 13, 25, 0)),
         # 10m -> 2019-08-12 13:30:00
-        ("10m", datetime(2019, 8, 12, 13, 30, 0, tzinfo=timezone.utc)),
+        ("10m", dt_utc(2019, 8, 12, 13, 30, 0)),
         # 1h -> 2019-08-12 14:00:00
-        ("1h", datetime(2019, 8, 12, 14, 00, 0, tzinfo=timezone.utc)),
+        ("1h", dt_utc(2019, 8, 12, 14, 00, 0)),
         # 2h -> 2019-08-12 14:00:00
-        ("2h", datetime(2019, 8, 12, 14, 00, 0, tzinfo=timezone.utc)),
+        ("2h", dt_utc(2019, 8, 12, 14, 00, 0)),
         # 4h -> 2019-08-12 14:00:00
-        ("4h", datetime(2019, 8, 12, 16, 00, 0, tzinfo=timezone.utc)),
+        ("4h", dt_utc(2019, 8, 12, 16, 00, 0)),
         # 1d -> 2019-08-13 00:00:00
-        ("1d", datetime(2019, 8, 13, 0, 0, 0, tzinfo=timezone.utc)),
+        ("1d", dt_utc(2019, 8, 13, 0, 0, 0)),
     ]
 
     for interval, result in tf_list:
         assert timeframe_to_next_date(interval, date) == result
 
-    date = datetime.now(tz=timezone.utc)
+    date = dt_now()
     assert timeframe_to_next_date("5m") > date
 
-    date = datetime(2019, 8, 12, 13, 30, 0, tzinfo=timezone.utc)
+    date = dt_utc(2019, 8, 12, 13, 30, 0)
     assert timeframe_to_next_date("5m", date) == date + timedelta(minutes=5)
 
 
@@ -372,10 +375,10 @@ def test_price_to_precision(price, precision_mode, precision, expected, rounding
     "amount,precision,precision_mode,contract_size,expected",
     [
         (1.17, 1.0, 4, 0.01, 1.17),  # Tick size
-        (1.17, 1.0, 2, 0.01, 1.17),  #
-        (1.16, 1.0, 4, 0.01, 1.16),  #
-        (1.16, 1.0, 2, 0.01, 1.16),  #
-        (1.13, 1.0, 2, 0.01, 1.13),  #
+        (1.17, 1.0, 2, 0.01, 1.17),
+        (1.16, 1.0, 4, 0.01, 1.16),
+        (1.16, 1.0, 2, 0.01, 1.16),
+        (1.13, 1.0, 2, 0.01, 1.13),
         (10.988, 1.0, 2, 10, 10),
         (10.988, 1.0, 4, 10, 10),
     ],
@@ -385,3 +388,42 @@ def test_amount_to_contract_precision_standalone(
 ):
     res = amount_to_contract_precision(amount, precision, precision_mode, contract_size)
     assert pytest.approx(res) == expected
+
+
+def test_exchange__exchange_has_helper():
+    e_mod = MagicMock()
+    e_mod.has = {
+        "fetchTicker": True,
+        "fetchOHLCV": False,
+        "fetchTrades": True,
+        "fetchMyTrades": False,
+        "fetchOrder": True,
+    }
+    required = {
+        "fetchOHLCV": [],
+        "fetchTicker": [],
+        "fetchMyTrades": ["fetchTrades"],
+        "fetchOrder": ["fetchOpenOrder", "fetchClosedOrder"],
+    }
+    missing = _exchange_has_helper(e_mod, required)
+    assert set(missing) == {"fetchOHLCV"}
+
+    e_mod.has = {
+        "fetchTicker": True,
+        "fetchOHLCV": False,
+        "fetchTrades": False,
+        "fetchMyTrades": False,
+        "fetchOrder": True,
+    }
+    missing = _exchange_has_helper(e_mod, required)
+    assert set(missing) == {"fetchOHLCV", "fetchMyTrades"}
+
+    e_mod.has = {
+        "fetchTicker": True,
+        "fetchOHLCV": False,
+        "fetchTrades": False,
+        "fetchMyTrades": False,
+        "fetchOrder": False,
+    }
+    missing = _exchange_has_helper(e_mod, required)
+    assert set(missing) == {"fetchOHLCV", "fetchMyTrades", "fetchOrder"}

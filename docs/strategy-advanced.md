@@ -33,7 +33,7 @@ class AwesomeStrategy(IStrategy):
                 trade_entry_type = trade.get_custom_data(key='entry_type')
                 if trade_entry_type is None:
                     trade_entry_type = 'breakout' if 'entry_1' in trade.enter_tag else 'dip'
-                elif fills > 1:
+                elif len(fills) > 1:
                     trade_entry_type = 'buy_up'
                 trade.set_custom_data(key='entry_type', value=trade_entry_type)
         return super().bot_loop_start(**kwargs)
@@ -174,17 +174,27 @@ class AwesomeStrategy(IStrategy):
 
 ## Enter Tag
 
-When your strategy has multiple buy signals, you can name the signal that triggered.
-Then you can access your buy signal on `custom_exit`
+When your strategy has multiple entry signals, you can name the signal that triggered.
+Then you can access your entry signal on `custom_exit`
 
 ```python
 def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+    dataframe["enter_tag"] = ""
+    signal_rsi = (qtpylib.crossed_above(dataframe["rsi"], 35))
+    signal_bblower = (dataframe["bb_lowerband"] < dataframe["close"])
+    # Additional conditions
     dataframe.loc[
         (
-            (dataframe['rsi'] < 35) &
-            (dataframe['volume'] > 0)
-        ),
-        ['enter_long', 'enter_tag']] = (1, 'buy_signal_rsi')
+            signal_rsi
+            | signal_bblower
+            # ... additional signals to enter a long position
+        )
+        & (dataframe["volume"] > 0)
+            , "enter_long"
+        ] = 1
+    # Concatenate the tags so all signals are kept
+    dataframe.loc[signal_rsi, "enter_tag"] += "long_signal_rsi "
+    dataframe.loc[signal_bblower, "enter_tag"] += "long_signal_bblower "
 
     return dataframe
 
@@ -192,14 +202,17 @@ def custom_exit(self, pair: str, trade: Trade, current_time: datetime, current_r
                 current_profit: float, **kwargs):
     dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
     last_candle = dataframe.iloc[-1].squeeze()
-    if trade.enter_tag == 'buy_signal_rsi' and last_candle['rsi'] > 80:
-        return 'sell_signal_rsi'
+    if "long_signal_rsi" in trade.enter_tag and last_candle["rsi"] > 80:
+        return "exit_signal_rsi"
+    if "long_signal_bblower" in trade.enter_tag and last_candle["high"] > last_candle["bb_upperband"]:
+        return "exit_signal_bblower"
+    # ...
     return None
 
 ```
 
 !!! Note
-    `enter_tag` is limited to 100 characters, remaining data will be truncated.
+    `enter_tag` is limited to 255 characters, remaining data will be truncated.
 
 !!! Warning
     There is only one `enter_tag` column, which is used for both long and short trades.
@@ -213,17 +226,27 @@ Similar to [Entry Tagging](#enter-tag), you can also specify an exit tag.
 
 ``` python
 def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+    dataframe["exit_tag"] = ""
+    rsi_exit_signal = (dataframe["rsi"] > 70)
+    ema_exit_signal  = (dataframe["ema20"] < dataframe["ema50"])
+    # Additional conditions
     dataframe.loc[
         (
-            (dataframe['rsi'] > 70) &
-            (dataframe['volume'] > 0)
-        ),
-        ['exit_long', 'exit_tag']] = (1, 'exit_rsi')
+            rsi_exit_signal
+            | ema_exit_signal
+            # ... additional signals to exit a long position
+        ) &
+        (dataframe["volume"] > 0)
+        ,
+    "exit_long"] = 1
+    # Concatenate the tags so all signals are kept
+    dataframe.loc[rsi_exit_signal, "exit_tag"] += "exit_signal_rsi "
+    dataframe.loc[rsi_exit_signal2, "exit_tag"] += "exit_signal_rsi "
 
     return dataframe
 ```
 
-The provided exit-tag is then used as sell-reason - and shown as such in backtest results.
+The provided exit-tag is then used as exit-reason - and shown as such in backtest results.
 
 !!! Note
     `exit_reason` is limited to 100 characters, remaining data will be truncated.
@@ -269,6 +292,9 @@ class MyAwesomeStrategy2(MyAwesomeStrategy):
 Both attributes and methods may be overridden, altering behavior of the original strategy in a way you need.
 
 While keeping the subclass in the same file is technically possible, it can lead to some problems with hyperopt parameter files, we therefore recommend to use separate strategy files, and import the parent strategy as shown above.
+
+!!! Warning "backtest Caching"
+    When using Backtesting with split files - only changes in the strategy file will be taken into account for cache invalidation. If you change the parent strategy (or any imported module) - you will need to use `--cache none` once to force a fresh backtest.
 
 ## Embedding Strategies
 

@@ -11,10 +11,9 @@ from freqtrade.exceptions import (
     RetryableOrderError,
     TemporaryError,
 )
-from freqtrade.exchange import Exchange, date_minus_candles
+from freqtrade.exchange import Exchange
 from freqtrade.exchange.common import API_RETRY_COUNT, retrier
 from freqtrade.exchange.exchange_types import CcxtOrder, FtHas
-from freqtrade.misc import safe_value_fallback2
 from freqtrade.util import dt_now, dt_ts
 
 
@@ -29,10 +28,9 @@ class Okx(Exchange):
 
     _ft_has: FtHas = {
         "ohlcv_candle_limit": 100,  # Warning, special case with data prior to X months
-        "mark_ohlcv_timeframe": "4h",
-        "funding_fee_timeframe": "8h",
-        "stoploss_order_types": {"limit": "limit"},
+        "stoploss_order_types": {"limit": "limit", "market": "market"},
         "stoploss_on_exchange": True,
+        "stoploss_query_requires_stop_flag": True,
         "trades_has_history": False,  # Endpoint doesn't have a "since" parameter
         "ws_enabled": True,
     }
@@ -41,14 +39,17 @@ class Okx(Exchange):
         "stop_price_type_field": "slTriggerPxType",
         "stop_price_type_value_mapping": {
             PriceType.LAST: "last",
-            PriceType.MARK: "index",
-            PriceType.INDEX: "mark",
+            PriceType.MARK: "mark",
+            PriceType.INDEX: "index",
         },
+        "stoploss_blocks_assets": False,
         "ws_enabled": True,
+        # ccxt maps "total" to the currency's "eq" (equity), which includes unrealized PnL
+        "balance_includes_unrealized_pnl": True,
     }
 
     _supported_trading_mode_margin_pairs: list[tuple[TradingMode, MarginMode]] = [
-        # TradingMode.SPOT always supported and not required in this list
+        (TradingMode.SPOT, MarginMode.NONE),
         # (TradingMode.MARGIN, MarginMode.CROSS),
         # (TradingMode.FUTURES, MarginMode.CROSS),
         (TradingMode.FUTURES, MarginMode.ISOLATED),
@@ -64,17 +65,19 @@ class Okx(Exchange):
         """
         Exchange ohlcv candle limit
         OKX has the following behaviour:
-        * 300 candles for up-to-date data
-        * 100 candles for historic data
-        * 100 candles for additional candles (not futures or spot).
+        * spot and futures:
+            * 300 candles for regular candles
+        * mark and premium-index:
+            * 300 candles for up-to-date data
+            * 100 candles for historic data
+        * additional data:
+            * 100 candles for additional candles
         :param timeframe: Timeframe to check
-        :param candle_type: Candle-type
+        :param candle_type: Candle type to use (spot, futures, funding_rate, ...)
         :param since_ms: Starting timestamp
         :return: Candle limit as integer
         """
-        if candle_type in (CandleType.FUTURES, CandleType.SPOT) and (
-            not since_ms or since_ms > (date_minus_candles(timeframe, 300).timestamp() * 1000)
-        ):
+        if candle_type in (CandleType.FUTURES, CandleType.SPOT):
             return 300
 
         return super().ohlcv_candle_limit(timeframe, candle_type, since_ms)
@@ -181,11 +184,16 @@ class Okx(Exchange):
             return float("inf")
 
         pair_tiers = self._leverage_tiers[pair]
-        return pair_tiers[-1]["maxNotional"] / leverage
+        last_max_notional = pair_tiers[-1]["maxNotional"]
+        if last_max_notional is None:
+            return float("inf")
+        return last_max_notional / leverage
 
     def _get_stop_params(self, side: BuySell, ordertype: str, stop_price: float) -> dict:
         params = super()._get_stop_params(side, ordertype, stop_price)
-        if self.trading_mode == TradingMode.FUTURES and self.margin_mode:
+        if self.trading_mode == TradingMode.SPOT:
+            params["tdMode"] = "cash"
+        elif self.trading_mode == TradingMode.FUTURES and self.margin_mode:
             params["tdMode"] = self.margin_mode.value
             params["posSide"] = self._get_posSide(side, True)
         return params
@@ -257,21 +265,6 @@ class Okx(Exchange):
                 raise OperationalException(e) from e
         raise RetryableOrderError(f"StoplossOrder not found (pair: {pair} id: {order_id}).")
 
-    def get_order_id_conditional(self, order: CcxtOrder) -> str:
-        if order.get("type", "") == "stop":
-            return safe_value_fallback2(order, order, "id_stop", "id")
-        return order["id"]
-
-    def cancel_stoploss_order(self, order_id: str, pair: str, params: dict | None = None) -> dict:
-        params1 = {"stop": True}
-        # 'ordType': 'conditional'
-        #
-        return self.cancel_order(
-            order_id=order_id,
-            pair=pair,
-            params=params1,
-        )
-
     def _fetch_orders_emulate(self, pair: str, since_ms: int) -> list[CcxtOrder]:
         orders = []
 
@@ -286,3 +279,23 @@ class Okx(Exchange):
         orders_open = self._api.fetch_open_orders(pair, since=since_ms)
         orders.extend(orders_open)
         return orders
+
+
+class Myokx(Okx):
+    """MyOkx exchange class.
+    Minimal adjustment to disable futures trading for the EU subsidiary of Okx
+    """
+
+    _supported_trading_mode_margin_pairs: list[tuple[TradingMode, MarginMode]] = [
+        (TradingMode.SPOT, MarginMode.NONE),
+    ]
+
+
+class Okxus(Okx):
+    """Okxus exchange class.
+    Minimal adjustment to disable futures trading for the US subsidiary of Okx
+    """
+
+    _supported_trading_mode_margin_pairs: list[tuple[TradingMode, MarginMode]] = [
+        (TradingMode.SPOT, MarginMode.NONE),
+    ]

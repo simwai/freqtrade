@@ -1,0 +1,122 @@
+- generic [active] [ref=f22e1]:
+  - banner [ref=f22e2]:
+    - generic [ref=f22e5]:
+      - heading "Strategy Lab" [level=1] [ref=f22e6]
+      - generic [ref=f22e7]: freqtrade strategy overview · 2026-08-28 16:02
+  - generic [ref=f22e8]:
+    - generic [ref=f22e1548]:
+      - generic [ref=f22e1549]: running
+      - generic [ref=f22e1550]: report-refresh-1787925851
+      - generic [ref=f22e1551]: report-refresh-1787925851-1787925851 · step 1/1
+      - button "Logs" [ref=f22e1552] [cursor=pointer]
+      - button "Pause" [ref=f22e1553] [cursor=pointer]
+      - button "Stop" [ref=f22e1554] [cursor=pointer]
+    - generic [ref=f22e1555]:
+      - generic [ref=f22e1556]: running
+      - generic [ref=f22e1557]: refresh
+      - generic [ref=f22e1558]: refresh-1787925851 · step 1/1
+      - button "Logs" [ref=f22e1559] [cursor=pointer]
+      - button "Pause" [ref=f22e1560] [cursor=pointer]
+      - button "Stop" [ref=f22e1561] [cursor=pointer]
+    - generic [ref=f22e1562]:
+      - generic [ref=f22e1563]: running
+      - generic [ref=f22e1564]: report-refresh-1787925846
+      - generic [ref=f22e1565]: report-refresh-1787925846-1787925846 · step 1/1
+      - button "Logs" [ref=f22e1566] [cursor=pointer]
+      - button "Pause" [ref=f22e1567] [cursor=pointer]
+      - button "Stop" [ref=f22e1568] [cursor=pointer]
+    - generic [ref=f22e1569]:
+      - generic [ref=f22e1570]: running
+      - generic [ref=f22e1571]: refresh
+      - generic [ref=f22e1572]: refresh-1787925846 · step 1/1
+      - button "Logs" [ref=f22e1573] [cursor=pointer]
+      - button "Pause" [ref=f22e1574] [cursor=pointer]
+      - button "Stop" [ref=f22e1575] [cursor=pointer]
+    - generic [ref=f22e1576]:
+      - generic [ref=f22e1577]: done
+      - generic [ref=f22e1578]: report-refresh-1787924277
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\build_report.py" [ref=f22e1579]: Dashboard written to M:\Documents\Programming\Python\freqtrade\user_data\analysis\dashboard.html (4498 KB)
+      - button "View log" [ref=f22e1580] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1581] [cursor=pointer]
+    - generic [ref=f22e1582]:
+      - generic [ref=f22e1583]: error
+      - generic [ref=f22e1584]: refresh
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\ingest_results.py" [ref=f22e1585]: "Traceback (most recent call last): | sqlite3.OperationalError: database is locked"
+      - button "View log" [ref=f22e1586] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1587] [cursor=pointer]
+    - generic [ref=f22e1588]:
+      - generic [ref=f22e1589]: done
+      - generic [ref=f22e1590]: report-refresh-1787924262
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\build_report.py" [ref=f22e1591]: Dashboard written to M:\Documents\Programming\Python\freqtrade\user_data\analysis\dashboard.html (4498 KB)
+      - button "View log" [ref=f22e1592] [cursor=pointer]
+      - button "Dismiss" [ref=f22e1593] [cursor=pointer]
+  - generic [ref=f22e27]:
+    - button "Dashboard" [ref=f22e28] [cursor=pointer]
+    - button "Strategies" [ref=f22e29] [cursor=pointer]
+    - button "History" [ref=f22e30] [cursor=pointer]
+    - button "Benchmark" [ref=f22e31] [cursor=pointer]
+    - button "Walk-Forward" [ref=f22e32] [cursor=pointer]
+    - button "Hyperopt" [ref=f22e33] [cursor=pointer]
+    - button "Trades" [ref=f22e34] [cursor=pointer]
+    - button "Lab" [ref=f22e35] [cursor=pointer]
+  - main [ref=f22e36]:
+    - generic [ref=f22e1526]:
+      - generic [ref=f22e1527]:
+        - heading "Benchmark" [level=2] [ref=f22e1528]
+        - generic [ref=f22e1529]: one box per strategy, one dot per run · outliers visible at a glance
+      - group [ref=f22e1530]:
+        - generic "How to read this (plain English)" [ref=f22e1531] [cursor=pointer]
+      - generic [ref=f22e1532]:
+        - generic [ref=f22e1533]:
+          - text: "Metric:"
+          - combobox "Metric:" [ref=f22e1534]:
+            - option "Sortino" [selected]
+            - option "Total Profit"
+            - option "Calmar"
+            - option "Profit Factor"
+            - option "Max Drawdown"
+        - generic [ref=f22e1535]:
+          - text: "Source:"
+          - combobox "Source:" [ref=f22e1536]:
+            - option "Benchmark + backtest (default)" [selected]
+            - option "Benchmark only"
+            - option "Backtest only"
+        - generic [ref=f22e1537]:
+          - text: "Sort by:"
+          - combobox "Sort by:" [ref=f22e1538]:
+            - option "Median (default)" [selected]
+            - option "Run count"
+            - option "Strategy name"
+        - generic [ref=f22e1539]:
+          - checkbox "Log scale" [ref=f22e1540]
+          - text: Log scale
+        - generic [ref=f22e1541]:
+          - checkbox "Show every run" [checked] [ref=f22e1542]
+          - text: Show every run
+      - paragraph [ref=f22e1544]: 72 strategies · 369 runs · 62 outliers (|z|>2.5) · 3 benchmarked · 69 backtest-only
+  - complementary [ref=f22e1488]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=f22e1492]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

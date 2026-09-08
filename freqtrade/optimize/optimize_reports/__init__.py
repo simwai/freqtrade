@@ -1,6 +1,5 @@
 # flake8: noqa: F401
 from freqtrade.optimize.optimize_reports.bt_output import (
-    generate_edge_table,
     generate_wins_draws_losses,
     show_backtest_result,
     show_backtest_results,
@@ -13,6 +12,7 @@ from freqtrade.optimize.optimize_reports.bt_output import (
 )
 from freqtrade.optimize.optimize_reports.bt_storage import store_backtest_results
 from freqtrade.optimize.optimize_reports.optimize_reports import (
+    convert_bt_wallet_collection,
     generate_all_periodic_breakdown_stats,
     generate_backtest_stats,
     generate_daily_stats,

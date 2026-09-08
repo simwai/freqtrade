@@ -1,0 +1,143 @@
+- generic [active] [ref=f11e1]:
+  - banner [ref=f11e2]:
+    - generic [ref=f11e5]:
+      - heading "Strategy Lab" [level=1] [ref=f11e6]
+      - generic [ref=f11e7]: freqtrade strategy overview · 2026-08-29 22:18
+    - button "Jobs" [ref=f11e8] [cursor=pointer]
+  - generic:
+    - generic:
+      - generic: Jobs
+      - button: ✕ Close
+  - generic [ref=f11e9]:
+    - button "Dashboard" [ref=f11e10] [cursor=pointer]
+    - button "Strategies" [ref=f11e11] [cursor=pointer]
+    - button "History" [ref=f11e12] [cursor=pointer]
+    - button "Benchmark" [ref=f11e13] [cursor=pointer]
+    - button "Walk-Forward" [ref=f11e14] [cursor=pointer]
+    - button "Hyperopt" [ref=f11e15] [cursor=pointer]
+    - button "Trades" [ref=f11e16] [cursor=pointer]
+    - button "Lab" [ref=f11e17] [cursor=pointer]
+  - main [ref=f11e18]:
+    - generic [ref=f11e20]:
+      - generic [ref=f11e21]:
+        - heading "History" [level=2] [ref=f11e22]
+        - generic [ref=f11e23]: profit & sortino per strategy over all runs
+      - generic [ref=f11e24]:
+        - generic [ref=f11e25]:
+          - checkbox "Profit % (log scale)" [checked] [ref=f11e26]
+          - text: Profit % (log scale)
+        - listbox [ref=f11e27]:
+          - option "Top by run count" [selected]
+          - option "All"
+          - option "BigZ08"
+          - option "adaptive"
+          - option "BigZ06AtrSl"
+          - option "BigZ06"
+          - option "HoffmanIRBStrategy"
+          - option "SmokeStrategyTemplateV21"
+          - option "NostalgiaForInfinityX7Guarded"
+          - option "OctopusNestStrategy"
+          - option "NostalgiaForInfinityX7"
+          - option "NostalgiaForInfinityX7GuardedRelative"
+          - option "CombinedBinHClucAndMADV3"
+          - option "HybridRegimeSwitcher"
+          - option "NostalgiaForInfinityX4"
+          - option "BigZ06Original"
+          - option "LuxAlgo15mBTCLowRisk"
+          - option "NostalgiaForInfinityX7GuardedCat15"
+          - option "HoffmanIRBStrategy5mFeeVRLocked"
+          - option "newstrategy51"
+          - option "newstrategy53"
+          - option "HarmonicDivergence"
+          - option "BigZ07Next2"
+          - option "HoffmanIRBStrategy5mFee"
+          - option "NFIX7GuardedCat15"
+          - option "NFIX7GuardedCat25"
+          - option "NFIX7GuardedCat30"
+          - option "NostalgiaForInfinityX7GuardedAge10"
+          - option "NostalgiaForInfinityX7GuardedAge21"
+          - option "NostalgiaForInfinityX7GuardedCat25"
+          - option "NostalgiaForInfinityX7GuardedCat30"
+          - option "ClucHAnix_5m"
+          - option "HoffmanIRBStrategy5mFeeVRPB"
+          - option "HoffmanIRBStrategy5mFeeVRPB50"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10"
+          - option "HoffmanIRBStrategy5mFeeVolRegime"
+          - option "MfiEmaWaveTrend"
+          - option "MfiEmaWaveTrend2"
+          - option "NFIX7GuardedAge10"
+          - option "NFIX7GuardedAge21"
+          - option "GKDAdaptiveAcademicFinal"
+          - option "HoffmanIRBStrategy15m"
+          - option "HoffmanIRBStrategy1h"
+          - option "HoffmanIRBStrategy5mFeePB"
+          - option "HoffmanIRBStrategy5mFeeVR50PB"
+          - option "HoffmanIRBStrategy5mFeeVRChV"
+          - option "HoffmanIRBStrategy5mFeeVRDC"
+          - option "HoffmanIRBStrategy5mFeeVRPB25"
+          - option "HoffmanIRBStrategy5mFeeVRPBN15"
+          - option "HoffmanIRBStrategy5mFeeVRSPBF"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFChV"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFDC"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFPB"
+          - option "HoffmanIRBStrategyRR05"
+          - option "Ichi"
+          - option "NostalgiaForInfinityX6"
+          - option "StrategyTemplateV21"
+          - option "SupertrendKeltner"
+          - option "WildersVolatilityBingAi"
+          - option "ichiV1"
+        - button "Select all" [ref=f11e28] [cursor=pointer]
+        - button "Top 8" [ref=f11e29] [cursor=pointer]
+        - button "Clear" [ref=f11e30] [cursor=pointer]
+      - generic [ref=f11e31]:
+        - generic [ref=f11e33]:
+          - generic [ref=f11e34]: BigZ08
+          - generic [ref=f11e35]: 91 runs
+        - generic [ref=f11e40]:
+          - generic [ref=f11e41]: adaptive
+          - generic [ref=f11e42]: 45 runs
+        - generic [ref=f11e47]:
+          - generic [ref=f11e48]: BigZ06AtrSl
+          - generic [ref=f11e49]: 24 runs
+        - generic [ref=f11e54]:
+          - generic [ref=f11e55]: BigZ06
+          - generic [ref=f11e56]: 17 runs
+        - generic [ref=f11e61]:
+          - generic [ref=f11e62]: HoffmanIRBStrategy
+          - generic [ref=f11e63]: 13 runs
+        - generic [ref=f11e68]:
+          - generic [ref=f11e69]: SmokeStrategyTemplateV21
+          - generic [ref=f11e70]: 12 runs
+        - generic [ref=f11e75]:
+          - generic [ref=f11e76]: NostalgiaForInfinityX7Guarded
+          - generic [ref=f11e77]: 11 runs
+        - generic [ref=f11e82]:
+          - generic [ref=f11e83]: OctopusNestStrategy
+          - generic [ref=f11e84]: 11 runs
+  - complementary [ref=f11e88]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=f11e92]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

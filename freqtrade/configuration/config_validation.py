@@ -66,7 +66,8 @@ def validate_config_schema(conf: dict[str, Any], preliminary: bool = False) -> d
         return conf
     except ValidationError as e:
         logger.critical(f"Invalid configuration. Reason: {e}")
-        raise ValidationError(best_match(Draft4Validator(conf_schema).iter_errors(conf)).message)
+        result = best_match(FreqtradeValidator(conf_schema).iter_errors(conf))
+        raise ConfigurationError(result.message)
 
 
 def validate_config_consistency(conf: dict[str, Any], *, preliminary: bool = False) -> None:
@@ -91,6 +92,7 @@ def validate_config_consistency(conf: dict[str, Any], *, preliminary: bool = Fal
     _validate_consumers(conf)
     validate_migrated_strategy_settings(conf)
     _validate_orderflow(conf)
+    _validate_demo_trading(conf)
 
     # validate configuration before returning
     logger.info("Validating configuration ...")
@@ -99,14 +101,12 @@ def validate_config_consistency(conf: dict[str, Any], *, preliminary: bool = Fal
 
 def _validate_unlimited_amount(conf: dict[str, Any]) -> None:
     """
-    If edge is disabled, either max_open_trades or stake_amount need to be set.
+    Either max_open_trades or stake_amount need to be set.
     :raise: ConfigurationError if config validation failed
     """
     if (
-        not conf.get("edge", {}).get("enabled")
-        and conf.get("max_open_trades") == float("inf")
-        and conf.get("stake_amount") == UNLIMITED_STAKE_AMOUNT
-    ):
+        conf.get("max_open_trades") == float("inf") or conf.get("max_open_trades") == -1
+    ) and conf.get("stake_amount") == UNLIMITED_STAKE_AMOUNT:
         raise ConfigurationError("`max_open_trades` and `stake_amount` cannot both be unlimited.")
 
 
@@ -114,7 +114,6 @@ def _validate_price_config(conf: dict[str, Any]) -> None:
     """
     When using market orders, price sides must be using the "other" side of the price
     """
-    # TODO: The below could be an enforced setting when using market orders
     if conf.get("order_types", {}).get("entry") == "market" and conf.get("entry_pricing", {}).get(
         "price_side"
     ) not in ("ask", "other"):
@@ -139,12 +138,11 @@ def _validate_trailing_stoploss(conf: dict[str, Any]) -> None:
     tsl_offset = float(conf.get("trailing_stop_positive_offset", 0))
     tsl_only_offset = conf.get("trailing_only_offset_is_reached", False)
 
-    if tsl_only_offset:
-        if tsl_positive == 0.0:
-            raise ConfigurationError(
-                "The config trailing_only_offset_is_reached needs "
-                "trailing_stop_positive_offset to be more than 0 in your config."
-            )
+    if tsl_only_offset and tsl_positive == 0.0:
+        raise ConfigurationError(
+            "The config trailing_only_offset_is_reached needs "
+            "trailing_stop_positive_offset to be more than 0 in your config."
+        )
     if tsl_positive > 0 and 0 < tsl_offset <= tsl_positive:
         raise ConfigurationError(
             "The config trailing_stop_positive_offset needs "
@@ -164,12 +162,9 @@ def _validate_edge(conf: dict[str, Any]) -> None:
     Edge and Dynamic whitelist should not both be enabled, since edge overrides dynamic whitelists.
     """
 
-    if not conf.get("edge", {}).get("enabled"):
-        return
-
-    if not conf.get("use_exit_signal", True):
+    if conf.get("edge", {}).get("enabled"):
         raise ConfigurationError(
-            "Edge requires `use_exit_signal` to be True, otherwise no sells will happen."
+            "Edge is no longer supported and has been removed from Freqtrade with 2025.6."
         )
 
 
@@ -411,11 +406,15 @@ def _validate_consumers(conf: dict[str, Any]) -> None:
 
 
 def _validate_orderflow(conf: dict[str, Any]) -> None:
-    if conf.get("exchange", {}).get("use_public_trades"):
-        if "orderflow" not in conf:
-            raise ConfigurationError(
-                "Orderflow is a required configuration key when using public trades."
-            )
+    if conf.get("exchange", {}).get("use_public_trades") and "orderflow" not in conf:
+        raise ConfigurationError(
+            "Orderflow is a required configuration key when using public trades."
+        )
+
+
+def _validate_demo_trading(conf: dict[str, Any]) -> None:
+    if conf.get("exchange", {}).get("demo_trading", False) and conf.get("dry_run", False):
+        raise ConfigurationError("Demo trading cannot be used together with dry_run.")
 
 
 def _strategy_settings(conf: dict[str, Any]) -> None:

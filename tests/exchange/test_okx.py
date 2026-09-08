@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, PropertyMock
 
 import ccxt
@@ -15,7 +15,7 @@ from tests.exchange.test_exchange import ccxt_exceptionhandlers
 def test_okx_ohlcv_candle_limit(default_conf, mocker):
     exchange = get_patched_exchange(mocker, default_conf, exchange="okx")
     timeframes = ("1m", "5m", "1h")
-    start_time = int(datetime(2021, 1, 1, tzinfo=timezone.utc).timestamp() * 1000)
+    start_time = int(datetime(2021, 1, 1, tzinfo=UTC).timestamp() * 1000)
 
     for timeframe in timeframes:
         assert exchange.ohlcv_candle_limit(timeframe, CandleType.SPOT) == 300
@@ -23,30 +23,30 @@ def test_okx_ohlcv_candle_limit(default_conf, mocker):
         assert exchange.ohlcv_candle_limit(timeframe, CandleType.MARK) == 100
         assert exchange.ohlcv_candle_limit(timeframe, CandleType.FUNDING_RATE) == 100
 
-        assert exchange.ohlcv_candle_limit(timeframe, CandleType.SPOT, start_time) == 100
-        assert exchange.ohlcv_candle_limit(timeframe, CandleType.FUTURES, start_time) == 100
+        assert exchange.ohlcv_candle_limit(timeframe, CandleType.SPOT, start_time) == 300
+        assert exchange.ohlcv_candle_limit(timeframe, CandleType.FUTURES, start_time) == 300
         assert exchange.ohlcv_candle_limit(timeframe, CandleType.MARK, start_time) == 100
         assert exchange.ohlcv_candle_limit(timeframe, CandleType.FUNDING_RATE, start_time) == 100
         one_call = int(
             (
-                datetime.now(timezone.utc)
-                - timedelta(minutes=290 * timeframe_to_minutes(timeframe))
+                datetime.now(UTC) - timedelta(minutes=290 * timeframe_to_minutes(timeframe))
             ).timestamp()
             * 1000
         )
 
         assert exchange.ohlcv_candle_limit(timeframe, CandleType.SPOT, one_call) == 300
         assert exchange.ohlcv_candle_limit(timeframe, CandleType.FUTURES, one_call) == 300
+        assert exchange.ohlcv_candle_limit(timeframe, CandleType.MARK, one_call) == 100
 
         one_call = int(
             (
-                datetime.now(timezone.utc)
-                - timedelta(minutes=320 * timeframe_to_minutes(timeframe))
+                datetime.now(UTC) - timedelta(minutes=320 * timeframe_to_minutes(timeframe))
             ).timestamp()
             * 1000
         )
-        assert exchange.ohlcv_candle_limit(timeframe, CandleType.SPOT, one_call) == 100
-        assert exchange.ohlcv_candle_limit(timeframe, CandleType.FUTURES, one_call) == 100
+        assert exchange.ohlcv_candle_limit(timeframe, CandleType.SPOT, one_call) == 300
+        assert exchange.ohlcv_candle_limit(timeframe, CandleType.FUTURES, one_call) == 300
+        assert exchange.ohlcv_candle_limit(timeframe, CandleType.MARK, one_call) == 100
 
 
 def test_get_maintenance_ratio_and_amt_okx(
@@ -661,24 +661,34 @@ def test_stoploss_adjust_okx(mocker, default_conf, sl1, sl2, sl3, side):
 
 def test_stoploss_cancel_okx(mocker, default_conf):
     exchange = get_patched_exchange(mocker, default_conf, exchange="okx")
-
-    exchange.cancel_order = MagicMock()
+    co_mock = mocker.patch.object(exchange, "cancel_order", autospec=True)
 
     exchange.cancel_stoploss_order("1234", "ETH/USDT")
-    assert exchange.cancel_order.call_count == 1
-    assert exchange.cancel_order.call_args_list[0][1]["order_id"] == "1234"
-    assert exchange.cancel_order.call_args_list[0][1]["pair"] == "ETH/USDT"
-    assert exchange.cancel_order.call_args_list[0][1]["params"] == {"stop": True}
+    assert co_mock.call_count == 1
+    args, _ = co_mock.call_args
+    assert args[0] == "1234"
+    assert args[1] == "ETH/USDT"
+    assert args[2] == {"stop": True}
 
 
-def test__get_stop_params_okx(mocker, default_conf):
-    default_conf["trading_mode"] = "futures"
-    default_conf["margin_mode"] = "isolated"
+@pytest.mark.parametrize(
+    "trading_mode,margin_mode,expected",
+    [
+        (TradingMode.SPOT, MarginMode.NONE, {"stopLossPrice": 1500, "tdMode": "cash"}),
+        (
+            TradingMode.FUTURES,
+            MarginMode.ISOLATED,
+            {"stopLossPrice": 1500, "tdMode": "isolated", "posSide": "net"},
+        ),
+    ],
+)
+def test__get_stop_params_okx(mocker, default_conf, trading_mode, margin_mode, expected):
+    default_conf["trading_mode"] = trading_mode
+    default_conf["margin_mode"] = margin_mode
     exchange = get_patched_exchange(mocker, default_conf, exchange="okx")
     params = exchange._get_stop_params("sell", "market", 1500)
 
-    assert params["tdMode"] == "isolated"
-    assert params["posSide"] == "net"
+    assert params == expected
 
 
 def test_fetch_orders_okx(default_conf, mocker, limit_order):
@@ -693,7 +703,7 @@ def test_fetch_orders_okx(default_conf, mocker, limit_order):
     api_mock.fetch_closed_orders = MagicMock(return_value=[limit_order["buy"]])
 
     mocker.patch(f"{EXMS}.exchange_has", return_value=True)
-    start_time = datetime.now(timezone.utc) - timedelta(days=20)
+    start_time = datetime.now(UTC) - timedelta(days=20)
 
     exchange = get_patched_exchange(mocker, default_conf, api_mock, exchange="okx")
     # Not available in dry-run
@@ -727,7 +737,7 @@ def test_fetch_orders_okx(default_conf, mocker, limit_order):
     api_mock.fetch_closed_orders.reset_mock()
 
     # regular closed_orders endpoint only has history for 7 days.
-    exchange.fetch_orders("mocked", datetime.now(timezone.utc) - timedelta(days=6))
+    exchange.fetch_orders("mocked", datetime.now(UTC) - timedelta(days=6))
     assert api_mock.fetch_orders.call_count == 0
     assert api_mock.fetch_open_orders.call_count == 1
     assert api_mock.fetch_closed_orders.call_count == 1

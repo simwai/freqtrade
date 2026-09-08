@@ -1,0 +1,101 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - heading "Strategy Lab" [level=1] [ref=e6]
+      - generic [ref=e7]: freqtrade strategy overview · 2026-08-28 16:17
+  - generic [ref=e8]:
+    - generic [ref=e1543]:
+      - generic [ref=e1544]: running
+      - generic [ref=e1545]: report-refresh-1787926610
+      - generic [ref=e1546]: report-refresh-1787926610-1787926610 · step 1/1
+      - button "Logs" [ref=e1547] [cursor=pointer]
+      - button "Pause" [ref=e1548] [cursor=pointer]
+      - button "Stop" [ref=e1549] [cursor=pointer]
+    - generic [ref=e1550]:
+      - generic [ref=e1551]: done
+      - generic [ref=e1552]: report-refresh-1787926595
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\build_report.py" [ref=e1553]: Dashboard written to M:\Documents\Programming\Python\freqtrade\user_data\analysis\dashboard.html (4108 KB)
+      - button "View log" [ref=e1554] [cursor=pointer]
+      - button "Dismiss" [ref=e1555] [cursor=pointer]
+    - generic [ref=e1556]:
+      - generic [ref=e1557]: done
+      - generic [ref=e1558]: report-refresh-1787926580
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\build_report.py" [ref=e1559]: Dashboard written to M:\Documents\Programming\Python\freqtrade\user_data\analysis\dashboard.html (4104 KB)
+      - button "View log" [ref=e1560] [cursor=pointer]
+      - button "Dismiss" [ref=e1561] [cursor=pointer]
+    - generic [ref=e1562]:
+      - generic [ref=e1563]: done
+      - generic [ref=e1564]: report-refresh-1787926565
+      - generic "C:\\Users\\Simon\\AppData\\Local\\Programs\\Python\\Python310\\python.exe M:\\Documents\\Programming\\Python\\freqtrade\\user_data\\scripts\\build_report.py" [ref=e1565]: Dashboard written to M:\Documents\Programming\Python\freqtrade\user_data\analysis\dashboard.html (4094 KB)
+      - button "View log" [ref=e1566] [cursor=pointer]
+      - button "Dismiss" [ref=e1567] [cursor=pointer]
+  - generic [ref=e34]:
+    - button "Dashboard" [ref=e35] [cursor=pointer]
+    - button "Strategies" [ref=e36] [cursor=pointer]
+    - button "History" [ref=e37] [cursor=pointer]
+    - button "Benchmark" [active] [ref=e38] [cursor=pointer]
+    - button "Walk-Forward" [ref=e39] [cursor=pointer]
+    - button "Hyperopt" [ref=e40] [cursor=pointer]
+    - button "Trades" [ref=e41] [cursor=pointer]
+    - button "Lab" [ref=e42] [cursor=pointer]
+  - main [ref=e43]:
+    - generic [ref=e1569]:
+      - generic [ref=e1570]:
+        - heading "Benchmark" [level=2] [ref=e1571]
+        - generic [ref=e1572]: one box per strategy, one dot per run · outliers visible at a glance
+      - group [ref=e1573]:
+        - generic "How to read this (plain English)" [ref=e1574] [cursor=pointer]
+      - generic [ref=e1575]:
+        - generic [ref=e1576]:
+          - text: "Metric:"
+          - combobox "Metric:" [ref=e1577]:
+            - option "Sortino" [selected]
+            - option "Total Profit"
+            - option "Calmar"
+            - option "Profit Factor"
+            - option "Max Drawdown"
+        - generic [ref=e1578]:
+          - text: "Source:"
+          - combobox "Source:" [ref=e1579]:
+            - option "Benchmark + backtest (default)" [selected]
+            - option "Benchmark only"
+            - option "Backtest only"
+        - generic [ref=e1580]:
+          - text: "Sort by:"
+          - combobox "Sort by:" [ref=e1581]:
+            - option "Median (default)" [selected]
+            - option "Run count"
+            - option "Strategy name"
+        - generic [ref=e1582]:
+          - checkbox "Log scale" [ref=e1583]
+          - text: Log scale
+        - generic [ref=e1584]:
+          - checkbox "Show every run" [checked] [ref=e1585]
+          - text: Show every run
+      - paragraph [ref=e1587]: 73 strategies · 381 runs · 63 outliers (|z|>2.5) · 3 benchmarked · 70 backtest-only
+  - complementary [ref=e1513]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=e1517]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

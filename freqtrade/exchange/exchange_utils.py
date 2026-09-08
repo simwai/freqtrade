@@ -3,7 +3,7 @@ Exchange support utils
 """
 
 import inspect
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from math import ceil, floor, isnan
 from typing import Any
 
@@ -22,12 +22,13 @@ from ccxt import (
 from freqtrade.exchange.common import (
     BAD_EXCHANGES,
     EXCHANGE_HAS_OPTIONAL,
+    EXCHANGE_HAS_OPTIONAL_FUTURES,
     EXCHANGE_HAS_REQUIRED,
     MAP_EXCHANGE_CHILDCLASS,
     SUPPORTED_EXCHANGES,
 )
 from freqtrade.exchange.exchange_utils_timeframe import timeframe_to_minutes, timeframe_to_prev_date
-from freqtrade.ft_types import ValidExchangesType
+from freqtrade.ft_types import TradeModeType, ValidExchangesType
 from freqtrade.util import FtPrecise
 
 
@@ -53,7 +54,22 @@ def available_exchanges(ccxt_module: CcxtModuleType | None = None) -> list[str]:
     return [x for x in exchanges if validate_exchange(x)[0]]
 
 
-def validate_exchange(exchange: str) -> tuple[bool, str, ccxt.Exchange | None]:
+def _exchange_has_helper(ex_mod: ccxt.Exchange, required: dict[str, list[str]]) -> list[str]:
+    """
+    Checks availability of methods (or their replacement)s in ex_mod.has
+    :param ex_mod: ccxt Exchange module
+    :param required: dict of required methods, with possible replacement methods as list
+    :return: list of missing required methods
+    """
+    return [
+        k
+        for k, v in required.items()
+        if ex_mod.has.get(k) is not True
+        and (len(v) == 0 or not (all(ex_mod.has.get(x) for x in v)))
+    ]
+
+
+def validate_exchange(exchange: str) -> tuple[bool, str, str, ccxt.Exchange | None]:
     """
     returns: can_use, reason, exchange_object
         with Reason including both missing and missing_opt
@@ -64,36 +80,38 @@ def validate_exchange(exchange: str) -> tuple[bool, str, ccxt.Exchange | None]:
         ex_mod = getattr(ccxt.async_support, exchange.lower())()
 
     if not ex_mod or not ex_mod.has:
-        return False, "", None
+        return False, "", "", None
 
     result = True
-    reason = ""
-    missing = [
-        k
-        for k, v in EXCHANGE_HAS_REQUIRED.items()
-        if ex_mod.has.get(k) is not True and not (all(ex_mod.has.get(x) for x in v))
-    ]
+    reasons = []
+    reasons_fut = ""
+    missing = _exchange_has_helper(ex_mod, EXCHANGE_HAS_REQUIRED)
     if missing:
         result = False
-        reason += f"missing: {', '.join(missing)}"
+        reasons.append(f"missing: {', '.join(missing)}")
 
-    missing_opt = [k for k in EXCHANGE_HAS_OPTIONAL if not ex_mod.has.get(k)]
+    missing_opt = _exchange_has_helper(ex_mod, EXCHANGE_HAS_OPTIONAL)
+
+    missing_futures = _exchange_has_helper(ex_mod, EXCHANGE_HAS_OPTIONAL_FUTURES)
 
     if exchange.lower() in BAD_EXCHANGES:
         result = False
-        reason = BAD_EXCHANGES.get(exchange.lower(), "")
+        reasons.append(BAD_EXCHANGES.get(exchange.lower(), ""))
 
     if missing_opt:
-        reason += f"{'. ' if reason else ''}missing opt: {', '.join(missing_opt)}. "
+        reasons.append(f"missing opt: {', '.join(missing_opt)}")
 
-    return result, reason, ex_mod
+    if missing_futures:
+        reasons_fut = f"missing futures opt: {', '.join(missing_futures)}"
+
+    return result, "; ".join(reasons), reasons_fut, ex_mod
 
 
 def _build_exchange_list_entry(
     exchange_name: str, exchangeClasses: dict[str, Any]
 ) -> ValidExchangesType:
     exchange_name = exchange_name.lower()
-    valid, comment, ex_mod = validate_exchange(exchange_name)
+    valid, comment, comment_fut, ex_mod = validate_exchange(exchange_name)
     mapped_exchange_name = MAP_EXCHANGE_CHILDCLASS.get(exchange_name, exchange_name).lower()
     is_alias = getattr(ex_mod, "alias", False)
     result: ValidExchangesType = {
@@ -102,6 +120,7 @@ def _build_exchange_list_entry(
         "valid": valid,
         "supported": mapped_exchange_name in SUPPORTED_EXCHANGES and not is_alias,
         "comment": comment,
+        "comment_futures": comment_fut,
         "dex": getattr(ex_mod, "dex", False),
         "is_alias": is_alias,
         "alias_for": inspect.getmro(ex_mod.__class__)[1]().id
@@ -110,7 +129,7 @@ def _build_exchange_list_entry(
         "trade_modes": [{"trading_mode": "spot", "margin_mode": ""}],
     }
     if resolved := exchangeClasses.get(mapped_exchange_name):
-        supported_modes = [{"trading_mode": "spot", "margin_mode": ""}] + [
+        supported_modes: list[TradeModeType] = [
             {"trading_mode": tm.value, "margin_mode": mm.value}
             for tm, mm in resolved["class"]._supported_trading_mode_margin_pairs
         ]
@@ -148,7 +167,7 @@ def date_minus_candles(timeframe: str, candle_count: int, date: datetime | None 
 
     """
     if not date:
-        date = datetime.now(timezone.utc)
+        date = datetime.now(UTC)
 
     tf_min = timeframe_to_minutes(timeframe)
     new_date = timeframe_to_prev_date(timeframe, date) - timedelta(minutes=tf_min * candle_count)
@@ -213,9 +232,9 @@ def amount_to_precision(
         amount = float(
             decimal_to_precision(
                 amount,
-                rounding_mode=TRUNCATE,
-                precision=precision,
-                counting_mode=precisionMode,
+                TRUNCATE,  # rounding_mode
+                precision,  # numPrecisionDigits
+                precisionMode,  # counting_mode
             )
         )
 
@@ -266,7 +285,7 @@ def __price_to_precision_significant_digits(
     precision = round(price_precision)
 
     q = precision - dec.adjusted() - 1
-    sigfig = Decimal("10") ** -q
+    sigfig = Decimal(10) ** -q
     if q < 0:
         string_to_precision = string[:precision]
         # string_to_precision is '' when we have zero precision
@@ -311,11 +330,11 @@ def price_to_precision(
             return float(
                 decimal_to_precision(
                     price,
-                    rounding_mode=rounding_mode,
-                    precision=int(price_precision)
+                    rounding_mode,  # rounding mode
+                    int(price_precision)
                     if precisionMode != TICK_SIZE
-                    else price_precision,
-                    counting_mode=precisionMode,
+                    else price_precision,  # numPrecisionDigits
+                    precisionMode,  # counting_mode
                 )
             )
 
@@ -323,7 +342,7 @@ def price_to_precision(
             precision = FtPrecise(price_precision)
             price_str = FtPrecise(price)
             missing = price_str % precision
-            if not missing == FtPrecise("0"):
+            if missing != FtPrecise("0"):
                 if rounding_mode == ROUND_UP:
                     res = price_str - missing + precision
                 elif rounding_mode == ROUND_DOWN:

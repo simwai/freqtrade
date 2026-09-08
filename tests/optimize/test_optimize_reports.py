@@ -18,18 +18,17 @@ from freqtrade.data.btanalysis import (
     load_backtest_data,
     load_backtest_stats,
 )
-from freqtrade.edge import PairInfo
 from freqtrade.enums import ExitType
 from freqtrade.optimize.optimize_reports import (
     generate_backtest_stats,
     generate_daily_stats,
-    generate_edge_table,
     generate_pair_metrics,
     generate_periodic_breakdown_stats,
     generate_strategy_comparison,
     generate_trading_stats,
     show_sorted_pairlist,
     store_backtest_results,
+    text_table_add_metrics,
     text_table_bt_results,
     text_table_strategy,
 )
@@ -37,10 +36,13 @@ from freqtrade.optimize.optimize_reports.bt_output import text_table_tags
 from freqtrade.optimize.optimize_reports.optimize_reports import (
     _get_resample_from_period,
     calc_streak,
+    generate_rejected_signals,
     generate_tag_metrics,
+    generate_trade_signal_candles,
+    generate_wallet_stats,
 )
 from freqtrade.resolvers.strategy_resolver import StrategyResolver
-from freqtrade.util import dt_ts
+from freqtrade.util import dt_ts, format_duration
 from freqtrade.util.datetime_helpers import dt_from_ts, dt_utc
 from tests.conftest import CURRENT_TEST_STRATEGY, log_has_re
 from tests.data.test_history import _clean_test_file
@@ -232,13 +234,16 @@ def test_generate_backtest_stats(default_conf, testdatadir, tmp_path):
     assert strat_stats["drawdown_end_ts"] == 1510699380000
     assert strat_stats["drawdown_start_ts"] == 1510697400000
     assert strat_stats["pairlist"] == ["UNITTEST/BTC"]
+    # Statistical significance of the mean trade return
+    assert "p_value" in strat_stats
+    assert strat_stats["p_value"] == pytest.approx(0.8957701627)
 
     # Test storing stats
     filename = tmp_path / "btresult.json"
     filename_last = tmp_path / LAST_BT_RESULT_FN
     _backup_file(filename_last, copy_file=True)
     assert not filename.is_file()
-    default_conf["exportfilename"] = filename
+    default_conf["exportdirectory"] = filename
 
     store_backtest_results(default_conf, stats, "2022_01_01_15_05_13")
 
@@ -265,7 +270,7 @@ def test_store_backtest_results(testdatadir, mocker):
     zip_mock = mocker.patch("freqtrade.optimize.optimize_reports.bt_storage.ZipFile")
     data = {"metadata": {}, "strategy": {}, "strategy_comparison": []}
     store_backtest_results(
-        {"exportfilename": testdatadir, "original_config": {}}, data, "2022_01_01_15_05_13"
+        {"exportdirectory": testdatadir, "original_config": {}}, data, "2022_01_01_15_05_13"
     )
 
     assert dump_mock.call_count == 2
@@ -277,7 +282,7 @@ def test_store_backtest_results(testdatadir, mocker):
     zip_mock.reset_mock()
     filename = testdatadir / "testresult.json"
     store_backtest_results(
-        {"exportfilename": filename, "original_config": {}}, data, "2022_01_01_15_05_13"
+        {"exportdirectory": filename, "original_config": {}}, data, "2022_01_01_15_05_13"
     )
     assert dump_mock.call_count == 2
     assert zip_mock.call_count == 1
@@ -289,7 +294,7 @@ def test_store_backtest_results(testdatadir, mocker):
 def test_store_backtest_results_real(tmp_path, caplog):
     data = {"metadata": {}, "strategy": {}, "strategy_comparison": []}
     config = {
-        "exportfilename": tmp_path,
+        "exportdirectory": tmp_path,
         "original_config": {},
     }
     store_backtest_results(
@@ -358,7 +363,7 @@ def test_write_read_backtest_candles(tmp_path):
     bt_results = {"metadata": {}, "strategy": {}, "strategy_comparison": []}
 
     mock_conf = {
-        "exportfilename": tmp_path,
+        "exportdirectory": tmp_path,
         "export": "signals",
         "runmode": "backtest",
         "original_config": {},
@@ -395,33 +400,6 @@ def test_write_read_backtest_candles(tmp_path):
 
     _clean_test_file(stored_file)
 
-    # test file exporting
-    filename = tmp_path / "testresult"
-    mock_conf["exportfilename"] = filename
-    store_backtest_results(mock_conf, bt_results, sample_date, analysis_results=data)
-    stored_file = tmp_path / f"testresult-{sample_date}.zip"
-    signals_pkl = f"testresult-{sample_date}_signals.pkl"
-    rejected_pkl = f"testresult-{sample_date}_rejected.pkl"
-    exited_pkl = f"testresult-{sample_date}_exited.pkl"
-    assert not (tmp_path / signals_pkl).is_file()
-    assert stored_file.is_file()
-
-    with ZipFile(stored_file, "r") as zipf:
-        assert signals_pkl in zipf.namelist()
-        assert rejected_pkl in zipf.namelist()
-        assert exited_pkl in zipf.namelist()
-
-        with zipf.open(signals_pkl) as scp:
-            pickled_signal_candles2 = joblib.load(scp)
-
-    assert pickled_signal_candles2.keys() == candle_dict.keys()
-    assert pickled_signal_candles2["DefStrat"].keys() == pickled_signal_candles2["DefStrat"].keys()
-    assert pickled_signal_candles2["DefStrat"]["UNITTEST/BTC"].equals(
-        pickled_signal_candles2["DefStrat"]["UNITTEST/BTC"]
-    )
-
-    _clean_test_file(stored_file)
-
 
 def test_generate_pair_metrics():
     results = pd.DataFrame(
@@ -454,7 +432,6 @@ def test_generate_pair_metrics():
     assert (
         pytest.approx(pair_results[-1]["profit_mean_pct"]) == pair_results[-1]["profit_mean"] * 100
     )
-    assert pytest.approx(pair_results[-1]["profit_sum_pct"]) == pair_results[-1]["profit_sum"] * 100
 
 
 def test_generate_daily_stats(testdatadir):
@@ -482,8 +459,8 @@ def test_generate_trading_stats(testdatadir):
     bt_data = load_backtest_data(filename)
     res = generate_trading_stats(bt_data)
     assert isinstance(res, dict)
-    assert res["winner_holding_avg"] == timedelta(seconds=1440)
-    assert res["loser_holding_avg"] == timedelta(days=1, seconds=21420)
+    assert res["winner_holding_avg"] == format_duration(timedelta(seconds=1440))
+    assert res["loser_holding_avg"] == format_duration(timedelta(days=1, seconds=21420))
     assert "wins" in res
     assert "losses" in res
     assert "draws" in res
@@ -646,13 +623,65 @@ def test_text_table_strategy(testdatadir, capsys):
     )
 
 
-def test_generate_edge_table(capsys):
-    results = {}
-    results["ETH/BTC"] = PairInfo(-0.01, 0.60, 2, 1, 3, 10, 60)
-    generate_edge_table(results)
+def test_generate_wallet_stats_extended_metrics():
+    wallet_df = pd.DataFrame(
+        {
+            "date": [
+                dt_utc(2025, 1, 1, 0, 0, 0),
+                dt_utc(2025, 1, 1, 12, 0, 0),
+                dt_utc(2025, 1, 1, 18, 0, 0),
+                dt_utc(2025, 1, 3, 0, 0, 0),
+            ],
+            "currency": ["BTC", "BTC", "BTC", "BTC"],
+            "rate": [1.0, 1.0, 1.0, 1.0],
+            "balance": [100.0, 120.0, 80.0, 110.0],
+        }
+    )
+
+    stats = generate_wallet_stats(wallet_df, "BTC")
+
+    assert "sharpe" in stats
+    assert "sortino" in stats
+    assert "calmar" in stats
+    assert "max_drawdown_account" in stats
+    assert "max_drawdown_abs" in stats
+    assert pytest.approx(stats["max_drawdown_account"]) == 1 / 3
+    assert stats["drawdown_start"] == "2025-01-01 12:00:00"
+    assert stats["drawdown_end"] == "2025-01-01 18:00:00"
+
+
+def test_text_table_add_metrics_shows_wallet_ratios(testdatadir, capsys):
+    filename = testdatadir / "backtest_results/backtest-result.json"
+    bt_data = load_backtest_stats(filename)
+    strat_results = next(iter(bt_data["strategy"].values()))
+    strat_results["wallet_stats"] = {
+        "low_balance": 0.95,
+        "high_balance": 1.12,
+        "low_date": "2025-01-01 18:00:00",
+        "high_date": "2025-01-01 12:00:00",
+        "sharpe": 1.23,
+        "sortino": 2.34,
+        "calmar": 3.45,
+        "max_drawdown_account": 0.12,
+        "max_relative_drawdown": 0.15,
+        "max_drawdown_abs": 0.05,
+        "drawdown_start": "2025-01-01 12:00:00",
+        "drawdown_end": "2025-01-01 18:00:00",
+        "max_drawdown_high": 1.12,
+        "max_drawdown_low": 0.95,
+    }
+
+    strat_results["p_value"] = 0.0321
+
+    text_table_add_metrics(strat_results)
     text = capsys.readouterr().out
-    assert re.search(r".* ETH/BTC .*", text)
-    assert re.search(r".* Risk Reward Ratio .* Required Risk Reward .* Expectancy .*", text)
+
+    assert "Sharpe (daily wallet balance)" in text
+    assert "Sortino (daily wallet balance)" in text
+    assert "Calmar (daily wallet balance)" in text
+    assert "Max % of account underwater (balance)" in text
+    assert "Mean profit p-value" in text
+    assert "0.0321" in text
 
 
 def test_generate_periodic_breakdown_stats(testdatadir):
@@ -673,11 +702,30 @@ def test_generate_periodic_breakdown_stats(testdatadir):
     res = generate_periodic_breakdown_stats([], "day")
     assert res == []
 
+    # Test weekday
+    reswd = generate_periodic_breakdown_stats(bt_data, "weekday")
+    assert isinstance(reswd, list)
+    assert len(reswd) == 7
+    assert reswd[0]["date"] == "Monday"
+    assert reswd[0]["date_ts"] == 0
+    assert reswd[1]["date"] == "Tuesday"
+    assert reswd[2]["date"] == "Wednesday"
+    assert reswd[3]["date"] == "Thursday"
+    assert reswd[4]["date"] == "Friday"
+    assert reswd[5]["date"] == "Saturday"
+    assert reswd[6]["date"] == "Sunday"
+    monday = reswd[0]
+    assert "draws" in monday
+    assert "losses" in monday
+    assert "wins" in monday
+    assert "profit_abs" in monday
+
 
 def test__get_resample_from_period():
-    assert _get_resample_from_period("day") == "1d"
+    assert _get_resample_from_period("day") == "1D"
     assert _get_resample_from_period("week") == "1W-MON"
     assert _get_resample_from_period("month") == "1ME"
+    assert _get_resample_from_period("weekday") == "weekday"
     with pytest.raises(ValueError, match=r"Period noooo is not supported."):
         _get_resample_from_period("noooo")
 
@@ -696,3 +744,81 @@ def test_show_sorted_pairlist(testdatadir, default_conf, capsys):
     assert "Pairs for Strategy StrategyTestV3: \n[" in out
     assert "TOTAL" not in out
     assert '"ETH/BTC",  // ' in out
+
+
+def test_generate_trade_signal_candles():
+    dates = pd.date_range("2023-01-01", periods=10, freq="5min", tz="UTC")
+    pairdf = pd.DataFrame(
+        {"date": dates, "close": [float(i) for i in range(10)], "enter_long": [1] * 10}
+    )
+    results = pd.DataFrame(
+        {
+            "pair": ["UNITTEST/BTC"] * 3 + ["NO_TRADES/BTC"] * 0,
+            # trades open 1 minute after candles 3, 5 and 5 again (duplicate candle)
+            "open_date": [
+                dates[4] + pd.Timedelta(minutes=1) - pd.Timedelta(minutes=5),
+                dates[6] + pd.Timedelta(minutes=1) - pd.Timedelta(minutes=5),
+                dates[6] + pd.Timedelta(minutes=1) - pd.Timedelta(minutes=5),
+            ],
+        }
+    )
+    preprocessed = {"UNITTEST/BTC": pairdf, "NO_TRADES/BTC": pairdf.copy()}
+    res = generate_trade_signal_candles(preprocessed, {"results": results}, "open_date")
+
+    # Last candle strictly before each trade date, duplicates preserved
+    expected = pairdf.iloc[[3, 5, 5]]
+    pd.testing.assert_frame_equal(res["UNITTEST/BTC"], expected, check_dtype=False)
+    assert res["NO_TRADES/BTC"].empty
+
+
+def test_generate_trade_signal_candles_no_preceding_candle():
+    # A trade dated at/before the first candle has no candle strictly before it.
+    # It must be dropped, not silently wrap to the last candle via iloc[-1].
+    dates = pd.date_range("2023-01-01", periods=5, freq="5min", tz="UTC")
+    pairdf = pd.DataFrame({"date": dates, "close": [float(i) for i in range(5)]})
+    results = pd.DataFrame(
+        {
+            "pair": ["UNITTEST/BTC"] * 2,
+            "open_date": [dates[0], dates[3] + pd.Timedelta(minutes=1)],
+        }
+    )
+    res = generate_trade_signal_candles({"UNITTEST/BTC": pairdf}, {"results": results}, "open_date")
+
+    # Only the second trade keeps a signal candle (candle 3); the first is dropped.
+    pd.testing.assert_frame_equal(res["UNITTEST/BTC"], pairdf.iloc[[3]], check_dtype=False)
+
+
+def test_generate_rejected_signals():
+    dates = pd.date_range("2023-01-01", periods=10, freq="5min", tz="UTC")
+    pairdf = pd.DataFrame(
+        {"date": dates, "close": [float(i) for i in range(10)], "enter_long": [1] * 10}
+    )
+    rejected = {
+        "UNITTEST/BTC": [(dates[2], "tag_a"), (dates[7], "tag_b"), (dates[7], "tag_c")],
+        "NO_REJECTS/BTC": [],
+    }
+    res = generate_rejected_signals({"UNITTEST/BTC": pairdf, "NO_REJECTS/BTC": pairdf}, rejected)
+
+    df = res["UNITTEST/BTC"]
+    assert len(df) == 3
+    assert list(df.columns) == ["date", "close", "enter_long", "pair", "enter_tag"]
+    assert set(df["enter_tag"]) == {"tag_a", "tag_b", "tag_c"}
+    assert (df["pair"] == "UNITTEST/BTC").all()
+    # candle content preserved for the rejected dates
+    assert sorted(df["close"]) == [2.0, 7.0, 7.0]
+    assert res["NO_REJECTS/BTC"].empty
+
+
+def test_generate_rejected_signals_preexisting_enter_tag():
+    # populate_indicators may assign an enter_tag column - the signal's enter_tag must
+    # win instead of colliding into enter_tag_x / enter_tag_y on the merge.
+    dates = pd.date_range("2023-01-01", periods=10, freq="5min", tz="UTC")
+    pairdf = pd.DataFrame(
+        {"date": dates, "close": [float(i) for i in range(10)], "enter_tag": ["preset"] * 10}
+    )
+    rejected = {"UNITTEST/BTC": [(dates[2], "tag_a"), (dates[7], "tag_b")]}
+    res = generate_rejected_signals({"UNITTEST/BTC": pairdf}, rejected)
+
+    df = res["UNITTEST/BTC"]
+    assert list(df.columns) == ["date", "close", "pair", "enter_tag"]
+    assert list(df["enter_tag"]) == ["tag_a", "tag_b"]

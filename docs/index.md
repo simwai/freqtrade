@@ -1,14 +1,15 @@
 ![freqtrade](assets/freqtrade_poweredby.svg)
 
-[![Freqtrade CI](https://github.com/freqtrade/freqtrade/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/freqtrade/freqtrade/actions/)
+[![Freqtrade CI](https://github.com/freqtrade/freqtrade/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/freqtrade/freqtrade/actions/workflows/ci.yml)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.04864/status.svg)](https://doi.org/10.21105/joss.04864)
-[![Coverage Status](https://coveralls.io/repos/github/freqtrade/freqtrade/badge.svg?branch=develop&service=github)](https://coveralls.io/github/freqtrade/freqtrade?branch=develop)
-[![Maintainability](https://api.codeclimate.com/v1/badges/5737e6d668200b7518ff/maintainability)](https://codeclimate.com/github/freqtrade/freqtrade/maintainability)
+[![codecov](https://codecov.io/gh/freqtrade/freqtrade/branch/develop/graph/badge.svg?token=AD5BG3ATKI)](https://codecov.io/gh/freqtrade/freqtrade)
+[![Documentation](https://readthedocs.org/projects/freqtrade/badge/)](https://www.freqtrade.io)
+[![Discord Server](https://img.shields.io/badge/Freqtrade_Discord-4E4E4E?logo=discord)](https://discord.gg/p7nuUNVfP7)
 
-<!-- Place this tag where you want the button to render. -->
-<a class="github-button" href="https://github.com/freqtrade/freqtrade" data-icon="octicon-star" data-size="large" aria-label="Star freqtrade/freqtrade on GitHub">Star</a>
-<a class="github-button" href="https://github.com/freqtrade/freqtrade/fork" data-icon="octicon-repo-forked" data-size="large" aria-label="Fork freqtrade/freqtrade on GitHub">Fork</a>
-<a class="github-button" href="https://github.com/freqtrade/freqtrade/archive/stable.zip" data-icon="octicon-cloud-download" data-size="large" aria-label="Download freqtrade/freqtrade on GitHub">Download</a>
+<!-- GitHub action buttons -->
+[:octicons-star-16: Star](https://github.com/freqtrade/freqtrade){ .md-button .md-button--sm }
+[:octicons-repo-forked-16: Fork](https://github.com/freqtrade/freqtrade/fork){ .md-button .md-button--sm }
+[:octicons-download-16: Download](https://github.com/freqtrade/freqtrade/archive/stable.zip){ .md-button .md-button--sm }
 
 ## Introduction
 
@@ -31,7 +32,6 @@ Freqtrade is a free and open source crypto trading bot written in Python. It is 
 - Optimize: Find the best parameters for your strategy using hyperoptimization which employs machine learning methods. You can optimize buy, sell, take profit (ROI), stop-loss and trailing stop-loss parameters for your strategy.
 - Select markets: Create your static list or use an automatic one based on top traded volumes and/or prices (not available during backtesting). You can also explicitly blacklist markets you don't want to trade.
 - Run: Test your strategy with simulated money (Dry-Run mode) or deploy it with real money (Live-Trade mode).
-- Run using Edge (optional module): The concept is to find the best historical [trade expectancy](edge.md#expectancy) by markets based on variation of the stop-loss and then allow/reject markets to trade. The sizing of the trade is based on a risk of a percentage of your capital.
 - Control/Monitor: Use Telegram or a WebUI (start/stop the bot, show profit/loss, daily summary, current open trades results, etc.).
 - Analyze: Further analysis can be performed on either Backtesting data or Freqtrade trading history (SQL database), including automated standard plots, and methods to load the data into [interactive environments](data-analysis.md).
 
@@ -39,24 +39,30 @@ Freqtrade is a free and open source crypto trading bot written in Python. It is 
 
 Please read the [exchange specific notes](exchanges.md) to learn about eventual, special configurations needed for each exchange.
 
+### Supported Spot Exchanges
+
 - [X] [Binance](https://www.binance.com/)
 - [X] [BingX](https://bingx.com/invite/0EM9RX)
-- [X] [Bitmart](https://bitmart.com/)
+- [X] [Bitget](https://www.bitget.com/)
+- [X] [Bybit EU](https://bybit.eu/)
 - [X] [Bybit](https://bybit.com/)
-- [X] [Gate.io](https://www.gate.io/ref/6266643)
+- [X] [Gate EU](https://www.gate.com/en-eu)
+- [X] [Gate](https://www.gate.com/ref/6266643)
 - [X] [HTX](https://www.htx.com/)
 - [X] [Hyperliquid](https://hyperliquid.xyz/) (A decentralized exchange, or DEX)
 - [X] [Kraken](https://kraken.com/)
-- [X] [OKX](https://okx.com/)
 - [X] [MyOKX](https://okx.com/) (OKX EEA)
-- [ ] [potentially many others through <img alt="ccxt" width="30px" src="assets/ccxt-logo.svg" />](https://github.com/ccxt/ccxt/). _(We cannot guarantee they will work)_
+- [X] [OKX](https://okx.com/)
+- [ ] [potentially many others](https://github.com/ccxt/ccxt/). _(We cannot guarantee they will work)_
 
-### Supported Futures Exchanges (experimental)
+### Supported Futures Exchanges
 
 - [X] [Binance](https://www.binance.com/)
+- [X] [Bitget](https://www.bitget.com/)
 - [X] [Bybit](https://bybit.com/)
-- [X] [Gate.io](https://www.gate.io/ref/6266643)
+- [X] [Gate](https://www.gate.com/ref/6266643)
 - [X] [Hyperliquid](https://hyperliquid.xyz/) (A decentralized exchange, or DEX)
+- [X] [Kraken](https://www.kraken.com/features/futures)
 - [X] [OKX](https://okx.com/)
 
 Please make sure to read the [exchange specific notes](exchanges.md), as well as the [trading with leverage](leverage.md) documentation before diving in.
@@ -88,7 +94,7 @@ To run this bot we recommend you a linux cloud instance with a minimum of:
 
 Alternatively
 
-- Python 3.10+
+- Python 3.11+
 - pip (pip3)
 - git
 - TA-Lib

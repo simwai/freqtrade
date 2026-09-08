@@ -1,3 +1,3 @@
 ---
-policy: upgrade-house-style
+policy: preserve-local
 ---

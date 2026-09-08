@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class CandleType(str, Enum):
+class CandleType(StrEnum):
     """Enum to distinguish candle types"""
 
     SPOT = "spot"
@@ -12,10 +12,8 @@ class CandleType(str, Enum):
 
     # TODO: Could take up less memory if these weren't a CandleType
     FUNDING_RATE = "funding_rate"
+    OPEN_INTEREST = "open_interest"
     # BORROW_RATE = "borrow_rate"  # * unimplemented
-
-    def __str__(self):
-        return f"{self.name.lower()}"
 
     @staticmethod
     def from_string(value: str) -> "CandleType":

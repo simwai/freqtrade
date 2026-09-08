@@ -190,7 +190,7 @@ class ClientProtocol:
             self.logger.info("Empty DataFrame")
 
     async def _handle_default(self, name, msgtype, data):
-        self.logger.info("Unknown message of type {msgtype} received...")
+        self.logger.info(f"Unknown message of type {msgtype} received...")
         self.logger.info(data)
 
 
@@ -234,7 +234,7 @@ async def create_client(
 
                         await protocol.on_message(ws, name, message)
 
-                    except (asyncio.TimeoutError, websockets.exceptions.WebSocketException):
+                    except (TimeoutError, websockets.exceptions.WebSocketException):
                         # Try pinging
                         try:
                             pong = await ws.ping()
@@ -244,7 +244,7 @@ async def create_client(
 
                             continue
 
-                        except asyncio.TimeoutError:
+                        except TimeoutError:
                             logger.error(f"Ping timed out, retrying in {sleep_time}s")
                             await asyncio.sleep(sleep_time)
 

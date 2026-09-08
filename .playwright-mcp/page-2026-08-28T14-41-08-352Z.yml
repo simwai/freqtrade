@@ -1,0 +1,83 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - heading "Strategy Lab" [level=1] [ref=e6]
+      - generic [ref=e7]: freqtrade strategy overview · 2026-08-28 16:36
+    - button "Jobs 3" [ref=e48] [cursor=pointer]:
+      - text: Jobs
+      - generic [ref=e9]: "3"
+  - generic:
+    - generic:
+      - generic: Jobs
+      - generic: 3 active
+      - button: ✕ Close
+  - generic [ref=e10]:
+    - button "Dashboard" [ref=e11] [cursor=pointer]
+    - button "Strategies" [ref=e12] [cursor=pointer]
+    - button "History" [ref=e13] [cursor=pointer]
+    - button "Benchmark" [ref=e14] [cursor=pointer]
+    - button "Walk-Forward" [ref=e15] [cursor=pointer]
+    - button "Hyperopt" [ref=e16] [cursor=pointer]
+    - button "Trades" [ref=e17] [cursor=pointer]
+    - button "Lab" [ref=e18] [cursor=pointer]
+  - main [ref=e19]:
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Benchmark" [level=2] [ref=e23]
+        - generic [ref=e24]: one box per strategy, one dot per run · outliers visible at a glance
+      - group [ref=e25]:
+        - generic "How to read this (plain English)" [ref=e26] [cursor=pointer]
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - text: "Metric:"
+          - combobox "Metric:" [ref=e29]:
+            - option "Sortino" [selected]
+            - option "Total Profit"
+            - option "Calmar"
+            - option "Profit Factor"
+            - option "Max Drawdown"
+        - generic [ref=e30]:
+          - text: "Source:"
+          - combobox "Source:" [ref=e31]:
+            - option "Benchmark + backtest (default)" [selected]
+            - option "Benchmark only"
+            - option "Backtest only"
+        - generic [ref=e32]:
+          - text: "Sort by:"
+          - combobox "Sort by:" [ref=e33]:
+            - option "Median (default)" [selected]
+            - option "Run count"
+            - option "Strategy name"
+        - generic [ref=e34]:
+          - checkbox "Log scale" [ref=e35]
+          - text: Log scale
+        - generic [ref=e36]:
+          - checkbox "Show every run" [checked] [ref=e37]
+          - text: Show every run
+      - paragraph [ref=e39]: 68 strategies · 329 runs · 56 outliers (|z|>2.5) · 3 benchmarked · 65 backtest-only
+  - complementary [ref=e43]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=e47]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

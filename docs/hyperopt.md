@@ -1,10 +1,10 @@
 # Hyperopt
 
 This page explains how to tune your strategy by finding the optimal
-parameters, a process called hyperparameter optimization. The bot uses algorithms included in the `scikit-optimize` package to accomplish this.
+parameters, a process called hyperparameter optimization. The bot uses algorithms included in the `optuna` package to accomplish this.
 The search will burn all your CPU cores, make your laptop sound like a fighter jet and still take a long time.
 
-In general, the search for best parameters starts with a few random combinations (see [below](#reproducible-results) for more details) and then uses Bayesian search with a ML regressor algorithm (currently ExtraTreesRegressor) to quickly find a combination of parameters in the search hyperspace that minimizes the value of the [loss function](#loss-functions).
+In general, the search for best parameters starts with a few random combinations (see [below](#reproducible-results) for more details) and then uses one of optuna's sampler algorithms (currently NSGAIIISampler) to quickly find a combination of parameters in the search hyperspace that minimizes the value of the [loss function](#loss-functions).
 
 Hyperopt requires historic data to be available, just as backtesting does (hyperopt runs backtesting many times with different parameters).
 To learn how to get data for the pairs and exchange you're interested in, head over to the [Data Downloading](data-download.md) section of the documentation.
@@ -46,9 +46,16 @@ Depending on the space you want to optimize, only some of the below are required
 
 * define parameters with `space='buy'` - for entry signal optimization
 * define parameters with `space='sell'` - for exit signal optimization
+* define parameters with `space='enter'` - for entry signal optimization
+* define parameters with `space='exit'` - for exit signal optimization
+* define parameters with `space='protection'` - for protection optimization
+* define parameters with `space='random_spacename'` - for better control over which parameters are optimized together
+
+Pick the space name that suits the parameter best. We recommend to use either `buy` / `sell` or `enter` / `exit` for clarity (however there's no technical limitation in this regard).
 
 !!! Note
     `populate_indicators` needs to create all indicators any of the spaces may use, otherwise hyperopt will not work.
+
 
 Rarely you may also need to create a [nested class](advanced-hyperopt.md#overriding-pre-defined-spaces) named `HyperOpt` and implement
 
@@ -79,15 +86,15 @@ Based on the loss function result, hyperopt will determine the next set of param
 
 ### Configure your Guards and Triggers
 
-There are two places you need to change in your strategy file to add a new buy hyperopt for testing:
+There are two places you need to change in your strategy file to add a new hyperopt parameter for optimization:
 
 * Define the parameters at the class level hyperopt shall be optimizing.
 * Within `populate_entry_trend()` - use defined parameter values instead of raw constants.
 
 There you have two different types of indicators: 1. `guards` and 2. `triggers`.
 
-1. Guards are conditions like "never buy if ADX < 10", or never buy if current price is over EMA10.
-2. Triggers are ones that actually trigger buy in specific moment, like "buy when EMA5 crosses over EMA10" or "buy when close price touches lower Bollinger band".
+1. Guards are conditions like "never enter if ADX < 10", or never enter if current price is over EMA10.
+2. Triggers are ones that actually trigger entry in specific moment, like "enter when EMA5 crosses over EMA10" or "enter when close price touches lower Bollinger band".
 
 !!! Hint "Guards and Triggers"
     Technically, there is no difference between Guards and Triggers.  
@@ -160,9 +167,11 @@ We use these to either enable or disable the ADX and RSI guards.
 The last one we call `trigger` and use it to decide which buy trigger we want to use.
 
 !!! Note "Parameter space assignment"
-    Parameters must either be assigned to a variable named `buy_*` or `sell_*` - or contain `space='buy'` | `space='sell'` to be assigned to a space correctly.
-    If no parameter is available for a space, you'll receive the error that no space was found when running hyperopt.  
+    - Parameters must either be assigned to a variable named `buy_*`, `sell_*`, `enter_*` or `exit_*` or `protection_*` - or contain have a space assigned explicitly via parameter (`space='buy'`, `space='sell'`, `space='protection'`).  
+    - Parameters with conflicting assignments (e.g. `buy_adx = IntParameter(4, 24, default=14, space='sell')`) will use the explicit space assignment.  
+    - If no parameter is available for a space, you'll receive the error that no space was found when running hyperopt.  
     Parameters with unclear space (e.g. `adx_period = IntParameter(4, 24, default=14)` - no explicit nor implicit space) will not be detected and will therefore be ignored.
+    Spaces can also be custom named (e.g. `space='my_custom_space'`), with the only limitation that the space name cannot be `all`, `default` - and must result in a valid python identifier.
 
 So let's write the buy strategy using these values:
 
@@ -225,6 +234,7 @@ There are two parameter options that can help you to quickly test various ideas:
 
 !!! Warning
     Hyperoptable parameters cannot be used in `populate_indicators` - as hyperopt does not recalculate indicators for each epoch, so the starting value would be used in this case.
+    Freqtrade will log a warning when the value of an optimized parameter is used during indicator calculation - the results of such an epoch would not correspond to the parameters shown for it. Either use the [`.range` functionality](#optimizing-an-indicator-parameter) or use `--analyze-per-epoch` in this case.
 
 ## Optimizing an indicator parameter
 
@@ -490,6 +500,8 @@ freqtrade hyperopt --config config.json --hyperopt-loss <hyperoptlossname> --str
 ```
 
 The `-e` option will set how many evaluations hyperopt will do. Since hyperopt uses Bayesian search, running too many epochs at once may not produce greater results. Experience has shown that best results are usually not improving much after 500-1000 epochs.  
+The `--early-stop` option will set after how many epochs with no improvements hyperopt will stop. A good value is 20-30% of the total epochs. Any value greater than 0 and lower than 20 it will be replaced by 20. Early stop is by default disabled (`--early-stop=0`)
+
 Doing multiple runs (executions) with a few 1000 epochs and different random state will most likely produce different results.
 
 The `--spaces all` option determines that all possible parameters should be optimized. Possibilities are listed below.
@@ -498,95 +510,6 @@ The `--spaces all` option determines that all possible parameters should be opti
     Hyperopt will store hyperopt results with the timestamp of the hyperopt start time.
     Reading commands (`hyperopt-list`, `hyperopt-show`) can use `--hyperopt-filename <filename>` to read and display older hyperopt results.
     You can find a list of filenames with `ls -l user_data/hyperopt_results/`.
-
-## Fibonacci Stepping Mode (Experimental)
-
-Fibonacci stepping is an advanced multi-stage optimization mode that structures hyperopt trials across
-progressively narrowing search spaces using Fibonacci-numbered trial budgets. This approach is based
-on the principle that optimization should start with broad exploration and gradually focus on the
-most promising regions of the search space.
-
-### How it works
-
-The Fibonacci stepping mode divides optimization into four stages:
-
-| Stage | Trials | Search Space | Description |
-|-------|--------|--------------|-------------|
-| Init | `n_initial` (default: 10) | Full | Random exploration to seed the surrogate model |
-| Stage 1 | `F_n - n_initial` | Full | Bayesian optimization on full search space |
-| Stage 2 | `F_{n-1}` | Reduced | Bayesian optimization on reduced space (top `F_{n-1}` results from Stage 1) |
-| Stage 3 | `F_{n-2}` | Further Reduced | Bayesian optimization on further reduced space (top `F_{n-2}` results from Stage 2) |
-
-Where `F_n` is the target Fibonacci number (default: 34 = F₉), giving the sequence:
-F₇=13, F₈=21, F₉=34, F₁₀=55, F₁₁=89, F₁₂=144...
-
-**Example with defaults (F_n=34, n_initial=10):**
-- Init: 10 random trials
-- Stage 1: 24 trials (full space)
-- Stage 2: 21 trials (reduced from top 21)
-- Stage 3: 13 trials (further reduced from top 13)
-- **Total: 68 trials**
-
-### Enabling Fibonacci Mode
-
-```bash
-freqtrade hyperopt --hyperopt-fibonacci --hyperopt-loss SharpeHyperOptLossDaily --spaces all --strategy MyStrategy --config config.json
-```
-
-### Configuration Options
-
-| CLI Argument | Config Key | Default | Description |
-|--------------|------------|---------|-------------|
-| `--hyperopt-fibonacci` | `hyperopt_fibonacci_enabled` | `false` | Enable Fibonacci stepping mode |
-| `--fibonacci-target` | `hyperopt_fibonacci_target` | `34` | Target Fibonacci number (must be ≥ 34) |
-| `--initial-points` | `hyperopt_initial_points` | `10` | Initial random trials before Bayesian optimization |
-| `--space-reduction` | `hyperopt_space_reduction` | `0.15` | Reduction factor for search space bounds (0.01-0.5) |
-| `--estimator` | `hyperopt_estimator` | `ET` | Base estimator: GP, RF, ET, GBRT |
-
-### Example Configurations
-
-**Conservative (faster, fewer trials):**
-```bash
-freqtrade hyperopt --hyperopt-fibonacci --fibonacci-target 34 --initial-points 5 --space-reduction 0.1
-```
-
-**Thorough (more trials, wider exploration):**
-```bash
-freqtrade hyperopt --hyperopt-fibonacci --fibonacci-target 55 --initial-points 15 --space-reduction 0.2
-```
-
-**Aggressive refinement (small reduction factor):**
-```bash
-freqtrade hyperopt --hyperopt-fibonacci --fibonacci-target 89 --space-reduction 0.05
-```
-
-### Output Display
-
-In Fibonacci mode, the live table includes a "Stage" column showing the current stage:
-- `Init` - Initialization (random)
-- `S1` - Stage 1 (full space)
-- `S2` - Stage 2 (reduced space)
-- `S3` - Stage 3 (refined space)
-
-Epoch display shows both stage-local and global epoch numbers: `5/24 (29/68)`
-
-### Result Files
-
-Results are saved to the same `.fthypt` format with additional fields:
-- `stage`: Current stage name (`init`, `stage1_full`, `stage2_reduced`, `stage3_refined`)
-- `stage_epoch`: Epoch number within the current stage
-- `current_epoch`: Global epoch number across all stages
-
-These fields are compatible with existing `hyperopt-list` and `hyperopt-show` commands.
-
-### Limitations & Notes
-
-- **Mutual exclusion**: `--hyperopt-fibonacci` and `--epochs` are mutually exclusive. In Fibonacci mode, total trials are calculated automatically from the Fibonacci target and initial points.
-- **Minimum target**: `--fibonacci-target` must be a Fibonacci number ≥ 34 (34, 55, 89, 144, 233, 377, 610...).
-- **Stage minimums**: Each stage requires a minimum number of trials (Stage 1: 5, Stage 2: 5, Stage 3: 3). The validation will error if the target is too small.
-- **No resume**: Interrupted Fibonacci runs cannot be resumed (same as standard hyperopt).
-- **Walk-forward**: Fibonacci mode works with walk-forward optimization automatically.
-- **Experimental**: This feature is experimental and may change in future releases.
 
 ### Execute Hyperopt with different historical data source
 
@@ -607,21 +530,24 @@ freqtrade hyperopt --strategy <strategyname> --timerange 20210101-20210201
 ### Running Hyperopt with Smaller Search Space
 
 Use the `--spaces` option to limit the search space used by hyperopt.
-Letting Hyperopt optimize everything is a huuuuge search space.
-Often it might make more sense to start by just searching for initial buy algorithm.
-Or maybe you just want to optimize your stoploss or roi table for that awesome new buy strategy you have.
+Letting Hyperopt optimize everything is often a huuuuge search space.
+Often it might make more sense to start by just searching for initial entry algorithm.
+Or maybe you just want to optimize your stoploss or roi table for that awesome new strategy you have.
 
 Legal values are:
 
-* `all`: optimize everything
+* `all`: optimize everything (including custom spaces)
 * `buy`: just search for a new buy strategy
 * `sell`: just search for a new sell strategy
+* `enter`: just search for a new entry logic
+* `exit`: just search for a new entry logic
 * `roi`: just optimize the minimal profit table for your strategy
 * `stoploss`: search for the best stoploss value
 * `trailing`: search for the best trailing stop values
 * `trades`: search for the best max open trades values
 * `protection`: search for the best protection parameters (read the [protections section](#optimizing-protections) on how to properly define these)
-* `default`: `all` except `trailing` and `protection`
+* `default`: `all` except `trailing`, `trades` and `protection`
+* `custom_space_name`: any custom space used by any parameter in your strategy
 * space-separated list of any of the above values for example `--spaces roi stoploss`
 
 The default Hyperopt Search Space, used when no `--space` command line option is specified, does not include the `trailing` hyperspace. We recommend you to run optimization for the `trailing` hyperspace separately, when the best parameters for other hyperspaces were found, validated and pasted into your custom strategy.

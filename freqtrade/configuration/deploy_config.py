@@ -28,26 +28,6 @@ def validate_is_float(val):
         return False
 
 
-def validate_stake_amount(val: str) -> bool:
-    """Validate stake_amount: either 'unlimited' (case-insensitive) or positive float."""
-    if isinstance(val, str) and val.lower() == UNLIMITED_STAKE_AMOUNT.lower():
-        return True
-    try:
-        amount = float(val)
-        return amount > 0
-    except Exception:
-        return False
-
-
-def validate_max_open_trades(val: str) -> bool:
-    """Validate max_open_trades: integer >= -1."""
-    try:
-        amount = int(val)
-        return amount >= -1
-    except Exception:
-        return False
-
-
 def ask_user_overwrite(config_path: Path) -> bool:
     questions = [
         {
@@ -89,11 +69,9 @@ def ask_user_config() -> dict[str, Any]:
             "name": "stake_amount",
             "message": f"Please insert your stake amount (Number or '{UNLIMITED_STAKE_AMOUNT}'):",
             "default": "unlimited",
-            "validate": lambda val: validate_stake_amount(val),
+            "validate": lambda val: val == UNLIMITED_STAKE_AMOUNT or validate_is_float(val),
             "filter": lambda val: (
-                '"' + UNLIMITED_STAKE_AMOUNT + '"'
-                if isinstance(val, str) and val.lower() == UNLIMITED_STAKE_AMOUNT.lower()
-                else val
+                '"' + UNLIMITED_STAKE_AMOUNT + '"' if val == UNLIMITED_STAKE_AMOUNT else val
             ),
         },
         {
@@ -101,7 +79,7 @@ def ask_user_config() -> dict[str, Any]:
             "name": "max_open_trades",
             "message": "Please insert max_open_trades (Integer or -1 for unlimited open trades):",
             "default": "3",
-            "validate": lambda val: validate_max_open_trades(val),
+            "validate": lambda val: validate_is_int(val),
         },
         {
             "type": "select",
@@ -159,8 +137,8 @@ def ask_user_config() -> dict[str, Any]:
         },
         {
             "type": "password",
-            "name": "exchange_key",
-            "message": "Insert Exchange Key",
+            "name": "exchange_api_key",
+            "message": "Insert Exchange API Key",
             "when": lambda x: not x["dry_run"],
         },
         {
@@ -171,7 +149,7 @@ def ask_user_config() -> dict[str, Any]:
         },
         {
             "type": "password",
-            "name": "exchange_key_password",
+            "name": "exchange_api_key_password",
             "message": "Insert Exchange API Key password",
             "when": lambda x: not x["dry_run"] and x["exchange_name"] in ("kucoin", "okx"),
         },
@@ -221,6 +199,9 @@ def ask_user_config() -> dict[str, Any]:
             "name": "api_server_password",
             "message": "Insert api-server password",
             "when": lambda x: x["api_server"],
+            "validate": lambda val: (
+                len(val) > 5 or "Please enter a password (minimum 6 characters)."
+            ),
         },
     ]
     answers = prompt(questions)
@@ -231,19 +212,6 @@ def ask_user_config() -> dict[str, Any]:
     # Ensure default is set for non-futures exchanges
     answers["trading_mode"] = answers.get("trading_mode", "spot")
     answers["margin_mode"] = "isolated" if answers.get("trading_mode") == "futures" else ""
-    # Normalize optional fields so template rendering never sees Undefined
-    answers["timeframe"] = answers.get("timeframe", "") or ""
-    answers["fiat_display_currency"] = answers.get("fiat_display_currency", "") or ""
-    answers["exchange_key"] = answers.get("exchange_key", "") or ""
-    answers["exchange_secret"] = answers.get("exchange_secret", "") or ""
-    answers["exchange_key_password"] = answers.get("exchange_key_password", "") or ""
-    answers["telegram_token"] = answers.get("telegram_token", "") or ""
-    answers["telegram_chat_id"] = answers.get("telegram_chat_id", "") or ""
-    answers["api_server_username"] = answers.get("api_server_username", "freqtrader")
-    answers["api_server_password"] = answers.get("api_server_password", "") or ""
-    answers["api_server_listen_addr"] = (
-        answers.get("api_server_listen_addr", "127.0.0.1") or "127.0.0.1"
-    )
     # Force JWT token to be a random string
     answers["api_server_jwt_key"] = secrets.token_hex()
     answers["api_server_ws_token"] = secrets.token_urlsafe(25)

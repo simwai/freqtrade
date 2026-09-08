@@ -56,7 +56,7 @@ class ReinforcementLearner(BaseReinforcementLearningModel):
         train_df = data_dictionary["train_features"]
         total_timesteps = self.freqai_info["rl_config"]["train_cycles"] * len(train_df)
 
-        policy_kwargs = dict(activation_fn=th.nn.ReLU, net_arch=self.net_arch)
+        policy_kwargs = {"activation_fn": th.nn.ReLU, "net_arch": self.net_arch}
 
         if self.activate_tensorboard:
             tb_path = Path(dk.full_path / "tensorboard" / dk.pair.split("/")[0])
@@ -101,7 +101,7 @@ class ReinforcementLearner(BaseReinforcementLearningModel):
 
         return model
 
-    MyRLEnv: type[BaseEnvironment]
+    MyRLEnv: type[BaseEnvironment]  # type: ignore[assignment, unused-ignore]
 
     class MyRLEnv(Base5ActionRLEnv):  # type: ignore[no-redef]
         """

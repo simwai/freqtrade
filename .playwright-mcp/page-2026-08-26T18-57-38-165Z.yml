@@ -1,0 +1,75 @@
+- generic [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - generic [ref=f2e5]:
+      - heading "Strategy Lab" [level=1] [ref=f2e6]
+      - generic [ref=f2e7]: freqtrade strategy overview · 2026-08-26 20:57
+  - generic [ref=f2e8]:
+    - button "Dashboard" [ref=f2e9] [cursor=pointer]
+    - button "Strategies" [ref=f2e10] [cursor=pointer]
+    - button "History" [ref=f2e11] [cursor=pointer]
+    - button "Benchmark" [ref=f2e12] [cursor=pointer]
+    - button "Walk-Forward" [ref=f2e13] [cursor=pointer]
+    - button "Hyperopt" [ref=f2e14] [cursor=pointer]
+    - button "Trades" [ref=f2e15] [cursor=pointer]
+    - button "Lab" [active] [ref=f2e16] [cursor=pointer]
+  - main [ref=f2e17]:
+    - generic [ref=f2e872]:
+      - generic [ref=f2e873]:
+        - generic [ref=f2e874]:
+          - heading "Run strategy" [level=2] [ref=f2e875]
+          - generic [ref=f2e876]: backtest / hyperopt / walk-forward for one strategy — requires the web server (lab.py serve)
+        - generic [ref=f2e877]:
+          - generic [ref=f2e878]:
+            - generic [ref=f2e879]:
+              - text: "Strategy:"
+              - combobox "Strategy:" [ref=f2e880]:
+                - option "(choose…)" [selected]
+            - generic [ref=f2e881]:
+              - text: "Run:"
+              - combobox "Run:" [ref=f2e882]:
+                - option "Backtest" [selected]
+                - option "Hyperopt"
+                - option "Walk-Forward"
+            - generic [ref=f2e883]:
+              - generic [ref=f2e884] [cursor=pointer]:
+                - text: "From:"
+                - textbox "From:" [ref=f2e885]: 2019-09-08
+              - generic [ref=f2e886]: →
+              - generic [ref=f2e887] [cursor=pointer]:
+                - text: "To:"
+                - textbox "To:" [ref=f2e888]: 2026-08-22
+            - generic [ref=f2e889]:
+              - text: "TF:"
+              - textbox "TF:" [ref=f2e890]: 5m
+            - generic [ref=f2e891]:
+              - text: "Config:"
+              - textbox "Config:" [ref=f2e892]:
+                - /placeholder: auto (optional)
+            - generic [ref=f2e893]:
+              - checkbox "Rebuild report when done" [checked] [ref=f2e894]
+              - text: Rebuild report when done
+            - button "▶ Run" [ref=f2e895] [cursor=pointer]
+            - button "↻ Refresh data" [ref=f2e896] [cursor=pointer]
+            - button "Rebuild report" [ref=f2e897] [cursor=pointer]
+          - generic [ref=f2e898]: Idle.
+      - generic [ref=f2e899]:
+        - generic [ref=f2e900]:
+          - heading "Benchmark (apples-to-apples)" [level=2] [ref=f2e901]
+          - generic [ref=f2e902]: every strategy on the shared benchmark config
+        - generic [ref=f2e904]:
+          - button "Run benchmark" [ref=f2e905] [cursor=pointer]
+          - generic [ref=f2e906]:
+            - text: "Strategies:"
+            - textbox "Strategies:" [ref=f2e907]:
+              - /placeholder: comma separated (empty = all)
+          - generic [ref=f2e908]:
+            - text: "Range:"
+            - textbox "Range:" [ref=f2e909]: 20230101-20240101
+          - generic [ref=f2e910]:
+            - text: "TF:"
+            - textbox "TF:" [ref=f2e911]: 5m
+      - generic [ref=f2e913]:
+        - heading "Strategy status" [level=2] [ref=f2e914]
+        - generic [ref=f2e915]: active / experimental / retired + notes (stored in DB)
+  - complementary [ref=f2e867]
+  - contentinfo [ref=f2e871]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

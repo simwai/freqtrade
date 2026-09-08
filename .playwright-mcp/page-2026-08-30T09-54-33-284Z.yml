@@ -1,0 +1,3336 @@
+- generic [active] [ref=f8e1]:
+  - banner [ref=f8e2]:
+    - generic [ref=f8e5]:
+      - heading "Strategy Lab" [level=1] [ref=f8e6]
+      - generic [ref=f8e7]: freqtrade strategy overview · 2026-08-30 11:54
+    - button "Jobs" [ref=f8e8] [cursor=pointer]
+  - generic:
+    - generic:
+      - generic: Jobs
+      - button: ✕ Close
+  - generic [ref=f8e9]:
+    - button "Dashboard" [ref=f8e10] [cursor=pointer]
+    - button "Strategies" [ref=f8e11] [cursor=pointer]
+    - button "History" [ref=f8e12] [cursor=pointer]
+    - button "Benchmark" [ref=f8e13] [cursor=pointer]
+    - button "Walk-Forward" [ref=f8e14] [cursor=pointer]
+    - button "Hyperopt" [ref=f8e15] [cursor=pointer]
+    - button "Trades" [ref=f8e16] [cursor=pointer]
+    - button "Lab" [ref=f8e17] [cursor=pointer]
+  - main [ref=f8e18]:
+    - generic [ref=f8e20]:
+      - generic [ref=f8e21]:
+        - heading "Trades" [level=2] [ref=f8e22]
+        - generic [ref=f8e23]: equity curve, profit distribution & per-trade detail (SL/TP, exit reason). Use lab.py serve to browse all runs.
+      - generic [ref=f8e25]:
+        - text: "Run:"
+        - combobox "Run:" [ref=f8e26]:
+          - option "HoffmanWF_rr1_5_tol0_25 — backtest-result-2026-08-30_11-53-04.zip (187 trades · 2026-08-30 09:53)" [selected]
+          - option "HoffmanWF_rr1_5_tol0_0 — backtest-result-2026-08-30_11-52-54.zip (90 trades · 2026-08-30 09:52)"
+          - option "HoffmanWF_rr1_5_tolm0_1 — backtest-result-2026-08-30_11-52-45.zip (61 trades · 2026-08-30 09:52)"
+          - option "HoffmanWF_rr1_5_tolm0_15 — backtest-result-2026-08-30_11-52-37.zip (44 trades · 2026-08-30 09:52)"
+          - option "HoffmanWF_rr1_25_tol0_5 — backtest-result-2026-08-30_11-52-28.zip (268 trades · 2026-08-30 09:52)"
+          - option "HoffmanWF_rr1_25_tol0_25 — backtest-result-2026-08-30_11-52-16.zip (185 trades · 2026-08-30 09:52)"
+          - option "HoffmanWF_rr1_25_tol0_0 — backtest-result-2026-08-30_11-52-06.zip (91 trades · 2026-08-30 09:52)"
+          - option "HoffmanWF_rr1_25_tolm0_1 — backtest-result-2026-08-30_11-51-57.zip (61 trades · 2026-08-30 09:51)"
+          - option "HoffmanWF_rr1_25_tolm0_15 — backtest-result-2026-08-30_11-51-48.zip (44 trades · 2026-08-30 09:51)"
+          - option "HoffmanWF_rr1_0_tol0_5 — backtest-result-2026-08-30_11-51-39.zip (261 trades · 2026-08-30 09:51)"
+          - option "HoffmanWF_rr1_0_tol0_25 — backtest-result-2026-08-30_11-51-26.zip (173 trades · 2026-08-30 09:51)"
+          - option "HoffmanWF_rr1_0_tol0_0 — backtest-result-2026-08-30_11-51-14.zip (88 trades · 2026-08-30 09:51)"
+          - option "HoffmanWF_rr1_0_tolm0_1 — backtest-result-2026-08-30_11-51-04.zip (59 trades · 2026-08-30 09:51)"
+          - option "HoffmanWF_rr1_0_tolm0_15 — backtest-result-2026-08-30_11-50-55.zip (44 trades · 2026-08-30 09:50)"
+          - option "HoffmanWF_rr0_75_tol0_5 — backtest-result-2026-08-30_11-50-45.zip (219 trades · 2026-08-30 09:50)"
+          - option "HoffmanWF_rr0_75_tol0_25 — backtest-result-2026-08-30_11-50-33.zip (143 trades · 2026-08-30 09:50)"
+          - option "HoffmanWF_rr0_75_tol0_0 — backtest-result-2026-08-30_11-50-21.zip (72 trades · 2026-08-30 09:50)"
+          - option "HoffmanWF_rr0_75_tolm0_1 — backtest-result-2026-08-30_11-50-10.zip (48 trades · 2026-08-30 09:50)"
+          - option "HoffmanWF_rr0_75_tolm0_15 — backtest-result-2026-08-30_11-50-01.zip (38 trades · 2026-08-30 09:49)"
+          - option "HoffmanWF_rr0_5_tol0_5 — backtest-result-2026-08-30_11-49-52.zip (127 trades · 2026-08-30 09:49)"
+          - option "HoffmanWF_rr0_5_tol0_25 — backtest-result-2026-08-30_11-49-40.zip (79 trades · 2026-08-30 09:49)"
+          - option "HoffmanWF_rr0_5_tol0_0 — backtest-result-2026-08-30_11-49-29.zip (43 trades · 2026-08-30 09:49)"
+          - option "HoffmanWF_rr0_5_tolm0_1 — backtest-result-2026-08-30_11-49-20.zip (28 trades · 2026-08-30 09:49)"
+          - option "HoffmanWF_rr0_5_tolm0_15 — backtest-result-2026-08-30_11-49-12.zip (21 trades · 2026-08-30 09:49)"
+          - option "HoffmanWF_rr2_5_tolm0_15 — backtest-result-2026-08-30_11-49-02.zip (27 trades · 2026-08-30 09:49)"
+          - option "HoffmanWF_rr3_0_tol0_5 — backtest-result-2026-08-30_11-48-53.zip (260 trades · 2026-08-30 09:48)"
+          - option "HoffmanWF_rr3_0_tol0_25 — backtest-result-2026-08-30_11-48-39.zip (176 trades · 2026-08-30 09:48)"
+          - option "HoffmanWF_rr3_0_tol0_0 — backtest-result-2026-08-30_11-48-26.zip (77 trades · 2026-08-30 09:48)"
+          - option "HoffmanWF_rr3_0_tolm0_1 — backtest-result-2026-08-30_11-48-16.zip (49 trades · 2026-08-30 09:48)"
+          - option "HoffmanWF_rr3_0_tolm0_15 — backtest-result-2026-08-30_11-48-06.zip (31 trades · 2026-08-30 09:48)"
+          - option "HoffmanWF_rr2_5_tol0_5 — backtest-result-2026-08-30_11-47-57.zip (261 trades · 2026-08-30 09:47)"
+          - option "HoffmanWF_rr2_5_tol0_25 — backtest-result-2026-08-30_11-47-44.zip (180 trades · 2026-08-30 09:47)"
+          - option "HoffmanWF_rr2_5_tol0_0 — backtest-result-2026-08-30_11-47-32.zip (78 trades · 2026-08-30 09:47)"
+          - option "HoffmanWF_rr2_5_tolm0_1 — backtest-result-2026-08-30_11-47-21.zip (49 trades · 2026-08-30 09:47)"
+          - option "HoffmanWF_rr2_5_tolm0_15 — backtest-result-2026-08-30_11-47-12.zip (31 trades · 2026-08-30 09:47)"
+          - option "HoffmanWF_rr2_0_tol0_5 — backtest-result-2026-08-30_11-47-03.zip (271 trades · 2026-08-30 09:46)"
+          - option "HoffmanWF_rr2_0_tol0_25 — backtest-result-2026-08-30_11-46-49.zip (190 trades · 2026-08-30 09:46)"
+          - option "HoffmanWF_rr2_0_tol0_0 — backtest-result-2026-08-30_11-46-37.zip (80 trades · 2026-08-30 09:46)"
+          - option "HoffmanWF_rr2_0_tolm0_1 — backtest-result-2026-08-30_11-46-27.zip (50 trades · 2026-08-30 09:46)"
+          - option "HoffmanWF_rr2_0_tolm0_15 — backtest-result-2026-08-30_11-46-17.zip (31 trades · 2026-08-30 09:46)"
+          - option "HoffmanWF_rr1_75_tol0_5 — backtest-result-2026-08-30_11-46-07.zip (270 trades · 2026-08-30 09:46)"
+          - option "HoffmanWF_rr1_75_tol0_25 — backtest-result-2026-08-30_11-45-54.zip (188 trades · 2026-08-30 09:45)"
+          - option "HoffmanWF_rr1_75_tol0_0 — backtest-result-2026-08-30_11-45-42.zip (80 trades · 2026-08-30 09:45)"
+          - option "HoffmanWF_rr1_75_tolm0_1 — backtest-result-2026-08-30_11-45-31.zip (50 trades · 2026-08-30 09:45)"
+          - option "HoffmanWF_rr1_75_tolm0_15 — backtest-result-2026-08-30_11-45-22.zip (31 trades · 2026-08-30 09:45)"
+          - option "HoffmanWF_rr1_5_tol0_5 — backtest-result-2026-08-30_11-45-14.zip (268 trades · 2026-08-30 09:45)"
+          - option "HoffmanWF_rr1_5_tol0_25 — backtest-result-2026-08-30_11-45-02.zip (191 trades · 2026-08-30 09:44)"
+          - option "HoffmanWF_rr1_5_tol0_0 — backtest-result-2026-08-30_11-44-52.zip (78 trades · 2026-08-30 09:44)"
+          - option "HoffmanWF_rr1_5_tolm0_1 — backtest-result-2026-08-30_11-44-42.zip (49 trades · 2026-08-30 09:44)"
+          - option "HoffmanWF_rr1_5_tolm0_15 — backtest-result-2026-08-30_11-44-33.zip (31 trades · 2026-08-30 09:44)"
+          - option "HoffmanWF_rr1_25_tol0_5 — backtest-result-2026-08-30_11-44-25.zip (266 trades · 2026-08-30 09:44)"
+          - option "HoffmanWF_rr1_25_tol0_25 — backtest-result-2026-08-30_11-44-13.zip (188 trades · 2026-08-30 09:44)"
+          - option "HoffmanWF_rr1_25_tol0_0 — backtest-result-2026-08-30_11-44-01.zip (78 trades · 2026-08-30 09:43)"
+          - option "HoffmanWF_rr1_25_tolm0_1 — backtest-result-2026-08-30_11-43-51.zip (49 trades · 2026-08-30 09:43)"
+          - option "HoffmanWF_rr1_25_tolm0_15 — backtest-result-2026-08-30_11-43-42.zip (31 trades · 2026-08-30 09:43)"
+          - option "HoffmanWF_rr1_0_tol0_5 — backtest-result-2026-08-30_11-43-34.zip (253 trades · 2026-08-30 09:43)"
+          - option "HoffmanWF_rr1_0_tol0_25 — backtest-result-2026-08-30_11-43-22.zip (175 trades · 2026-08-30 09:43)"
+          - option "adaptive — backtest-result-2026-08-30_11-50-27.zip (166 trades · 2026-08-30 09:43)"
+          - option "HoffmanWF_rr1_0_tol0_0 — backtest-result-2026-08-30_11-43-11.zip (70 trades · 2026-08-30 09:43)"
+          - option "HoffmanWF_rr1_0_tolm0_1 — backtest-result-2026-08-30_11-43-02.zip (43 trades · 2026-08-30 09:43)"
+          - option "HoffmanWF_rr1_0_tolm0_15 — backtest-result-2026-08-30_11-42-53.zip (29 trades · 2026-08-30 09:42)"
+          - option "HoffmanWF_rr0_75_tol0_5 — backtest-result-2026-08-30_11-42-45.zip (208 trades · 2026-08-30 09:42)"
+          - option "HoffmanWF_rr0_75_tol0_25 — backtest-result-2026-08-30_11-42-35.zip (145 trades · 2026-08-30 09:42)"
+          - option "HoffmanWF_rr0_75_tol0_0 — backtest-result-2026-08-30_11-42-25.zip (58 trades · 2026-08-30 09:42)"
+          - option "HoffmanWF_rr0_75_tolm0_1 — backtest-result-2026-08-30_11-42-17.zip (34 trades · 2026-08-30 09:42)"
+          - option "HoffmanWF_rr0_75_tolm0_15 — backtest-result-2026-08-30_11-42-06.zip (24 trades · 2026-08-30 09:42)"
+          - option "HoffmanWF_rr0_5_tol0_5 — backtest-result-2026-08-30_11-41-57.zip (140 trades · 2026-08-30 09:41)"
+          - option "HoffmanWF_rr0_5_tol0_25 — backtest-result-2026-08-30_11-41-46.zip (95 trades · 2026-08-30 09:41)"
+          - option "HoffmanWF_rr0_5_tol0_0 — backtest-result-2026-08-30_11-41-37.zip (38 trades · 2026-08-30 09:41)"
+          - option "HoffmanWF_rr0_5_tolm0_1 — backtest-result-2026-08-30_11-41-28.zip (24 trades · 2026-08-30 09:41)"
+          - option "HoffmanWF_rr0_5_tolm0_15 — backtest-result-2026-08-30_11-41-21.zip (16 trades · 2026-08-30 09:41)"
+          - option "HoffmanWF_rr2_5_tolm0_1 — backtest-result-2026-08-30_11-41-13.zip (25 trades · 2026-08-30 09:41)"
+          - option "HoffmanWF_rr3_0_tol0_5 — backtest-result-2026-08-30_11-41-05.zip (119 trades · 2026-08-30 09:41)"
+          - option "HoffmanWF_rr3_0_tol0_25 — backtest-result-2026-08-30_11-40-55.zip (87 trades · 2026-08-30 09:40)"
+          - option "HoffmanWF_rr3_0_tol0_0 — backtest-result-2026-08-30_11-40-47.zip (39 trades · 2026-08-30 09:40)"
+          - option "HoffmanWF_rr3_0_tolm0_1 — backtest-result-2026-08-30_11-40-39.zip (24 trades · 2026-08-30 09:40)"
+          - option "HoffmanWF_rr3_0_tolm0_15 — backtest-result-2026-08-30_11-40-32.zip (14 trades · 2026-08-30 09:40)"
+          - option "HoffmanWF_rr2_5_tol0_5 — backtest-result-2026-08-30_11-40-24.zip (118 trades · 2026-08-30 09:40)"
+          - option "HoffmanWF_rr2_5_tol0_25 — backtest-result-2026-08-30_11-40-15.zip (87 trades · 2026-08-30 09:40)"
+          - option "HoffmanWF_rr2_5_tol0_0 — backtest-result-2026-08-30_11-40-06.zip (39 trades · 2026-08-30 09:40)"
+          - option "adaptive — backtest-result-2026-08-30_11-42-11.zip (208 trades · 2026-08-30 09:40)"
+          - option "HoffmanWF_rr2_5_tolm0_1 — backtest-result-2026-08-30_11-39-59.zip (24 trades · 2026-08-30 09:39)"
+          - option "HoffmanWF_rr2_5_tolm0_15 — backtest-result-2026-08-30_11-39-50.zip (14 trades · 2026-08-30 09:39)"
+          - option "HoffmanWF_rr2_0_tol0_5 — backtest-result-2026-08-30_11-39-43.zip (125 trades · 2026-08-30 09:39)"
+          - option "HoffmanWF_rr2_0_tol0_25 — backtest-result-2026-08-30_11-39-34.zip (95 trades · 2026-08-30 09:39)"
+          - option "HoffmanWF_rr2_0_tol0_0 — backtest-result-2026-08-30_11-39-27.zip (39 trades · 2026-08-30 09:39)"
+          - option "HoffmanWF_rr2_0_tolm0_1 — backtest-result-2026-08-30_11-39-19.zip (24 trades · 2026-08-30 09:39)"
+          - option "HoffmanWF_rr2_0_tolm0_15 — backtest-result-2026-08-30_11-39-13.zip (14 trades · 2026-08-30 09:39)"
+          - option "HoffmanWF_rr1_75_tol0_5 — backtest-result-2026-08-30_11-39-06.zip (124 trades · 2026-08-30 09:39)"
+          - option "HoffmanWF_rr1_75_tol0_25 — backtest-result-2026-08-30_11-38-56.zip (93 trades · 2026-08-30 09:38)"
+          - option "HoffmanWF_rr1_75_tol0_0 — backtest-result-2026-08-30_11-38-47.zip (39 trades · 2026-08-30 09:38)"
+          - option "HoffmanWF_rr1_75_tolm0_1 — backtest-result-2026-08-30_11-38-39.zip (24 trades · 2026-08-30 09:38)"
+          - option "HoffmanWF_rr1_75_tolm0_15 — backtest-result-2026-08-30_11-38-32.zip (14 trades · 2026-08-30 09:38)"
+          - option "HoffmanWF_rr1_5_tol0_5 — backtest-result-2026-08-30_11-38-24.zip (122 trades · 2026-08-30 09:38)"
+          - option "HoffmanWF_rr1_5_tol0_25 — backtest-result-2026-08-30_11-38-16.zip (95 trades · 2026-08-30 09:38)"
+          - option "HoffmanWF_rr1_5_tol0_0 — backtest-result-2026-08-30_11-38-07.zip (37 trades · 2026-08-30 09:38)"
+          - option "HoffmanWF_rr1_5_tolm0_1 — backtest-result-2026-08-30_11-38-00.zip (23 trades · 2026-08-30 09:37)"
+          - option "HoffmanWF_rr1_5_tolm0_15 — backtest-result-2026-08-30_11-37-52.zip (14 trades · 2026-08-30 09:37)"
+          - option "HoffmanWF_rr1_25_tol0_5 — backtest-result-2026-08-30_11-37-45.zip (122 trades · 2026-08-30 09:37)"
+          - option "HoffmanWF_rr1_25_tol0_25 — backtest-result-2026-08-30_11-37-34.zip (93 trades · 2026-08-30 09:37)"
+          - option "HoffmanWF_rr1_25_tol0_0 — backtest-result-2026-08-30_11-37-26.zip (36 trades · 2026-08-30 09:37)"
+          - option "HoffmanWF_rr1_25_tolm0_1 — backtest-result-2026-08-30_11-37-18.zip (23 trades · 2026-08-30 09:37)"
+          - option "HoffmanWF_rr1_25_tolm0_15 — backtest-result-2026-08-30_11-37-10.zip (14 trades · 2026-08-30 09:37)"
+          - option "HoffmanWF_rr1_0_tol0_5 — backtest-result-2026-08-30_11-37-03.zip (114 trades · 2026-08-30 09:37)"
+          - option "HoffmanWF_rr1_0_tol0_25 — backtest-result-2026-08-30_11-36-54.zip (85 trades · 2026-08-30 09:36)"
+          - option "HoffmanWF_rr1_0_tol0_0 — backtest-result-2026-08-30_11-36-46.zip (30 trades · 2026-08-30 09:36)"
+          - option "HoffmanWF_rr1_0_tolm0_1 — backtest-result-2026-08-30_11-36-38.zip (19 trades · 2026-08-30 09:36)"
+          - option "HoffmanWF_rr1_0_tolm0_15 — backtest-result-2026-08-30_11-36-30.zip (12 trades · 2026-08-30 09:36)"
+          - option "HoffmanWF_rr0_75_tol0_5 — backtest-result-2026-08-30_11-36-22.zip (89 trades · 2026-08-30 09:36)"
+          - option "HoffmanWF_rr0_75_tol0_25 — backtest-result-2026-08-30_11-36-14.zip (70 trades · 2026-08-30 09:36)"
+          - option "HoffmanWF_rr0_75_tol0_0 — backtest-result-2026-08-30_11-36-05.zip (25 trades · 2026-08-30 09:36)"
+          - option "HoffmanWF_rr0_75_tolm0_1 — backtest-result-2026-08-30_11-35-58.zip (15 trades · 2026-08-30 09:35)"
+          - option "HoffmanWF_rr0_75_tolm0_15 — backtest-result-2026-08-30_11-35-50.zip (9 trades · 2026-08-30 09:35)"
+          - option "HoffmanWF_rr0_5_tol0_5 — backtest-result-2026-08-30_11-35-42.zip (62 trades · 2026-08-30 09:35)"
+          - option "HoffmanWF_rr0_5_tol0_25 — backtest-result-2026-08-30_11-35-33.zip (51 trades · 2026-08-30 09:35)"
+          - option "HoffmanWF_rr0_5_tol0_0 — backtest-result-2026-08-30_11-35-25.zip (17 trades · 2026-08-30 09:35)"
+          - option "HoffmanWF_rr0_5_tolm0_1 — backtest-result-2026-08-30_11-35-18.zip (11 trades · 2026-08-30 09:35)"
+          - option "HoffmanWF_rr0_5_tolm0_15 — backtest-result-2026-08-30_11-35-11.zip (6 trades · 2026-08-30 09:35)"
+          - option "HoffmanWF_rr1_0_tol0_5 — backtest-result-2026-08-30_11-34-48.zip (114 trades · 2026-08-30 09:34)"
+          - option "HoffmanWF_rr1_0_tol0_25 — backtest-result-2026-08-30_11-34-39.zip (85 trades · 2026-08-30 09:34)"
+          - option "HoffmanWF_rr1_0_tol0_0 — backtest-result-2026-08-30_11-34-31.zip (30 trades · 2026-08-30 09:34)"
+          - option "HoffmanWF_rr1_0_tolm0_1 — backtest-result-2026-08-30_11-34-24.zip (19 trades · 2026-08-30 09:34)"
+          - option "HoffmanWF_rr1_0_tolm0_15 — backtest-result-2026-08-30_11-34-17.zip (12 trades · 2026-08-30 09:34)"
+          - option "HoffmanWF_rr0_75_tol0_5 — backtest-result-2026-08-30_11-34-10.zip (89 trades · 2026-08-30 09:34)"
+          - option "HoffmanWF_rr0_75_tol0_25 — backtest-result-2026-08-30_11-34-01.zip (70 trades · 2026-08-30 09:34)"
+          - option "HoffmanWF_rr0_75_tol0_0 — backtest-result-2026-08-30_11-33-53.zip (25 trades · 2026-08-30 09:33)"
+          - option "HoffmanWF_rr0_75_tolm0_1 — backtest-result-2026-08-30_11-33-45.zip (15 trades · 2026-08-30 09:33)"
+          - option "HoffmanWF_rr0_75_tolm0_15 — backtest-result-2026-08-30_11-33-38.zip (9 trades · 2026-08-30 09:33)"
+          - option "HoffmanWF_rr0_5_tol0_5 — backtest-result-2026-08-30_11-33-31.zip (62 trades · 2026-08-30 09:33)"
+          - option "HoffmanWF_rr0_5_tol0_25 — backtest-result-2026-08-30_11-33-22.zip (51 trades · 2026-08-30 09:33)"
+          - option "HoffmanWF_rr0_5_tol0_0 — backtest-result-2026-08-30_11-33-13.zip (17 trades · 2026-08-30 09:33)"
+          - option "HoffmanWF_rr0_5_tolm0_1 — backtest-result-2026-08-30_11-33-06.zip (11 trades · 2026-08-30 09:33)"
+          - option "HoffmanWF_rr0_5_tolm0_15 — backtest-result-2026-08-30_11-32-58.zip (6 trades · 2026-08-30 09:32)"
+          - option "adaptive — backtest-result-2026-08-30_11-38-57.zip (170 trades · 2026-08-30 09:32)"
+          - option "adaptive — backtest-result-2026-08-30_11-31-26.zip (219 trades · 2026-08-30 09:29)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_lowrisk — backtest-result-2026-08-30_11-28-30.zip (107 trades · 2026-08-30 09:28)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_lowrisk — backtest-result-2026-08-30_11-28-20.zip (65 trades · 2026-08-30 09:28)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_5 — backtest-result-2026-08-30_11-24-04.zip (107 trades · 2026-08-30 09:24)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr0_5 — backtest-result-2026-08-30_11-23-55.zip (45 trades · 2026-08-30 09:23)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_0 — backtest-result-2026-08-30_11-23-28.zip (95 trades · 2026-08-30 09:23)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr3_0 — backtest-result-2026-08-30_11-22-02.zip (78 trades · 2026-08-30 09:21)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr2_75 — backtest-result-2026-08-30_11-21-43.zip (79 trades · 2026-08-30 09:21)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr2_5 — backtest-result-2026-08-30_11-21-26.zip (79 trades · 2026-08-30 09:21)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr2_25 — backtest-result-2026-08-30_11-21-08.zip (77 trades · 2026-08-30 09:20)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr2_0 — backtest-result-2026-08-30_11-19-37.zip (75 trades · 2026-08-30 09:19)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_75 — backtest-result-2026-08-30_11-19-19.zip (71 trades · 2026-08-30 09:19)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_5 — backtest-result-2026-08-30_11-19-04.zip (65 trades · 2026-08-30 09:18)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_25 — backtest-result-2026-08-30_11-18-48.zip (56 trades · 2026-08-30 09:18)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr1_0 — backtest-result-2026-08-30_11-18-34.zip (51 trades · 2026-08-30 09:18)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr0_75 — backtest-result-2026-08-30_11-18-19.zip (41 trades · 2026-08-30 09:18)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10_rr0_5 — backtest-result-2026-08-30_11-18-05.zip (27 trades · 2026-08-30 09:18)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr1_5 — backtest-result-2026-08-30_11-03-44.zip (170 trades · 2026-08-30 09:03)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr0_5 — backtest-result-2026-08-30_11-03-34.zip (72 trades · 2026-08-30 09:03)"
+          - option "HoffmanIRBStrategy4hVRPB — backtest-result-2026-08-30_11-03-05.zip (219 trades · 2026-08-30 09:02)"
+          - option "HoffmanIRBStrategy1hVRPB — backtest-result-2026-08-30_11-02-45.zip (243 trades · 2026-08-30 09:02)"
+          - option "HoffmanIRBStrategy15mVRPB — backtest-result-2026-08-30_11-02-23.zip (243 trades · 2026-08-30 09:02)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr3_0 — backtest-result-2026-08-30_11-01-46.zip (142 trades · 2026-08-30 09:01)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr2_75 — backtest-result-2026-08-30_11-01-28.zip (143 trades · 2026-08-30 09:01)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr2_5 — backtest-result-2026-08-30_11-01-10.zip (142 trades · 2026-08-30 09:01)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr2_25 — backtest-result-2026-08-30_11-00-52.zip (139 trades · 2026-08-30 09:00)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr2_0 — backtest-result-2026-08-30_10-59-22.zip (136 trades · 2026-08-30 08:59)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr1_75 — backtest-result-2026-08-30_10-59-06.zip (131 trades · 2026-08-30 08:58)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr1_5 — backtest-result-2026-08-30_10-58-48.zip (120 trades · 2026-08-30 08:58)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr1_25 — backtest-result-2026-08-30_10-58-28.zip (97 trades · 2026-08-30 08:58)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr1_0 — backtest-result-2026-08-30_10-58-13.zip (89 trades · 2026-08-30 08:58)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr0_75 — backtest-result-2026-08-30_10-57-57.zip (71 trades · 2026-08-30 08:57)"
+          - option "HoffmanIRBStrategy5mFeeVRPB_rr0_5 — backtest-result-2026-08-30_10-57-39.zip (39 trades · 2026-08-30 08:57)"
+          - option "adaptive — backtest-result-2026-08-29_22-05-18.zip (181 trades · 2026-08-29 19:58)"
+          - option "adaptive — backtest-result-2026-08-29_21-57-37.zip (152 trades · 2026-08-29 19:51)"
+          - option "adaptive — backtest-result-2026-08-29_21-50-41.zip (181 trades · 2026-08-29 19:47)"
+          - option "adaptive — backtest-result-2026-08-29_21-46-10.zip (225 trades · 2026-08-29 19:41)"
+          - option "adaptive — backtest-result-2026-08-29_21-41-14.zip (225 trades · 2026-08-29 19:36)"
+          - option "adaptive — backtest-result-2026-08-29_21-35-19.zip (134 trades · 2026-08-29 19:30)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-29_21-15-59.zip (1 trades · 2026-08-29 19:15)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-29_21-14-45.zip (2 trades · 2026-08-29 19:14)"
+          - option "HarmonicDivergence — backtest-result-2026-08-29_21-14-16.zip (296 trades · 2026-08-29 19:14)"
+          - option "adaptive — backtest-result-2026-08-29_21-11-55.zip (1254 trades · 2026-08-29 19:04)"
+          - option "adaptive — backtest-result-2026-08-29_21-00-09.zip (185 trades · 2026-08-29 18:58)"
+          - option "adaptive — backtest-result-2026-08-29_20-57-14.zip (210 trades · 2026-08-29 18:53)"
+          - option "adaptive — backtest-result-2026-08-29_20-53-09.zip (210 trades · 2026-08-29 18:49)"
+          - option "adaptive — backtest-result-2026-08-29_20-48-14.zip (28 trades · 2026-08-29 18:44)"
+          - option "adaptive — backtest-result-2026-08-29_20-44-17.zip (83 trades · 2026-08-29 18:41)"
+          - option "adaptive — backtest-result-2026-08-29_20-40-05.zip (161 trades · 2026-08-29 18:36)"
+          - option "adaptive — backtest-result-2026-08-29_20-15-07.zip (1 trades · 2026-08-29 18:15)"
+          - option "HoffmanIRBStrategy5mFeeVRPB50 — backtest-result-2026-08-29_20-10-08.zip (587 trades · 2026-08-29 18:09)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10 — backtest-result-2026-08-29_20-09-47.zip (107 trades · 2026-08-29 18:09)"
+          - option "HoffmanIRBStrategy5mFeeVRPB — backtest-result-2026-08-29_20-09-36.zip (170 trades · 2026-08-29 18:09)"
+          - option "HoffmanIRBStrategy5mFeeVolRegime — backtest-result-2026-08-29_20-09-23.zip (1296 trades · 2026-08-29 18:08)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN15 — backtest-result-2026-08-28_19-56-26.zip (25 trades · 2026-08-28 17:56)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN15 — backtest-result-2026-08-28_19-56-16.zip (45 trades · 2026-08-28 17:56)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10 — backtest-result-2026-08-28_19-56-01.zip (36 trades · 2026-08-28 17:55)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10 — backtest-result-2026-08-28_19-55-51.zip (65 trades · 2026-08-28 17:55)"
+          - option "adaptive — backtest-result-2026-08-28_19-57-08.zip (1173 trades · 2026-08-28 17:44)"
+          - option "HoffmanIRBStrategy5mFeePB — backtest-result-2026-08-28_19-43-10.zip (322 trades · 2026-08-28 17:42)"
+          - option "HoffmanIRBStrategy5mFeePB — backtest-result-2026-08-28_19-42-49.zip (835 trades · 2026-08-28 17:42)"
+          - option "HoffmanIRBStrategy5mFeeVR50PB — backtest-result-2026-08-28_19-42-09.zip (177 trades · 2026-08-28 17:42)"
+          - option "HoffmanIRBStrategy5mFeeVR50PB — backtest-result-2026-08-28_19-41-54.zip (451 trades · 2026-08-28 17:41)"
+          - option "HoffmanIRBStrategy5mFeeVRPB50 — backtest-result-2026-08-28_19-41-29.zip (142 trades · 2026-08-28 17:41)"
+          - option "HoffmanIRBStrategy5mFeeVRPB50 — backtest-result-2026-08-28_19-41-14.zip (507 trades · 2026-08-28 17:40)"
+          - option "HoffmanIRBStrategy5mFeeVRPB25 — backtest-result-2026-08-28_19-40-46.zip (100 trades · 2026-08-28 17:40)"
+          - option "HoffmanIRBStrategy5mFeeVRPB25 — backtest-result-2026-08-28_19-40-33.zip (294 trades · 2026-08-28 17:40)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFPB — backtest-result-2026-08-28_19-30-13.zip (10 trades · 2026-08-28 17:30)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFPB — backtest-result-2026-08-28_19-29-55.zip (44 trades · 2026-08-28 17:29)"
+          - option "HoffmanIRBStrategy5mFeeVRPB — backtest-result-2026-08-28_19-29-38.zip (54 trades · 2026-08-28 17:29)"
+          - option "HoffmanIRBStrategy5mFeeVRPB — backtest-result-2026-08-28_19-29-22.zip (120 trades · 2026-08-28 17:29)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFChV — backtest-result-2026-08-28_19-01-36.zip (187 trades · 2026-08-28 17:01)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFChV — backtest-result-2026-08-28_19-01-19.zip (1047 trades · 2026-08-28 17:00)"
+          - option "HoffmanIRBStrategy5mFeeVRChV — backtest-result-2026-08-28_19-00-24.zip (260 trades · 2026-08-28 17:00)"
+          - option "HoffmanIRBStrategy5mFeeVRChV — backtest-result-2026-08-28_19-00-05.zip (1267 trades · 2026-08-28 16:59)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFDC — backtest-result-2026-08-28_18-50-10.zip (206 trades · 2026-08-28 16:50)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFDC — backtest-result-2026-08-28_18-49-52.zip (1146 trades · 2026-08-28 16:49)"
+          - option "HoffmanIRBStrategy5mFeeVRDC — backtest-result-2026-08-28_18-48-55.zip (266 trades · 2026-08-28 16:48)"
+          - option "HoffmanIRBStrategy5mFeeVRDC — backtest-result-2026-08-28_18-48-36.zip (1405 trades · 2026-08-28 16:47)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBF — backtest-result-2026-08-28_18-15-09.zip (205 trades · 2026-08-28 16:15)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBF — backtest-result-2026-08-28_18-14-46.zip (1155 trades · 2026-08-28 16:14)"
+          - option "adaptive — backtest-result-2026-08-28_16-56-35.zip (470 trades · 2026-08-28 14:53)"
+          - option "adaptive — backtest-result-2026-08-28_16-52-38.zip (217 trades · 2026-08-28 14:49)"
+          - option "adaptive — backtest-result-2026-08-28_16-48-45.zip (227 trades · 2026-08-28 14:45)"
+          - option "adaptive — backtest-result-2026-08-28_16-44-37.zip (239 trades · 2026-08-28 14:41)"
+          - option "adaptive — backtest-result-2026-08-28_16-40-54.zip (248 trades · 2026-08-28 14:37)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_16-30-59.zip (1465 trades · 2026-08-28 14:30)"
+          - option "adaptive — backtest-result-2026-08-28_16-29-44.zip (248 trades · 2026-08-28 14:25)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_16-26-39.zip (1465 trades · 2026-08-28 14:25)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_16-23-43.zip (1465 trades · 2026-08-28 14:22)"
+          - option "adaptive — backtest-result-2026-08-28_16-25-05.zip (248 trades · 2026-08-28 14:21)"
+          - option "adaptive — backtest-result-2026-08-28_16-20-20.zip (248 trades · 2026-08-28 14:17)"
+          - option "adaptive — backtest-result-2026-08-28_16-15-49.zip (308 trades · 2026-08-28 14:12)"
+          - option "adaptive — backtest-result-2026-08-28_16-11-30.zip (239 trades · 2026-08-28 14:08)"
+          - option "adaptive — backtest-result-2026-08-28_16-07-27.zip (248 trades · 2026-08-28 14:03)"
+          - option "adaptive — backtest-result-2026-08-28_16-02-44.zip (101 trades · 2026-08-28 13:59)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_15-53-33.zip (1465 trades · 2026-08-28 13:52)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_15-50-45.zip (1465 trades · 2026-08-28 13:50)"
+          - option "adaptive — backtest-result-2026-08-28_15-52-46.zip (125 trades · 2026-08-28 13:49)"
+          - option "adaptive — backtest-result-2026-08-28_15-48-46.zip (221 trades · 2026-08-28 13:45)"
+          - option "adaptive — backtest-result-2026-08-28_15-44-35.zip (1 trades · 2026-08-28 13:44)"
+          - option "adaptive — backtest-result-2026-08-28_15-44-00.zip (13 trades · 2026-08-28 13:43)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_15-44-15.zip (1465 trades · 2026-08-28 13:43)"
+          - option "adaptive — backtest-result-2026-08-28_15-38-56.zip (165 trades · 2026-08-28 13:34)"
+          - option "HoffmanIRBStrategy5mFee — backtest-result-2026-08-28_14-20-50.zip (1644 trades · 2026-08-28 12:20)"
+          - option "HoffmanIRBStrategy5mFee — backtest-result-2026-08-28_14-19-19.zip (1383 trades · 2026-08-28 12:18)"
+          - option "HoffmanIRBStrategy5mFeeVolRegime — backtest-result-2026-08-28_14-17-45.zip (352 trades · 2026-08-28 12:17)"
+          - option "HoffmanIRBStrategy5mFeeVolRegime — backtest-result-2026-08-28_14-17-15.zip (1465 trades · 2026-08-28 12:16)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-28_14-15-23.zip (1714 trades · 2026-08-28 12:14)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-28_14-13-20.zip (1450 trades · 2026-08-28 12:12)"
+          - option "adaptive — backtest-result-2026-08-28_14-08-30.zip (325 trades · 2026-08-28 12:05)"
+          - option "adaptive — backtest-result-2026-08-28_14-03-42.zip (341 trades · 2026-08-28 12:00)"
+          - option "HoffmanIRBStrategy5mFee — backtest-result-2026-08-28_13-28-41.zip (1644 trades · 2026-08-28 11:28)"
+          - option "adaptive — backtest-result-2026-08-27_22-20-23.zip (550 trades · 2026-08-27 20:17)"
+          - option "adaptive — backtest-result-2026-08-27_19-52-14.zip (326 trades · 2026-08-27 17:49)"
+          - option "TrendOMaticNadarayaBaselineStrategy — backtest-result-2026-08-27_19-43-38.zip (4 trades · 2026-08-27 17:43)"
+          - option "TrendOMaticNadarayaStrategy — backtest-result-2026-08-27_19-42-47.zip (4 trades · 2026-08-27 17:42)"
+          - option "adaptive — backtest-result-2026-08-27_19-38-33.zip (555 trades · 2026-08-27 17:35)"
+          - option "adaptive — backtest-result-2026-08-27_19-34-46.zip (333 trades · 2026-08-27 17:31)"
+          - option "adaptive — backtest-result-2026-08-27_19-30-13.zip (852 trades · 2026-08-27 17:27)"
+          - option "HoffmanIRBStrategy15m — backtest-result-2026-08-27_19-27-15.zip (1426 trades · 2026-08-27 17:26)"
+          - option "HoffmanIRBStrategy4hFee — backtest-result-2026-08-27_19-25-49.zip (346 trades · 2026-08-27 17:25)"
+          - option "HoffmanIRBStrategy1hFee — backtest-result-2026-08-27_19-25-34.zip (1052 trades · 2026-08-27 17:25)"
+          - option "HoffmanIRBStrategy5mFee — backtest-result-2026-08-27_19-25-02.zip (1383 trades · 2026-08-27 17:24)"
+          - option "HoffmanIRBStrategy15mBase — backtest-result-2026-08-27_19-24-15.zip (1411 trades · 2026-08-27 17:23)"
+          - option "HoffmanIRBStrategy15m — backtest-result-2026-08-27_19-23-19.zip (498 trades · 2026-08-27 17:23)"
+          - option "adaptive — backtest-result-2026-08-27_19-26-19.zip (379 trades · 2026-08-27 17:23)"
+          - option "HarmonicDivergenceRegime — backtest-result-2026-08-27_16-53-16.zip (15546 trades · 2026-08-27 13:57)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-34-25.zip (58 trades · 2026-08-27 13:33)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-33-46.zip (47 trades · 2026-08-27 13:32)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-32-45.zip (14 trades · 2026-08-27 13:32)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-32-11.zip (31 trades · 2026-08-27 13:31)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-31-12.zip (126 trades · 2026-08-27 13:30)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-29-45.zip (36 trades · 2026-08-27 13:28)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-24-59.zip (36 trades · 2026-08-27 13:23)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-22-43.zip (36 trades · 2026-08-27 13:21)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-20-25.zip (36 trades · 2026-08-27 13:19)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-16-54.zip (36 trades · 2026-08-27 13:15)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_14-30-42.zip (36 trades · 2026-08-27 12:29)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_14-29-27.zip (36 trades · 2026-08-27 12:26)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_14-26-22.zip (58 trades · 2026-08-27 12:25)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_14-25-43.zip (58 trades · 2026-08-27 12:25)"
+          - option "NostalgiaForInfinityX7GuardedAge21 — backtest-result-2026-08-27_14-24-37.zip (47 trades · 2026-08-27 12:23)"
+          - option "NostalgiaForInfinityX7GuardedAge10 — backtest-result-2026-08-27_14-23-34.zip (47 trades · 2026-08-27 12:22)"
+          - option "NostalgiaForInfinityX7GuardedCat30 — backtest-result-2026-08-27_14-22-31.zip (47 trades · 2026-08-27 12:21)"
+          - option "NostalgiaForInfinityX7GuardedCat25 — backtest-result-2026-08-27_14-21-28.zip (47 trades · 2026-08-27 12:20)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_14-20-25.zip (47 trades · 2026-08-27 12:19)"
+          - option "NostalgiaForInfinityX7GuardedAge21 — backtest-result-2026-08-27_14-18-17.zip (14 trades · 2026-08-27 12:17)"
+          - option "NostalgiaForInfinityX7GuardedAge10 — backtest-result-2026-08-27_14-17-36.zip (14 trades · 2026-08-27 12:17)"
+          - option "NostalgiaForInfinityX7GuardedCat30 — backtest-result-2026-08-27_14-17-04.zip (14 trades · 2026-08-27 12:16)"
+          - option "NostalgiaForInfinityX7GuardedCat25 — backtest-result-2026-08-27_14-16-30.zip (14 trades · 2026-08-27 12:16)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_14-15-55.zip (14 trades · 2026-08-27 12:15)"
+          - option "NostalgiaForInfinityX7GuardedAge21 — backtest-result-2026-08-27_14-15-12.zip (31 trades · 2026-08-27 12:14)"
+          - option "NostalgiaForInfinityX7GuardedAge10 — backtest-result-2026-08-27_14-14-10.zip (32 trades · 2026-08-27 12:13)"
+          - option "NostalgiaForInfinityX7GuardedCat30 — backtest-result-2026-08-27_14-13-17.zip (32 trades · 2026-08-27 12:12)"
+          - option "NostalgiaForInfinityX7GuardedCat25 — backtest-result-2026-08-27_14-12-20.zip (32 trades · 2026-08-27 12:11)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_14-11-23.zip (32 trades · 2026-08-27 12:10)"
+          - option "NostalgiaForInfinityX7GuardedAge21 — backtest-result-2026-08-27_14-04-58.zip (126 trades · 2026-08-27 12:04)"
+          - option "NostalgiaForInfinityX7GuardedAge10 — backtest-result-2026-08-27_14-04-16.zip (126 trades · 2026-08-27 12:03)"
+          - option "NostalgiaForInfinityX7GuardedCat30 — backtest-result-2026-08-27_14-03-36.zip (126 trades · 2026-08-27 12:03)"
+          - option "NostalgiaForInfinityX7GuardedCat25 — backtest-result-2026-08-27_14-02-55.zip (126 trades · 2026-08-27 12:02)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_14-02-12.zip (126 trades · 2026-08-27 12:01)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_13-57-32.zip (126 trades · 2026-08-27 11:57)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_13-55-05.zip (126 trades · 2026-08-27 11:54)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_13-51-43.zip (126 trades · 2026-08-27 11:51)"
+          - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-41-32.zip (47 trades · 2026-08-27 11:40)"
+          - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-40-27.zip (47 trades · 2026-08-27 11:39)"
+          - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-39-23.zip (47 trades · 2026-08-27 11:38)"
+          - option "NFIX7GuardedAge21 — backtest-result-2026-08-27_13-38-21.zip (14 trades · 2026-08-27 11:37)"
+          - option "NFIX7GuardedAge10 — backtest-result-2026-08-27_13-37-41.zip (14 trades · 2026-08-27 11:37)"
+          - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-37-03.zip (14 trades · 2026-08-27 11:36)"
+          - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-36-28.zip (14 trades · 2026-08-27 11:36)"
+          - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-35-53.zip (14 trades · 2026-08-27 11:35)"
+          - option "NFIX7GuardedAge21 — backtest-result-2026-08-27_13-35-20.zip (31 trades · 2026-08-27 11:34)"
+          - option "NFIX7GuardedAge10 — backtest-result-2026-08-27_13-34-15.zip (32 trades · 2026-08-27 11:33)"
+          - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-33-20.zip (32 trades · 2026-08-27 11:32)"
+          - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-32-22.zip (32 trades · 2026-08-27 11:31)"
+          - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-31-22.zip (32 trades · 2026-08-27 11:30)"
+          - option "NFIX7GuardedAge21 — backtest-result-2026-08-27_13-30-25.zip (126 trades · 2026-08-27 11:29)"
+          - option "NFIX7GuardedAge10 — backtest-result-2026-08-27_13-29-44.zip (126 trades · 2026-08-27 11:29)"
+          - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-29-05.zip (126 trades · 2026-08-27 11:28)"
+          - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-28-25.zip (126 trades · 2026-08-27 11:27)"
+          - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-27-45.zip (126 trades · 2026-08-27 11:27)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_13-27-02.zip (36 trades · 2026-08-27 11:25)"
+          - option "newstrategy53 — backtest-result-2026-08-27_13-27-51.zip (184 trades · 2026-08-27 11:22)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_13-25-39.zip (36 trades · 2026-08-27 11:22)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_13-22-13.zip (58 trades · 2026-08-27 11:21)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_13-21-34.zip (58 trades · 2026-08-27 11:20)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_12-36-19.zip (47 trades · 2026-08-27 10:33)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_12-33-28.zip (47 trades · 2026-08-27 10:32)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_12-31-57.zip (126 trades · 2026-08-27 10:31)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-54-56.zip (40 trades · 2026-08-27 09:53)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-51-30.zip (14 trades · 2026-08-27 09:50)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-49-29.zip (14 trades · 2026-08-27 09:48)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-47-45.zip (32 trades · 2026-08-27 09:46)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-46-24.zip (31 trades · 2026-08-27 09:45)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-44-40.zip (79 trades · 2026-08-27 09:44)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-41-51.zip (126 trades · 2026-08-27 09:40)"
+          - option "newstrategy53 — backtest-result-2026-08-27_11-43-26.zip (205 trades · 2026-08-27 09:34)"
+          - option "newstrategy53 — backtest-result-2026-08-26_21-23-49.zip (3 trades · 2026-08-26 19:23)"
+          - option "newstrategy53 — backtest-result-2026-08-26_21-21-34.zip (3 trades · 2026-08-26 19:21)"
+          - option "ScreenerDpoEveningStar — backtest-result-2026-08-26_20-51-11.zip (2018 trades · 2026-08-26 18:50)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-26_20-45-18.zip (6 trades · 2026-08-26 18:45)"
+          - option "NostalgiaForInfinityX6 — backtest-result-2026-08-26_13-13-36.zip (30 trades · 2026-08-26 11:09)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-26_13-09-01.zip (41 trades · 2026-08-26 11:07)"
+          - option "NostalgiaForInfinityX6 — backtest-result-2026-08-26_13-06-52.zip (6 trades · 2026-08-26 11:05)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-26_13-05-25.zip (9 trades · 2026-08-26 11:05)"
+          - option "Ichi — backtest-result-2026-08-26_12-58-49.zip (1451 trades · 2026-08-26 10:58)"
+          - option "HarmonicDivergence — backtest-result-2026-08-26_13-35-21.zip (21933 trades · 2026-08-26 10:54)"
+          - option "EntryFloodControl — backtest-result-2026-08-26_12-53-00.zip (3123 trades · 2026-08-26 10:52)"
+          - option "HarmonicDivergence — backtest-result-2026-08-26_12-49-28.zip (1326 trades · 2026-08-26 10:48)"
+          - option "HarmonicDivergence — backtest-result-2026-08-26_02-07-09.zip (561 trades · 2026-08-26 00:06)"
+          - option "Ichi — backtest-result-2026-08-24_12-28-17.zip (4 trades · 2026-08-24 10:28)"
+          - option "HarmonicDivergence — backtest-result-2026-08-24_12-25-40.zip (522 trades · 2026-08-24 10:25)"
+          - option "TrendOMaticStrategySpot — backtest-result-2026-08-23_20-20-21.zip (1734 trades · 2026-08-23 18:17)"
+          - option "HoffmanIRBStrategy1h — backtest-result-2026-08-23_20-04-39.zip (1075 trades · 2026-08-23 18:04)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_20-04-06.zip (1450 trades · 2026-08-23 18:03)"
+          - option "HoffmanIRBStrategy4h — backtest-result-2026-08-23_20-03-25.zip (347 trades · 2026-08-23 18:03)"
+          - option "HoffmanIRBStrategy1h — backtest-result-2026-08-23_20-03-08.zip (1075 trades · 2026-08-23 18:02)"
+          - option "NadarayaWatsonSpot — backtest-result-2026-08-23_20-16-51.zip (3012 trades · 2026-08-23 18:01)"
+          - option "MfiEmaWaveTrend2Spot — backtest-result-2026-08-23_20-01-31.zip (10178 trades · 2026-08-23 17:58)"
+          - option "MfiEmaWaveTrendSpot — backtest-result-2026-08-23_19-58-35.zip (1524 trades · 2026-08-23 17:51)"
+          - option "SuperKeltnerStrategy — backtest-result-2026-08-23_19-50-38.zip (222 trades · 2026-08-23 17:50)"
+          - option "HoffmanIRBStrategyPct20 — backtest-result-2026-08-23_19-50-13.zip (1753 trades · 2026-08-23 17:49)"
+          - option "HoffmanIRBStrategyPct25 — backtest-result-2026-08-23_19-48-58.zip (1743 trades · 2026-08-23 17:48)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-23_19-47-51.zip (2405 trades · 2026-08-23 17:47)"
+          - option "HoffmanIRBStrategyRR20 — backtest-result-2026-08-23_19-47-02.zip (1739 trades · 2026-08-23 17:46)"
+          - option "HoffmanIRBStrategyRR10 — backtest-result-2026-08-23_19-45-53.zip (1755 trades · 2026-08-23 17:45)"
+          - option "ClucHAnix_5m — backtest-result-2026-08-23_19-46-34.zip (180 trades · 2026-08-23 17:44)"
+          - option "HoffmanIRBStrategyRR05 — backtest-result-2026-08-23_19-44-52.zip (1774 trades · 2026-08-23 17:44)"
+          - option "BigZ08 — backtest-result-2026-08-23_19-44-13.zip (9 trades · 2026-08-23 17:43)"
+          - option "BigZ06AtrSl — backtest-result-2026-08-23_19-43-47.zip (735 trades · 2026-08-23 17:43)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2026-08-23_19-42-55.zip (66 trades · 2026-08-23 17:42)"
+          - option "HoffmanIRBStrategyRR05 — backtest-result-2026-08-23_19-42-17.zip (1774 trades · 2026-08-23 17:41)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-31-51.zip (1714 trades · 2026-08-23 17:31)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-29-59.zip (1714 trades · 2026-08-23 17:29)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-27-02.zip (13 trades · 2026-08-23 17:27)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-24-00.zip (1661 trades · 2026-08-23 17:23)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-17-05.zip (43 trades · 2026-08-23 17:17)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-14-57.zip (43 trades · 2026-08-23 17:14)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-13-11.zip (1778 trades · 2026-08-23 17:12)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-10-18.zip (1778 trades · 2026-08-23 17:09)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-23_17-03-42.zip (30 trades · 2026-08-23 15:03)"
+          - option "StrategyTemplateV21 — backtest-result-2026-08-23_14-04-46.zip (33 trades · 2026-08-23 12:04)"
+          - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_14-03-10.zip (531 trades · 2026-08-23 12:02)"
+          - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-56-47.zip (672 trades · 2026-08-23 11:56)"
+          - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-54-57.zip (672 trades · 2026-08-23 11:54)"
+          - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-54-12.zip (672 trades · 2026-08-23 11:53)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-19-18.zip (59 trades · 2026-08-22 14:19)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-15-26.zip (374 trades · 2026-08-22 14:15)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-14-58.zip (965 trades · 2026-08-22 14:14)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-04-34.zip (8407 trades · 2026-08-22 14:03)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-03-19.zip (3262 trades · 2026-08-22 14:02)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-02-31.zip (111 trades · 2026-08-22 14:02)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-02-16.zip (338 trades · 2026-08-22 14:02)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_15-51-01.zip (64 trades · 2026-08-22 13:50)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_15-49-50.zip (374 trades · 2026-08-22 13:49)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_15-49-35.zip (2 trades · 2026-08-22 13:49)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_15-44-14.zip (9841 trades · 2026-08-22 13:42)"
+          - option "GKDAdaptiveAcademicFinal — backtest-result-2026-08-22_15-12-15.zip (6 trades · 2026-08-22 13:12)"
+          - option "GKDAdaptiveAcademicFinal — backtest-result-2026-08-22_14-59-52.zip (12 trades · 2026-08-22 12:59)"
+          - option "OctopusNestATR — backtest-result-2026-08-21_14-00-21.zip (39 trades · 2026-08-21 12:00)"
+          - option "OctopusNestHighestLowestATR — backtest-result-2026-08-21_14-00-47.zip (23 trades · 2026-08-21 12:00)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-21_13-59-47.zip (37 trades · 2026-08-21 11:59)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-21_13-45-33.zip (28 trades · 2026-08-21 11:45)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-21_13-39-26.zip (122 trades · 2026-08-21 11:39)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-20_18-29-40.zip (537 trades · 2026-08-20 16:29)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-20_18-15-50.zip (139 trades · 2026-08-20 16:15)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-20_16-56-01.zip (3 trades · 2026-08-20 14:56)"
+          - option "WolfeFuturesShortStrategy — backtest-result-2026-08-20_15-47-26.zip (9 trades · 2026-08-20 13:47)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-20_15-34-28.zip (7 trades · 2026-08-20 13:34)"
+          - option "BigZ08 — backtest-result-2024-12-01_17-37-30.json (165 trades · 2024-12-01 16:34)"
+          - option "BigZ08 — backtest-result-2024-07-28_13-51-02.json (163 trades · 2024-07-28 11:49)"
+          - option "BigZ08 — backtest-result-2024-07-28_13-18-05.json (242 trades · 2024-07-28 11:15)"
+          - option "BigZ08 — backtest-result-2024-07-28_12-48-35.json (242 trades · 2024-07-28 10:46)"
+          - option "BigZ08 — backtest-result-2024-07-28_12-41-02.json (163 trades · 2024-07-28 10:39)"
+          - option "BigZ08 — backtest-result-2024-07-28_12-38-36.json (163 trades · 2024-07-28 10:36)"
+          - option "BigZ08 — backtest-result-2024-07-28_12-35-44.json (242 trades · 2024-07-28 10:32)"
+          - option "BigZ08 — backtest-result-2024-07-22_21-25-28.json (215 trades · 2024-07-22 19:23)"
+          - option "BigZ08 — backtest-result-2024-07-22_13-19-04.json (215 trades · 2024-07-22 11:17)"
+          - option "BigZ08 — backtest-result-2024-07-22_13-00-43.json (271 trades · 2024-07-22 10:58)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-18-39.json (239 trades · 2024-07-22 09:16)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-15-09.json (263 trades · 2024-07-22 09:13)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-11-23.json (268 trades · 2024-07-22 09:09)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-08-08.json (259 trades · 2024-07-22 09:06)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-01-15.json (250 trades · 2024-07-22 08:59)"
+          - option "BigZ08 — backtest-result-2024-07-22_10-41-36.json (231 trades · 2024-07-22 08:39)"
+          - option "BigZ08 — backtest-result-2024-07-22_09-08-54.json (250 trades · 2024-07-22 07:06)"
+          - option "BigZ08 — backtest-result-2024-07-22_09-05-08.json (399 trades · 2024-07-22 07:02)"
+          - option "BigZ08 — backtest-result-2024-07-22_09-01-00.json (399 trades · 2024-07-22 06:58)"
+          - option "BigZ08 — backtest-result-2024-07-22_08-57-53.json (403 trades · 2024-07-22 06:55)"
+          - option "BigZ08 — backtest-result-2024-07-22_08-50-32.json (403 trades · 2024-07-22 06:47)"
+          - option "BigZ08 — backtest-result-2024-07-22_00-01-00.json (403 trades · 2024-07-21 21:58)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-56-34.json (346 trades · 2024-07-21 21:54)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-38-15.json (265 trades · 2024-07-21 21:35)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-33-14.json (265 trades · 2024-07-21 21:30)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-29-26.json (265 trades · 2024-07-21 21:26)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-25-08.json (517 trades · 2024-07-21 21:24)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-21-52.json (673 trades · 2024-07-21 21:21)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-19-34.json (517 trades · 2024-07-21 21:18)"
+          - option "BigZ08 — backtest-result-2024-07-21_20-34-48.json (673 trades · 2024-07-21 12:34)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-32-37.json (673 trades · 2024-07-21 12:31)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-28-23.json (673 trades · 2024-07-21 12:27)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-25-20.json (673 trades · 2024-07-21 12:24)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-12-51.json (517 trades · 2024-07-21 12:12)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-09-45.json (517 trades · 2024-07-21 12:08)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-03-51.json (517 trades · 2024-07-21 12:01)"
+          - option "BigZ08 — backtest-result-2024-07-21_13-46-30.json (517 trades · 2024-07-21 11:45)"
+          - option "BigZ08 — backtest-result-2024-07-21_13-43-38.json (517 trades · 2024-07-21 11:42)"
+          - option "BigZ08 — backtest-result-2024-07-19_21-34-57.json (517 trades · 2024-07-19 19:31)"
+          - option "BigZ08 — backtest-result-2024-07-19_21-26-23.json (517 trades · 2024-07-19 19:25)"
+          - option "BigZ08 — backtest-result-2024-07-19_21-18-24.json (517 trades · 2024-07-19 19:17)"
+          - option "BigZ08 — backtest-result-2024-07-19_21-14-32.json (517 trades · 2024-07-19 15:49)"
+          - option "BigZ08 — backtest-result-2024-07-19_14-47-21.json (517 trades · 2024-07-19 12:46)"
+          - option "BigZ08 — backtest-result-2024-07-19_14-33-31.json (517 trades · 2024-07-19 12:32)"
+          - option "BigZ08 — backtest-result-2024-07-19_14-19-35.json (517 trades · 2024-07-19 12:18)"
+          - option "BigZ08 — backtest-result-2024-07-19_14-02-23.json (673 trades · 2024-07-19 12:01)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-46-15.json (673 trades · 2024-07-19 10:45)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-42-39.json (673 trades · 2024-07-19 10:41)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-37-46.json (673 trades · 2024-07-19 10:36)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-36-21.json (673 trades · 2024-07-19 10:35)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-32-32.json (673 trades · 2024-07-19 10:31)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-26-39.json (673 trades · 2024-07-19 10:25)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-23-43.json (673 trades · 2024-07-19 10:22)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-22-00.json (673 trades · 2024-07-19 10:21)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-16-13.json (673 trades · 2024-07-19 10:15)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-12-37.json (673 trades · 2024-07-19 10:11)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-04-28.json (673 trades · 2024-07-19 10:03)"
+          - option "BigZ08 — backtest-result-2024-07-18_23-02-35.json (517 trades · 2024-07-18 21:01)"
+          - option "BigZ08 — backtest-result-2024-07-18_23-01-33.json (517 trades · 2024-07-18 21:00)"
+          - option "BigZ08 — backtest-result-2024-07-18_20-22-24.json (517 trades · 2024-07-18 18:21)"
+          - option "BigZ08 — backtest-result-2024-07-18_20-11-05.json (517 trades · 2024-07-18 18:10)"
+          - option "BigZ08 — backtest-result-2024-07-18_20-05-48.json (517 trades · 2024-07-18 18:05)"
+          - option "BigZ08 — backtest-result-2024-07-18_20-04-13.json (517 trades · 2024-07-18 18:03)"
+          - option "BigZ08 — backtest-result-2024-07-18_19-57-13.json (517 trades · 2024-07-18 17:56)"
+          - option "BigZ06AtrSl — backtest-result-2024-06-25_19-21-09.json (3913 trades · 2024-06-25 17:19)"
+          - option "StrategyTemplate — backtest-result-2024-06-18_12-32-24.json (4906 trades · 2024-06-18 10:31)"
+          - option "BigZ08 — backtest-result-2024-05-22_11-09-30.json (503 trades · 2024-05-22 09:08)"
+          - option "BigZ08 — backtest-result-2024-05-21_23-14-30.json (3236 trades · 2024-05-21 21:12)"
+          - option "BigZ08 — backtest-result-2024-05-21_23-02-20.json (3357 trades · 2024-05-21 21:00)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-40-44.json (3236 trades · 2024-05-20 13:39)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-37-08.json (3935 trades · 2024-05-20 13:35)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-32-31.json (4996 trades · 2024-05-20 13:31)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-29-30.json (3817 trades · 2024-05-20 13:28)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-25-04.json (4114 trades · 2024-05-20 13:23)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-20-56.json (3463 trades · 2024-05-20 13:19)"
+          - option "BigZ08 — backtest-result-2024-05-20_14-45-55.json (3463 trades · 2024-05-20 12:44)"
+          - option "BigZ08 — backtest-result-2024-05-20_12-15-20.json (3536 trades · 2024-05-20 10:12)"
+          - option "BigZ08 — backtest-result-2024-05-20_11-21-14.json (3536 trades · 2024-05-20 09:19)"
+          - option "BigZ08 — backtest-result-2024-05-19_19-48-48.json (3536 trades · 2024-05-19 17:47)"
+          - option "BigZ08 — backtest-result-2024-05-19_19-13-11.json (3536 trades · 2024-05-19 17:11)"
+          - option "BigZ08 — backtest-result-2024-05-19_19-02-45.json (3536 trades · 2024-05-19 17:01)"
+          - option "BigZ08 — backtest-result-2024-05-19_18-17-14.json (5440 trades · 2024-05-19 16:16)"
+          - option "BigZ08 — backtest-result-2024-05-19_18-07-19.json (3536 trades · 2024-05-19 16:05)"
+          - option "BigZ08 — backtest-result-2024-05-19_18-00-16.json (3561 trades · 2024-05-19 15:58)"
+          - option "BigZ08 — backtest-result-2024-05-19_17-52-11.json (6342 trades · 2024-05-19 15:51)"
+          - option "BigZ08 — backtest-result-2024-05-19_17-23-12.json (6342 trades · 2024-05-19 15:22)"
+          - option "BigZ08 — backtest-result-2024-05-19_17-20-37.json (4866 trades · 2024-05-19 15:19)"
+          - option "BigZ08 — backtest-result-2024-05-19_17-10-05.json (4866 trades · 2024-05-19 15:09)"
+          - option "BigZ08 — backtest-result-2024-05-19_13-01-26.json (3262 trades · 2024-05-19 10:53)"
+          - option "BigZ08 — backtest-result-2024-05-18_19-04-17.json (3262 trades · 2024-05-18 16:57)"
+          - option "BigZ08 — backtest-result-2024-05-18_18-32-29.json (3262 trades · 2024-05-18 16:25)"
+          - option "BigZ07Next2 — backtest-result-2024-02-17_13-16-32.json (3606 trades · 2024-02-17 12:14)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-17_13-16-32.json (3607 trades · 2024-02-17 12:13)"
+          - option "BigZ06AtrSl — backtest-result-2024-02-17_13-16-32.json (4040 trades · 2024-02-17 12:12)"
+          - option "BigZ06Original — backtest-result-2024-02-17_13-16-32.json (3450 trades · 2024-02-17 12:11)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-16_13-22-34.json (3618 trades · 2024-02-16 12:21)"
+          - option "BigZ06AtrSl — backtest-result-2024-02-16_13-22-34.json (4046 trades · 2024-02-16 12:20)"
+          - option "BigZ06Original — backtest-result-2024-02-16_13-22-34.json (3458 trades · 2024-02-16 12:19)"
+          - option "newstrategy51 — backtest-result-2024-02-16_13-22-34.json (138 trades · 2024-02-16 12:10)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-16_12-06-20.json (3618 trades · 2024-02-16 11:05)"
+          - option "BigZ06Original — backtest-result-2024-02-16_12-06-20.json (3458 trades · 2024-02-16 11:04)"
+          - option "newstrategy51 — backtest-result-2024-02-16_12-06-20.json (138 trades · 2024-02-16 10:57)"
+          - option "BigZ06Original — backtest-result-2024-02-16_11-47-32.json (3458 trades · 2024-02-16 10:46)"
+          - option "newstrategy51 — backtest-result-2024-02-16_11-47-32.json (138 trades · 2024-02-16 10:39)"
+          - option "BigZ06Original — backtest-result-2024-02-15_22-53-32.json (3638 trades · 2024-02-15 21:52)"
+          - option "newstrategy51 — backtest-result-2024-02-15_22-53-32.json (1048 trades · 2024-02-15 21:35)"
+          - option "BigZ06Original — backtest-result-2024-02-14_12-25-37.json (3524 trades · 2024-02-14 11:24)"
+          - option "newstrategy51 — backtest-result-2024-02-14_12-25-37.json (1014 trades · 2024-02-14 11:07)"
+          - option "ClucHAnix_5m — backtest-result-2024-02-13_16-41-46.json (7136 trades · 2024-02-13 15:29)"
+          - option "newstrategy53 — backtest-result-2024-02-13_16-41-46.json (1250 trades · 2024-02-13 15:02)"
+          - option "newstrategy51 — backtest-result-2024-02-13_16-41-46.json (1008 trades · 2024-02-13 14:25)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-19_21-14-12.json (4225 trades · 2024-01-19 20:11)"
+          - option "BigZ07Next2 — backtest-result-2024-01-19_21-14-12.json (2494 trades · 2024-01-19 20:05)"
+          - option "BigZ06Original — backtest-result-2024-01-19_21-14-12.json (3516 trades · 2024-01-19 20:02)"
+          - option "ClucHAnix_5m — backtest-result-2024-01-18_23-12-23.json (7136 trades · 2024-01-18 22:02)"
+          - option "BB_RPB_TSLmeneguzzo — backtest-result-2024-01-18_23-12-23.json (1239 trades · 2024-01-18 21:49)"
+          - option "adaptive — backtest-result-2024-01-18_23-12-23.json (2210 trades · 2024-01-18 21:47)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2024-01-18_23-12-23.json (90 trades · 2024-01-18 21:47)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-18_23-12-23.json (4225 trades · 2024-01-18 21:46)"
+          - option "BigZ07Next2 — backtest-result-2024-01-18_23-12-23.json (2494 trades · 2024-01-18 21:44)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_15-41-05.json (4231 trades · 2024-01-10 14:40)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_15-28-12.json (4231 trades · 2024-01-10 14:27)"
+          - option "BigZ06 — backtest-result-2024-01-10_12-36-28.json (3451 trades · 2024-01-10 11:32)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_12-36-28.json (3721 trades · 2024-01-10 11:29)"
+          - option "BigZ06 — backtest-result-2024-01-10_12-15-30.json (3451 trades · 2024-01-10 11:13)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_12-15-30.json (3988 trades · 2024-01-10 11:10)"
+          - option "BigZ06 — backtest-result-2024-01-10_11-51-33.json (3451 trades · 2024-01-10 10:49)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_11-51-33.json (3988 trades · 2024-01-10 10:48)"
+          - option "BigZ06 — backtest-result-2024-01-10_11-27-58.json (3451 trades · 2024-01-10 10:26)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_11-27-58.json (4048 trades · 2024-01-10 10:25)"
+          - option "BigZ06 — backtest-result-2024-01-10_09-31-52.json (3451 trades · 2024-01-10 08:31)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_09-31-52.json (800 trades · 2024-01-10 08:30)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-25-13.json (3451 trades · 2024-01-09 01:24)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-25-13.json (4231 trades · 2024-01-09 01:23)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-21-15.json (3451 trades · 2024-01-09 01:20)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-21-15.json (4228 trades · 2024-01-09 01:19)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-18-02.json (3451 trades · 2024-01-09 01:17)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-18-02.json (4218 trades · 2024-01-09 01:16)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-12-52.json (3451 trades · 2024-01-09 01:12)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-12-52.json (4231 trades · 2024-01-09 01:11)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-01-59.json (3451 trades · 2024-01-09 01:01)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-01-59.json (3720 trades · 2024-01-09 01:00)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-57-20.json (3451 trades · 2024-01-09 00:56)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-57-20.json (3721 trades · 2024-01-09 00:55)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-53-46.json (3451 trades · 2024-01-09 00:53)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-53-46.json (3721 trades · 2024-01-09 00:52)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-44-58.json (3451 trades · 2024-01-09 00:44)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-44-58.json (3721 trades · 2024-01-09 00:43)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-39-30.json (3451 trades · 2024-01-09 00:38)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-39-30.json (3721 trades · 2024-01-09 00:38)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-05-45.json (3451 trades · 2024-01-09 00:05)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-05-45.json (3451 trades · 2024-01-09 00:04)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_00-23-48.json (3720 trades · 2024-01-08 23:23)"
+          - option "BigZ06 — backtest-result-2024-01-07_02-41-35.json (3444 trades · 2024-01-07 01:40)"
+          - option "BigZ07Next2 — backtest-result-2024-01-07_02-41-35.json (2494 trades · 2024-01-07 01:38)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-20_16-14-42.json (7 trades · 2023-12-20 15:09)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-19_22-01-15.json (7 trades · 2023-12-19 20:55)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-09_02-46-45.json (38 trades · 2023-12-09 01:34)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-09_01-47-22.json (55 trades · 2023-12-09 00:34)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-04_10-20-18.json (282 trades · 2023-12-04 08:32)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-03_13-55-52.json (273 trades · 2023-12-03 12:19)"
+          - option "NostalgiaForInfinityX3 — backtest-result-2023-06-08_21-48-55.json (271 trades · 2023-06-08 19:05)"
+          - option "SupertrendKeltner — backtest-result-2023-03-27_12-55-38.json (31202 trades · 2023-03-27 10:08)"
+          - option "NostalgiaForInfinityX — backtest-result-2023-03-24_13-00-24.json (433 trades · 2023-03-24 11:50)"
+          - option "MfiEmaWaveTrend2 — backtest-result-2023-03-18_08-07-03.json (30695 trades · 2023-03-18 06:53)"
+          - option "MfiEmaWaveTrend2 — backtest-result-2023-03-17_14-35-11.json (3172 trades · 2023-03-17 13:21)"
+          - option "MfiEmaWaveTrend2 — backtest-result-2023-03-17_14-06-34.json (763 trades · 2023-03-17 12:48)"
+          - option "MfiEmaWaveTrend — backtest-result-2023-03-17_13-46-07.json (4452 trades · 2023-03-17 12:31)"
+          - option "MfiEmaWaveTrend — backtest-result-2023-03-16_20-48-15.json (111 trades · 2023-03-16 19:43)"
+          - option "MfiEmaWaveTrend — backtest-result-2023-03-15_18-34-26.json (1970 trades · 2023-03-15 17:21)"
+          - option "NadarayaWatson — backtest-result-2022-12-18_21-44-03.json (24617 trades · 2022-12-18 19:46)"
+          - option "NWEv6_new — backtest-result-2022-12-17_12-27-45.json (5046 trades · 2022-12-17 10:46)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-16_11-47-10.json (1644 trades · 2022-12-16 10:46)"
+          - option "BigZ06 — backtest-result-2022-12-09_10-42-37.json (6405 trades · 2022-12-09 09:40)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_20-03-45.json (1642 trades · 2022-12-08 19:02)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_19-17-10.json (1642 trades · 2022-12-08 18:16)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_19-11-00.json (1642 trades · 2022-12-08 18:09)"
+          - option "HoffmanWF_rr1_5_tol0_5 — backtest-result-2026-08-30_11-53-17.zip (270 trades)"
+      - generic [ref=f8e37]:
+        - generic [ref=f8e38]:
+          - heading "Trade map" [level=2] [ref=f8e39]
+          - generic [ref=f8e40]: one marker line per trade - long runs below the price, short above it, entry to exit (both marker modes) - entry arrows + exit dots in fixed colours, dashed line = initial stop loss
+        - generic [ref=f8e41]:
+          - generic [ref=f8e42]:
+            - text: "Pair:"
+            - combobox "Pair:" [ref=f8e43]:
+              - option "XRP/USDT:USDT" [selected]
+          - generic [ref=f8e44]:
+            - text: "Exit reason:"
+            - combobox "Exit reason:" [ref=f8e45]:
+              - option "all exits" [selected]
+              - option "irb_target"
+              - option "stop_loss"
+          - generic [ref=f8e46]:
+            - text: "Candles:"
+            - combobox "Candles:" [ref=f8e47]:
+              - option "Lab (default)" [selected]
+              - option "TradingView"
+              - option "Classic"
+              - option "Ghost (dim)"
+              - option "Mint & Rajah"
+              - option "Cyan & Pink"
+          - generic [ref=f8e48]:
+            - text: "Markers:"
+            - combobox "Markers:" [ref=f8e49]:
+              - option "Lab (default)" [selected]
+              - option "TradingView"
+              - option "Classic"
+              - option "Bright"
+              - option "Mint & Rajah"
+              - option "Cyan & Pink"
+          - generic [ref=f8e50]:
+            - text: "Tracks:"
+            - combobox "Tracks:" [ref=f8e51]:
+              - option "Beside candles"
+              - option "At trade rates" [selected]
+          - generic [ref=f8e52]:
+            - text: "Indicators:"
+            - combobox "Indicators:" [ref=f8e53]:
+              - option "+ add" [selected]
+        - generic [ref=f8e54]:
+          - table [ref=f8e57]:
+            - row [ref=f8e58]:
+              - cell
+              - cell [ref=f8e59]:
+                - link "Charting by TradingView" [ref=f8e63] [cursor=pointer]:
+                  - /url: https://www.tradingview.com/?utm_medium=lwc-link&utm_campaign=lwc-chart&utm_source=127.0.0.1/
+              - cell [ref=f8e68]
+            - row [ref=f8e72]:
+              - cell
+              - cell [ref=f8e73]
+              - cell [ref=f8e77]
+          - button "Fit" [ref=f8e80] [cursor=pointer]
+        - generic [ref=f8e81]:
+          - generic [ref=f8e82]: no indicators - add up to 3 via the "Indicators" dropdown, controls appear here
+          - generic [ref=f8e84]: entry (↑ long · ↓ short)
+          - generic [ref=f8e86]: exit
+          - generic [ref=f8e88]: initial stop loss
+          - generic [ref=f8e90]: volume
+      - generic [ref=f8e92]:
+        - table [ref=f8e94]:
+          - rowgroup [ref=f8e109]:
+            - row [ref=f8e110]:
+              - columnheader "Pair" [ref=f8e111] [cursor=pointer]
+              - columnheader "Side" [ref=f8e112] [cursor=pointer]
+              - columnheader "Enter tag" [ref=f8e113] [cursor=pointer]
+              - columnheader "Exit reason" [ref=f8e114] [cursor=pointer]
+              - columnheader "Open" [ref=f8e115] [cursor=pointer]
+              - columnheader "Close" [ref=f8e116] [cursor=pointer]
+              - columnheader "Open rate" [ref=f8e117] [cursor=pointer]
+              - columnheader "Close rate" [ref=f8e118] [cursor=pointer]
+              - columnheader "Profit%" [ref=f8e119] [cursor=pointer]
+              - columnheader "Profit abs" [ref=f8e120] [cursor=pointer]
+              - columnheader "Stop loss" [ref=f8e121] [cursor=pointer]
+              - columnheader "SL%" [ref=f8e122] [cursor=pointer]
+              - columnheader "Duration" [ref=f8e123] [cursor=pointer]
+        - generic [ref=f8e125]:
+          - paragraph [ref=f8e126]: Showing 187 of 187 trades for HoffmanWF_rr1_5_tol0_25
+          - table [ref=f8e127]:
+            - rowgroup [ref=f8e142]:
+              - row [ref=f8e143]:
+                - cell "XRP/USDT:USDT" [ref=f8e144]
+                - cell "long" [ref=f8e145]
+                - cell "irb_long_612" [ref=f8e146]
+                - cell "irb_target" [ref=f8e147]
+                - cell "2025-01-01 17:45" [ref=f8e148]
+                - cell "2025-01-01 18:00" [ref=f8e149]
+                - cell "2.248" [ref=f8e150]
+                - cell "2.261" [ref=f8e151]
+                - cell "0.47%" [ref=f8e152]
+                - cell "46.89" [ref=f8e154]
+                - cell "2.239" [ref=f8e155]
+                - cell "-0.4%" [ref=f8e156]
+                - cell "0h0m" [ref=f8e157]
+              - row [ref=f8e158]:
+                - cell "XRP/USDT:USDT" [ref=f8e159]
+                - cell "long" [ref=f8e160]
+                - cell "irb_long_652" [ref=f8e161]
+                - cell "stop_loss" [ref=f8e162]
+                - cell "2025-01-01 21:05" [ref=f8e163]
+                - cell "2025-01-01 21:05" [ref=f8e164]
+                - cell "2.31" [ref=f8e165]
+                - cell "2.305" [ref=f8e166]
+                - cell "⚠ -0.32%" [ref=f8e167]
+                - cell "-31.465" [ref=f8e169]
+                - cell "2.305" [ref=f8e170]
+                - cell "-0.2%" [ref=f8e171]
+                - cell "—" [ref=f8e172]
+              - row [ref=f8e173]:
+                - cell "XRP/USDT:USDT" [ref=f8e174]
+                - cell "long" [ref=f8e175]
+                - cell "irb_long_656" [ref=f8e176]
+                - cell "irb_target" [ref=f8e177]
+                - cell "2025-01-01 21:25" [ref=f8e178]
+                - cell "2025-01-01 21:35" [ref=f8e179]
+                - cell "2.311" [ref=f8e180]
+                - cell "2.32" [ref=f8e181]
+                - cell "0.31%" [ref=f8e182]
+                - cell "30.827" [ref=f8e184]
+                - cell "2.305" [ref=f8e185]
+                - cell "-0.3%" [ref=f8e186]
+                - cell "0h0m" [ref=f8e187]
+              - row [ref=f8e188]:
+                - cell "XRP/USDT:USDT" [ref=f8e189]
+                - cell "long" [ref=f8e190]
+                - cell "irb_long_701" [ref=f8e191]
+                - cell "stop_loss" [ref=f8e192]
+                - cell "2025-01-02 01:10" [ref=f8e193]
+                - cell "2025-01-02 01:30" [ref=f8e194]
+                - cell "2.4" [ref=f8e195]
+                - cell "2.379" [ref=f8e196]
+                - cell "⚠ -0.95%" [ref=f8e197]
+                - cell "-78.361" [ref=f8e199]
+                - cell "2.379" [ref=f8e200]
+                - cell "-0.9%" [ref=f8e201]
+                - cell "0h0m" [ref=f8e202]
+              - row [ref=f8e203]:
+                - cell "XRP/USDT:USDT" [ref=f8e204]
+                - cell "long" [ref=f8e205]
+                - cell "irb_long_1296" [ref=f8e206]
+                - cell "irb_target" [ref=f8e207]
+                - cell "2025-01-04 02:45" [ref=f8e208]
+                - cell "2025-01-04 02:55" [ref=f8e209]
+                - cell "2.478" [ref=f8e210]
+                - cell "2.489" [ref=f8e211]
+                - cell "0.34%" [ref=f8e212]
+                - cell "33.114" [ref=f8e214]
+                - cell "2.471" [ref=f8e215]
+                - cell "-0.3%" [ref=f8e216]
+                - cell "0h0m" [ref=f8e217]
+              - row [ref=f8e218]:
+                - cell "XRP/USDT:USDT" [ref=f8e219]
+                - cell "long" [ref=f8e220]
+                - cell "irb_long_3540" [ref=f8e221]
+                - cell "stop_loss" [ref=f8e222]
+                - cell "2025-01-11 21:45" [ref=f8e223]
+                - cell "2025-01-11 22:15" [ref=f8e224]
+                - cell "2.566" [ref=f8e225]
+                - cell "2.557" [ref=f8e226]
+                - cell "⚠ -0.44%" [ref=f8e227]
+                - cell "-43.458" [ref=f8e229]
+                - cell "2.557" [ref=f8e230]
+                - cell "-0.3%" [ref=f8e231]
+                - cell "0h1m" [ref=f8e232]
+              - row [ref=f8e233]:
+                - cell "XRP/USDT:USDT" [ref=f8e234]
+                - cell "short" [ref=f8e235]
+                - cell "irb_short_4025" [ref=f8e236]
+                - cell "stop_loss" [ref=f8e237]
+                - cell "2025-01-13 14:30" [ref=f8e238]
+                - cell "2025-01-13 14:35" [ref=f8e239]
+                - cell "2.362" [ref=f8e240]
+                - cell "2.379" [ref=f8e241]
+                - cell "⚠ -0.84%" [ref=f8e242]
+                - cell "-82.934" [ref=f8e244]
+                - cell "2.379" [ref=f8e245]
+                - cell "-0.7%" [ref=f8e246]
+                - cell "0h0m" [ref=f8e247]
+              - row [ref=f8e248]:
+                - cell "XRP/USDT:USDT" [ref=f8e249]
+                - cell "long" [ref=f8e250]
+                - cell "irb_long_4608" [ref=f8e251]
+                - cell "irb_target" [ref=f8e252]
+                - cell "2025-01-15 14:45" [ref=f8e253]
+                - cell "2025-01-15 15:10" [ref=f8e254]
+                - cell "2.846" [ref=f8e255]
+                - cell "2.869" [ref=f8e256]
+                - cell "0.71%" [ref=f8e257]
+                - cell "59.057" [ref=f8e259]
+                - cell "2.83" [ref=f8e260]
+                - cell "-0.5%" [ref=f8e261]
+                - cell "0h0m" [ref=f8e262]
+              - row [ref=f8e263]:
+                - cell "XRP/USDT:USDT" [ref=f8e264]
+                - cell "long" [ref=f8e265]
+                - cell "irb_long_4889" [ref=f8e266]
+                - cell "stop_loss" [ref=f8e267]
+                - cell "2025-01-16 14:10" [ref=f8e268]
+                - cell "2025-01-16 14:35" [ref=f8e269]
+                - cell "3.318" [ref=f8e270]
+                - cell "3.284" [ref=f8e271]
+                - cell "⚠ -1.14%" [ref=f8e272]
+                - cell "-63.422" [ref=f8e274]
+                - cell "3.284" [ref=f8e275]
+                - cell "-1%" [ref=f8e276]
+                - cell "0h0m" [ref=f8e277]
+              - row [ref=f8e278]:
+                - cell "XRP/USDT:USDT" [ref=f8e279]
+                - cell "short" [ref=f8e280]
+                - cell "irb_short_7938" [ref=f8e281]
+                - cell "irb_target" [ref=f8e282]
+                - cell "2025-01-27 04:15" [ref=f8e283]
+                - cell "2025-01-27 04:20" [ref=f8e284]
+                - cell "2.987" [ref=f8e285]
+                - cell "2.977" [ref=f8e286]
+                - cell "0.25%" [ref=f8e287]
+                - cell "24.268" [ref=f8e289]
+                - cell "2.994" [ref=f8e290]
+                - cell "-0.2%" [ref=f8e291]
+                - cell "0h0m" [ref=f8e292]
+              - row [ref=f8e293]:
+                - cell "XRP/USDT:USDT" [ref=f8e294]
+                - cell "short" [ref=f8e295]
+                - cell "irb_short_7982" [ref=f8e296]
+                - cell "irb_target" [ref=f8e297]
+                - cell "2025-01-27 08:00" [ref=f8e298]
+                - cell "2025-01-27 08:35" [ref=f8e299]
+                - cell "2.8" [ref=f8e300]
+                - cell "2.75" [ref=f8e301]
+                - cell "1.70%" [ref=f8e302]
+                - cell "80.864" [ref=f8e304]
+                - cell "2.833" [ref=f8e305]
+                - cell "-1.2%" [ref=f8e306]
+                - cell "0h1m" [ref=f8e307]
+              - row [ref=f8e308]:
+                - cell "XRP/USDT:USDT" [ref=f8e309]
+                - cell "long" [ref=f8e310]
+                - cell "irb_long_8056" [ref=f8e311]
+                - cell "stop_loss" [ref=f8e312]
+                - cell "2025-01-27 14:05" [ref=f8e313]
+                - cell "2025-01-27 14:10" [ref=f8e314]
+                - cell "2.877" [ref=f8e315]
+                - cell "2.858" [ref=f8e316]
+                - cell "⚠ -0.77%" [ref=f8e317]
+                - cell "-65.734" [ref=f8e319]
+                - cell "2.858" [ref=f8e320]
+                - cell "-0.7%" [ref=f8e321]
+                - cell "0h0m" [ref=f8e322]
+              - row [ref=f8e323]:
+                - cell "XRP/USDT:USDT" [ref=f8e324]
+                - cell "long" [ref=f8e325]
+                - cell "irb_long_8063" [ref=f8e326]
+                - cell "irb_target" [ref=f8e327]
+                - cell "2025-01-27 14:40" [ref=f8e328]
+                - cell "2025-01-27 15:05" [ref=f8e329]
+                - cell "2.909" [ref=f8e330]
+                - cell "2.982" [ref=f8e331]
+                - cell "2.41%" [ref=f8e332]
+                - cell "141.233" [ref=f8e334]
+                - cell "2.86" [ref=f8e335]
+                - cell "-1.7%" [ref=f8e336]
+                - cell "0h0m" [ref=f8e337]
+              - row [ref=f8e338]:
+                - cell "XRP/USDT:USDT" [ref=f8e339]
+                - cell "short" [ref=f8e340]
+                - cell "irb_short_9670" [ref=f8e341]
+                - cell "stop_loss" [ref=f8e342]
+                - cell "2025-02-02 04:35" [ref=f8e343]
+                - cell "2025-02-02 05:20" [ref=f8e344]
+                - cell "2.85" [ref=f8e345]
+                - cell "2.862" [ref=f8e346]
+                - cell "⚠ -0.53%" [ref=f8e347]
+                - cell "-52.564" [ref=f8e349]
+                - cell "2.862" [ref=f8e350]
+                - cell "-0.4%" [ref=f8e351]
+                - cell "0h1m" [ref=f8e352]
+              - row [ref=f8e353]:
+                - cell "XRP/USDT:USDT" [ref=f8e354]
+                - cell "short" [ref=f8e355]
+                - cell "irb_short_9956" [ref=f8e356]
+                - cell "irb_target" [ref=f8e357]
+                - cell "2025-02-03 04:25" [ref=f8e358]
+                - cell "2025-02-03 04:35" [ref=f8e359]
+                - cell "2.201" [ref=f8e360]
+                - cell "2.154" [ref=f8e361]
+                - cell "2.02%" [ref=f8e362]
+                - cell "52.615" [ref=f8e364]
+                - cell "2.232" [ref=f8e365]
+                - cell "-1.4%" [ref=f8e366]
+                - cell "0h0m" [ref=f8e367]
+              - row [ref=f8e368]:
+                - cell "XRP/USDT:USDT" [ref=f8e369]
+                - cell "short" [ref=f8e370]
+                - cell "irb_short_12674" [ref=f8e371]
+                - cell "stop_loss" [ref=f8e372]
+                - cell "2025-02-12 14:55" [ref=f8e373]
+                - cell "2025-02-12 14:55" [ref=f8e374]
+                - cell "2.38" [ref=f8e375]
+                - cell "2.39" [ref=f8e376]
+                - cell "⚠ -0.51%" [ref=f8e377]
+                - cell "-43.312" [ref=f8e379]
+                - cell "2.39" [ref=f8e380]
+                - cell "-0.4%" [ref=f8e381]
+                - cell "—" [ref=f8e382]
+              - row [ref=f8e383]:
+                - cell "XRP/USDT:USDT" [ref=f8e384]
+                - cell "short" [ref=f8e385]
+                - cell "irb_short_12678" [ref=f8e386]
+                - cell "stop_loss" [ref=f8e387]
+                - cell "2025-02-12 15:15" [ref=f8e388]
+                - cell "2025-02-12 15:15" [ref=f8e389]
+                - cell "2.374" [ref=f8e390]
+                - cell "2.387" [ref=f8e391]
+                - cell "⚠ -0.65%" [ref=f8e392]
+                - cell "-58.345" [ref=f8e394]
+                - cell "2.387" [ref=f8e395]
+                - cell "-0.6%" [ref=f8e396]
+                - cell "—" [ref=f8e397]
+              - row [ref=f8e398]:
+                - cell "XRP/USDT:USDT" [ref=f8e399]
+                - cell "short" [ref=f8e400]
+                - cell "irb_short_12692" [ref=f8e401]
+                - cell "stop_loss" [ref=f8e402]
+                - cell "2025-02-12 16:25" [ref=f8e403]
+                - cell "2025-02-12 16:30" [ref=f8e404]
+                - cell "2.383" [ref=f8e405]
+                - cell "2.392" [ref=f8e406]
+                - cell "⚠ -0.49%" [ref=f8e407]
+                - cell "-48.727" [ref=f8e409]
+                - cell "2.392" [ref=f8e410]
+                - cell "-0.4%" [ref=f8e411]
+                - cell "0h0m" [ref=f8e412]
+              - row [ref=f8e413]:
+                - cell "XRP/USDT:USDT" [ref=f8e414]
+                - cell "short" [ref=f8e415]
+                - cell "irb_short_12962" [ref=f8e416]
+                - cell "stop_loss" [ref=f8e417]
+                - cell "2025-02-13 14:55" [ref=f8e418]
+                - cell "2025-02-13 15:15" [ref=f8e419]
+                - cell "2.429" [ref=f8e420]
+                - cell "2.438" [ref=f8e421]
+                - cell "⚠ -0.45%" [ref=f8e422]
+                - cell "-43.708" [ref=f8e424]
+                - cell "2.438" [ref=f8e425]
+                - cell "-0.3%" [ref=f8e426]
+                - cell "0h0m" [ref=f8e427]
+              - row [ref=f8e428]:
+                - cell "XRP/USDT:USDT" [ref=f8e429]
+                - cell "long" [ref=f8e430]
+                - cell "irb_long_13205" [ref=f8e431]
+                - cell "irb_target" [ref=f8e432]
+                - cell "2025-02-14 11:10" [ref=f8e433]
+                - cell "2025-02-14 11:20" [ref=f8e434]
+                - cell "2.749" [ref=f8e435]
+                - cell "2.768" [ref=f8e436]
+                - cell "0.59%" [ref=f8e437]
+                - cell "56.369" [ref=f8e439]
+                - cell "2.736" [ref=f8e440]
+                - cell "-0.5%" [ref=f8e441]
+                - cell "0h0m" [ref=f8e442]
+              - row [ref=f8e443]:
+                - cell "XRP/USDT:USDT" [ref=f8e444]
+                - cell "long" [ref=f8e445]
+                - cell "irb_long_13313" [ref=f8e446]
+                - cell "stop_loss" [ref=f8e447]
+                - cell "2025-02-14 20:15" [ref=f8e448]
+                - cell "2025-02-14 20:30" [ref=f8e449]
+                - cell "2.804" [ref=f8e450]
+                - cell "2.781" [ref=f8e451]
+                - cell "⚠ -0.90%" [ref=f8e452]
+                - cell "-83.497" [ref=f8e454]
+                - cell "2.781" [ref=f8e455]
+                - cell "-0.8%" [ref=f8e456]
+                - cell "0h0m" [ref=f8e457]
+              - row [ref=f8e458]:
+                - cell "XRP/USDT:USDT" [ref=f8e459]
+                - cell "short" [ref=f8e460]
+                - cell "irb_short_14013" [ref=f8e461]
+                - cell "stop_loss" [ref=f8e462]
+                - cell "2025-02-17 06:30" [ref=f8e463]
+                - cell "2025-02-17 07:05" [ref=f8e464]
+                - cell "2.677" [ref=f8e465]
+                - cell "2.686" [ref=f8e466]
+                - cell "⚠ -0.44%" [ref=f8e467]
+                - cell "-42.829" [ref=f8e469]
+                - cell "2.686" [ref=f8e470]
+                - cell "-0.3%" [ref=f8e471]
+                - cell "0h1m" [ref=f8e472]
+              - row [ref=f8e473]:
+                - cell "XRP/USDT:USDT" [ref=f8e474]
+                - cell "long" [ref=f8e475]
+                - cell "irb_long_14714" [ref=f8e476]
+                - cell "irb_target" [ref=f8e477]
+                - cell "2025-02-19 16:55" [ref=f8e478]
+                - cell "2025-02-19 17:15" [ref=f8e479]
+                - cell "2.639" [ref=f8e480]
+                - cell "2.654" [ref=f8e481]
+                - cell "0.48%" [ref=f8e482]
+                - cell "46.084" [ref=f8e484]
+                - cell "2.629" [ref=f8e485]
+                - cell "-0.4%" [ref=f8e486]
+                - cell "0h0m" [ref=f8e487]
+              - row [ref=f8e488]:
+                - cell "XRP/USDT:USDT" [ref=f8e489]
+                - cell "short" [ref=f8e490]
+                - cell "irb_short_15331" [ref=f8e491]
+                - cell "stop_loss" [ref=f8e492]
+                - cell "2025-02-21 20:20" [ref=f8e493]
+                - cell "2025-02-21 20:30" [ref=f8e494]
+                - cell "2.534" [ref=f8e495]
+                - cell "2.543" [ref=f8e496]
+                - cell "⚠ -0.46%" [ref=f8e497]
+                - cell "-44.711" [ref=f8e499]
+                - cell "2.543" [ref=f8e500]
+                - cell "-0.4%" [ref=f8e501]
+                - cell "0h0m" [ref=f8e502]
+              - row [ref=f8e503]:
+                - cell "XRP/USDT:USDT" [ref=f8e504]
+                - cell "long" [ref=f8e505]
+                - cell "irb_long_15942" [ref=f8e506]
+                - cell "stop_loss" [ref=f8e507]
+                - cell "2025-02-23 23:15" [ref=f8e508]
+                - cell "2025-02-23 23:20" [ref=f8e509]
+                - cell "2.574" [ref=f8e510]
+                - cell "2.566" [ref=f8e511]
+                - cell "⚠ -0.45%" [ref=f8e512]
+                - cell "-43.174" [ref=f8e514]
+                - cell "2.566" [ref=f8e515]
+                - cell "-0.3%" [ref=f8e516]
+                - cell "0h0m" [ref=f8e517]
+              - row [ref=f8e518]:
+                - cell "XRP/USDT:USDT" [ref=f8e519]
+                - cell "short" [ref=f8e520]
+                - cell "irb_short_16026" [ref=f8e521]
+                - cell "stop_loss" [ref=f8e522]
+                - cell "2025-02-24 06:15" [ref=f8e523]
+                - cell "2025-02-24 06:30" [ref=f8e524]
+                - cell "2.484" [ref=f8e525]
+                - cell "2.49" [ref=f8e526]
+                - cell "⚠ -0.35%" [ref=f8e527]
+                - cell "-33.355" [ref=f8e529]
+                - cell "2.49" [ref=f8e530]
+                - cell "-0.2%" [ref=f8e531]
+                - cell "0h0m" [ref=f8e532]
+              - row [ref=f8e533]:
+                - cell "XRP/USDT:USDT" [ref=f8e534]
+                - cell "short" [ref=f8e535]
+                - cell "irb_short_16039" [ref=f8e536]
+                - cell "stop_loss" [ref=f8e537]
+                - cell "2025-02-24 07:30" [ref=f8e538]
+                - cell "2025-02-24 07:30" [ref=f8e539]
+                - cell "2.484" [ref=f8e540]
+                - cell "2.491" [ref=f8e541]
+                - cell "⚠ -0.38%" [ref=f8e542]
+                - cell "-36.333" [ref=f8e544]
+                - cell "2.491" [ref=f8e545]
+                - cell "-0.3%" [ref=f8e546]
+                - cell "—" [ref=f8e547]
+              - row [ref=f8e548]:
+                - cell "XRP/USDT:USDT" [ref=f8e549]
+                - cell "long" [ref=f8e550]
+                - cell "irb_long_17913" [ref=f8e551]
+                - cell "irb_target" [ref=f8e552]
+                - cell "2025-03-02 19:30" [ref=f8e553]
+                - cell "2025-03-02 19:45" [ref=f8e554]
+                - cell "2.829" [ref=f8e555]
+                - cell "2.852" [ref=f8e556]
+                - cell "0.72%" [ref=f8e557]
+                - cell "32.932" [ref=f8e559]
+                - cell "2.813" [ref=f8e560]
+                - cell "-0.5%" [ref=f8e561]
+                - cell "0h0m" [ref=f8e562]
+              - row [ref=f8e563]:
+                - cell "XRP/USDT:USDT" [ref=f8e564]
+                - cell "long" [ref=f8e565]
+                - cell "irb_long_17928" [ref=f8e566]
+                - cell "irb_target" [ref=f8e567]
+                - cell "2025-03-02 20:45" [ref=f8e568]
+                - cell "2025-03-02 21:20" [ref=f8e569]
+                - cell "2.863" [ref=f8e570]
+                - cell "2.902" [ref=f8e571]
+                - cell "1.24%" [ref=f8e572]
+                - cell "82.857" [ref=f8e574]
+                - cell "2.847" [ref=f8e575]
+                - cell "-0.6%" [ref=f8e576]
+                - cell "0h1m" [ref=f8e577]
+              - row [ref=f8e578]:
+                - cell "XRP/USDT:USDT" [ref=f8e579]
+                - cell "short" [ref=f8e580]
+                - cell "irb_short_19145" [ref=f8e581]
+                - cell "stop_loss" [ref=f8e582]
+                - cell "2025-03-07 02:15" [ref=f8e583]
+                - cell "2025-03-07 02:35" [ref=f8e584]
+                - cell "2.47" [ref=f8e585]
+                - cell "2.485" [ref=f8e586]
+                - cell "⚠ -0.72%" [ref=f8e587]
+                - cell "-47.003" [ref=f8e589]
+                - cell "2.485" [ref=f8e590]
+                - cell "-0.6%" [ref=f8e591]
+                - cell "0h0m" [ref=f8e592]
+              - row [ref=f8e593]:
+                - cell "XRP/USDT:USDT" [ref=f8e594]
+                - cell "short" [ref=f8e595]
+                - cell "irb_short_20444" [ref=f8e596]
+                - cell "irb_target" [ref=f8e597]
+                - cell "2025-03-11 14:25" [ref=f8e598]
+                - cell "2025-03-11 14:40" [ref=f8e599]
+                - cell "2.092" [ref=f8e600]
+                - cell "2.062" [ref=f8e601]
+                - cell "1.38%" [ref=f8e602]
+                - cell "83.518" [ref=f8e604]
+                - cell "2.113" [ref=f8e605]
+                - cell "-1%" [ref=f8e606]
+                - cell "0h0m" [ref=f8e607]
+              - row [ref=f8e608]:
+                - cell "XRP/USDT:USDT" [ref=f8e609]
+                - cell "long" [ref=f8e610]
+                - cell "irb_long_20455" [ref=f8e611]
+                - cell "stop_loss" [ref=f8e612]
+                - cell "2025-03-11 15:20" [ref=f8e613]
+                - cell "2025-03-11 17:25" [ref=f8e614]
+                - cell "2.123" [ref=f8e615]
+                - cell "2.101" [ref=f8e616]
+                - cell "⚠ -1.16%" [ref=f8e617]
+                - cell "-69.159" [ref=f8e619]
+                - cell "2.101" [ref=f8e620]
+                - cell "-1.1%" [ref=f8e621]
+                - cell "0h2m" [ref=f8e622]
+              - row [ref=f8e623]:
+                - cell "XRP/USDT:USDT" [ref=f8e624]
+                - cell "short" [ref=f8e625]
+                - cell "irb_short_21866" [ref=f8e626]
+                - cell "stop_loss" [ref=f8e627]
+                - cell "2025-03-16 12:55" [ref=f8e628]
+                - cell "2025-03-16 13:00" [ref=f8e629]
+                - cell "2.305" [ref=f8e630]
+                - cell "2.312" [ref=f8e631]
+                - cell "⚠ -0.43%" [ref=f8e632]
+                - cell "-41.114" [ref=f8e634]
+                - cell "2.312" [ref=f8e635]
+                - cell "-0.3%" [ref=f8e636]
+                - cell "0h0m" [ref=f8e637]
+              - row [ref=f8e638]:
+                - cell "XRP/USDT:USDT" [ref=f8e639]
+                - cell "short" [ref=f8e640]
+                - cell "irb_short_22459" [ref=f8e641]
+                - cell "stop_loss" [ref=f8e642]
+                - cell "2025-03-18 14:20" [ref=f8e643]
+                - cell "2025-03-18 14:25" [ref=f8e644]
+                - cell "2.235" [ref=f8e645]
+                - cell "2.243" [ref=f8e646]
+                - cell "⚠ -0.44%" [ref=f8e647]
+                - cell "-42.774" [ref=f8e649]
+                - cell "2.243" [ref=f8e650]
+                - cell "-0.3%" [ref=f8e651]
+                - cell "0h0m" [ref=f8e652]
+              - row [ref=f8e653]:
+                - cell "XRP/USDT:USDT" [ref=f8e654]
+                - cell "short" [ref=f8e655]
+                - cell "irb_short_23940" [ref=f8e656]
+                - cell "irb_target" [ref=f8e657]
+                - cell "2025-03-23 17:45" [ref=f8e658]
+                - cell "2025-03-23 18:15" [ref=f8e659]
+                - cell "2.399" [ref=f8e660]
+                - cell "2.391" [ref=f8e661]
+                - cell "0.22%" [ref=f8e662]
+                - cell "21.181" [ref=f8e664]
+                - cell "2.404" [ref=f8e665]
+                - cell "-0.2%" [ref=f8e666]
+                - cell "0h1m" [ref=f8e667]
+              - row [ref=f8e668]:
+                - cell "XRP/USDT:USDT" [ref=f8e669]
+                - cell "short" [ref=f8e670]
+                - cell "irb_short_25247" [ref=f8e671]
+                - cell "irb_target" [ref=f8e672]
+                - cell "2025-03-28 06:40" [ref=f8e673]
+                - cell "2025-03-28 06:50" [ref=f8e674]
+                - cell "2.257" [ref=f8e675]
+                - cell "2.245" [ref=f8e676]
+                - cell "0.43%" [ref=f8e677]
+                - cell "41.047" [ref=f8e679]
+                - cell "2.264" [ref=f8e680]
+                - cell "-0.4%" [ref=f8e681]
+                - cell "0h0m" [ref=f8e682]
+              - row [ref=f8e683]:
+                - cell "XRP/USDT:USDT" [ref=f8e684]
+                - cell "short" [ref=f8e685]
+                - cell "irb_short_25322" [ref=f8e686]
+                - cell "stop_loss" [ref=f8e687]
+                - cell "2025-03-28 13:00" [ref=f8e688]
+                - cell "2025-03-28 13:20" [ref=f8e689]
+                - cell "2.208" [ref=f8e690]
+                - cell "2.219" [ref=f8e691]
+                - cell "⚠ -0.59%" [ref=f8e692]
+                - cell "-56.808" [ref=f8e694]
+                - cell "2.219" [ref=f8e695]
+                - cell "-0.5%" [ref=f8e696]
+                - cell "0h0m" [ref=f8e697]
+              - row [ref=f8e698]:
+                - cell "XRP/USDT:USDT" [ref=f8e699]
+                - cell "short" [ref=f8e700]
+                - cell "irb_short_25352" [ref=f8e701]
+                - cell "irb_target" [ref=f8e702]
+                - cell "2025-03-28 15:25" [ref=f8e703]
+                - cell "2025-03-28 16:15" [ref=f8e704]
+                - cell "2.188" [ref=f8e705]
+                - cell "2.174" [ref=f8e706]
+                - cell "0.53%" [ref=f8e707]
+                - cell "51.245" [ref=f8e709]
+                - cell "2.197" [ref=f8e710]
+                - cell "-0.4%" [ref=f8e711]
+                - cell "0h1m" [ref=f8e712]
+              - row [ref=f8e713]:
+                - cell "XRP/USDT:USDT" [ref=f8e714]
+                - cell "short" [ref=f8e715]
+                - cell "irb_short_25364" [ref=f8e716]
+                - cell "stop_loss" [ref=f8e717]
+                - cell "2025-03-28 16:40" [ref=f8e718]
+                - cell "2025-03-28 18:00" [ref=f8e719]
+                - cell "2.173" [ref=f8e720]
+                - cell "2.187" [ref=f8e721]
+                - cell "⚠ -0.74%" [ref=f8e722]
+                - cell "-71.29" [ref=f8e724]
+                - cell "2.187" [ref=f8e725]
+                - cell "-0.6%" [ref=f8e726]
+                - cell "0h1m" [ref=f8e727]
+              - row [ref=f8e728]:
+                - cell "XRP/USDT:USDT" [ref=f8e729]
+                - cell "long" [ref=f8e730]
+                - cell "irb_long_25673" [ref=f8e731]
+                - cell "stop_loss" [ref=f8e732]
+                - cell "2025-03-29 18:30" [ref=f8e733]
+                - cell "2025-03-29 20:45" [ref=f8e734]
+                - cell "2.124" [ref=f8e735]
+                - cell "2.108" [ref=f8e736]
+                - cell "⚠ -0.86%" [ref=f8e737]
+                - cell "-82.461" [ref=f8e739]
+                - cell "2.108" [ref=f8e740]
+                - cell "-0.8%" [ref=f8e741]
+                - cell "0h2m" [ref=f8e742]
+              - row [ref=f8e743]:
+                - cell "XRP/USDT:USDT" [ref=f8e744]
+                - cell "long" [ref=f8e745]
+                - cell "irb_long_26205" [ref=f8e746]
+                - cell "stop_loss" [ref=f8e747]
+                - cell "2025-03-31 14:30" [ref=f8e748]
+                - cell "2025-03-31 14:30" [ref=f8e749]
+                - cell "2.1" [ref=f8e750]
+                - cell "2.09" [ref=f8e751]
+                - cell "⚠ -0.59%" [ref=f8e752]
+                - cell "-55.964" [ref=f8e754]
+                - cell "2.09" [ref=f8e755]
+                - cell "-0.5%" [ref=f8e756]
+                - cell "—" [ref=f8e757]
+              - row [ref=f8e758]:
+                - cell "XRP/USDT:USDT" [ref=f8e759]
+                - cell "long" [ref=f8e760]
+                - cell "irb_long_26785" [ref=f8e761]
+                - cell "irb_target" [ref=f8e762]
+                - cell "2025-04-02 14:50" [ref=f8e763]
+                - cell "2025-04-02 15:10" [ref=f8e764]
+                - cell "2.125" [ref=f8e765]
+                - cell "2.141" [ref=f8e766]
+                - cell "0.66%" [ref=f8e767]
+                - cell "61.969" [ref=f8e769]
+                - cell "2.114" [ref=f8e770]
+                - cell "-0.5%" [ref=f8e771]
+                - cell "0h0m" [ref=f8e772]
+              - row [ref=f8e773]:
+                - cell "XRP/USDT:USDT" [ref=f8e774]
+                - cell "long" [ref=f8e775]
+                - cell "irb_long_27373" [ref=f8e776]
+                - cell "stop_loss" [ref=f8e777]
+                - cell "2025-04-04 15:50" [ref=f8e778]
+                - cell "2025-04-04 16:00" [ref=f8e779]
+                - cell "2.137" [ref=f8e780]
+                - cell "2.118" [ref=f8e781]
+                - cell "⚠ -0.99%" [ref=f8e782]
+                - cell "-66.457" [ref=f8e784]
+                - cell "2.118" [ref=f8e785]
+                - cell "-0.9%" [ref=f8e786]
+                - cell "0h0m" [ref=f8e787]
+              - row [ref=f8e788]:
+                - cell "XRP/USDT:USDT" [ref=f8e789]
+                - cell "short" [ref=f8e790]
+                - cell "irb_short_28019" [ref=f8e791]
+                - cell "stop_loss" [ref=f8e792]
+                - cell "2025-04-06 21:40" [ref=f8e793]
+                - cell "2025-04-06 22:10" [ref=f8e794]
+                - cell "1.963" [ref=f8e795]
+                - cell "1.977" [ref=f8e796]
+                - cell "⚠ -0.81%" [ref=f8e797]
+                - cell "-57.039" [ref=f8e799]
+                - cell "1.977" [ref=f8e800]
+                - cell "-0.7%" [ref=f8e801]
+                - cell "0h1m" [ref=f8e802]
+              - row [ref=f8e803]:
+                - cell "XRP/USDT:USDT" [ref=f8e804]
+                - cell "short" [ref=f8e805]
+                - cell "irb_short_28112" [ref=f8e806]
+                - cell "irb_target" [ref=f8e807]
+                - cell "2025-04-07 05:25" [ref=f8e808]
+                - cell "2025-04-07 05:40" [ref=f8e809]
+                - cell "1.797" [ref=f8e810]
+                - cell "1.773" [ref=f8e811]
+                - cell "1.25%" [ref=f8e812]
+                - cell "71.681" [ref=f8e814]
+                - cell "1.813" [ref=f8e815]
+                - cell "-0.9%" [ref=f8e816]
+                - cell "0h0m" [ref=f8e817]
+              - row [ref=f8e818]:
+                - cell "XRP/USDT:USDT" [ref=f8e819]
+                - cell "short" [ref=f8e820]
+                - cell "irb_short_28142" [ref=f8e821]
+                - cell "stop_loss" [ref=f8e822]
+                - cell "2025-04-07 07:55" [ref=f8e823]
+                - cell "2025-04-07 08:00" [ref=f8e824]
+                - cell "1.687" [ref=f8e825]
+                - cell "1.703" [ref=f8e826]
+                - cell "⚠ -1.03%" [ref=f8e827]
+                - cell "-43.538" [ref=f8e829]
+                - cell "1.703" [ref=f8e830]
+                - cell "-0.9%" [ref=f8e831]
+                - cell "0h0m" [ref=f8e832]
+              - row [ref=f8e833]:
+                - cell "XRP/USDT:USDT" [ref=f8e834]
+                - cell "long" [ref=f8e835]
+                - cell "irb_long_28236" [ref=f8e836]
+                - cell "stop_loss" [ref=f8e837]
+                - cell "2025-04-07 15:45" [ref=f8e838]
+                - cell "2025-04-07 15:50" [ref=f8e839]
+                - cell "1.892" [ref=f8e840]
+                - cell "1.871" [ref=f8e841]
+                - cell "⚠ -1.21%" [ref=f8e842]
+                - cell "-46.982" [ref=f8e844]
+                - cell "1.871" [ref=f8e845]
+                - cell "-1.1%" [ref=f8e846]
+                - cell "0h0m" [ref=f8e847]
+              - row [ref=f8e848]:
+                - cell "XRP/USDT:USDT" [ref=f8e849]
+                - cell "long" [ref=f8e850]
+                - cell "irb_long_28795" [ref=f8e851]
+                - cell "stop_loss" [ref=f8e852]
+                - cell "2025-04-09 14:20" [ref=f8e853]
+                - cell "2025-04-09 14:55" [ref=f8e854]
+                - cell "1.832" [ref=f8e855]
+                - cell "1.814" [ref=f8e856]
+                - cell "⚠ -1.05%" [ref=f8e857]
+                - cell "-71.106" [ref=f8e859]
+                - cell "1.814" [ref=f8e860]
+                - cell "-0.9%" [ref=f8e861]
+                - cell "0h1m" [ref=f8e862]
+              - row [ref=f8e863]:
+                - cell "XRP/USDT:USDT" [ref=f8e864]
+                - cell "long" [ref=f8e865]
+                - cell "irb_long_28806" [ref=f8e866]
+                - cell "stop_loss" [ref=f8e867]
+                - cell "2025-04-09 15:15" [ref=f8e868]
+                - cell "2025-04-09 15:40" [ref=f8e869]
+                - cell "1.833" [ref=f8e870]
+                - cell "1.823" [ref=f8e871]
+                - cell "⚠ -0.64%" [ref=f8e872]
+                - cell "-49.203" [ref=f8e874]
+                - cell "1.823" [ref=f8e875]
+                - cell "-0.5%" [ref=f8e876]
+                - cell "0h0m" [ref=f8e877]
+              - row [ref=f8e878]:
+                - cell "XRP/USDT:USDT" [ref=f8e879]
+                - cell "long" [ref=f8e880]
+                - cell "irb_long_29680" [ref=f8e881]
+                - cell "irb_target" [ref=f8e882]
+                - cell "2025-04-12 16:05" [ref=f8e883]
+                - cell "2025-04-12 16:15" [ref=f8e884]
+                - cell "2.154" [ref=f8e885]
+                - cell "2.161" [ref=f8e886]
+                - cell "0.19%" [ref=f8e887]
+                - cell "17.745" [ref=f8e889]
+                - cell "2.15" [ref=f8e890]
+                - cell "-0.2%" [ref=f8e891]
+                - cell "0h0m" [ref=f8e892]
+              - row [ref=f8e893]:
+                - cell "XRP/USDT:USDT" [ref=f8e894]
+                - cell "long" [ref=f8e895]
+                - cell "irb_long_30811" [ref=f8e896]
+                - cell "irb_target" [ref=f8e897]
+                - cell "2025-04-16 14:20" [ref=f8e898]
+                - cell "2025-04-16 14:35" [ref=f8e899]
+                - cell "2.083" [ref=f8e900]
+                - cell "2.095" [ref=f8e901]
+                - cell "0.43%" [ref=f8e902]
+                - cell "39.987" [ref=f8e904]
+                - cell "2.076" [ref=f8e905]
+                - cell "-0.4%" [ref=f8e906]
+                - cell "0h0m" [ref=f8e907]
+              - row [ref=f8e908]:
+                - cell "XRP/USDT:USDT" [ref=f8e909]
+                - cell "short" [ref=f8e910]
+                - cell "irb_short_30871" [ref=f8e911]
+                - cell "stop_loss" [ref=f8e912]
+                - cell "2025-04-16 19:20" [ref=f8e913]
+                - cell "2025-04-16 19:40" [ref=f8e914]
+                - cell "2.074" [ref=f8e915]
+                - cell "2.085" [ref=f8e916]
+                - cell "⚠ -0.62%" [ref=f8e917]
+                - cell "-57.657" [ref=f8e919]
+                - cell "2.085" [ref=f8e920]
+                - cell "-0.5%" [ref=f8e921]
+                - cell "0h0m" [ref=f8e922]
+              - row [ref=f8e923]:
+                - cell "XRP/USDT:USDT" [ref=f8e924]
+                - cell "long" [ref=f8e925]
+                - cell "irb_long_32657" [ref=f8e926]
+                - cell "stop_loss" [ref=f8e927]
+                - cell "2025-04-23 00:15" [ref=f8e928]
+                - cell "2025-04-23 00:30" [ref=f8e929]
+                - cell "2.231" [ref=f8e930]
+                - cell "2.214" [ref=f8e931]
+                - cell "⚠ -0.89%" [ref=f8e932]
+                - cell "-81.974" [ref=f8e934]
+                - cell "2.214" [ref=f8e935]
+                - cell "-0.8%" [ref=f8e936]
+                - cell "0h0m" [ref=f8e937]
+              - row [ref=f8e938]:
+                - cell "XRP/USDT:USDT" [ref=f8e939]
+                - cell "short" [ref=f8e940]
+                - cell "irb_short_32849" [ref=f8e941]
+                - cell "irb_target" [ref=f8e942]
+                - cell "2025-04-23 16:15" [ref=f8e943]
+                - cell "2025-04-23 16:25" [ref=f8e944]
+                - cell "2.22" [ref=f8e945]
+                - cell "2.208" [ref=f8e946]
+                - cell "0.44%" [ref=f8e947]
+                - cell "40.31" [ref=f8e949]
+                - cell "2.228" [ref=f8e950]
+                - cell "-0.4%" [ref=f8e951]
+                - cell "0h0m" [ref=f8e952]
+              - row [ref=f8e953]:
+                - cell "XRP/USDT:USDT" [ref=f8e954]
+                - cell "long" [ref=f8e955]
+                - cell "irb_long_33116" [ref=f8e956]
+                - cell "irb_target" [ref=f8e957]
+                - cell "2025-04-24 14:35" [ref=f8e958]
+                - cell "2025-04-24 15:10" [ref=f8e959]
+                - cell "2.188" [ref=f8e960]
+                - cell "2.206" [ref=f8e961]
+                - cell "0.73%" [ref=f8e962]
+                - cell "67.183" [ref=f8e964]
+                - cell "2.178" [ref=f8e965]
+                - cell "-0.4%" [ref=f8e966]
+                - cell "0h1m" [ref=f8e967]
+              - row [ref=f8e968]:
+                - cell "XRP/USDT:USDT" [ref=f8e969]
+                - cell "long" [ref=f8e970]
+                - cell "irb_long_34204" [ref=f8e971]
+                - cell "stop_loss" [ref=f8e972]
+                - cell "2025-04-28 09:05" [ref=f8e973]
+                - cell "2025-04-28 09:10" [ref=f8e974]
+                - cell "2.33" [ref=f8e975]
+                - cell "2.324" [ref=f8e976]
+                - cell "⚠ -0.35%" [ref=f8e977]
+                - cell "-32.273" [ref=f8e979]
+                - cell "2.324" [ref=f8e980]
+                - cell "-0.2%" [ref=f8e981]
+                - cell "0h0m" [ref=f8e982]
+              - row [ref=f8e983]:
+                - cell "XRP/USDT:USDT" [ref=f8e984]
+                - cell "short" [ref=f8e985]
+                - cell "irb_short_34849" [ref=f8e986]
+                - cell "stop_loss" [ref=f8e987]
+                - cell "2025-04-30 14:50" [ref=f8e988]
+                - cell "2025-04-30 15:15" [ref=f8e989]
+                - cell "2.157" [ref=f8e990]
+                - cell "2.168" [ref=f8e991]
+                - cell "⚠ -0.64%" [ref=f8e992]
+                - cell "-59.269" [ref=f8e994]
+                - cell "2.168" [ref=f8e995]
+                - cell "-0.5%" [ref=f8e996]
+                - cell "0h0m" [ref=f8e997]
+              - row [ref=f8e998]:
+                - cell "XRP/USDT:USDT" [ref=f8e999]
+                - cell "short" [ref=f8e1000]
+                - cell "irb_short_34854" [ref=f8e1001]
+                - cell "stop_loss" [ref=f8e1002]
+                - cell "2025-04-30 15:20" [ref=f8e1003]
+                - cell "2025-04-30 15:30" [ref=f8e1004]
+                - cell "2.157" [ref=f8e1005]
+                - cell "2.164" [ref=f8e1006]
+                - cell "⚠ -0.40%" [ref=f8e1007]
+                - cell "-36.786" [ref=f8e1009]
+                - cell "2.164" [ref=f8e1010]
+                - cell "-0.3%" [ref=f8e1011]
+                - cell "0h0m" [ref=f8e1012]
+              - row [ref=f8e1013]:
+                - cell "XRP/USDT:USDT" [ref=f8e1014]
+                - cell "long" [ref=f8e1015]
+                - cell "irb_long_34902" [ref=f8e1016]
+                - cell "stop_loss" [ref=f8e1017]
+                - cell "2025-04-30 19:15" [ref=f8e1018]
+                - cell "2025-04-30 19:15" [ref=f8e1019]
+                - cell "2.192" [ref=f8e1020]
+                - cell "2.186" [ref=f8e1021]
+                - cell "⚠ -0.40%" [ref=f8e1022]
+                - cell "-36.174" [ref=f8e1024]
+                - cell "2.186" [ref=f8e1025]
+                - cell "-0.3%" [ref=f8e1026]
+                - cell "—" [ref=f8e1027]
+              - row [ref=f8e1028]:
+                - cell "XRP/USDT:USDT" [ref=f8e1029]
+                - cell "long" [ref=f8e1030]
+                - cell "irb_long_34908" [ref=f8e1031]
+                - cell "irb_target" [ref=f8e1032]
+                - cell "2025-04-30 19:45" [ref=f8e1033]
+                - cell "2025-04-30 20:00" [ref=f8e1034]
+                - cell "2.192" [ref=f8e1035]
+                - cell "2.199" [ref=f8e1036]
+                - cell "0.19%" [ref=f8e1037]
+                - cell "17.02" [ref=f8e1039]
+                - cell "2.188" [ref=f8e1040]
+                - cell "-0.2%" [ref=f8e1041]
+                - cell "0h0m" [ref=f8e1042]
+              - row [ref=f8e1043]:
+                - cell "XRP/USDT:USDT" [ref=f8e1044]
+                - cell "long" [ref=f8e1045]
+                - cell "irb_long_35447" [ref=f8e1046]
+                - cell "stop_loss" [ref=f8e1047]
+                - cell "2025-05-02 16:40" [ref=f8e1048]
+                - cell "2025-05-02 16:45" [ref=f8e1049]
+                - cell "2.232" [ref=f8e1050]
+                - cell "2.227" [ref=f8e1051]
+                - cell "⚠ -0.31%" [ref=f8e1052]
+                - cell "-28.274" [ref=f8e1054]
+                - cell "2.227" [ref=f8e1055]
+                - cell "-0.2%" [ref=f8e1056]
+                - cell "0h0m" [ref=f8e1057]
+              - row [ref=f8e1058]:
+                - cell "XRP/USDT:USDT" [ref=f8e1059]
+                - cell "short" [ref=f8e1060]
+                - cell "irb_short_36152" [ref=f8e1061]
+                - cell "stop_loss" [ref=f8e1062]
+                - cell "2025-05-05 03:25" [ref=f8e1063]
+                - cell "2025-05-05 04:15" [ref=f8e1064]
+                - cell "2.149" [ref=f8e1065]
+                - cell "2.154" [ref=f8e1066]
+                - cell "⚠ -0.29%" [ref=f8e1067]
+                - cell "-26.405" [ref=f8e1069]
+                - cell "2.154" [ref=f8e1070]
+                - cell "-0.2%" [ref=f8e1071]
+                - cell "0h1m" [ref=f8e1072]
+              - row [ref=f8e1073]:
+                - cell "XRP/USDT:USDT" [ref=f8e1074]
+                - cell "long" [ref=f8e1075]
+                - cell "irb_long_36580" [ref=f8e1076]
+                - cell "stop_loss" [ref=f8e1077]
+                - cell "2025-05-06 15:05" [ref=f8e1078]
+                - cell "2025-05-06 15:05" [ref=f8e1079]
+                - cell "2.106" [ref=f8e1080]
+                - cell "2.102" [ref=f8e1081]
+                - cell "⚠ -0.30%" [ref=f8e1082]
+                - cell "-27.095" [ref=f8e1084]
+                - cell "2.102" [ref=f8e1085]
+                - cell "-0.2%" [ref=f8e1086]
+                - cell "—" [ref=f8e1087]
+              - row [ref=f8e1088]:
+                - cell "XRP/USDT:USDT" [ref=f8e1089]
+                - cell "long" [ref=f8e1090]
+                - cell "irb_long_36605" [ref=f8e1091]
+                - cell "irb_target" [ref=f8e1092]
+                - cell "2025-05-06 17:10" [ref=f8e1093]
+                - cell "2025-05-06 18:25" [ref=f8e1094]
+                - cell "2.119" [ref=f8e1095]
+                - cell "2.135" [ref=f8e1096]
+                - cell "0.63%" [ref=f8e1097]
+                - cell "56.957" [ref=f8e1099]
+                - cell "2.109" [ref=f8e1100]
+                - cell "-0.5%" [ref=f8e1101]
+                - cell "0h1m" [ref=f8e1102]
+              - row [ref=f8e1103]:
+                - cell "XRP/USDT:USDT" [ref=f8e1104]
+                - cell "short" [ref=f8e1105]
+                - cell "irb_short_36918" [ref=f8e1106]
+                - cell "stop_loss" [ref=f8e1107]
+                - cell "2025-05-07 19:15" [ref=f8e1108]
+                - cell "2025-05-07 19:15" [ref=f8e1109]
+                - cell "2.114" [ref=f8e1110]
+                - cell "2.121" [ref=f8e1111]
+                - cell "⚠ -0.44%" [ref=f8e1112]
+                - cell "-40.033" [ref=f8e1114]
+                - cell "2.121" [ref=f8e1115]
+                - cell "-0.3%" [ref=f8e1116]
+                - cell "—" [ref=f8e1117]
+              - row [ref=f8e1118]:
+                - cell "XRP/USDT:USDT" [ref=f8e1119]
+                - cell "long" [ref=f8e1120]
+                - cell "irb_long_37371" [ref=f8e1121]
+                - cell "stop_loss" [ref=f8e1122]
+                - cell "2025-05-09 09:00" [ref=f8e1123]
+                - cell "2025-05-09 09:05" [ref=f8e1124]
+                - cell "2.376" [ref=f8e1125]
+                - cell "2.36" [ref=f8e1126]
+                - cell "⚠ -0.73%" [ref=f8e1127]
+                - cell "-51.373" [ref=f8e1129]
+                - cell "2.36" [ref=f8e1130]
+                - cell "-0.6%" [ref=f8e1131]
+                - cell "0h0m" [ref=f8e1132]
+              - row [ref=f8e1133]:
+                - cell "XRP/USDT:USDT" [ref=f8e1134]
+                - cell "long" [ref=f8e1135]
+                - cell "irb_long_38313" [ref=f8e1136]
+                - cell "stop_loss" [ref=f8e1137]
+                - cell "2025-05-12 15:30" [ref=f8e1138]
+                - cell "2025-05-12 15:30" [ref=f8e1139]
+                - cell "2.583" [ref=f8e1140]
+                - cell "2.568" [ref=f8e1141]
+                - cell "⚠ -0.67%" [ref=f8e1142]
+                - cell "-37.627" [ref=f8e1144]
+                - cell "2.568" [ref=f8e1145]
+                - cell "-0.6%" [ref=f8e1146]
+                - cell "—" [ref=f8e1147]
+              - row [ref=f8e1148]:
+                - cell "XRP/USDT:USDT" [ref=f8e1149]
+                - cell "long" [ref=f8e1150]
+                - cell "irb_long_38314" [ref=f8e1151]
+                - cell "stop_loss" [ref=f8e1152]
+                - cell "2025-05-12 15:35" [ref=f8e1153]
+                - cell "2025-05-12 15:40" [ref=f8e1154]
+                - cell "2.582" [ref=f8e1155]
+                - cell "2.565" [ref=f8e1156]
+                - cell "⚠ -0.77%" [ref=f8e1157]
+                - cell "-44.072" [ref=f8e1159]
+                - cell "2.565" [ref=f8e1160]
+                - cell "-0.7%" [ref=f8e1161]
+                - cell "0h0m" [ref=f8e1162]
+              - row [ref=f8e1163]:
+                - cell "XRP/USDT:USDT" [ref=f8e1164]
+                - cell "short" [ref=f8e1165]
+                - cell "irb_short_40233" [ref=f8e1166]
+                - cell "stop_loss" [ref=f8e1167]
+                - cell "2025-05-19 07:40" [ref=f8e1168]
+                - cell "2025-05-19 07:40" [ref=f8e1169]
+                - cell "2.307" [ref=f8e1170]
+                - cell "2.315" [ref=f8e1171]
+                - cell "⚠ -0.44%" [ref=f8e1172]
+                - cell "-39.443" [ref=f8e1174]
+                - cell "2.315" [ref=f8e1175]
+                - cell "-0.3%" [ref=f8e1176]
+                - cell "—" [ref=f8e1177]
+              - row [ref=f8e1178]:
+                - cell "XRP/USDT:USDT" [ref=f8e1179]
+                - cell "short" [ref=f8e1180]
+                - cell "irb_short_41595" [ref=f8e1181]
+                - cell "stop_loss" [ref=f8e1182]
+                - cell "2025-05-24 01:00" [ref=f8e1183]
+                - cell "2025-05-24 01:05" [ref=f8e1184]
+                - cell "2.303" [ref=f8e1185]
+                - cell "2.308" [ref=f8e1186]
+                - cell "⚠ -0.33%" [ref=f8e1187]
+                - cell "-29.302" [ref=f8e1189]
+                - cell "2.308" [ref=f8e1190]
+                - cell "-0.2%" [ref=f8e1191]
+                - cell "0h0m" [ref=f8e1192]
+              - row [ref=f8e1193]:
+                - cell "XRP/USDT:USDT" [ref=f8e1194]
+                - cell "short" [ref=f8e1195]
+                - cell "irb_short_42066" [ref=f8e1196]
+                - cell "stop_loss" [ref=f8e1197]
+                - cell "2025-05-25 16:15" [ref=f8e1198]
+                - cell "2025-05-25 16:40" [ref=f8e1199]
+                - cell "2.277" [ref=f8e1200]
+                - cell "2.286" [ref=f8e1201]
+                - cell "⚠ -0.50%" [ref=f8e1202]
+                - cell "-43.815" [ref=f8e1204]
+                - cell "2.286" [ref=f8e1205]
+                - cell "-0.4%" [ref=f8e1206]
+                - cell "0h0m" [ref=f8e1207]
+              - row [ref=f8e1208]:
+                - cell "XRP/USDT:USDT" [ref=f8e1209]
+                - cell "long" [ref=f8e1210]
+                - cell "irb_long_42612" [ref=f8e1211]
+                - cell "stop_loss" [ref=f8e1212]
+                - cell "2025-05-27 13:45" [ref=f8e1213]
+                - cell "2025-05-27 13:50" [ref=f8e1214]
+                - cell "2.339" [ref=f8e1215]
+                - cell "2.332" [ref=f8e1216]
+                - cell "⚠ -0.38%" [ref=f8e1217]
+                - cell "-33.62" [ref=f8e1219]
+                - cell "2.332" [ref=f8e1220]
+                - cell "-0.3%" [ref=f8e1221]
+                - cell "0h0m" [ref=f8e1222]
+              - row [ref=f8e1223]:
+                - cell "XRP/USDT:USDT" [ref=f8e1224]
+                - cell "long" [ref=f8e1225]
+                - cell "irb_long_42629" [ref=f8e1226]
+                - cell "irb_target" [ref=f8e1227]
+                - cell "2025-05-27 15:10" [ref=f8e1228]
+                - cell "2025-05-27 16:40" [ref=f8e1229]
+                - cell "2.334" [ref=f8e1230]
+                - cell "2.344" [ref=f8e1231]
+                - cell "0.30%" [ref=f8e1232]
+                - cell "26.395" [ref=f8e1234]
+                - cell "2.328" [ref=f8e1235]
+                - cell "-0.3%" [ref=f8e1236]
+                - cell "0h2m" [ref=f8e1237]
+              - row [ref=f8e1238]:
+                - cell "XRP/USDT:USDT" [ref=f8e1239]
+                - cell "short" [ref=f8e1240]
+                - cell "irb_short_42979" [ref=f8e1241]
+                - cell "stop_loss" [ref=f8e1242]
+                - cell "2025-05-28 20:20" [ref=f8e1243]
+                - cell "2025-05-28 20:20" [ref=f8e1244]
+                - cell "2.237" [ref=f8e1245]
+                - cell "2.24" [ref=f8e1246]
+                - cell "⚠ -0.27%" [ref=f8e1247]
+                - cell "-24.132" [ref=f8e1249]
+                - cell "2.24" [ref=f8e1250]
+                - cell "-0.2%" [ref=f8e1251]
+                - cell "—" [ref=f8e1252]
+              - row [ref=f8e1253]:
+                - cell "XRP/USDT:USDT" [ref=f8e1254]
+                - cell "short" [ref=f8e1255]
+                - cell "irb_short_43221" [ref=f8e1256]
+                - cell "stop_loss" [ref=f8e1257]
+                - cell "2025-05-29 16:30" [ref=f8e1258]
+                - cell "2025-05-29 16:30" [ref=f8e1259]
+                - cell "2.275" [ref=f8e1260]
+                - cell "2.279" [ref=f8e1261]
+                - cell "⚠ -0.28%" [ref=f8e1262]
+                - cell "-24.193" [ref=f8e1264]
+                - cell "2.279" [ref=f8e1265]
+                - cell "-0.2%" [ref=f8e1266]
+                - cell "—" [ref=f8e1267]
+              - row [ref=f8e1268]:
+                - cell "XRP/USDT:USDT" [ref=f8e1269]
+                - cell "short" [ref=f8e1270]
+                - cell "irb_short_44300" [ref=f8e1271]
+                - cell "stop_loss" [ref=f8e1272]
+                - cell "2025-06-02 10:25" [ref=f8e1273]
+                - cell "2025-06-02 14:30" [ref=f8e1274]
+                - cell "2.148" [ref=f8e1275]
+                - cell "2.158" [ref=f8e1276]
+                - cell "⚠ -0.56%" [ref=f8e1277]
+                - cell "-48.666" [ref=f8e1279]
+                - cell "2.158" [ref=f8e1280]
+                - cell "-0.5%" [ref=f8e1281]
+                - cell "0h4m" [ref=f8e1282]
+              - row [ref=f8e1283]:
+                - cell "XRP/USDT:USDT" [ref=f8e1284]
+                - cell "long" [ref=f8e1285]
+                - cell "irb_long_44349" [ref=f8e1286]
+                - cell "stop_loss" [ref=f8e1287]
+                - cell "2025-06-02 14:30" [ref=f8e1288]
+                - cell "2025-06-02 14:45" [ref=f8e1289]
+                - cell "2.153" [ref=f8e1290]
+                - cell "2.145" [ref=f8e1291]
+                - cell "⚠ -0.49%" [ref=f8e1292]
+                - cell "-42.605" [ref=f8e1294]
+                - cell "2.145" [ref=f8e1295]
+                - cell "-0.4%" [ref=f8e1296]
+                - cell "0h0m" [ref=f8e1297]
+              - row [ref=f8e1298]:
+                - cell "XRP/USDT:USDT" [ref=f8e1299]
+                - cell "long" [ref=f8e1300]
+                - cell "irb_long_44687" [ref=f8e1301]
+                - cell "irb_target" [ref=f8e1302]
+                - cell "2025-06-03 18:40" [ref=f8e1303]
+                - cell "2025-06-03 18:45" [ref=f8e1304]
+                - cell "2.255" [ref=f8e1305]
+                - cell "2.261" [ref=f8e1306]
+                - cell "0.13%" [ref=f8e1307]
+                - cell "11.672" [ref=f8e1309]
+                - cell "2.252" [ref=f8e1310]
+                - cell "-0.2%" [ref=f8e1311]
+                - cell "0h0m" [ref=f8e1312]
+              - row [ref=f8e1313]:
+                - cell "XRP/USDT:USDT" [ref=f8e1314]
+                - cell "short" [ref=f8e1315]
+                - cell "irb_short_45220" [ref=f8e1316]
+                - cell "stop_loss" [ref=f8e1317]
+                - cell "2025-06-05 15:05" [ref=f8e1318]
+                - cell "2025-06-05 15:25" [ref=f8e1319]
+                - cell "2.195" [ref=f8e1320]
+                - cell "2.2" [ref=f8e1321]
+                - cell "⚠ -0.34%" [ref=f8e1322]
+                - cell "-29.601" [ref=f8e1324]
+                - cell "2.2" [ref=f8e1325]
+                - cell "-0.2%" [ref=f8e1326]
+                - cell "0h0m" [ref=f8e1327]
+              - row [ref=f8e1328]:
+                - cell "XRP/USDT:USDT" [ref=f8e1329]
+                - cell "short" [ref=f8e1330]
+                - cell "irb_short_45262" [ref=f8e1331]
+                - cell "irb_target" [ref=f8e1332]
+                - cell "2025-06-05 18:40" [ref=f8e1333]
+                - cell "2025-06-05 19:15" [ref=f8e1334]
+                - cell "2.16" [ref=f8e1335]
+                - cell "2.147" [ref=f8e1336]
+                - cell "0.53%" [ref=f8e1337]
+                - cell "46.161" [ref=f8e1339]
+                - cell "2.169" [ref=f8e1340]
+                - cell "-0.4%" [ref=f8e1341]
+                - cell "0h1m" [ref=f8e1342]
+              - row [ref=f8e1343]:
+                - cell "XRP/USDT:USDT" [ref=f8e1344]
+                - cell "short" [ref=f8e1345]
+                - cell "irb_short_45331" [ref=f8e1346]
+                - cell "stop_loss" [ref=f8e1347]
+                - cell "2025-06-06 00:20" [ref=f8e1348]
+                - cell "2025-06-06 00:25" [ref=f8e1349]
+                - cell "2.084" [ref=f8e1350]
+                - cell "2.091" [ref=f8e1351]
+                - cell "⚠ -0.42%" [ref=f8e1352]
+                - cell "-36.192" [ref=f8e1354]
+                - cell "2.091" [ref=f8e1355]
+                - cell "-0.3%" [ref=f8e1356]
+                - cell "0h0m" [ref=f8e1357]
+              - row [ref=f8e1358]:
+                - cell "XRP/USDT:USDT" [ref=f8e1359]
+                - cell "long" [ref=f8e1360]
+                - cell "irb_long_45999" [ref=f8e1361]
+                - cell "irb_target" [ref=f8e1362]
+                - cell "2025-06-08 08:00" [ref=f8e1363]
+                - cell "2025-06-08 08:15" [ref=f8e1364]
+                - cell "2.209" [ref=f8e1365]
+                - cell "2.216" [ref=f8e1366]
+                - cell "0.21%" [ref=f8e1367]
+                - cell "18.524" [ref=f8e1369]
+                - cell "2.204" [ref=f8e1370]
+                - cell "-0.2%" [ref=f8e1371]
+                - cell "0h0m" [ref=f8e1372]
+              - row [ref=f8e1373]:
+                - cell "XRP/USDT:USDT" [ref=f8e1374]
+                - cell "long" [ref=f8e1375]
+                - cell "irb_long_46082" [ref=f8e1376]
+                - cell "irb_target" [ref=f8e1377]
+                - cell "2025-06-08 14:55" [ref=f8e1378]
+                - cell "2025-06-08 15:05" [ref=f8e1379]
+                - cell "2.271" [ref=f8e1380]
+                - cell "2.282" [ref=f8e1381]
+                - cell "0.38%" [ref=f8e1382]
+                - cell "32.517" [ref=f8e1384]
+                - cell "2.264" [ref=f8e1385]
+                - cell "-0.3%" [ref=f8e1386]
+                - cell "0h0m" [ref=f8e1387]
+              - row [ref=f8e1388]:
+                - cell "XRP/USDT:USDT" [ref=f8e1389]
+                - cell "long" [ref=f8e1390]
+                - cell "irb_long_46096" [ref=f8e1391]
+                - cell "stop_loss" [ref=f8e1392]
+                - cell "2025-06-08 16:05" [ref=f8e1393]
+                - cell "2025-06-08 16:15" [ref=f8e1394]
+                - cell "2.28" [ref=f8e1395]
+                - cell "2.276" [ref=f8e1396]
+                - cell "-0.25%" [ref=f8e1397]
+                - cell "-21.66" [ref=f8e1399]
+                - cell "2.276" [ref=f8e1400]
+                - cell "-0.1%" [ref=f8e1401]
+                - cell "0h0m" [ref=f8e1402]
+              - row [ref=f8e1403]:
+                - cell "XRP/USDT:USDT" [ref=f8e1404]
+                - cell "long" [ref=f8e1405]
+                - cell "irb_long_46408" [ref=f8e1406]
+                - cell "irb_target" [ref=f8e1407]
+                - cell "2025-06-09 18:05" [ref=f8e1408]
+                - cell "2025-06-09 18:30" [ref=f8e1409]
+                - cell "2.292" [ref=f8e1410]
+                - cell "2.299" [ref=f8e1411]
+                - cell "0.21%" [ref=f8e1412]
+                - cell "18.561" [ref=f8e1414]
+                - cell "2.287" [ref=f8e1415]
+                - cell "-0.2%" [ref=f8e1416]
+                - cell "0h0m" [ref=f8e1417]
+              - row [ref=f8e1418]:
+                - cell "XRP/USDT:USDT" [ref=f8e1419]
+                - cell "long" [ref=f8e1420]
+                - cell "irb_long_46454" [ref=f8e1421]
+                - cell "stop_loss" [ref=f8e1422]
+                - cell "2025-06-09 21:55" [ref=f8e1423]
+                - cell "2025-06-10 01:10" [ref=f8e1424]
+                - cell "2.316" [ref=f8e1425]
+                - cell "2.306" [ref=f8e1426]
+                - cell "⚠ -0.52%" [ref=f8e1427]
+                - cell "-45.589" [ref=f8e1429]
+                - cell "2.306" [ref=f8e1430]
+                - cell "-0.4%" [ref=f8e1431]
+                - cell "0h3m" [ref=f8e1432]
+              - row [ref=f8e1433]:
+                - cell "XRP/USDT:USDT" [ref=f8e1434]
+                - cell "long" [ref=f8e1435]
+                - cell "irb_long_46638" [ref=f8e1436]
+                - cell "stop_loss" [ref=f8e1437]
+                - cell "2025-06-10 13:15" [ref=f8e1438]
+                - cell "2025-06-10 13:20" [ref=f8e1439]
+                - cell "2.312" [ref=f8e1440]
+                - cell "2.306" [ref=f8e1441]
+                - cell "⚠ -0.35%" [ref=f8e1442]
+                - cell "-30.708" [ref=f8e1444]
+                - cell "2.306" [ref=f8e1445]
+                - cell "-0.3%" [ref=f8e1446]
+                - cell "0h0m" [ref=f8e1447]
+              - row [ref=f8e1448]:
+                - cell "XRP/USDT:USDT" [ref=f8e1449]
+                - cell "long" [ref=f8e1450]
+                - cell "irb_long_46894" [ref=f8e1451]
+                - cell "stop_loss" [ref=f8e1452]
+                - cell "2025-06-11 10:35" [ref=f8e1453]
+                - cell "2025-06-11 11:05" [ref=f8e1454]
+                - cell "2.321" [ref=f8e1455]
+                - cell "2.315" [ref=f8e1456]
+                - cell "⚠ -0.34%" [ref=f8e1457]
+                - cell "-29.405" [ref=f8e1459]
+                - cell "2.315" [ref=f8e1460]
+                - cell "-0.2%" [ref=f8e1461]
+                - cell "0h1m" [ref=f8e1462]
+              - row [ref=f8e1463]:
+                - cell "XRP/USDT:USDT" [ref=f8e1464]
+                - cell "short" [ref=f8e1465]
+                - cell "irb_short_47394" [ref=f8e1466]
+                - cell "stop_loss" [ref=f8e1467]
+                - cell "2025-06-13 04:15" [ref=f8e1468]
+                - cell "2025-06-13 04:40" [ref=f8e1469]
+                - cell "2.112" [ref=f8e1470]
+                - cell "2.117" [ref=f8e1471]
+                - cell "⚠ -0.34%" [ref=f8e1472]
+                - cell "-28.935" [ref=f8e1474]
+                - cell "2.117" [ref=f8e1475]
+                - cell "-0.2%" [ref=f8e1476]
+                - cell "0h0m" [ref=f8e1477]
+              - row [ref=f8e1478]:
+                - cell "XRP/USDT:USDT" [ref=f8e1479]
+                - cell "long" [ref=f8e1480]
+                - cell "irb_long_48373" [ref=f8e1481]
+                - cell "stop_loss" [ref=f8e1482]
+                - cell "2025-06-16 13:55" [ref=f8e1483]
+                - cell "2025-06-16 13:55" [ref=f8e1484]
+                - cell "2.258" [ref=f8e1485]
+                - cell "2.252" [ref=f8e1486]
+                - cell "⚠ -0.36%" [ref=f8e1487]
+                - cell "-30.922" [ref=f8e1489]
+                - cell "2.252" [ref=f8e1490]
+                - cell "-0.3%" [ref=f8e1491]
+                - cell "—" [ref=f8e1492]
+              - row [ref=f8e1493]:
+                - cell "XRP/USDT:USDT" [ref=f8e1494]
+                - cell "long" [ref=f8e1495]
+                - cell "irb_long_48381" [ref=f8e1496]
+                - cell "irb_target" [ref=f8e1497]
+                - cell "2025-06-16 14:30" [ref=f8e1498]
+                - cell "2025-06-16 14:40" [ref=f8e1499]
+                - cell "2.26" [ref=f8e1500]
+                - cell "2.274" [ref=f8e1501]
+                - cell "0.53%" [ref=f8e1502]
+                - cell "45.045" [ref=f8e1504]
+                - cell "2.251" [ref=f8e1505]
+                - cell "-0.4%" [ref=f8e1506]
+                - cell "0h0m" [ref=f8e1507]
+              - row [ref=f8e1508]:
+                - cell "XRP/USDT:USDT" [ref=f8e1509]
+                - cell "long" [ref=f8e1510]
+                - cell "irb_long_49018" [ref=f8e1511]
+                - cell "stop_loss" [ref=f8e1512]
+                - cell "2025-06-18 19:35" [ref=f8e1513]
+                - cell "2025-06-18 19:35" [ref=f8e1514]
+                - cell "2.148" [ref=f8e1515]
+                - cell "2.142" [ref=f8e1516]
+                - cell "⚠ -0.37%" [ref=f8e1517]
+                - cell "-31.721" [ref=f8e1519]
+                - cell "2.142" [ref=f8e1520]
+                - cell "-0.3%" [ref=f8e1521]
+                - cell "—" [ref=f8e1522]
+              - row [ref=f8e1523]:
+                - cell "XRP/USDT:USDT" [ref=f8e1524]
+                - cell "short" [ref=f8e1525]
+                - cell "irb_short_49957" [ref=f8e1526]
+                - cell "stop_loss" [ref=f8e1527]
+                - cell "2025-06-22 01:50" [ref=f8e1528]
+                - cell "2025-06-22 01:50" [ref=f8e1529]
+                - cell "2.063" [ref=f8e1530]
+                - cell "2.068" [ref=f8e1531]
+                - cell "⚠ -0.37%" [ref=f8e1532]
+                - cell "-31.334" [ref=f8e1534]
+                - cell "2.068" [ref=f8e1535]
+                - cell "-0.3%" [ref=f8e1536]
+                - cell "—" [ref=f8e1537]
+              - row [ref=f8e1538]:
+                - cell "XRP/USDT:USDT" [ref=f8e1539]
+                - cell "short" [ref=f8e1540]
+                - cell "irb_short_49958" [ref=f8e1541]
+                - cell "stop_loss" [ref=f8e1542]
+                - cell "2025-06-22 01:55" [ref=f8e1543]
+                - cell "2025-06-22 02:00" [ref=f8e1544]
+                - cell "2.062" [ref=f8e1545]
+                - cell "2.068" [ref=f8e1546]
+                - cell "⚠ -0.38%" [ref=f8e1547]
+                - cell "-32.056" [ref=f8e1549]
+                - cell "2.068" [ref=f8e1550]
+                - cell "-0.3%" [ref=f8e1551]
+                - cell "0h0m" [ref=f8e1552]
+              - row [ref=f8e1553]:
+                - cell "XRP/USDT:USDT" [ref=f8e1554]
+                - cell "short" [ref=f8e1555]
+                - cell "irb_short_50116" [ref=f8e1556]
+                - cell "stop_loss" [ref=f8e1557]
+                - cell "2025-06-22 15:10" [ref=f8e1558]
+                - cell "2025-06-22 15:10" [ref=f8e1559]
+                - cell "1.947" [ref=f8e1560]
+                - cell "1.955" [ref=f8e1561]
+                - cell "⚠ -0.53%" [ref=f8e1562]
+                - cell "-38.285" [ref=f8e1564]
+                - cell "1.955" [ref=f8e1565]
+                - cell "-0.4%" [ref=f8e1566]
+                - cell "—" [ref=f8e1567]
+              - row [ref=f8e1568]:
+                - cell "XRP/USDT:USDT" [ref=f8e1569]
+                - cell "long" [ref=f8e1570]
+                - cell "irb_long_50195" [ref=f8e1571]
+                - cell "stop_loss" [ref=f8e1572]
+                - cell "2025-06-22 21:40" [ref=f8e1573]
+                - cell "2025-06-22 21:40" [ref=f8e1574]
+                - cell "1.968" [ref=f8e1575]
+                - cell "1.961" [ref=f8e1576]
+                - cell "⚠ -0.44%" [ref=f8e1577]
+                - cell "-37.173" [ref=f8e1579]
+                - cell "1.961" [ref=f8e1580]
+                - cell "-0.3%" [ref=f8e1581]
+                - cell "—" [ref=f8e1582]
+              - row [ref=f8e1583]:
+                - cell "XRP/USDT:USDT" [ref=f8e1584]
+                - cell "long" [ref=f8e1585]
+                - cell "irb_long_53036" [ref=f8e1586]
+                - cell "stop_loss" [ref=f8e1587]
+                - cell "2025-07-02 18:25" [ref=f8e1588]
+                - cell "2025-07-02 18:40" [ref=f8e1589]
+                - cell "2.249" [ref=f8e1590]
+                - cell "2.245" [ref=f8e1591]
+                - cell "⚠ -0.26%" [ref=f8e1592]
+                - cell "-22.227" [ref=f8e1594]
+                - cell "2.245" [ref=f8e1595]
+                - cell "-0.2%" [ref=f8e1596]
+                - cell "0h0m" [ref=f8e1597]
+              - row [ref=f8e1598]:
+                - cell "XRP/USDT:USDT" [ref=f8e1599]
+                - cell "long" [ref=f8e1600]
+                - cell "irb_long_53042" [ref=f8e1601]
+                - cell "irb_target" [ref=f8e1602]
+                - cell "2025-07-02 18:55" [ref=f8e1603]
+                - cell "2025-07-02 19:05" [ref=f8e1604]
+                - cell "2.25" [ref=f8e1605]
+                - cell "2.257" [ref=f8e1606]
+                - cell "0.22%" [ref=f8e1607]
+                - cell "18.056" [ref=f8e1609]
+                - cell "2.246" [ref=f8e1610]
+                - cell "-0.2%" [ref=f8e1611]
+                - cell "0h0m" [ref=f8e1612]
+              - row [ref=f8e1613]:
+                - cell "XRP/USDT:USDT" [ref=f8e1614]
+                - cell "long" [ref=f8e1615]
+                - cell "irb_long_53268" [ref=f8e1616]
+                - cell "stop_loss" [ref=f8e1617]
+                - cell "2025-07-03 13:45" [ref=f8e1618]
+                - cell "2025-07-03 14:25" [ref=f8e1619]
+                - cell "2.295" [ref=f8e1620]
+                - cell "2.285" [ref=f8e1621]
+                - cell "⚠ -0.56%" [ref=f8e1622]
+                - cell "-46.815" [ref=f8e1624]
+                - cell "2.285" [ref=f8e1625]
+                - cell "-0.5%" [ref=f8e1626]
+                - cell "0h1m" [ref=f8e1627]
+              - row [ref=f8e1628]:
+                - cell "XRP/USDT:USDT" [ref=f8e1629]
+                - cell "long" [ref=f8e1630]
+                - cell "irb_long_54434" [ref=f8e1631]
+                - cell "irb_target" [ref=f8e1632]
+                - cell "2025-07-07 15:00" [ref=f8e1633]
+                - cell "2025-07-07 15:10" [ref=f8e1634]
+                - cell "2.318" [ref=f8e1635]
+                - cell "2.33" [ref=f8e1636]
+                - cell "0.40%" [ref=f8e1637]
+                - cell "33.798" [ref=f8e1639]
+                - cell "2.31" [ref=f8e1640]
+                - cell "-0.3%" [ref=f8e1641]
+                - cell "0h0m" [ref=f8e1642]
+              - row [ref=f8e1643]:
+                - cell "XRP/USDT:USDT" [ref=f8e1644]
+                - cell "long" [ref=f8e1645]
+                - cell "irb_long_55406" [ref=f8e1646]
+                - cell "stop_loss" [ref=f8e1647]
+                - cell "2025-07-10 23:55" [ref=f8e1648]
+                - cell "2025-07-11 00:00" [ref=f8e1649]
+                - cell "2.547" [ref=f8e1650]
+                - cell "2.541" [ref=f8e1651]
+                - cell "⚠ -0.38%" [ref=f8e1652]
+                - cell "-31.608" [ref=f8e1654]
+                - cell "2.541" [ref=f8e1655]
+                - cell "-0.3%" [ref=f8e1656]
+                - cell "0h0m" [ref=f8e1657]
+              - row [ref=f8e1658]:
+                - cell "XRP/USDT:USDT" [ref=f8e1659]
+                - cell "long" [ref=f8e1660]
+                - cell "irb_long_55640" [ref=f8e1661]
+                - cell "stop_loss" [ref=f8e1662]
+                - cell "2025-07-11 19:25" [ref=f8e1663]
+                - cell "2025-07-11 20:30" [ref=f8e1664]
+                - cell "2.834" [ref=f8e1665]
+                - cell "2.813" [ref=f8e1666]
+                - cell "⚠ -0.85%" [ref=f8e1667]
+                - cell "-66.31" [ref=f8e1669]
+                - cell "2.813" [ref=f8e1670]
+                - cell "-0.8%" [ref=f8e1671]
+                - cell "0h1m" [ref=f8e1672]
+              - row [ref=f8e1673]:
+                - cell "XRP/USDT:USDT" [ref=f8e1674]
+                - cell "long" [ref=f8e1675]
+                - cell "irb_long_56384" [ref=f8e1676]
+                - cell "irb_target" [ref=f8e1677]
+                - cell "2025-07-14 09:25" [ref=f8e1678]
+                - cell "2025-07-14 09:40" [ref=f8e1679]
+                - cell "2.979" [ref=f8e1680]
+                - cell "3.001" [ref=f8e1681]
+                - cell "0.66%" [ref=f8e1682]
+                - cell "54.867" [ref=f8e1684]
+                - cell "2.965" [ref=f8e1685]
+                - cell "-0.5%" [ref=f8e1686]
+                - cell "0h0m" [ref=f8e1687]
+              - row [ref=f8e1688]:
+                - cell "XRP/USDT:USDT" [ref=f8e1689]
+                - cell "long" [ref=f8e1690]
+                - cell "irb_long_56398" [ref=f8e1691]
+                - cell "irb_target" [ref=f8e1692]
+                - cell "2025-07-14 10:40" [ref=f8e1693]
+                - cell "2025-07-14 10:50" [ref=f8e1694]
+                - cell "2.987" [ref=f8e1695]
+                - cell "3.003" [ref=f8e1696]
+                - cell "0.42%" [ref=f8e1697]
+                - cell "35.214" [ref=f8e1699]
+                - cell "2.977" [ref=f8e1700]
+                - cell "-0.3%" [ref=f8e1701]
+                - cell "0h0m" [ref=f8e1702]
+              - row [ref=f8e1703]:
+                - cell "XRP/USDT:USDT" [ref=f8e1704]
+                - cell "long" [ref=f8e1705]
+                - cell "irb_long_57260" [ref=f8e1706]
+                - cell "stop_loss" [ref=f8e1707]
+                - cell "2025-07-17 10:30" [ref=f8e1708]
+                - cell "2025-07-17 10:30" [ref=f8e1709]
+                - cell "3.258" [ref=f8e1710]
+                - cell "3.246" [ref=f8e1711]
+                - cell "⚠ -0.48%" [ref=f8e1712]
+                - cell "-40.006" [ref=f8e1714]
+                - cell "3.246" [ref=f8e1715]
+                - cell "-0.4%" [ref=f8e1716]
+                - cell "—" [ref=f8e1717]
+              - row [ref=f8e1718]:
+                - cell "XRP/USDT:USDT" [ref=f8e1719]
+                - cell "long" [ref=f8e1720]
+                - cell "irb_long_57309" [ref=f8e1721]
+                - cell "stop_loss" [ref=f8e1722]
+                - cell "2025-07-17 14:30" [ref=f8e1723]
+                - cell "2025-07-17 15:00" [ref=f8e1724]
+                - cell "3.244" [ref=f8e1725]
+                - cell "3.233" [ref=f8e1726]
+                - cell "⚠ -0.44%" [ref=f8e1727]
+                - cell "-36.611" [ref=f8e1729]
+                - cell "3.233" [ref=f8e1730]
+                - cell "-0.3%" [ref=f8e1731]
+                - cell "0h1m" [ref=f8e1732]
+              - row [ref=f8e1733]:
+                - cell "XRP/USDT:USDT" [ref=f8e1734]
+                - cell "long" [ref=f8e1735]
+                - cell "irb_long_57338" [ref=f8e1736]
+                - cell "stop_loss" [ref=f8e1737]
+                - cell "2025-07-17 16:55" [ref=f8e1738]
+                - cell "2025-07-17 16:55" [ref=f8e1739]
+                - cell "3.265" [ref=f8e1740]
+                - cell "3.251" [ref=f8e1741]
+                - cell "⚠ -0.53%" [ref=f8e1742]
+                - cell "-43.902" [ref=f8e1744]
+                - cell "3.251" [ref=f8e1745]
+                - cell "-0.4%" [ref=f8e1746]
+                - cell "—" [ref=f8e1747]
+              - row [ref=f8e1748]:
+                - cell "XRP/USDT:USDT" [ref=f8e1749]
+                - cell "long" [ref=f8e1750]
+                - cell "irb_long_57382" [ref=f8e1751]
+                - cell "irb_target" [ref=f8e1752]
+                - cell "2025-07-17 20:35" [ref=f8e1753]
+                - cell "2025-07-17 21:10" [ref=f8e1754]
+                - cell "3.363" [ref=f8e1755]
+                - cell "3.419" [ref=f8e1756]
+                - cell "1.54%" [ref=f8e1757]
+                - cell "110.872" [ref=f8e1759]
+                - cell "3.333" [ref=f8e1760]
+                - cell "-0.9%" [ref=f8e1761]
+                - cell "0h1m" [ref=f8e1762]
+              - row [ref=f8e1763]:
+                - cell "XRP/USDT:USDT" [ref=f8e1764]
+                - cell "short" [ref=f8e1765]
+                - cell "irb_short_58219" [ref=f8e1766]
+                - cell "stop_loss" [ref=f8e1767]
+                - cell "2025-07-20 18:20" [ref=f8e1768]
+                - cell "2025-07-20 18:20" [ref=f8e1769]
+                - cell "3.505" [ref=f8e1770]
+                - cell "3.513" [ref=f8e1771]
+                - cell "⚠ -0.33%" [ref=f8e1772]
+                - cell "-27.966" [ref=f8e1774]
+                - cell "3.513" [ref=f8e1775]
+                - cell "-0.2%" [ref=f8e1776]
+                - cell "—" [ref=f8e1777]
+              - row [ref=f8e1778]:
+                - cell "XRP/USDT:USDT" [ref=f8e1779]
+                - cell "short" [ref=f8e1780]
+                - cell "irb_short_58287" [ref=f8e1781]
+                - cell "irb_target" [ref=f8e1782]
+                - cell "2025-07-21 00:00" [ref=f8e1783]
+                - cell "2025-07-21 00:10" [ref=f8e1784]
+                - cell "3.451" [ref=f8e1785]
+                - cell "3.437" [ref=f8e1786]
+                - cell "0.31%" [ref=f8e1787]
+                - cell "25.875" [ref=f8e1789]
+                - cell "3.46" [ref=f8e1790]
+                - cell "-0.3%" [ref=f8e1791]
+                - cell "0h0m" [ref=f8e1792]
+              - row [ref=f8e1793]:
+                - cell "XRP/USDT:USDT" [ref=f8e1794]
+                - cell "short" [ref=f8e1795]
+                - cell "irb_short_59128" [ref=f8e1796]
+                - cell "stop_loss" [ref=f8e1797]
+                - cell "2025-07-23 22:05" [ref=f8e1798]
+                - cell "2025-07-23 22:10" [ref=f8e1799]
+                - cell "3.119" [ref=f8e1800]
+                - cell "3.152" [ref=f8e1801]
+                - cell "⚠ -1.16%" [ref=f8e1802]
+                - cell "-62.262" [ref=f8e1804]
+                - cell "3.152" [ref=f8e1805]
+                - cell "-1.1%" [ref=f8e1806]
+                - cell "0h0m" [ref=f8e1807]
+              - row [ref=f8e1808]:
+                - cell "XRP/USDT:USDT" [ref=f8e1809]
+                - cell "short" [ref=f8e1810]
+                - cell "irb_short_59242" [ref=f8e1811]
+                - cell "stop_loss" [ref=f8e1812]
+                - cell "2025-07-24 07:35" [ref=f8e1813]
+                - cell "2025-07-24 07:40" [ref=f8e1814]
+                - cell "3.04" [ref=f8e1815]
+                - cell "3.057" [ref=f8e1816]
+                - cell "⚠ -0.63%" [ref=f8e1817]
+                - cell "-34.045" [ref=f8e1819]
+                - cell "3.057" [ref=f8e1820]
+                - cell "-0.5%" [ref=f8e1821]
+                - cell "0h0m" [ref=f8e1822]
+              - row [ref=f8e1823]:
+                - cell "XRP/USDT:USDT" [ref=f8e1824]
+                - cell "short" [ref=f8e1825]
+                - cell "irb_short_60201" [ref=f8e1826]
+                - cell "stop_loss" [ref=f8e1827]
+                - cell "2025-07-27 15:30" [ref=f8e1828]
+                - cell "2025-07-27 15:45" [ref=f8e1829]
+                - cell "3.175" [ref=f8e1830]
+                - cell "3.181" [ref=f8e1831]
+                - cell "⚠ -0.30%" [ref=f8e1832]
+                - cell "-24.699" [ref=f8e1834]
+                - cell "3.181" [ref=f8e1835]
+                - cell "-0.2%" [ref=f8e1836]
+                - cell "0h0m" [ref=f8e1837]
+              - row [ref=f8e1838]:
+                - cell "XRP/USDT:USDT" [ref=f8e1839]
+                - cell "short" [ref=f8e1840]
+                - cell "irb_short_60559" [ref=f8e1841]
+                - cell "stop_loss" [ref=f8e1842]
+                - cell "2025-07-28 21:25" [ref=f8e1843]
+                - cell "2025-07-28 21:25" [ref=f8e1844]
+                - cell "3.133" [ref=f8e1845]
+                - cell "3.139" [ref=f8e1846]
+                - cell "⚠ -0.29%" [ref=f8e1847]
+                - cell "-23.527" [ref=f8e1849]
+                - cell "3.139" [ref=f8e1850]
+                - cell "-0.2%" [ref=f8e1851]
+                - cell "—" [ref=f8e1852]
+              - row [ref=f8e1853]:
+                - cell "XRP/USDT:USDT" [ref=f8e1854]
+                - cell "long" [ref=f8e1855]
+                - cell "irb_long_61679" [ref=f8e1856]
+                - cell "stop_loss" [ref=f8e1857]
+                - cell "2025-08-01 18:40" [ref=f8e1858]
+                - cell "2025-08-01 18:50" [ref=f8e1859]
+                - cell "3.025" [ref=f8e1860]
+                - cell "3.008" [ref=f8e1861]
+                - cell "⚠ -0.64%" [ref=f8e1862]
+                - cell "-53.076" [ref=f8e1864]
+                - cell "3.008" [ref=f8e1865]
+                - cell "-0.5%" [ref=f8e1866]
+                - cell "0h0m" [ref=f8e1867]
+              - row [ref=f8e1868]:
+                - cell "XRP/USDT:USDT" [ref=f8e1869]
+                - cell "short" [ref=f8e1870]
+                - cell "irb_short_62775" [ref=f8e1871]
+                - cell "irb_target" [ref=f8e1872]
+                - cell "2025-08-05 14:00" [ref=f8e1873]
+                - cell "2025-08-05 14:10" [ref=f8e1874]
+                - cell "3.031" [ref=f8e1875]
+                - cell "3.018" [ref=f8e1876]
+                - cell "0.35%" [ref=f8e1877]
+                - cell "28.249" [ref=f8e1879]
+                - cell "3.04" [ref=f8e1880]
+                - cell "-0.3%" [ref=f8e1881]
+                - cell "0h0m" [ref=f8e1882]
+              - row [ref=f8e1883]:
+                - cell "XRP/USDT:USDT" [ref=f8e1884]
+                - cell "short" [ref=f8e1885]
+                - cell "irb_short_62791" [ref=f8e1886]
+                - cell "stop_loss" [ref=f8e1887]
+                - cell "2025-08-05 15:20" [ref=f8e1888]
+                - cell "2025-08-05 15:20" [ref=f8e1889]
+                - cell "2.983" [ref=f8e1890]
+                - cell "2.991" [ref=f8e1891]
+                - cell "⚠ -0.37%" [ref=f8e1892]
+                - cell "-30.483" [ref=f8e1894]
+                - cell "2.991" [ref=f8e1895]
+                - cell "-0.3%" [ref=f8e1896]
+                - cell "—" [ref=f8e1897]
+              - row [ref=f8e1898]:
+                - cell "XRP/USDT:USDT" [ref=f8e1899]
+                - cell "short" [ref=f8e1900]
+                - cell "irb_short_62792" [ref=f8e1901]
+                - cell "irb_target" [ref=f8e1902]
+                - cell "2025-08-05 15:25" [ref=f8e1903]
+                - cell "2025-08-05 15:35" [ref=f8e1904]
+                - cell "2.984" [ref=f8e1905]
+                - cell "2.973" [ref=f8e1906]
+                - cell "0.25%" [ref=f8e1907]
+                - cell "20.598" [ref=f8e1909]
+                - cell "2.991" [ref=f8e1910]
+                - cell "-0.2%" [ref=f8e1911]
+                - cell "0h0m" [ref=f8e1912]
+              - row [ref=f8e1913]:
+                - cell "XRP/USDT:USDT" [ref=f8e1914]
+                - cell "long" [ref=f8e1915]
+                - cell "irb_long_63072" [ref=f8e1916]
+                - cell "irb_target" [ref=f8e1917]
+                - cell "2025-08-06 14:45" [ref=f8e1918]
+                - cell "2025-08-06 15:00" [ref=f8e1919]
+                - cell "2.958" [ref=f8e1920]
+                - cell "2.973" [ref=f8e1921]
+                - cell "0.41%" [ref=f8e1922]
+                - cell "33.604" [ref=f8e1924]
+                - cell "2.95" [ref=f8e1925]
+                - cell "-0.3%" [ref=f8e1926]
+                - cell "0h0m" [ref=f8e1927]
+              - row [ref=f8e1928]:
+                - cell "XRP/USDT:USDT" [ref=f8e1929]
+                - cell "long" [ref=f8e1930]
+                - cell "irb_long_63478" [ref=f8e1931]
+                - cell "stop_loss" [ref=f8e1932]
+                - cell "2025-08-08 00:35" [ref=f8e1933]
+                - cell "2025-08-08 00:35" [ref=f8e1934]
+                - cell "3.332" [ref=f8e1935]
+                - cell "3.302" [ref=f8e1936]
+                - cell "⚠ -0.99%" [ref=f8e1937]
+                - cell "-72.062" [ref=f8e1939]
+                - cell "3.302" [ref=f8e1940]
+                - cell "-0.9%" [ref=f8e1941]
+                - cell "—" [ref=f8e1942]
+              - row [ref=f8e1943]:
+                - cell "XRP/USDT:USDT" [ref=f8e1944]
+                - cell "short" [ref=f8e1945]
+                - cell "irb_short_64487" [ref=f8e1946]
+                - cell "irb_target" [ref=f8e1947]
+                - cell "2025-08-11 12:45" [ref=f8e1948]
+                - cell "2025-08-11 20:05" [ref=f8e1949]
+                - cell "3.196" [ref=f8e1950]
+                - cell "3.14" [ref=f8e1951]
+                - cell "1.65%" [ref=f8e1952]
+                - cell "115.602" [ref=f8e1954]
+                - cell "3.233" [ref=f8e1955]
+                - cell "-1.2%" [ref=f8e1956]
+                - cell "0h7m" [ref=f8e1957]
+              - row [ref=f8e1958]:
+                - cell "XRP/USDT:USDT" [ref=f8e1959]
+                - cell "long" [ref=f8e1960]
+                - cell "irb_long_65215" [ref=f8e1961]
+                - cell "irb_target" [ref=f8e1962]
+                - cell "2025-08-14 01:20" [ref=f8e1963]
+                - cell "2025-08-14 01:35" [ref=f8e1964]
+                - cell "3.295" [ref=f8e1965]
+                - cell "3.313" [ref=f8e1966]
+                - cell "0.43%" [ref=f8e1967]
+                - cell "35.369" [ref=f8e1969]
+                - cell "3.286" [ref=f8e1970]
+                - cell "-0.3%" [ref=f8e1971]
+                - cell "0h0m" [ref=f8e1972]
+              - row [ref=f8e1973]:
+                - cell "XRP/USDT:USDT" [ref=f8e1974]
+                - cell "short" [ref=f8e1975]
+                - cell "irb_short_66441" [ref=f8e1976]
+                - cell "stop_loss" [ref=f8e1977]
+                - cell "2025-08-18 07:30" [ref=f8e1978]
+                - cell "2025-08-18 07:35" [ref=f8e1979]
+                - cell "2.962" [ref=f8e1980]
+                - cell "2.972" [ref=f8e1981]
+                - cell "⚠ -0.45%" [ref=f8e1982]
+                - cell "-37.476" [ref=f8e1984]
+                - cell "2.972" [ref=f8e1985]
+                - cell "-0.4%" [ref=f8e1986]
+                - cell "0h0m" [ref=f8e1987]
+              - row [ref=f8e1988]:
+                - cell "XRP/USDT:USDT" [ref=f8e1989]
+                - cell "short" [ref=f8e1990]
+                - cell "irb_short_66446" [ref=f8e1991]
+                - cell "stop_loss" [ref=f8e1992]
+                - cell "2025-08-18 07:55" [ref=f8e1993]
+                - cell "2025-08-18 08:10" [ref=f8e1994]
+                - cell "2.963" [ref=f8e1995]
+                - cell "2.971" [ref=f8e1996]
+                - cell "⚠ -0.38%" [ref=f8e1997]
+                - cell "-31.452" [ref=f8e1999]
+                - cell "2.971" [ref=f8e2000]
+                - cell "-0.3%" [ref=f8e2001]
+                - cell "0h0m" [ref=f8e2002]
+              - row [ref=f8e2003]:
+                - cell "XRP/USDT:USDT" [ref=f8e2004]
+                - cell "long" [ref=f8e2005]
+                - cell "irb_long_67120" [ref=f8e2006]
+                - cell "irb_target" [ref=f8e2007]
+                - cell "2025-08-20 16:05" [ref=f8e2008]
+                - cell "2025-08-20 16:20" [ref=f8e2009]
+                - cell "2.909" [ref=f8e2010]
+                - cell "2.923" [ref=f8e2011]
+                - cell "0.41%" [ref=f8e2012]
+                - cell "33.93" [ref=f8e2014]
+                - cell "2.899" [ref=f8e2015]
+                - cell "-0.3%" [ref=f8e2016]
+                - cell "0h0m" [ref=f8e2017]
+              - row [ref=f8e2018]:
+                - cell "XRP/USDT:USDT" [ref=f8e2019]
+                - cell "short" [ref=f8e2020]
+                - cell "irb_short_69760" [ref=f8e2021]
+                - cell "irb_target" [ref=f8e2022]
+                - cell "2025-08-29 20:05" [ref=f8e2023]
+                - cell "2025-08-29 21:00" [ref=f8e2024]
+                - cell "2.805" [ref=f8e2025]
+                - cell "2.784" [ref=f8e2026]
+                - cell "0.65%" [ref=f8e2027]
+                - cell "53.677" [ref=f8e2029]
+                - cell "2.819" [ref=f8e2030]
+                - cell "-0.5%" [ref=f8e2031]
+                - cell "0h1m" [ref=f8e2032]
+              - row [ref=f8e2033]:
+                - cell "XRP/USDT:USDT" [ref=f8e2034]
+                - cell "short" [ref=f8e2035]
+                - cell "irb_short_70567" [ref=f8e2036]
+                - cell "stop_loss" [ref=f8e2037]
+                - cell "2025-09-01 15:20" [ref=f8e2038]
+                - cell "2025-09-01 15:45" [ref=f8e2039]
+                - cell "2.759" [ref=f8e2040]
+                - cell "2.768" [ref=f8e2041]
+                - cell "⚠ -0.43%" [ref=f8e2042]
+                - cell "-36.083" [ref=f8e2044]
+                - cell "2.768" [ref=f8e2045]
+                - cell "-0.3%" [ref=f8e2046]
+                - cell "0h0m" [ref=f8e2047]
+              - row [ref=f8e2048]:
+                - cell "XRP/USDT:USDT" [ref=f8e2049]
+                - cell "short" [ref=f8e2050]
+                - cell "irb_short_71443" [ref=f8e2051]
+                - cell "irb_target" [ref=f8e2052]
+                - cell "2025-09-04 16:20" [ref=f8e2053]
+                - cell "2025-09-04 16:50" [ref=f8e2054]
+                - cell "2.811" [ref=f8e2055]
+                - cell "2.802" [ref=f8e2056]
+                - cell "0.21%" [ref=f8e2057]
+                - cell "17.374" [ref=f8e2059]
+                - cell "2.817" [ref=f8e2060]
+                - cell "-0.2%" [ref=f8e2061]
+                - cell "0h1m" [ref=f8e2062]
+              - row [ref=f8e2063]:
+                - cell "XRP/USDT:USDT" [ref=f8e2064]
+                - cell "short" [ref=f8e2065]
+                - cell "irb_short_71726" [ref=f8e2066]
+                - cell "irb_target" [ref=f8e2067]
+                - cell "2025-09-05 15:55" [ref=f8e2068]
+                - cell "2025-09-05 17:35" [ref=f8e2069]
+                - cell "2.816" [ref=f8e2070]
+                - cell "2.804" [ref=f8e2071]
+                - cell "0.32%" [ref=f8e2072]
+                - cell "26.4" [ref=f8e2074]
+                - cell "2.823" [ref=f8e2075]
+                - cell "-0.3%" [ref=f8e2076]
+                - cell "0h2m" [ref=f8e2077]
+              - row [ref=f8e2078]:
+                - cell "XRP/USDT:USDT" [ref=f8e2079]
+                - cell "long" [ref=f8e2080]
+                - cell "irb_long_72508" [ref=f8e2081]
+                - cell "stop_loss" [ref=f8e2082]
+                - cell "2025-09-08 09:05" [ref=f8e2083]
+                - cell "2025-09-08 09:05" [ref=f8e2084]
+                - cell "2.911" [ref=f8e2085]
+                - cell "2.906" [ref=f8e2086]
+                - cell "⚠ -0.27%" [ref=f8e2087]
+                - cell "-22.341" [ref=f8e2089]
+                - cell "2.906" [ref=f8e2090]
+                - cell "-0.2%" [ref=f8e2091]
+                - cell "—" [ref=f8e2092]
+              - row [ref=f8e2093]:
+                - cell "XRP/USDT:USDT" [ref=f8e2094]
+                - cell "long" [ref=f8e2095]
+                - cell "irb_long_72855" [ref=f8e2096]
+                - cell "stop_loss" [ref=f8e2097]
+                - cell "2025-09-09 14:00" [ref=f8e2098]
+                - cell "2025-09-09 14:00" [ref=f8e2099]
+                - cell "3.017" [ref=f8e2100]
+                - cell "3.009" [ref=f8e2101]
+                - cell "⚠ -0.37%" [ref=f8e2102]
+                - cell "-30.871" [ref=f8e2104]
+                - cell "3.009" [ref=f8e2105]
+                - cell "-0.3%" [ref=f8e2106]
+                - cell "—" [ref=f8e2107]
+              - row [ref=f8e2108]:
+                - cell "XRP/USDT:USDT" [ref=f8e2109]
+                - cell "short" [ref=f8e2110]
+                - cell "irb_short_73444" [ref=f8e2111]
+                - cell "stop_loss" [ref=f8e2112]
+                - cell "2025-09-11 15:05" [ref=f8e2113]
+                - cell "2025-09-11 15:15" [ref=f8e2114]
+                - cell "2.993" [ref=f8e2115]
+                - cell "2.999" [ref=f8e2116]
+                - cell "⚠ -0.31%" [ref=f8e2117]
+                - cell "-25.987" [ref=f8e2119]
+                - cell "2.999" [ref=f8e2120]
+                - cell "-0.2%" [ref=f8e2121]
+                - cell "0h0m" [ref=f8e2122]
+              - row [ref=f8e2123]:
+                - cell "XRP/USDT:USDT" [ref=f8e2124]
+                - cell "short" [ref=f8e2125]
+                - cell "irb_short_73451" [ref=f8e2126]
+                - cell "stop_loss" [ref=f8e2127]
+                - cell "2025-09-11 15:40" [ref=f8e2128]
+                - cell "2025-09-11 16:00" [ref=f8e2129]
+                - cell "2.992" [ref=f8e2130]
+                - cell "2.998" [ref=f8e2131]
+                - cell "⚠ -0.29%" [ref=f8e2132]
+                - cell "-23.813" [ref=f8e2134]
+                - cell "2.998" [ref=f8e2135]
+                - cell "-0.2%" [ref=f8e2136]
+                - cell "0h0m" [ref=f8e2137]
+              - row [ref=f8e2138]:
+                - cell "XRP/USDT:USDT" [ref=f8e2139]
+                - cell "short" [ref=f8e2140]
+                - cell "irb_short_74034" [ref=f8e2141]
+                - cell "irb_target" [ref=f8e2142]
+                - cell "2025-09-13 16:15" [ref=f8e2143]
+                - cell "2025-09-13 16:55" [ref=f8e2144]
+                - cell "3.128" [ref=f8e2145]
+                - cell "3.108" [ref=f8e2146]
+                - cell "0.55%" [ref=f8e2147]
+                - cell "45.192" [ref=f8e2149]
+                - cell "3.142" [ref=f8e2150]
+                - cell "-0.4%" [ref=f8e2151]
+                - cell "0h1m" [ref=f8e2152]
+              - row [ref=f8e2153]:
+                - cell "XRP/USDT:USDT" [ref=f8e2154]
+                - cell "long" [ref=f8e2155]
+                - cell "irb_long_74586" [ref=f8e2156]
+                - cell "stop_loss" [ref=f8e2157]
+                - cell "2025-09-15 14:15" [ref=f8e2158]
+                - cell "2025-09-15 14:55" [ref=f8e2159]
+                - cell "3.02" [ref=f8e2160]
+                - cell "3.005" [ref=f8e2161]
+                - cell "⚠ -0.60%" [ref=f8e2162]
+                - cell "-49.887" [ref=f8e2164]
+                - cell "3.005" [ref=f8e2165]
+                - cell "-0.5%" [ref=f8e2166]
+                - cell "0h1m" [ref=f8e2167]
+              - row [ref=f8e2168]:
+                - cell "XRP/USDT:USDT" [ref=f8e2169]
+                - cell "short" [ref=f8e2170]
+                - cell "irb_short_75167" [ref=f8e2171]
+                - cell "stop_loss" [ref=f8e2172]
+                - cell "2025-09-17 14:40" [ref=f8e2173]
+                - cell "2025-09-17 15:15" [ref=f8e2174]
+                - cell "3.012" [ref=f8e2175]
+                - cell "3.022" [ref=f8e2176]
+                - cell "⚠ -0.43%" [ref=f8e2177]
+                - cell "-34.987" [ref=f8e2179]
+                - cell "3.022" [ref=f8e2180]
+                - cell "-0.3%" [ref=f8e2181]
+                - cell "0h1m" [ref=f8e2182]
+              - row [ref=f8e2183]:
+                - cell "XRP/USDT:USDT" [ref=f8e2184]
+                - cell "short" [ref=f8e2185]
+                - cell "irb_short_76433" [ref=f8e2186]
+                - cell "irb_target" [ref=f8e2187]
+                - cell "2025-09-22 00:10" [ref=f8e2188]
+                - cell "2025-09-22 00:25" [ref=f8e2189]
+                - cell "2.964" [ref=f8e2190]
+                - cell "2.952" [ref=f8e2191]
+                - cell "0.31%" [ref=f8e2192]
+                - cell "24.975" [ref=f8e2194]
+                - cell "2.972" [ref=f8e2195]
+                - cell "-0.3%" [ref=f8e2196]
+                - cell "0h0m" [ref=f8e2197]
+              - row [ref=f8e2198]:
+                - cell "XRP/USDT:USDT" [ref=f8e2199]
+                - cell "short" [ref=f8e2200]
+                - cell "irb_short_76452" [ref=f8e2201]
+                - cell "irb_target" [ref=f8e2202]
+                - cell "2025-09-22 01:50" [ref=f8e2203]
+                - cell "2025-09-22 02:00" [ref=f8e2204]
+                - cell "2.926" [ref=f8e2205]
+                - cell "2.917" [ref=f8e2206]
+                - cell "0.20%" [ref=f8e2207]
+                - cell "16.78" [ref=f8e2209]
+                - cell "2.932" [ref=f8e2210]
+                - cell "-0.2%" [ref=f8e2211]
+                - cell "0h0m" [ref=f8e2212]
+              - row [ref=f8e2213]:
+                - cell "XRP/USDT:USDT" [ref=f8e2214]
+                - cell "short" [ref=f8e2215]
+                - cell "irb_short_76517" [ref=f8e2216]
+                - cell "stop_loss" [ref=f8e2217]
+                - cell "2025-09-22 07:10" [ref=f8e2218]
+                - cell "2025-09-22 12:45" [ref=f8e2219]
+                - cell "2.813" [ref=f8e2220]
+                - cell "2.826" [ref=f8e2221]
+                - cell "⚠ -0.56%" [ref=f8e2222]
+                - cell "-46.2" [ref=f8e2224]
+                - cell "2.826" [ref=f8e2225]
+                - cell "-0.5%" [ref=f8e2226]
+                - cell "0h6m" [ref=f8e2227]
+              - row [ref=f8e2228]:
+                - cell "XRP/USDT:USDT" [ref=f8e2229]
+                - cell "long" [ref=f8e2230]
+                - cell "irb_long_77226" [ref=f8e2231]
+                - cell "irb_target" [ref=f8e2232]
+                - cell "2025-09-24 18:15" [ref=f8e2233]
+                - cell "2025-09-24 19:50" [ref=f8e2234]
+                - cell "2.949" [ref=f8e2235]
+                - cell "2.968" [ref=f8e2236]
+                - cell "0.52%" [ref=f8e2237]
+                - cell "42.57" [ref=f8e2239]
+                - cell "2.942" [ref=f8e2240]
+                - cell "-0.2%" [ref=f8e2241]
+                - cell "0h2m" [ref=f8e2242]
+              - row [ref=f8e2243]:
+                - cell "XRP/USDT:USDT" [ref=f8e2244]
+                - cell "long" [ref=f8e2245]
+                - cell "irb_long_80663" [ref=f8e2246]
+                - cell "stop_loss" [ref=f8e2247]
+                - cell "2025-10-06 16:40" [ref=f8e2248]
+                - cell "2025-10-06 16:40" [ref=f8e2249]
+                - cell "3.027" [ref=f8e2250]
+                - cell "3.022" [ref=f8e2251]
+                - cell "⚠ -0.27%" [ref=f8e2252]
+                - cell "-22.349" [ref=f8e2254]
+                - cell "3.022" [ref=f8e2255]
+                - cell "-0.2%" [ref=f8e2256]
+                - cell "—" [ref=f8e2257]
+              - row [ref=f8e2258]:
+                - cell "XRP/USDT:USDT" [ref=f8e2259]
+                - cell "short" [ref=f8e2260]
+                - cell "irb_short_81918" [ref=f8e2261]
+                - cell "irb_target" [ref=f8e2262]
+                - cell "2025-10-11 01:15" [ref=f8e2263]
+                - cell "2025-10-11 01:25" [ref=f8e2264]
+                - cell "2.357" [ref=f8e2265]
+                - cell "2.33" [ref=f8e2266]
+                - cell "1.06%" [ref=f8e2267]
+                - cell "32.617" [ref=f8e2269]
+                - cell "2.375" [ref=f8e2270]
+                - cell "-0.8%" [ref=f8e2271]
+                - cell "0h0m" [ref=f8e2272]
+              - row [ref=f8e2273]:
+                - cell "XRP/USDT:USDT" [ref=f8e2274]
+                - cell "short" [ref=f8e2275]
+                - cell "irb_short_82653" [ref=f8e2276]
+                - cell "stop_loss" [ref=f8e2277]
+                - cell "2025-10-13 14:30" [ref=f8e2278]
+                - cell "2025-10-13 14:35" [ref=f8e2279]
+                - cell "2.554" [ref=f8e2280]
+                - cell "2.583" [ref=f8e2281]
+                - cell "⚠ -1.24%" [ref=f8e2282]
+                - cell "-89.65" [ref=f8e2284]
+                - cell "2.583" [ref=f8e2285]
+                - cell "-1.1%" [ref=f8e2286]
+                - cell "0h0m" [ref=f8e2287]
+              - row [ref=f8e2288]:
+                - cell "XRP/USDT:USDT" [ref=f8e2289]
+                - cell "long" [ref=f8e2290]
+                - cell "irb_long_83816" [ref=f8e2291]
+                - cell "stop_loss" [ref=f8e2292]
+                - cell "2025-10-17 15:25" [ref=f8e2293]
+                - cell "2025-10-17 15:35" [ref=f8e2294]
+                - cell "2.281" [ref=f8e2295]
+                - cell "2.262" [ref=f8e2296]
+                - cell "⚠ -0.91%" [ref=f8e2297]
+                - cell "-74.2" [ref=f8e2299]
+                - cell "2.262" [ref=f8e2300]
+                - cell "-0.8%" [ref=f8e2301]
+                - cell "0h0m" [ref=f8e2302]
+              - row [ref=f8e2303]:
+                - cell "XRP/USDT:USDT" [ref=f8e2304]
+                - cell "short" [ref=f8e2305]
+                - cell "irb_short_85248" [ref=f8e2306]
+                - cell "stop_loss" [ref=f8e2307]
+                - cell "2025-10-22 14:45" [ref=f8e2308]
+                - cell "2025-10-22 14:45" [ref=f8e2309]
+                - cell "2.378" [ref=f8e2310]
+                - cell "2.389" [ref=f8e2311]
+                - cell "⚠ -0.56%" [ref=f8e2312]
+                - cell "-45.445" [ref=f8e2314]
+                - cell "2.389" [ref=f8e2315]
+                - cell "-0.5%" [ref=f8e2316]
+                - cell "—" [ref=f8e2317]
+              - row [ref=f8e2318]:
+                - cell "XRP/USDT:USDT" [ref=f8e2319]
+                - cell "long" [ref=f8e2320]
+                - cell "irb_long_85263" [ref=f8e2321]
+                - cell "stop_loss" [ref=f8e2322]
+                - cell "2025-10-22 16:05" [ref=f8e2323]
+                - cell "2025-10-22 16:10" [ref=f8e2324]
+                - cell "2.403" [ref=f8e2325]
+                - cell "2.395" [ref=f8e2326]
+                - cell "⚠ -0.40%" [ref=f8e2327]
+                - cell "-32.077" [ref=f8e2329]
+                - cell "2.395" [ref=f8e2330]
+                - cell "-0.3%" [ref=f8e2331]
+                - cell "0h0m" [ref=f8e2332]
+              - row [ref=f8e2333]:
+                - cell "XRP/USDT:USDT" [ref=f8e2334]
+                - cell "long" [ref=f8e2335]
+                - cell "irb_long_85274" [ref=f8e2336]
+                - cell "stop_loss" [ref=f8e2337]
+                - cell "2025-10-22 16:55" [ref=f8e2338]
+                - cell "2025-10-22 16:55" [ref=f8e2339]
+                - cell "2.402" [ref=f8e2340]
+                - cell "2.395" [ref=f8e2341]
+                - cell "⚠ -0.41%" [ref=f8e2342]
+                - cell "-32.617" [ref=f8e2344]
+                - cell "2.395" [ref=f8e2345]
+                - cell "-0.3%" [ref=f8e2346]
+                - cell "—" [ref=f8e2347]
+              - row [ref=f8e2348]:
+                - cell "XRP/USDT:USDT" [ref=f8e2349]
+                - cell "long" [ref=f8e2350]
+                - cell "irb_long_86723" [ref=f8e2351]
+                - cell "stop_loss" [ref=f8e2352]
+                - cell "2025-10-27 17:40" [ref=f8e2353]
+                - cell "2025-10-27 17:45" [ref=f8e2354]
+                - cell "2.685" [ref=f8e2355]
+                - cell "2.676" [ref=f8e2356]
+                - cell "⚠ -0.44%" [ref=f8e2357]
+                - cell "-34.943" [ref=f8e2359]
+                - cell "2.676" [ref=f8e2360]
+                - cell "-0.3%" [ref=f8e2361]
+                - cell "0h0m" [ref=f8e2362]
+              - row [ref=f8e2363]:
+                - cell "XRP/USDT:USDT" [ref=f8e2364]
+                - cell "short" [ref=f8e2365]
+                - cell "irb_short_87063" [ref=f8e2366]
+                - cell "stop_loss" [ref=f8e2367]
+                - cell "2025-10-28 22:00" [ref=f8e2368]
+                - cell "2025-10-28 22:25" [ref=f8e2369]
+                - cell "2.593" [ref=f8e2370]
+                - cell "2.602" [ref=f8e2371]
+                - cell "⚠ -0.46%" [ref=f8e2372]
+                - cell "-36.079" [ref=f8e2374]
+                - cell "2.602" [ref=f8e2375]
+                - cell "-0.4%" [ref=f8e2376]
+                - cell "0h0m" [ref=f8e2377]
+              - row [ref=f8e2378]:
+                - cell "XRP/USDT:USDT" [ref=f8e2379]
+                - cell "short" [ref=f8e2380]
+                - cell "irb_short_87321" [ref=f8e2381]
+                - cell "irb_target" [ref=f8e2382]
+                - cell "2025-10-29 19:30" [ref=f8e2383]
+                - cell "2025-10-29 19:40" [ref=f8e2384]
+                - cell "2.609" [ref=f8e2385]
+                - cell "2.589" [ref=f8e2386]
+                - cell "0.66%" [ref=f8e2387]
+                - cell "48.285" [ref=f8e2389]
+                - cell "2.621" [ref=f8e2390]
+                - cell "-0.5%" [ref=f8e2391]
+                - cell "0h0m" [ref=f8e2392]
+              - row [ref=f8e2393]:
+                - cell "XRP/USDT:USDT" [ref=f8e2394]
+                - cell "long" [ref=f8e2395]
+                - cell "irb_long_88397" [ref=f8e2396]
+                - cell "stop_loss" [ref=f8e2397]
+                - cell "2025-11-02 13:10" [ref=f8e2398]
+                - cell "2025-11-02 13:15" [ref=f8e2399]
+                - cell "2.541" [ref=f8e2400]
+                - cell "2.535" [ref=f8e2401]
+                - cell "⚠ -0.32%" [ref=f8e2402]
+                - cell "-25.128" [ref=f8e2404]
+                - cell "2.535" [ref=f8e2405]
+                - cell "-0.2%" [ref=f8e2406]
+                - cell "0h0m" [ref=f8e2407]
+              - row [ref=f8e2408]:
+                - cell "XRP/USDT:USDT" [ref=f8e2409]
+                - cell "short" [ref=f8e2410]
+                - cell "irb_short_88584" [ref=f8e2411]
+                - cell "stop_loss" [ref=f8e2412]
+                - cell "2025-11-03 04:45" [ref=f8e2413]
+                - cell "2025-11-03 04:45" [ref=f8e2414]
+                - cell "2.433" [ref=f8e2415]
+                - cell "2.439" [ref=f8e2416]
+                - cell "⚠ -0.33%" [ref=f8e2417]
+                - cell "-26.472" [ref=f8e2419]
+                - cell "2.439" [ref=f8e2420]
+                - cell "-0.2%" [ref=f8e2421]
+                - cell "—" [ref=f8e2422]
+              - row [ref=f8e2423]:
+                - cell "XRP/USDT:USDT" [ref=f8e2424]
+                - cell "short" [ref=f8e2425]
+                - cell "irb_short_88619" [ref=f8e2426]
+                - cell "stop_loss" [ref=f8e2427]
+                - cell "2025-11-03 07:40" [ref=f8e2428]
+                - cell "2025-11-03 07:50" [ref=f8e2429]
+                - cell "2.408" [ref=f8e2430]
+                - cell "2.416" [ref=f8e2431]
+                - cell "⚠ -0.41%" [ref=f8e2432]
+                - cell "-32.149" [ref=f8e2434]
+                - cell "2.416" [ref=f8e2435]
+                - cell "-0.3%" [ref=f8e2436]
+                - cell "0h0m" [ref=f8e2437]
+              - row [ref=f8e2438]:
+                - cell "XRP/USDT:USDT" [ref=f8e2439]
+                - cell "short" [ref=f8e2440]
+                - cell "irb_short_88765" [ref=f8e2441]
+                - cell "irb_target" [ref=f8e2442]
+                - cell "2025-11-03 19:50" [ref=f8e2443]
+                - cell "2025-11-03 20:00" [ref=f8e2444]
+                - cell "2.339" [ref=f8e2445]
+                - cell "2.327" [ref=f8e2446]
+                - cell "0.41%" [ref=f8e2447]
+                - cell "32.147" [ref=f8e2449]
+                - cell "2.347" [ref=f8e2450]
+                - cell "-0.3%" [ref=f8e2451]
+                - cell "0h0m" [ref=f8e2452]
+              - row [ref=f8e2453]:
+                - cell "XRP/USDT:USDT" [ref=f8e2454]
+                - cell "short" [ref=f8e2455]
+                - cell "irb_short_88794" [ref=f8e2456]
+                - cell "irb_target" [ref=f8e2457]
+                - cell "2025-11-03 22:15" [ref=f8e2458]
+                - cell "2025-11-03 22:30" [ref=f8e2459]
+                - cell "2.296" [ref=f8e2460]
+                - cell "2.28" [ref=f8e2461]
+                - cell "0.56%" [ref=f8e2462]
+                - cell "44.385" [ref=f8e2464]
+                - cell "2.306" [ref=f8e2465]
+                - cell "-0.4%" [ref=f8e2466]
+                - cell "0h0m" [ref=f8e2467]
+              - row [ref=f8e2468]:
+                - cell "XRP/USDT:USDT" [ref=f8e2469]
+                - cell "short" [ref=f8e2470]
+                - cell "irb_short_88927" [ref=f8e2471]
+                - cell "stop_loss" [ref=f8e2472]
+                - cell "2025-11-04 09:20" [ref=f8e2473]
+                - cell "2025-11-04 09:20" [ref=f8e2474]
+                - cell "2.251" [ref=f8e2475]
+                - cell "2.259" [ref=f8e2476]
+                - cell "⚠ -0.49%" [ref=f8e2477]
+                - cell "-38.624" [ref=f8e2479]
+                - cell "2.259" [ref=f8e2480]
+                - cell "-0.4%" [ref=f8e2481]
+                - cell "—" [ref=f8e2482]
+              - row [ref=f8e2483]:
+                - cell "XRP/USDT:USDT" [ref=f8e2484]
+                - cell "long" [ref=f8e2485]
+                - cell "irb_long_89865" [ref=f8e2486]
+                - cell "stop_loss" [ref=f8e2487]
+                - cell "2025-11-07 15:30" [ref=f8e2488]
+                - cell "2025-11-07 15:30" [ref=f8e2489]
+                - cell "2.207" [ref=f8e2490]
+                - cell "2.195" [ref=f8e2491]
+                - cell "⚠ -0.64%" [ref=f8e2492]
+                - cell "-50.811" [ref=f8e2494]
+                - cell "2.195" [ref=f8e2495]
+                - cell "-0.5%" [ref=f8e2496]
+                - cell "—" [ref=f8e2497]
+              - row [ref=f8e2498]:
+                - cell "XRP/USDT:USDT" [ref=f8e2499]
+                - cell "long" [ref=f8e2500]
+                - cell "irb_long_89868" [ref=f8e2501]
+                - cell "irb_target" [ref=f8e2502]
+                - cell "2025-11-07 15:45" [ref=f8e2503]
+                - cell "2025-11-07 16:25" [ref=f8e2504]
+                - cell "2.208" [ref=f8e2505]
+                - cell "2.229" [ref=f8e2506]
+                - cell "0.87%" [ref=f8e2507]
+                - cell "68.012" [ref=f8e2509]
+                - cell "2.197" [ref=f8e2510]
+                - cell "-0.5%" [ref=f8e2511]
+                - cell "0h1m" [ref=f8e2512]
+              - row [ref=f8e2513]:
+                - cell "XRP/USDT:USDT" [ref=f8e2514]
+                - cell "long" [ref=f8e2515]
+                - cell "irb_long_90564" [ref=f8e2516]
+                - cell "stop_loss" [ref=f8e2517]
+                - cell "2025-11-10 01:45" [ref=f8e2518]
+                - cell "2025-11-10 01:45" [ref=f8e2519]
+                - cell "2.407" [ref=f8e2520]
+                - cell "2.396" [ref=f8e2521]
+                - cell "⚠ -0.53%" [ref=f8e2522]
+                - cell "-42.097" [ref=f8e2524]
+                - cell "2.396" [ref=f8e2525]
+                - cell "-0.4%" [ref=f8e2526]
+                - cell "—" [ref=f8e2527]
+              - row [ref=f8e2528]:
+                - cell "XRP/USDT:USDT" [ref=f8e2529]
+                - cell "short" [ref=f8e2530]
+                - cell "irb_short_90734" [ref=f8e2531]
+                - cell "stop_loss" [ref=f8e2532]
+                - cell "2025-11-10 15:55" [ref=f8e2533]
+                - cell "2025-11-10 16:00" [ref=f8e2534]
+                - cell "2.522" [ref=f8e2535]
+                - cell "2.531" [ref=f8e2536]
+                - cell "⚠ -0.44%" [ref=f8e2537]
+                - cell "-34.879" [ref=f8e2539]
+                - cell "2.531" [ref=f8e2540]
+                - cell "-0.4%" [ref=f8e2541]
+                - cell "0h0m" [ref=f8e2542]
+              - row [ref=f8e2543]:
+                - cell "XRP/USDT:USDT" [ref=f8e2544]
+                - cell "short" [ref=f8e2545]
+                - cell "irb_short_90742" [ref=f8e2546]
+                - cell "stop_loss" [ref=f8e2547]
+                - cell "2025-11-10 16:35" [ref=f8e2548]
+                - cell "2025-11-10 16:45" [ref=f8e2549]
+                - cell "2.522" [ref=f8e2550]
+                - cell "2.528" [ref=f8e2551]
+                - cell "⚠ -0.36%" [ref=f8e2552]
+                - cell "-28.052" [ref=f8e2554]
+                - cell "2.528" [ref=f8e2555]
+                - cell "-0.3%" [ref=f8e2556]
+                - cell "0h0m" [ref=f8e2557]
+              - row [ref=f8e2558]:
+                - cell "XRP/USDT:USDT" [ref=f8e2559]
+                - cell "long" [ref=f8e2560]
+                - cell "irb_long_91475" [ref=f8e2561]
+                - cell "irb_target" [ref=f8e2562]
+                - cell "2025-11-13 05:40" [ref=f8e2563]
+                - cell "2025-11-13 05:50" [ref=f8e2564]
+                - cell "2.475" [ref=f8e2565]
+                - cell "2.488" [ref=f8e2566]
+                - cell "0.44%" [ref=f8e2567]
+                - cell "34.456" [ref=f8e2569]
+                - cell "2.466" [ref=f8e2570]
+                - cell "-0.4%" [ref=f8e2571]
+                - cell "0h0m" [ref=f8e2572]
+              - row [ref=f8e2573]:
+                - cell "XRP/USDT:USDT" [ref=f8e2574]
+                - cell "long" [ref=f8e2575]
+                - cell "irb_long_91880" [ref=f8e2576]
+                - cell "stop_loss" [ref=f8e2577]
+                - cell "2025-11-14 15:25" [ref=f8e2578]
+                - cell "2025-11-14 15:25" [ref=f8e2579]
+                - cell "2.298" [ref=f8e2580]
+                - cell "2.286" [ref=f8e2581]
+                - cell "⚠ -0.61%" [ref=f8e2582]
+                - cell "-45.298" [ref=f8e2584]
+                - cell "2.286" [ref=f8e2585]
+                - cell "-0.5%" [ref=f8e2586]
+                - cell "—" [ref=f8e2587]
+              - row [ref=f8e2588]:
+                - cell "XRP/USDT:USDT" [ref=f8e2589]
+                - cell "long" [ref=f8e2590]
+                - cell "irb_long_91881" [ref=f8e2591]
+                - cell "irb_target" [ref=f8e2592]
+                - cell "2025-11-14 15:30" [ref=f8e2593]
+                - cell "2025-11-14 15:50" [ref=f8e2594]
+                - cell "2.297" [ref=f8e2595]
+                - cell "2.318" [ref=f8e2596]
+                - cell "0.81%" [ref=f8e2597]
+                - cell "60.049" [ref=f8e2599]
+                - cell "2.283" [ref=f8e2600]
+                - cell "-0.6%" [ref=f8e2601]
+                - cell "0h0m" [ref=f8e2602]
+              - row [ref=f8e2603]:
+                - cell "XRP/USDT:USDT" [ref=f8e2604]
+                - cell "short" [ref=f8e2605]
+                - cell "irb_short_92543" [ref=f8e2606]
+                - cell "stop_loss" [ref=f8e2607]
+                - cell "2025-11-16 22:40" [ref=f8e2608]
+                - cell "2025-11-16 22:45" [ref=f8e2609]
+                - cell "2.19" [ref=f8e2610]
+                - cell "2.197" [ref=f8e2611]
+                - cell "⚠ -0.45%" [ref=f8e2612]
+                - cell "-35.15" [ref=f8e2614]
+                - cell "2.197" [ref=f8e2615]
+                - cell "-0.3%" [ref=f8e2616]
+                - cell "0h0m" [ref=f8e2617]
+              - row [ref=f8e2618]:
+                - cell "XRP/USDT:USDT" [ref=f8e2619]
+                - cell "long" [ref=f8e2620]
+                - cell "irb_long_92578" [ref=f8e2621]
+                - cell "stop_loss" [ref=f8e2622]
+                - cell "2025-11-17 01:35" [ref=f8e2623]
+                - cell "2025-11-17 01:50" [ref=f8e2624]
+                - cell "2.24" [ref=f8e2625]
+                - cell "2.229" [ref=f8e2626]
+                - cell "⚠ -0.56%" [ref=f8e2627]
+                - cell "-44.138" [ref=f8e2629]
+                - cell "2.229" [ref=f8e2630]
+                - cell "-0.5%" [ref=f8e2631]
+                - cell "0h0m" [ref=f8e2632]
+              - row [ref=f8e2633]:
+                - cell "XRP/USDT:USDT" [ref=f8e2634]
+                - cell "short" [ref=f8e2635]
+                - cell "irb_short_93643" [ref=f8e2636]
+                - cell "irb_target" [ref=f8e2637]
+                - cell "2025-11-20 18:20" [ref=f8e2638]
+                - cell "2025-11-20 18:45" [ref=f8e2639]
+                - cell "2.002" [ref=f8e2640]
+                - cell "1.988" [ref=f8e2641]
+                - cell "0.60%" [ref=f8e2642]
+                - cell "43.719" [ref=f8e2644]
+                - cell "2.011" [ref=f8e2645]
+                - cell "-0.5%" [ref=f8e2646]
+                - cell "0h0m" [ref=f8e2647]
+              - row [ref=f8e2648]:
+                - cell "XRP/USDT:USDT" [ref=f8e2649]
+                - cell "short" [ref=f8e2650]
+                - cell "irb_short_93816" [ref=f8e2651]
+                - cell "stop_loss" [ref=f8e2652]
+                - cell "2025-11-21 08:45" [ref=f8e2653]
+                - cell "2025-11-21 09:00" [ref=f8e2654]
+                - cell "1.933" [ref=f8e2655]
+                - cell "1.945" [ref=f8e2656]
+                - cell "⚠ -0.69%" [ref=f8e2657]
+                - cell "-45.414" [ref=f8e2659]
+                - cell "1.945" [ref=f8e2660]
+                - cell "-0.6%" [ref=f8e2661]
+                - cell "0h0m" [ref=f8e2662]
+              - row [ref=f8e2663]:
+                - cell "XRP/USDT:USDT" [ref=f8e2664]
+                - cell "short" [ref=f8e2665]
+                - cell "irb_short_94590" [ref=f8e2666]
+                - cell "stop_loss" [ref=f8e2667]
+                - cell "2025-11-24 01:15" [ref=f8e2668]
+                - cell "2025-11-24 01:25" [ref=f8e2669]
+                - cell "2.039" [ref=f8e2670]
+                - cell "2.047" [ref=f8e2671]
+                - cell "⚠ -0.49%" [ref=f8e2672]
+                - cell "-38.315" [ref=f8e2674]
+                - cell "2.047" [ref=f8e2675]
+                - cell "-0.4%" [ref=f8e2676]
+                - cell "0h0m" [ref=f8e2677]
+              - row [ref=f8e2678]:
+                - cell "XRP/USDT:USDT" [ref=f8e2679]
+                - cell "long" [ref=f8e2680]
+                - cell "irb_long_94757" [ref=f8e2681]
+                - cell "stop_loss" [ref=f8e2682]
+                - cell "2025-11-24 15:10" [ref=f8e2683]
+                - cell "2025-11-24 15:25" [ref=f8e2684]
+                - cell "2.081" [ref=f8e2685]
+                - cell "2.069" [ref=f8e2686]
+                - cell "⚠ -0.70%" [ref=f8e2687]
+                - cell "-54.21" [ref=f8e2689]
+                - cell "2.069" [ref=f8e2690]
+                - cell "-0.6%" [ref=f8e2691]
+                - cell "0h0m" [ref=f8e2692]
+              - row [ref=f8e2693]:
+                - cell "XRP/USDT:USDT" [ref=f8e2694]
+                - cell "long" [ref=f8e2695]
+                - cell "irb_long_94761" [ref=f8e2696]
+                - cell "stop_loss" [ref=f8e2697]
+                - cell "2025-11-24 15:30" [ref=f8e2698]
+                - cell "2025-11-24 15:30" [ref=f8e2699]
+                - cell "2.083" [ref=f8e2700]
+                - cell "2.071" [ref=f8e2701]
+                - cell "⚠ -0.68%" [ref=f8e2702]
+                - cell "-51.949" [ref=f8e2704]
+                - cell "2.071" [ref=f8e2705]
+                - cell "-0.6%" [ref=f8e2706]
+                - cell "—" [ref=f8e2707]
+              - row [ref=f8e2708]:
+                - cell "XRP/USDT:USDT" [ref=f8e2709]
+                - cell "short" [ref=f8e2710]
+                - cell "irb_short_96750" [ref=f8e2711]
+                - cell "irb_target" [ref=f8e2712]
+                - cell "2025-12-01 13:15" [ref=f8e2713]
+                - cell "2025-12-01 13:50" [ref=f8e2714]
+                - cell "2.022" [ref=f8e2715]
+                - cell "2.01" [ref=f8e2716]
+                - cell "0.47%" [ref=f8e2717]
+                - cell "36.189" [ref=f8e2719]
+                - cell "2.03" [ref=f8e2720]
+                - cell "-0.4%" [ref=f8e2721]
+                - cell "0h1m" [ref=f8e2722]
+              - row [ref=f8e2723]:
+                - cell "XRP/USDT:USDT" [ref=f8e2724]
+                - cell "short" [ref=f8e2725]
+                - cell "irb_short_97657" [ref=f8e2726]
+                - cell "irb_target" [ref=f8e2727]
+                - cell "2025-12-04 16:50" [ref=f8e2728]
+                - cell "2025-12-04 17:00" [ref=f8e2729]
+                - cell "2.137" [ref=f8e2730]
+                - cell "2.131" [ref=f8e2731]
+                - cell "0.16%" [ref=f8e2732]
+                - cell "12.443" [ref=f8e2734]
+                - cell "2.141" [ref=f8e2735]
+                - cell "-0.2%" [ref=f8e2736]
+                - cell "0h0m" [ref=f8e2737]
+              - row [ref=f8e2738]:
+                - cell "XRP/USDT:USDT" [ref=f8e2739]
+                - cell "short" [ref=f8e2740]
+                - cell "irb_short_97701" [ref=f8e2741]
+                - cell "stop_loss" [ref=f8e2742]
+                - cell "2025-12-04 20:30" [ref=f8e2743]
+                - cell "2025-12-04 20:30" [ref=f8e2744]
+                - cell "2.089" [ref=f8e2745]
+                - cell "2.096" [ref=f8e2746]
+                - cell "⚠ -0.44%" [ref=f8e2747]
+                - cell "-33.447" [ref=f8e2749]
+                - cell "2.096" [ref=f8e2750]
+                - cell "-0.3%" [ref=f8e2751]
+                - cell "—" [ref=f8e2752]
+              - row [ref=f8e2753]:
+                - cell "XRP/USDT:USDT" [ref=f8e2754]
+                - cell "short" [ref=f8e2755]
+                - cell "irb_short_98602" [ref=f8e2756]
+                - cell "stop_loss" [ref=f8e2757]
+                - cell "2025-12-07 23:35" [ref=f8e2758]
+                - cell "2025-12-07 23:35" [ref=f8e2759]
+                - cell "2.033" [ref=f8e2760]
+                - cell "2.037" [ref=f8e2761]
+                - cell "⚠ -0.27%" [ref=f8e2762]
+                - cell "-20.451" [ref=f8e2764]
+                - cell "2.037" [ref=f8e2765]
+                - cell "-0.2%" [ref=f8e2766]
+                - cell "—" [ref=f8e2767]
+              - row [ref=f8e2768]:
+                - cell "XRP/USDT:USDT" [ref=f8e2769]
+                - cell "short" [ref=f8e2770]
+                - cell "irb_short_98603" [ref=f8e2771]
+                - cell "stop_loss" [ref=f8e2772]
+                - cell "2025-12-07 23:40" [ref=f8e2773]
+                - cell "2025-12-07 23:45" [ref=f8e2774]
+                - cell "2.033" [ref=f8e2775]
+                - cell "2.037" [ref=f8e2776]
+                - cell "⚠ -0.30%" [ref=f8e2777]
+                - cell "-23.029" [ref=f8e2779]
+                - cell "2.037" [ref=f8e2780]
+                - cell "-0.2%" [ref=f8e2781]
+                - cell "0h0m" [ref=f8e2782]
+              - row [ref=f8e2783]:
+                - cell "XRP/USDT:USDT" [ref=f8e2784]
+                - cell "long" [ref=f8e2785]
+                - cell "irb_long_99109" [ref=f8e2786]
+                - cell "stop_loss" [ref=f8e2787]
+                - cell "2025-12-09 17:50" [ref=f8e2788]
+                - cell "2025-12-09 18:45" [ref=f8e2789]
+                - cell "2.151" [ref=f8e2790]
+                - cell "2.145" [ref=f8e2791]
+                - cell "⚠ -0.41%" [ref=f8e2792]
+                - cell "-30.934" [ref=f8e2794]
+                - cell "2.145" [ref=f8e2795]
+                - cell "-0.3%" [ref=f8e2796]
+                - cell "0h1m" [ref=f8e2797]
+              - row [ref=f8e2798]:
+                - cell "XRP/USDT:USDT" [ref=f8e2799]
+                - cell "long" [ref=f8e2800]
+                - cell "irb_long_99424" [ref=f8e2801]
+                - cell "stop_loss" [ref=f8e2802]
+                - cell "2025-12-10 20:05" [ref=f8e2803]
+                - cell "2025-12-10 20:05" [ref=f8e2804]
+                - cell "2.072" [ref=f8e2805]
+                - cell "2.066" [ref=f8e2806]
+                - cell "⚠ -0.40%" [ref=f8e2807]
+                - cell "-30.236" [ref=f8e2809]
+                - cell "2.066" [ref=f8e2810]
+                - cell "-0.3%" [ref=f8e2811]
+                - cell "—" [ref=f8e2812]
+              - row [ref=f8e2813]:
+                - cell "XRP/USDT:USDT" [ref=f8e2814]
+                - cell "long" [ref=f8e2815]
+                - cell "irb_long_99429" [ref=f8e2816]
+                - cell "stop_loss" [ref=f8e2817]
+                - cell "2025-12-10 20:30" [ref=f8e2818]
+                - cell "2025-12-10 20:50" [ref=f8e2819]
+                - cell "2.094" [ref=f8e2820]
+                - cell "2.072" [ref=f8e2821]
+                - cell "⚠ -1.14%" [ref=f8e2822]
+                - cell "-81.459" [ref=f8e2824]
+                - cell "2.072" [ref=f8e2825]
+                - cell "-1%" [ref=f8e2826]
+                - cell "0h0m" [ref=f8e2827]
+              - row [ref=f8e2828]:
+                - cell "XRP/USDT:USDT" [ref=f8e2829]
+                - cell "short" [ref=f8e2830]
+                - cell "irb_short_100521" [ref=f8e2831]
+                - cell "stop_loss" [ref=f8e2832]
+                - cell "2025-12-14 15:30" [ref=f8e2833]
+                - cell "2025-12-14 15:40" [ref=f8e2834]
+                - cell "1.991" [ref=f8e2835]
+                - cell "1.995" [ref=f8e2836]
+                - cell "⚠ -0.32%" [ref=f8e2837]
+                - cell "-23.6" [ref=f8e2839]
+                - cell "1.995" [ref=f8e2840]
+                - cell "-0.2%" [ref=f8e2841]
+                - cell "0h0m" [ref=f8e2842]
+              - row [ref=f8e2843]:
+                - cell "XRP/USDT:USDT" [ref=f8e2844]
+                - cell "short" [ref=f8e2845]
+                - cell "irb_short_100615" [ref=f8e2846]
+                - cell "irb_target" [ref=f8e2847]
+                - cell "2025-12-14 23:20" [ref=f8e2848]
+                - cell "2025-12-14 23:35" [ref=f8e2849]
+                - cell "1.981" [ref=f8e2850]
+                - cell "1.974" [ref=f8e2851]
+                - cell "0.26%" [ref=f8e2852]
+                - cell "19.245" [ref=f8e2854]
+                - cell "1.986" [ref=f8e2855]
+                - cell "-0.2%" [ref=f8e2856]
+                - cell "0h0m" [ref=f8e2857]
+              - row [ref=f8e2858]:
+                - cell "XRP/USDT:USDT" [ref=f8e2859]
+                - cell "short" [ref=f8e2860]
+                - cell "irb_short_100641" [ref=f8e2861]
+                - cell "stop_loss" [ref=f8e2862]
+                - cell "2025-12-15 01:30" [ref=f8e2863]
+                - cell "2025-12-15 01:30" [ref=f8e2864]
+                - cell "1.979" [ref=f8e2865]
+                - cell "1.983" [ref=f8e2866]
+                - cell "⚠ -0.31%" [ref=f8e2867]
+                - cell "-22.932" [ref=f8e2869]
+                - cell "1.983" [ref=f8e2870]
+                - cell "-0.2%" [ref=f8e2871]
+                - cell "—" [ref=f8e2872]
+              - row [ref=f8e2873]:
+                - cell "XRP/USDT:USDT" [ref=f8e2874]
+                - cell "long" [ref=f8e2875]
+                - cell "irb_long_101094" [ref=f8e2876]
+                - cell "stop_loss" [ref=f8e2877]
+                - cell "2025-12-16 15:45" [ref=f8e2878]
+                - cell "2025-12-16 16:40" [ref=f8e2879]
+                - cell "1.933" [ref=f8e2880]
+                - cell "1.918" [ref=f8e2881]
+                - cell "⚠ -0.84%" [ref=f8e2882]
+                - cell "-62.832" [ref=f8e2884]
+                - cell "1.918" [ref=f8e2885]
+                - cell "-0.8%" [ref=f8e2886]
+                - cell "0h1m" [ref=f8e2887]
+              - row [ref=f8e2888]:
+                - cell "XRP/USDT:USDT" [ref=f8e2889]
+                - cell "short" [ref=f8e2890]
+                - cell "irb_short_102825" [ref=f8e2891]
+                - cell "stop_loss" [ref=f8e2892]
+                - cell "2025-12-22 15:35" [ref=f8e2893]
+                - cell "2025-12-22 15:55" [ref=f8e2894]
+                - cell "1.922" [ref=f8e2895]
+                - cell "1.937" [ref=f8e2896]
+                - cell "⚠ -0.88%" [ref=f8e2897]
+                - cell "-64.977" [ref=f8e2899]
+                - cell "1.937" [ref=f8e2900]
+                - cell "-0.8%" [ref=f8e2901]
+                - cell "0h0m" [ref=f8e2902]
+              - row [ref=f8e2903]:
+                - cell "XRP/USDT:USDT" [ref=f8e2904]
+                - cell "long" [ref=f8e2905]
+                - cell "irb_long_102832" [ref=f8e2906]
+                - cell "stop_loss" [ref=f8e2907]
+                - cell "2025-12-22 16:05" [ref=f8e2908]
+                - cell "2025-12-22 17:05" [ref=f8e2909]
+                - cell "1.937" [ref=f8e2910]
+                - cell "1.93" [ref=f8e2911]
+                - cell "⚠ -0.46%" [ref=f8e2912]
+                - cell "-33.346" [ref=f8e2914]
+                - cell "1.93" [ref=f8e2915]
+                - cell "-0.4%" [ref=f8e2916]
+                - cell "0h1m" [ref=f8e2917]
+              - row [ref=f8e2918]:
+                - cell "XRP/USDT:USDT" [ref=f8e2919]
+                - cell "long" [ref=f8e2920]
+                - cell "irb_long_103424" [ref=f8e2921]
+                - cell "stop_loss" [ref=f8e2922]
+                - cell "2025-12-24 17:25" [ref=f8e2923]
+                - cell "2025-12-24 17:25" [ref=f8e2924]
+                - cell "1.866" [ref=f8e2925]
+                - cell "1.863" [ref=f8e2926]
+                - cell "-0.23%" [ref=f8e2927]
+                - cell "-17.03" [ref=f8e2929]
+                - cell "1.863" [ref=f8e2930]
+                - cell "-0.1%" [ref=f8e2931]
+                - cell "—" [ref=f8e2932]
+              - row [ref=f8e2933]:
+                - cell "XRP/USDT:USDT" [ref=f8e2934]
+                - cell "long" [ref=f8e2935]
+                - cell "irb_long_105126" [ref=f8e2936]
+                - cell "irb_target" [ref=f8e2937]
+                - cell "2025-12-30 15:15" [ref=f8e2938]
+                - cell "2025-12-30 15:55" [ref=f8e2939]
+                - cell "1.868" [ref=f8e2940]
+                - cell "1.876" [ref=f8e2941]
+                - cell "0.31%" [ref=f8e2942]
+                - cell "22.266" [ref=f8e2944]
+                - cell "1.864" [ref=f8e2945]
+                - cell "-0.2%" [ref=f8e2946]
+                - cell "0h1m" [ref=f8e2947]
+  - complementary [ref=f8e2948]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=f8e2952]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

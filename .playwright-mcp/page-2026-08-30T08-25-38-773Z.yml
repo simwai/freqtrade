@@ -1,0 +1,3139 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - heading "Strategy Lab" [level=1] [ref=e6]
+      - generic [ref=e7]: freqtrade strategy overview · 2026-08-30 10:17
+    - button "Jobs" [ref=e8] [cursor=pointer]
+  - generic:
+    - generic:
+      - generic: Jobs
+      - generic: 30 total
+      - button: ✕ Close
+  - generic [ref=e9]:
+    - button "Dashboard" [ref=e10] [cursor=pointer]
+    - button "Strategies" [ref=e11] [cursor=pointer]
+    - button "History" [ref=e12] [cursor=pointer]
+    - button "Benchmark" [ref=e13] [cursor=pointer]
+    - button "Walk-Forward" [ref=e14] [cursor=pointer]
+    - button "Hyperopt" [ref=e15] [cursor=pointer]
+    - button "Trades" [ref=e16] [cursor=pointer]
+    - button "Lab" [ref=e17] [cursor=pointer]
+  - main [ref=e18]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - heading "Trades" [level=2] [ref=e22]
+        - generic [ref=e23]: equity curve, profit distribution & per-trade detail (SL/TP, exit reason). Use lab.py serve to browse all runs.
+      - generic [ref=e25]:
+        - text: "Run:"
+        - combobox "Run:" [ref=e26]:
+          - option "adaptive — backtest-result-2026-08-29_22-05-18.zip (181 trades · 2026-08-29 19:58)" [selected]
+          - option "adaptive — backtest-result-2026-08-29_21-57-37.zip (152 trades · 2026-08-29 19:51)"
+          - option "adaptive — backtest-result-2026-08-29_21-50-41.zip (181 trades · 2026-08-29 19:47)"
+          - option "adaptive — backtest-result-2026-08-29_21-46-10.zip (225 trades · 2026-08-29 19:41)"
+          - option "adaptive — backtest-result-2026-08-29_21-41-14.zip (225 trades · 2026-08-29 19:36)"
+          - option "adaptive — backtest-result-2026-08-29_21-35-19.zip (134 trades · 2026-08-29 19:30)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-29_21-15-59.zip (1 trades · 2026-08-29 19:15)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-29_21-14-45.zip (2 trades · 2026-08-29 19:14)"
+          - option "HarmonicDivergence — backtest-result-2026-08-29_21-14-16.zip (296 trades · 2026-08-29 19:14)"
+          - option "adaptive — backtest-result-2026-08-29_21-11-55.zip (1254 trades · 2026-08-29 19:04)"
+          - option "adaptive — backtest-result-2026-08-29_21-00-09.zip (185 trades · 2026-08-29 18:58)"
+          - option "adaptive — backtest-result-2026-08-29_20-57-14.zip (210 trades · 2026-08-29 18:53)"
+          - option "adaptive — backtest-result-2026-08-29_20-53-09.zip (210 trades · 2026-08-29 18:49)"
+          - option "adaptive — backtest-result-2026-08-29_20-48-14.zip (28 trades · 2026-08-29 18:44)"
+          - option "adaptive — backtest-result-2026-08-29_20-44-17.zip (83 trades · 2026-08-29 18:41)"
+          - option "adaptive — backtest-result-2026-08-29_20-40-05.zip (161 trades · 2026-08-29 18:36)"
+          - option "adaptive — backtest-result-2026-08-29_20-15-07.zip (1 trades · 2026-08-29 18:15)"
+          - option "HoffmanIRBStrategy5mFeeVRPB50 — backtest-result-2026-08-29_20-10-08.zip (587 trades · 2026-08-29 18:09)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10 — backtest-result-2026-08-29_20-09-47.zip (107 trades · 2026-08-29 18:09)"
+          - option "HoffmanIRBStrategy5mFeeVRPB — backtest-result-2026-08-29_20-09-36.zip (170 trades · 2026-08-29 18:09)"
+          - option "HoffmanIRBStrategy5mFeeVolRegime — backtest-result-2026-08-29_20-09-23.zip (1296 trades · 2026-08-29 18:08)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN15 — backtest-result-2026-08-28_19-56-26.zip (25 trades · 2026-08-28 17:56)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN15 — backtest-result-2026-08-28_19-56-16.zip (45 trades · 2026-08-28 17:56)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10 — backtest-result-2026-08-28_19-56-01.zip (36 trades · 2026-08-28 17:55)"
+          - option "HoffmanIRBStrategy5mFeeVRPBN10 — backtest-result-2026-08-28_19-55-51.zip (65 trades · 2026-08-28 17:55)"
+          - option "adaptive — backtest-result-2026-08-28_19-57-08.zip (1173 trades · 2026-08-28 17:44)"
+          - option "HoffmanIRBStrategy5mFeePB — backtest-result-2026-08-28_19-43-10.zip (322 trades · 2026-08-28 17:42)"
+          - option "HoffmanIRBStrategy5mFeePB — backtest-result-2026-08-28_19-42-49.zip (835 trades · 2026-08-28 17:42)"
+          - option "HoffmanIRBStrategy5mFeeVR50PB — backtest-result-2026-08-28_19-42-09.zip (177 trades · 2026-08-28 17:42)"
+          - option "HoffmanIRBStrategy5mFeeVR50PB — backtest-result-2026-08-28_19-41-54.zip (451 trades · 2026-08-28 17:41)"
+          - option "HoffmanIRBStrategy5mFeeVRPB50 — backtest-result-2026-08-28_19-41-29.zip (142 trades · 2026-08-28 17:41)"
+          - option "HoffmanIRBStrategy5mFeeVRPB50 — backtest-result-2026-08-28_19-41-14.zip (507 trades · 2026-08-28 17:40)"
+          - option "HoffmanIRBStrategy5mFeeVRPB25 — backtest-result-2026-08-28_19-40-46.zip (100 trades · 2026-08-28 17:40)"
+          - option "HoffmanIRBStrategy5mFeeVRPB25 — backtest-result-2026-08-28_19-40-33.zip (294 trades · 2026-08-28 17:40)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFPB — backtest-result-2026-08-28_19-30-13.zip (10 trades · 2026-08-28 17:30)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFPB — backtest-result-2026-08-28_19-29-55.zip (44 trades · 2026-08-28 17:29)"
+          - option "HoffmanIRBStrategy5mFeeVRPB — backtest-result-2026-08-28_19-29-38.zip (54 trades · 2026-08-28 17:29)"
+          - option "HoffmanIRBStrategy5mFeeVRPB — backtest-result-2026-08-28_19-29-22.zip (120 trades · 2026-08-28 17:29)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFChV — backtest-result-2026-08-28_19-01-36.zip (187 trades · 2026-08-28 17:01)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFChV — backtest-result-2026-08-28_19-01-19.zip (1047 trades · 2026-08-28 17:00)"
+          - option "HoffmanIRBStrategy5mFeeVRChV — backtest-result-2026-08-28_19-00-24.zip (260 trades · 2026-08-28 17:00)"
+          - option "HoffmanIRBStrategy5mFeeVRChV — backtest-result-2026-08-28_19-00-05.zip (1267 trades · 2026-08-28 16:59)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFDC — backtest-result-2026-08-28_18-50-10.zip (206 trades · 2026-08-28 16:50)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBFDC — backtest-result-2026-08-28_18-49-52.zip (1146 trades · 2026-08-28 16:49)"
+          - option "HoffmanIRBStrategy5mFeeVRDC — backtest-result-2026-08-28_18-48-55.zip (266 trades · 2026-08-28 16:48)"
+          - option "HoffmanIRBStrategy5mFeeVRDC — backtest-result-2026-08-28_18-48-36.zip (1405 trades · 2026-08-28 16:47)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBF — backtest-result-2026-08-28_18-15-09.zip (205 trades · 2026-08-28 16:15)"
+          - option "HoffmanIRBStrategy5mFeeVRSPBF — backtest-result-2026-08-28_18-14-46.zip (1155 trades · 2026-08-28 16:14)"
+          - option "adaptive — backtest-result-2026-08-28_16-56-35.zip (470 trades · 2026-08-28 14:53)"
+          - option "adaptive — backtest-result-2026-08-28_16-52-38.zip (217 trades · 2026-08-28 14:49)"
+          - option "adaptive — backtest-result-2026-08-28_16-48-45.zip (227 trades · 2026-08-28 14:45)"
+          - option "adaptive — backtest-result-2026-08-28_16-44-37.zip (239 trades · 2026-08-28 14:41)"
+          - option "adaptive — backtest-result-2026-08-28_16-40-54.zip (248 trades · 2026-08-28 14:37)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_16-30-59.zip (1465 trades · 2026-08-28 14:30)"
+          - option "adaptive — backtest-result-2026-08-28_16-29-44.zip (248 trades · 2026-08-28 14:25)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_16-26-39.zip (1465 trades · 2026-08-28 14:25)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_16-23-43.zip (1465 trades · 2026-08-28 14:22)"
+          - option "adaptive — backtest-result-2026-08-28_16-25-05.zip (248 trades · 2026-08-28 14:21)"
+          - option "adaptive — backtest-result-2026-08-28_16-20-20.zip (248 trades · 2026-08-28 14:17)"
+          - option "adaptive — backtest-result-2026-08-28_16-15-49.zip (308 trades · 2026-08-28 14:12)"
+          - option "adaptive — backtest-result-2026-08-28_16-11-30.zip (239 trades · 2026-08-28 14:08)"
+          - option "adaptive — backtest-result-2026-08-28_16-07-27.zip (248 trades · 2026-08-28 14:03)"
+          - option "adaptive — backtest-result-2026-08-28_16-02-44.zip (101 trades · 2026-08-28 13:59)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_15-53-33.zip (1465 trades · 2026-08-28 13:52)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_15-50-45.zip (1465 trades · 2026-08-28 13:50)"
+          - option "adaptive — backtest-result-2026-08-28_15-52-46.zip (125 trades · 2026-08-28 13:49)"
+          - option "adaptive — backtest-result-2026-08-28_15-48-46.zip (221 trades · 2026-08-28 13:45)"
+          - option "adaptive — backtest-result-2026-08-28_15-44-35.zip (1 trades · 2026-08-28 13:44)"
+          - option "adaptive — backtest-result-2026-08-28_15-44-00.zip (13 trades · 2026-08-28 13:43)"
+          - option "HoffmanIRBStrategy5mFeeVRLocked — backtest-result-2026-08-28_15-44-15.zip (1465 trades · 2026-08-28 13:43)"
+          - option "adaptive — backtest-result-2026-08-28_15-38-56.zip (165 trades · 2026-08-28 13:34)"
+          - option "HoffmanIRBStrategy5mFee — backtest-result-2026-08-28_14-20-50.zip (1644 trades · 2026-08-28 12:20)"
+          - option "HoffmanIRBStrategy5mFee — backtest-result-2026-08-28_14-19-19.zip (1383 trades · 2026-08-28 12:18)"
+          - option "HoffmanIRBStrategy5mFeeVolRegime — backtest-result-2026-08-28_14-17-45.zip (352 trades · 2026-08-28 12:17)"
+          - option "HoffmanIRBStrategy5mFeeVolRegime — backtest-result-2026-08-28_14-17-15.zip (1465 trades · 2026-08-28 12:16)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-28_14-15-23.zip (1714 trades · 2026-08-28 12:14)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-28_14-13-20.zip (1450 trades · 2026-08-28 12:12)"
+          - option "adaptive — backtest-result-2026-08-28_14-08-30.zip (325 trades · 2026-08-28 12:05)"
+          - option "adaptive — backtest-result-2026-08-28_14-03-42.zip (341 trades · 2026-08-28 12:00)"
+          - option "HoffmanIRBStrategy5mFee — backtest-result-2026-08-28_13-28-41.zip (1644 trades · 2026-08-28 11:28)"
+          - option "adaptive — backtest-result-2026-08-27_22-20-23.zip (550 trades · 2026-08-27 20:17)"
+          - option "adaptive — backtest-result-2026-08-27_19-52-14.zip (326 trades · 2026-08-27 17:49)"
+          - option "TrendOMaticNadarayaBaselineStrategy — backtest-result-2026-08-27_19-43-38.zip (4 trades · 2026-08-27 17:43)"
+          - option "TrendOMaticNadarayaStrategy — backtest-result-2026-08-27_19-42-47.zip (4 trades · 2026-08-27 17:42)"
+          - option "adaptive — backtest-result-2026-08-27_19-38-33.zip (555 trades · 2026-08-27 17:35)"
+          - option "adaptive — backtest-result-2026-08-27_19-34-46.zip (333 trades · 2026-08-27 17:31)"
+          - option "adaptive — backtest-result-2026-08-27_19-30-13.zip (852 trades · 2026-08-27 17:27)"
+          - option "HoffmanIRBStrategy15m — backtest-result-2026-08-27_19-27-15.zip (1426 trades · 2026-08-27 17:26)"
+          - option "HoffmanIRBStrategy4hFee — backtest-result-2026-08-27_19-25-49.zip (346 trades · 2026-08-27 17:25)"
+          - option "HoffmanIRBStrategy1hFee — backtest-result-2026-08-27_19-25-34.zip (1052 trades · 2026-08-27 17:25)"
+          - option "HoffmanIRBStrategy5mFee — backtest-result-2026-08-27_19-25-02.zip (1383 trades · 2026-08-27 17:24)"
+          - option "HoffmanIRBStrategy15mBase — backtest-result-2026-08-27_19-24-15.zip (1411 trades · 2026-08-27 17:23)"
+          - option "HoffmanIRBStrategy15m — backtest-result-2026-08-27_19-23-19.zip (498 trades · 2026-08-27 17:23)"
+          - option "adaptive — backtest-result-2026-08-27_19-26-19.zip (379 trades · 2026-08-27 17:23)"
+          - option "HarmonicDivergenceRegime — backtest-result-2026-08-27_16-53-16.zip (15546 trades · 2026-08-27 13:57)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-34-25.zip (58 trades · 2026-08-27 13:33)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-33-46.zip (47 trades · 2026-08-27 13:32)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-32-45.zip (14 trades · 2026-08-27 13:32)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-32-11.zip (31 trades · 2026-08-27 13:31)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-31-12.zip (126 trades · 2026-08-27 13:30)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-29-45.zip (36 trades · 2026-08-27 13:28)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-24-59.zip (36 trades · 2026-08-27 13:23)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-22-43.zip (36 trades · 2026-08-27 13:21)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-20-25.zip (36 trades · 2026-08-27 13:19)"
+          - option "NostalgiaForInfinityX7GuardedRelative — backtest-result-2026-08-27_15-16-54.zip (36 trades · 2026-08-27 13:15)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_14-30-42.zip (36 trades · 2026-08-27 12:29)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_14-29-27.zip (36 trades · 2026-08-27 12:26)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_14-26-22.zip (58 trades · 2026-08-27 12:25)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_14-25-43.zip (58 trades · 2026-08-27 12:25)"
+          - option "NostalgiaForInfinityX7GuardedAge21 — backtest-result-2026-08-27_14-24-37.zip (47 trades · 2026-08-27 12:23)"
+          - option "NostalgiaForInfinityX7GuardedAge10 — backtest-result-2026-08-27_14-23-34.zip (47 trades · 2026-08-27 12:22)"
+          - option "NostalgiaForInfinityX7GuardedCat30 — backtest-result-2026-08-27_14-22-31.zip (47 trades · 2026-08-27 12:21)"
+          - option "NostalgiaForInfinityX7GuardedCat25 — backtest-result-2026-08-27_14-21-28.zip (47 trades · 2026-08-27 12:20)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_14-20-25.zip (47 trades · 2026-08-27 12:19)"
+          - option "NostalgiaForInfinityX7GuardedAge21 — backtest-result-2026-08-27_14-18-17.zip (14 trades · 2026-08-27 12:17)"
+          - option "NostalgiaForInfinityX7GuardedAge10 — backtest-result-2026-08-27_14-17-36.zip (14 trades · 2026-08-27 12:17)"
+          - option "NostalgiaForInfinityX7GuardedCat30 — backtest-result-2026-08-27_14-17-04.zip (14 trades · 2026-08-27 12:16)"
+          - option "NostalgiaForInfinityX7GuardedCat25 — backtest-result-2026-08-27_14-16-30.zip (14 trades · 2026-08-27 12:16)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_14-15-55.zip (14 trades · 2026-08-27 12:15)"
+          - option "NostalgiaForInfinityX7GuardedAge21 — backtest-result-2026-08-27_14-15-12.zip (31 trades · 2026-08-27 12:14)"
+          - option "NostalgiaForInfinityX7GuardedAge10 — backtest-result-2026-08-27_14-14-10.zip (32 trades · 2026-08-27 12:13)"
+          - option "NostalgiaForInfinityX7GuardedCat30 — backtest-result-2026-08-27_14-13-17.zip (32 trades · 2026-08-27 12:12)"
+          - option "NostalgiaForInfinityX7GuardedCat25 — backtest-result-2026-08-27_14-12-20.zip (32 trades · 2026-08-27 12:11)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_14-11-23.zip (32 trades · 2026-08-27 12:10)"
+          - option "NostalgiaForInfinityX7GuardedAge21 — backtest-result-2026-08-27_14-04-58.zip (126 trades · 2026-08-27 12:04)"
+          - option "NostalgiaForInfinityX7GuardedAge10 — backtest-result-2026-08-27_14-04-16.zip (126 trades · 2026-08-27 12:03)"
+          - option "NostalgiaForInfinityX7GuardedCat30 — backtest-result-2026-08-27_14-03-36.zip (126 trades · 2026-08-27 12:03)"
+          - option "NostalgiaForInfinityX7GuardedCat25 — backtest-result-2026-08-27_14-02-55.zip (126 trades · 2026-08-27 12:02)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_14-02-12.zip (126 trades · 2026-08-27 12:01)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_13-57-32.zip (126 trades · 2026-08-27 11:57)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_13-55-05.zip (126 trades · 2026-08-27 11:54)"
+          - option "NostalgiaForInfinityX7GuardedCat15 — backtest-result-2026-08-27_13-51-43.zip (126 trades · 2026-08-27 11:51)"
+          - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-41-32.zip (47 trades · 2026-08-27 11:40)"
+          - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-40-27.zip (47 trades · 2026-08-27 11:39)"
+          - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-39-23.zip (47 trades · 2026-08-27 11:38)"
+          - option "NFIX7GuardedAge21 — backtest-result-2026-08-27_13-38-21.zip (14 trades · 2026-08-27 11:37)"
+          - option "NFIX7GuardedAge10 — backtest-result-2026-08-27_13-37-41.zip (14 trades · 2026-08-27 11:37)"
+          - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-37-03.zip (14 trades · 2026-08-27 11:36)"
+          - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-36-28.zip (14 trades · 2026-08-27 11:36)"
+          - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-35-53.zip (14 trades · 2026-08-27 11:35)"
+          - option "NFIX7GuardedAge21 — backtest-result-2026-08-27_13-35-20.zip (31 trades · 2026-08-27 11:34)"
+          - option "NFIX7GuardedAge10 — backtest-result-2026-08-27_13-34-15.zip (32 trades · 2026-08-27 11:33)"
+          - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-33-20.zip (32 trades · 2026-08-27 11:32)"
+          - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-32-22.zip (32 trades · 2026-08-27 11:31)"
+          - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-31-22.zip (32 trades · 2026-08-27 11:30)"
+          - option "NFIX7GuardedAge21 — backtest-result-2026-08-27_13-30-25.zip (126 trades · 2026-08-27 11:29)"
+          - option "NFIX7GuardedAge10 — backtest-result-2026-08-27_13-29-44.zip (126 trades · 2026-08-27 11:29)"
+          - option "NFIX7GuardedCat30 — backtest-result-2026-08-27_13-29-05.zip (126 trades · 2026-08-27 11:28)"
+          - option "NFIX7GuardedCat25 — backtest-result-2026-08-27_13-28-25.zip (126 trades · 2026-08-27 11:27)"
+          - option "NFIX7GuardedCat15 — backtest-result-2026-08-27_13-27-45.zip (126 trades · 2026-08-27 11:27)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_13-27-02.zip (36 trades · 2026-08-27 11:25)"
+          - option "newstrategy53 — backtest-result-2026-08-27_13-27-51.zip (184 trades · 2026-08-27 11:22)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_13-25-39.zip (36 trades · 2026-08-27 11:22)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_13-22-13.zip (58 trades · 2026-08-27 11:21)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_13-21-34.zip (58 trades · 2026-08-27 11:20)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_12-36-19.zip (47 trades · 2026-08-27 10:33)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_12-33-28.zip (47 trades · 2026-08-27 10:32)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_12-31-57.zip (126 trades · 2026-08-27 10:31)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-54-56.zip (40 trades · 2026-08-27 09:53)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-51-30.zip (14 trades · 2026-08-27 09:50)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-49-29.zip (14 trades · 2026-08-27 09:48)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-47-45.zip (32 trades · 2026-08-27 09:46)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-46-24.zip (31 trades · 2026-08-27 09:45)"
+          - option "NostalgiaForInfinityX7Guarded — backtest-result-2026-08-27_11-44-40.zip (79 trades · 2026-08-27 09:44)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-27_11-41-51.zip (126 trades · 2026-08-27 09:40)"
+          - option "newstrategy53 — backtest-result-2026-08-27_11-43-26.zip (205 trades · 2026-08-27 09:34)"
+          - option "newstrategy53 — backtest-result-2026-08-26_21-23-49.zip (3 trades · 2026-08-26 19:23)"
+          - option "newstrategy53 — backtest-result-2026-08-26_21-21-34.zip (3 trades · 2026-08-26 19:21)"
+          - option "ScreenerDpoEveningStar — backtest-result-2026-08-26_20-51-11.zip (2018 trades · 2026-08-26 18:50)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-26_20-45-18.zip (6 trades · 2026-08-26 18:45)"
+          - option "NostalgiaForInfinityX6 — backtest-result-2026-08-26_13-13-36.zip (30 trades · 2026-08-26 11:09)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-26_13-09-01.zip (41 trades · 2026-08-26 11:07)"
+          - option "NostalgiaForInfinityX6 — backtest-result-2026-08-26_13-06-52.zip (6 trades · 2026-08-26 11:05)"
+          - option "NostalgiaForInfinityX7 — backtest-result-2026-08-26_13-05-25.zip (9 trades · 2026-08-26 11:05)"
+          - option "Ichi — backtest-result-2026-08-26_12-58-49.zip (1451 trades · 2026-08-26 10:58)"
+          - option "HarmonicDivergence — backtest-result-2026-08-26_13-35-21.zip (21933 trades · 2026-08-26 10:54)"
+          - option "EntryFloodControl — backtest-result-2026-08-26_12-53-00.zip (3123 trades · 2026-08-26 10:52)"
+          - option "HarmonicDivergence — backtest-result-2026-08-26_12-49-28.zip (1326 trades · 2026-08-26 10:48)"
+          - option "HarmonicDivergence — backtest-result-2026-08-26_02-07-09.zip (561 trades · 2026-08-26 00:06)"
+          - option "Ichi — backtest-result-2026-08-24_12-28-17.zip (4 trades · 2026-08-24 10:28)"
+          - option "HarmonicDivergence — backtest-result-2026-08-24_12-25-40.zip (522 trades · 2026-08-24 10:25)"
+          - option "TrendOMaticStrategySpot — backtest-result-2026-08-23_20-20-21.zip (1734 trades · 2026-08-23 18:17)"
+          - option "HoffmanIRBStrategy1h — backtest-result-2026-08-23_20-04-39.zip (1075 trades · 2026-08-23 18:04)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_20-04-06.zip (1450 trades · 2026-08-23 18:03)"
+          - option "HoffmanIRBStrategy4h — backtest-result-2026-08-23_20-03-25.zip (347 trades · 2026-08-23 18:03)"
+          - option "HoffmanIRBStrategy1h — backtest-result-2026-08-23_20-03-08.zip (1075 trades · 2026-08-23 18:02)"
+          - option "NadarayaWatsonSpot — backtest-result-2026-08-23_20-16-51.zip (3012 trades · 2026-08-23 18:01)"
+          - option "MfiEmaWaveTrend2Spot — backtest-result-2026-08-23_20-01-31.zip (10178 trades · 2026-08-23 17:58)"
+          - option "MfiEmaWaveTrendSpot — backtest-result-2026-08-23_19-58-35.zip (1524 trades · 2026-08-23 17:51)"
+          - option "SuperKeltnerStrategy — backtest-result-2026-08-23_19-50-38.zip (222 trades · 2026-08-23 17:50)"
+          - option "HoffmanIRBStrategyPct20 — backtest-result-2026-08-23_19-50-13.zip (1753 trades · 2026-08-23 17:49)"
+          - option "HoffmanIRBStrategyPct25 — backtest-result-2026-08-23_19-48-58.zip (1743 trades · 2026-08-23 17:48)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-23_19-47-51.zip (2405 trades · 2026-08-23 17:47)"
+          - option "HoffmanIRBStrategyRR20 — backtest-result-2026-08-23_19-47-02.zip (1739 trades · 2026-08-23 17:46)"
+          - option "HoffmanIRBStrategyRR10 — backtest-result-2026-08-23_19-45-53.zip (1755 trades · 2026-08-23 17:45)"
+          - option "ClucHAnix_5m — backtest-result-2026-08-23_19-46-34.zip (180 trades · 2026-08-23 17:44)"
+          - option "HoffmanIRBStrategyRR05 — backtest-result-2026-08-23_19-44-52.zip (1774 trades · 2026-08-23 17:44)"
+          - option "BigZ08 — backtest-result-2026-08-23_19-44-13.zip (9 trades · 2026-08-23 17:43)"
+          - option "BigZ06AtrSl — backtest-result-2026-08-23_19-43-47.zip (735 trades · 2026-08-23 17:43)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2026-08-23_19-42-55.zip (66 trades · 2026-08-23 17:42)"
+          - option "HoffmanIRBStrategyRR05 — backtest-result-2026-08-23_19-42-17.zip (1774 trades · 2026-08-23 17:41)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-31-51.zip (1714 trades · 2026-08-23 17:31)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-29-59.zip (1714 trades · 2026-08-23 17:29)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-27-02.zip (13 trades · 2026-08-23 17:27)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-24-00.zip (1661 trades · 2026-08-23 17:23)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-17-05.zip (43 trades · 2026-08-23 17:17)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-14-57.zip (43 trades · 2026-08-23 17:14)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-13-11.zip (1778 trades · 2026-08-23 17:12)"
+          - option "HoffmanIRBStrategy — backtest-result-2026-08-23_19-10-18.zip (1778 trades · 2026-08-23 17:09)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-23_17-03-42.zip (30 trades · 2026-08-23 15:03)"
+          - option "StrategyTemplateV21 — backtest-result-2026-08-23_14-04-46.zip (33 trades · 2026-08-23 12:04)"
+          - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_14-03-10.zip (531 trades · 2026-08-23 12:02)"
+          - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-56-47.zip (672 trades · 2026-08-23 11:56)"
+          - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-54-57.zip (672 trades · 2026-08-23 11:54)"
+          - option "SmokeStrategyTemplateV21 — backtest-result-2026-08-23_13-54-12.zip (672 trades · 2026-08-23 11:53)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-19-18.zip (59 trades · 2026-08-22 14:19)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-15-26.zip (374 trades · 2026-08-22 14:15)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-14-58.zip (965 trades · 2026-08-22 14:14)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-04-34.zip (8407 trades · 2026-08-22 14:03)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-03-19.zip (3262 trades · 2026-08-22 14:02)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_16-02-31.zip (111 trades · 2026-08-22 14:02)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_16-02-16.zip (338 trades · 2026-08-22 14:02)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_15-51-01.zip (64 trades · 2026-08-22 13:50)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_15-49-50.zip (374 trades · 2026-08-22 13:49)"
+          - option "HybridRegimeSwitcher — backtest-result-2026-08-22_15-49-35.zip (2 trades · 2026-08-22 13:49)"
+          - option "LuxAlgo15mBTCLowRisk — backtest-result-2026-08-22_15-44-14.zip (9841 trades · 2026-08-22 13:42)"
+          - option "GKDAdaptiveAcademicFinal — backtest-result-2026-08-22_15-12-15.zip (6 trades · 2026-08-22 13:12)"
+          - option "GKDAdaptiveAcademicFinal — backtest-result-2026-08-22_14-59-52.zip (12 trades · 2026-08-22 12:59)"
+          - option "OctopusNestATR — backtest-result-2026-08-21_14-00-21.zip (39 trades · 2026-08-21 12:00)"
+          - option "OctopusNestHighestLowestATR — backtest-result-2026-08-21_14-00-47.zip (23 trades · 2026-08-21 12:00)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-21_13-59-47.zip (37 trades · 2026-08-21 11:59)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-21_13-45-33.zip (28 trades · 2026-08-21 11:45)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-21_13-39-26.zip (122 trades · 2026-08-21 11:39)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-20_18-29-40.zip (537 trades · 2026-08-20 16:29)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-20_18-15-50.zip (139 trades · 2026-08-20 16:15)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-20_16-56-01.zip (3 trades · 2026-08-20 14:56)"
+          - option "WolfeFuturesShortStrategy — backtest-result-2026-08-20_15-47-26.zip (9 trades · 2026-08-20 13:47)"
+          - option "OctopusNestStrategy — backtest-result-2026-08-20_15-34-28.zip (7 trades · 2026-08-20 13:34)"
+          - option "BigZ08 — backtest-result-2024-12-01_17-37-30.json (165 trades · 2024-12-01 16:34)"
+          - option "BigZ08 — backtest-result-2024-07-28_13-51-02.json (163 trades · 2024-07-28 11:49)"
+          - option "BigZ08 — backtest-result-2024-07-28_13-18-05.json (242 trades · 2024-07-28 11:15)"
+          - option "BigZ08 — backtest-result-2024-07-28_12-48-35.json (242 trades · 2024-07-28 10:46)"
+          - option "BigZ08 — backtest-result-2024-07-28_12-41-02.json (163 trades · 2024-07-28 10:39)"
+          - option "BigZ08 — backtest-result-2024-07-28_12-38-36.json (163 trades · 2024-07-28 10:36)"
+          - option "BigZ08 — backtest-result-2024-07-28_12-35-44.json (242 trades · 2024-07-28 10:32)"
+          - option "BigZ08 — backtest-result-2024-07-22_21-25-28.json (215 trades · 2024-07-22 19:23)"
+          - option "BigZ08 — backtest-result-2024-07-22_13-19-04.json (215 trades · 2024-07-22 11:17)"
+          - option "BigZ08 — backtest-result-2024-07-22_13-00-43.json (271 trades · 2024-07-22 10:58)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-18-39.json (239 trades · 2024-07-22 09:16)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-15-09.json (263 trades · 2024-07-22 09:13)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-11-23.json (268 trades · 2024-07-22 09:09)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-08-08.json (259 trades · 2024-07-22 09:06)"
+          - option "BigZ08 — backtest-result-2024-07-22_11-01-15.json (250 trades · 2024-07-22 08:59)"
+          - option "BigZ08 — backtest-result-2024-07-22_10-41-36.json (231 trades · 2024-07-22 08:39)"
+          - option "BigZ08 — backtest-result-2024-07-22_09-08-54.json (250 trades · 2024-07-22 07:06)"
+          - option "BigZ08 — backtest-result-2024-07-22_09-05-08.json (399 trades · 2024-07-22 07:02)"
+          - option "BigZ08 — backtest-result-2024-07-22_09-01-00.json (399 trades · 2024-07-22 06:58)"
+          - option "BigZ08 — backtest-result-2024-07-22_08-57-53.json (403 trades · 2024-07-22 06:55)"
+          - option "BigZ08 — backtest-result-2024-07-22_08-50-32.json (403 trades · 2024-07-22 06:47)"
+          - option "BigZ08 — backtest-result-2024-07-22_00-01-00.json (403 trades · 2024-07-21 21:58)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-56-34.json (346 trades · 2024-07-21 21:54)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-38-15.json (265 trades · 2024-07-21 21:35)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-33-14.json (265 trades · 2024-07-21 21:30)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-29-26.json (265 trades · 2024-07-21 21:26)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-25-08.json (517 trades · 2024-07-21 21:24)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-21-52.json (673 trades · 2024-07-21 21:21)"
+          - option "BigZ08 — backtest-result-2024-07-21_23-19-34.json (517 trades · 2024-07-21 21:18)"
+          - option "BigZ08 — backtest-result-2024-07-21_20-34-48.json (673 trades · 2024-07-21 12:34)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-32-37.json (673 trades · 2024-07-21 12:31)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-28-23.json (673 trades · 2024-07-21 12:27)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-25-20.json (673 trades · 2024-07-21 12:24)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-12-51.json (517 trades · 2024-07-21 12:12)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-09-45.json (517 trades · 2024-07-21 12:08)"
+          - option "BigZ08 — backtest-result-2024-07-21_14-03-51.json (517 trades · 2024-07-21 12:01)"
+          - option "BigZ08 — backtest-result-2024-07-21_13-46-30.json (517 trades · 2024-07-21 11:45)"
+          - option "BigZ08 — backtest-result-2024-07-21_13-43-38.json (517 trades · 2024-07-21 11:42)"
+          - option "BigZ08 — backtest-result-2024-07-19_21-34-57.json (517 trades · 2024-07-19 19:31)"
+          - option "BigZ08 — backtest-result-2024-07-19_21-26-23.json (517 trades · 2024-07-19 19:25)"
+          - option "BigZ08 — backtest-result-2024-07-19_21-18-24.json (517 trades · 2024-07-19 19:17)"
+          - option "BigZ08 — backtest-result-2024-07-19_21-14-32.json (517 trades · 2024-07-19 15:49)"
+          - option "BigZ08 — backtest-result-2024-07-19_14-47-21.json (517 trades · 2024-07-19 12:46)"
+          - option "BigZ08 — backtest-result-2024-07-19_14-33-31.json (517 trades · 2024-07-19 12:32)"
+          - option "BigZ08 — backtest-result-2024-07-19_14-19-35.json (517 trades · 2024-07-19 12:18)"
+          - option "BigZ08 — backtest-result-2024-07-19_14-02-23.json (673 trades · 2024-07-19 12:01)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-46-15.json (673 trades · 2024-07-19 10:45)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-42-39.json (673 trades · 2024-07-19 10:41)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-37-46.json (673 trades · 2024-07-19 10:36)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-36-21.json (673 trades · 2024-07-19 10:35)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-32-32.json (673 trades · 2024-07-19 10:31)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-26-39.json (673 trades · 2024-07-19 10:25)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-23-43.json (673 trades · 2024-07-19 10:22)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-22-00.json (673 trades · 2024-07-19 10:21)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-16-13.json (673 trades · 2024-07-19 10:15)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-12-37.json (673 trades · 2024-07-19 10:11)"
+          - option "BigZ08 — backtest-result-2024-07-19_12-04-28.json (673 trades · 2024-07-19 10:03)"
+          - option "BigZ08 — backtest-result-2024-07-18_23-02-35.json (517 trades · 2024-07-18 21:01)"
+          - option "BigZ08 — backtest-result-2024-07-18_23-01-33.json (517 trades · 2024-07-18 21:00)"
+          - option "BigZ08 — backtest-result-2024-07-18_20-22-24.json (517 trades · 2024-07-18 18:21)"
+          - option "BigZ08 — backtest-result-2024-07-18_20-11-05.json (517 trades · 2024-07-18 18:10)"
+          - option "BigZ08 — backtest-result-2024-07-18_20-05-48.json (517 trades · 2024-07-18 18:05)"
+          - option "BigZ08 — backtest-result-2024-07-18_20-04-13.json (517 trades · 2024-07-18 18:03)"
+          - option "BigZ08 — backtest-result-2024-07-18_19-57-13.json (517 trades · 2024-07-18 17:56)"
+          - option "BigZ06AtrSl — backtest-result-2024-06-25_19-21-09.json (3913 trades · 2024-06-25 17:19)"
+          - option "StrategyTemplate — backtest-result-2024-06-18_12-32-24.json (4906 trades · 2024-06-18 10:31)"
+          - option "BigZ08 — backtest-result-2024-05-22_11-09-30.json (503 trades · 2024-05-22 09:08)"
+          - option "BigZ08 — backtest-result-2024-05-21_23-14-30.json (3236 trades · 2024-05-21 21:12)"
+          - option "BigZ08 — backtest-result-2024-05-21_23-02-20.json (3357 trades · 2024-05-21 21:00)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-40-44.json (3236 trades · 2024-05-20 13:39)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-37-08.json (3935 trades · 2024-05-20 13:35)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-32-31.json (4996 trades · 2024-05-20 13:31)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-29-30.json (3817 trades · 2024-05-20 13:28)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-25-04.json (4114 trades · 2024-05-20 13:23)"
+          - option "BigZ08 — backtest-result-2024-05-20_15-20-56.json (3463 trades · 2024-05-20 13:19)"
+          - option "BigZ08 — backtest-result-2024-05-20_14-45-55.json (3463 trades · 2024-05-20 12:44)"
+          - option "BigZ08 — backtest-result-2024-05-20_12-15-20.json (3536 trades · 2024-05-20 10:12)"
+          - option "BigZ08 — backtest-result-2024-05-20_11-21-14.json (3536 trades · 2024-05-20 09:19)"
+          - option "BigZ08 — backtest-result-2024-05-19_19-48-48.json (3536 trades · 2024-05-19 17:47)"
+          - option "BigZ08 — backtest-result-2024-05-19_19-13-11.json (3536 trades · 2024-05-19 17:11)"
+          - option "BigZ08 — backtest-result-2024-05-19_19-02-45.json (3536 trades · 2024-05-19 17:01)"
+          - option "BigZ08 — backtest-result-2024-05-19_18-17-14.json (5440 trades · 2024-05-19 16:16)"
+          - option "BigZ08 — backtest-result-2024-05-19_18-07-19.json (3536 trades · 2024-05-19 16:05)"
+          - option "BigZ08 — backtest-result-2024-05-19_18-00-16.json (3561 trades · 2024-05-19 15:58)"
+          - option "BigZ08 — backtest-result-2024-05-19_17-52-11.json (6342 trades · 2024-05-19 15:51)"
+          - option "BigZ08 — backtest-result-2024-05-19_17-23-12.json (6342 trades · 2024-05-19 15:22)"
+          - option "BigZ08 — backtest-result-2024-05-19_17-20-37.json (4866 trades · 2024-05-19 15:19)"
+          - option "BigZ08 — backtest-result-2024-05-19_17-10-05.json (4866 trades · 2024-05-19 15:09)"
+          - option "BigZ08 — backtest-result-2024-05-19_13-01-26.json (3262 trades · 2024-05-19 10:53)"
+          - option "BigZ08 — backtest-result-2024-05-18_19-04-17.json (3262 trades · 2024-05-18 16:57)"
+          - option "BigZ08 — backtest-result-2024-05-18_18-32-29.json (3262 trades · 2024-05-18 16:25)"
+          - option "BigZ07Next2 — backtest-result-2024-02-17_13-16-32.json (3606 trades · 2024-02-17 12:14)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-17_13-16-32.json (3607 trades · 2024-02-17 12:13)"
+          - option "BigZ06AtrSl — backtest-result-2024-02-17_13-16-32.json (4040 trades · 2024-02-17 12:12)"
+          - option "BigZ06Original — backtest-result-2024-02-17_13-16-32.json (3450 trades · 2024-02-17 12:11)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-16_13-22-34.json (3618 trades · 2024-02-16 12:21)"
+          - option "BigZ06AtrSl — backtest-result-2024-02-16_13-22-34.json (4046 trades · 2024-02-16 12:20)"
+          - option "BigZ06Original — backtest-result-2024-02-16_13-22-34.json (3458 trades · 2024-02-16 12:19)"
+          - option "newstrategy51 — backtest-result-2024-02-16_13-22-34.json (138 trades · 2024-02-16 12:10)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2024-02-16_12-06-20.json (3618 trades · 2024-02-16 11:05)"
+          - option "BigZ06Original — backtest-result-2024-02-16_12-06-20.json (3458 trades · 2024-02-16 11:04)"
+          - option "newstrategy51 — backtest-result-2024-02-16_12-06-20.json (138 trades · 2024-02-16 10:57)"
+          - option "BigZ06Original — backtest-result-2024-02-16_11-47-32.json (3458 trades · 2024-02-16 10:46)"
+          - option "newstrategy51 — backtest-result-2024-02-16_11-47-32.json (138 trades · 2024-02-16 10:39)"
+          - option "BigZ06Original — backtest-result-2024-02-15_22-53-32.json (3638 trades · 2024-02-15 21:52)"
+          - option "newstrategy51 — backtest-result-2024-02-15_22-53-32.json (1048 trades · 2024-02-15 21:35)"
+          - option "BigZ06Original — backtest-result-2024-02-14_12-25-37.json (3524 trades · 2024-02-14 11:24)"
+          - option "newstrategy51 — backtest-result-2024-02-14_12-25-37.json (1014 trades · 2024-02-14 11:07)"
+          - option "ClucHAnix_5m — backtest-result-2024-02-13_16-41-46.json (7136 trades · 2024-02-13 15:29)"
+          - option "newstrategy53 — backtest-result-2024-02-13_16-41-46.json (1250 trades · 2024-02-13 15:02)"
+          - option "newstrategy51 — backtest-result-2024-02-13_16-41-46.json (1008 trades · 2024-02-13 14:25)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-19_21-14-12.json (4225 trades · 2024-01-19 20:11)"
+          - option "BigZ07Next2 — backtest-result-2024-01-19_21-14-12.json (2494 trades · 2024-01-19 20:05)"
+          - option "BigZ06Original — backtest-result-2024-01-19_21-14-12.json (3516 trades · 2024-01-19 20:02)"
+          - option "ClucHAnix_5m — backtest-result-2024-01-18_23-12-23.json (7136 trades · 2024-01-18 22:02)"
+          - option "BB_RPB_TSLmeneguzzo — backtest-result-2024-01-18_23-12-23.json (1239 trades · 2024-01-18 21:49)"
+          - option "adaptive — backtest-result-2024-01-18_23-12-23.json (2210 trades · 2024-01-18 21:47)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2024-01-18_23-12-23.json (90 trades · 2024-01-18 21:47)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-18_23-12-23.json (4225 trades · 2024-01-18 21:46)"
+          - option "BigZ07Next2 — backtest-result-2024-01-18_23-12-23.json (2494 trades · 2024-01-18 21:44)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_15-41-05.json (4231 trades · 2024-01-10 14:40)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_15-28-12.json (4231 trades · 2024-01-10 14:27)"
+          - option "BigZ06 — backtest-result-2024-01-10_12-36-28.json (3451 trades · 2024-01-10 11:32)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_12-36-28.json (3721 trades · 2024-01-10 11:29)"
+          - option "BigZ06 — backtest-result-2024-01-10_12-15-30.json (3451 trades · 2024-01-10 11:13)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_12-15-30.json (3988 trades · 2024-01-10 11:10)"
+          - option "BigZ06 — backtest-result-2024-01-10_11-51-33.json (3451 trades · 2024-01-10 10:49)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_11-51-33.json (3988 trades · 2024-01-10 10:48)"
+          - option "BigZ06 — backtest-result-2024-01-10_11-27-58.json (3451 trades · 2024-01-10 10:26)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_11-27-58.json (4048 trades · 2024-01-10 10:25)"
+          - option "BigZ06 — backtest-result-2024-01-10_09-31-52.json (3451 trades · 2024-01-10 08:31)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-10_09-31-52.json (800 trades · 2024-01-10 08:30)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-25-13.json (3451 trades · 2024-01-09 01:24)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-25-13.json (4231 trades · 2024-01-09 01:23)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-21-15.json (3451 trades · 2024-01-09 01:20)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-21-15.json (4228 trades · 2024-01-09 01:19)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-18-02.json (3451 trades · 2024-01-09 01:17)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-18-02.json (4218 trades · 2024-01-09 01:16)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-12-52.json (3451 trades · 2024-01-09 01:12)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-12-52.json (4231 trades · 2024-01-09 01:11)"
+          - option "BigZ06 — backtest-result-2024-01-09_02-01-59.json (3451 trades · 2024-01-09 01:01)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_02-01-59.json (3720 trades · 2024-01-09 01:00)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-57-20.json (3451 trades · 2024-01-09 00:56)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-57-20.json (3721 trades · 2024-01-09 00:55)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-53-46.json (3451 trades · 2024-01-09 00:53)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-53-46.json (3721 trades · 2024-01-09 00:52)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-44-58.json (3451 trades · 2024-01-09 00:44)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-44-58.json (3721 trades · 2024-01-09 00:43)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-39-30.json (3451 trades · 2024-01-09 00:38)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-39-30.json (3721 trades · 2024-01-09 00:38)"
+          - option "BigZ06 — backtest-result-2024-01-09_01-05-45.json (3451 trades · 2024-01-09 00:05)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_01-05-45.json (3451 trades · 2024-01-09 00:04)"
+          - option "BigZ06AtrSl — backtest-result-2024-01-09_00-23-48.json (3720 trades · 2024-01-08 23:23)"
+          - option "BigZ06 — backtest-result-2024-01-07_02-41-35.json (3444 trades · 2024-01-07 01:40)"
+          - option "BigZ07Next2 — backtest-result-2024-01-07_02-41-35.json (2494 trades · 2024-01-07 01:38)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-20_16-14-42.json (7 trades · 2023-12-20 15:09)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-19_22-01-15.json (7 trades · 2023-12-19 20:55)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-09_02-46-45.json (38 trades · 2023-12-09 01:34)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-09_01-47-22.json (55 trades · 2023-12-09 00:34)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-04_10-20-18.json (282 trades · 2023-12-04 08:32)"
+          - option "NostalgiaForInfinityX4 — backtest-result-2023-12-03_13-55-52.json (273 trades · 2023-12-03 12:19)"
+          - option "NostalgiaForInfinityX3 — backtest-result-2023-06-08_21-48-55.json (271 trades · 2023-06-08 19:05)"
+          - option "SupertrendKeltner — backtest-result-2023-03-27_12-55-38.json (31202 trades · 2023-03-27 10:08)"
+          - option "NostalgiaForInfinityX — backtest-result-2023-03-24_13-00-24.json (433 trades · 2023-03-24 11:50)"
+          - option "MfiEmaWaveTrend2 — backtest-result-2023-03-18_08-07-03.json (30695 trades · 2023-03-18 06:53)"
+          - option "MfiEmaWaveTrend2 — backtest-result-2023-03-17_14-35-11.json (3172 trades · 2023-03-17 13:21)"
+          - option "MfiEmaWaveTrend2 — backtest-result-2023-03-17_14-06-34.json (763 trades · 2023-03-17 12:48)"
+          - option "MfiEmaWaveTrend — backtest-result-2023-03-17_13-46-07.json (4452 trades · 2023-03-17 12:31)"
+          - option "MfiEmaWaveTrend — backtest-result-2023-03-16_20-48-15.json (111 trades · 2023-03-16 19:43)"
+          - option "MfiEmaWaveTrend — backtest-result-2023-03-15_18-34-26.json (1970 trades · 2023-03-15 17:21)"
+          - option "NadarayaWatson — backtest-result-2022-12-18_21-44-03.json (24617 trades · 2022-12-18 19:46)"
+          - option "NWEv6_new — backtest-result-2022-12-17_12-27-45.json (5046 trades · 2022-12-17 10:46)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-16_11-47-10.json (1644 trades · 2022-12-16 10:46)"
+          - option "BigZ06 — backtest-result-2022-12-09_10-42-37.json (6405 trades · 2022-12-09 09:40)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_20-03-45.json (1642 trades · 2022-12-08 19:02)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_19-17-10.json (1642 trades · 2022-12-08 18:16)"
+          - option "CombinedBinHClucAndMADV3 — backtest-result-2022-12-08_19-11-00.json (1642 trades · 2022-12-08 18:09)"
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - heading "Trade map" [level=2] [ref=e39]
+          - generic [ref=e40]: one marker line per trade - long runs below the price, short above it, entry to exit (both marker modes) - entry arrows + exit dots in fixed colours, dashed line = initial stop loss
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - text: "Pair:"
+            - combobox "Pair:" [ref=e43]:
+              - option "1000BONK/USDT:USDT" [selected]
+              - option "ENJ/USDT:USDT"
+              - option "1000FLOKI/USDT:USDT"
+              - option "CRV/USDT:USDT"
+              - option "APE/USDT:USDT"
+              - option "ALGO/USDT:USDT"
+              - option "XRP/USDT:USDT"
+              - option "DOGE/USDT:USDT"
+              - option "DOT/USDT:USDT"
+              - option "SLP/USDT:USDT"
+              - option "MANA/USDT:USDT"
+              - option "SAND/USDT:USDT"
+              - option "GRT/USDT:USDT"
+          - generic [ref=e44]:
+            - text: "Exit reason:"
+            - combobox "Exit reason:" [ref=e45]:
+              - option "all exits" [selected]
+              - option "stop_loss"
+              - option "roi"
+          - generic [ref=e46]:
+            - text: "Candles:"
+            - combobox "Candles:" [ref=e47]:
+              - option "Lab (default)" [selected]
+              - option "TradingView"
+              - option "Classic"
+              - option "Ghost (dim)"
+              - option "Mint & Rajah"
+              - option "Cyan & Pink"
+          - generic [ref=e48]:
+            - text: "Markers:"
+            - combobox "Markers:" [ref=e49]:
+              - option "Lab (default)" [selected]
+              - option "TradingView"
+              - option "Classic"
+              - option "Bright"
+              - option "Mint & Rajah"
+              - option "Cyan & Pink"
+          - generic [ref=e50]:
+            - text: "Tracks:"
+            - combobox "Tracks:" [ref=e51]:
+              - option "Beside candles"
+              - option "At trade rates" [selected]
+          - generic [ref=e52]:
+            - text: "Indicators:"
+            - combobox "Indicators:" [ref=e53]:
+              - option "+ add" [selected]
+              - option "WaveTrend"
+              - option "VIX Fix"
+              - option "TDFI"
+              - option "Chaikin Volatility"
+              - option "Garman-Klass Vol"
+              - option "Damiani Volatmeter"
+              - option "Woodies CCI"
+              - option "Kairi Index"
+              - option "KAMA Slope"
+              - option "ATR Percentile"
+              - option "Volume Percentile"
+              - option "Z-Score"
+              - option "Choppiness Index"
+              - option "LinReg Forecast"
+              - option "Hurst Exponent"
+              - option "BBWP"
+              - option "Ehlers Super Smoother"
+        - generic [ref=e54]:
+          - table [ref=e57]:
+            - row [ref=e58]:
+              - cell
+              - cell [ref=e59]:
+                - link "Charting by TradingView" [ref=e63] [cursor=pointer]:
+                  - /url: https://www.tradingview.com/?utm_medium=lwc-link&utm_campaign=lwc-chart&utm_source=127.0.0.1/
+              - cell [ref=e68]
+            - row [ref=e72]:
+              - cell
+              - cell [ref=e73]
+              - cell [ref=e77]
+          - generic [ref=e2865]:
+            - table [ref=e2868]:
+              - row [ref=e2869]:
+                - cell
+                - cell [ref=e2870]:
+                  - link "Charting by TradingView" [ref=e2874] [cursor=pointer]:
+                    - /url: https://www.tradingview.com/?utm_medium=lwc-link&utm_campaign=lwc-chart&utm_source=127.0.0.1/
+                - cell [ref=e2879]
+            - table [ref=e2885]:
+              - row [ref=e2886]:
+                - cell
+                - cell [ref=e2887]:
+                  - link "Charting by TradingView" [ref=e2891] [cursor=pointer]:
+                    - /url: https://www.tradingview.com/?utm_medium=lwc-link&utm_campaign=lwc-chart&utm_source=127.0.0.1/
+                - cell [ref=e2896]
+          - button "Fit" [ref=e80] [cursor=pointer]
+        - generic [ref=e81]:
+          - generic [ref=e2900]:
+            - generic [ref=e2901]:
+              - text: TDFI
+              - generic [ref=e2902] [cursor=pointer]: ↑
+              - generic [ref=e2903] [cursor=pointer]: ↓
+              - generic [ref=e2904] [cursor=pointer]: x
+            - generic [ref=e2905]:
+              - text: WaveTrend
+              - generic [ref=e2906] [cursor=pointer]: ↑
+              - generic [ref=e2907] [cursor=pointer]: ↓
+              - generic [ref=e2908] [cursor=pointer]: x
+          - generic [ref=e82]: entry (↑ long · ↓ short)
+          - generic [ref=e84]: exit
+          - generic [ref=e86]: initial stop loss
+          - generic [ref=e88]: volume
+      - generic [ref=e90]:
+        - table [ref=e2909]:
+          - rowgroup [ref=e2924]:
+            - row [ref=e2925]:
+              - columnheader "Pair" [ref=e2926] [cursor=pointer]
+              - columnheader "Side" [ref=e2927] [cursor=pointer]
+              - columnheader "Enter tag" [ref=e2928] [cursor=pointer]
+              - columnheader "Exit reason" [ref=e2929] [cursor=pointer]
+              - columnheader "Open" [ref=e2930] [cursor=pointer]
+              - columnheader "Close" [ref=e2931] [cursor=pointer]
+              - columnheader "Open rate" [ref=e2932] [cursor=pointer]
+              - columnheader "Close rate" [ref=e2933] [cursor=pointer]
+              - columnheader "Profit%" [ref=e2934] [cursor=pointer]
+              - columnheader "Profit abs" [ref=e2935] [cursor=pointer]
+              - columnheader "Stop loss" [ref=e2936] [cursor=pointer]
+              - columnheader "SL%" [ref=e2937] [cursor=pointer]
+              - columnheader "Duration" [ref=e2938] [cursor=pointer]
+        - generic [ref=e123]:
+          - paragraph [ref=e2939]: Showing 181 of 181 trades for adaptive
+          - table [ref=e2940]:
+            - rowgroup [ref=e2955]:
+              - row [ref=e2956]:
+                - cell "1000BONK/USDT:USDT" [ref=e2957]
+                - cell "long" [ref=e2958]
+                - cell [ref=e2959]
+                - cell "stop_loss" [ref=e2960]
+                - cell "2024-07-11 18:40" [ref=e2961]
+                - cell "2024-07-12 01:20" [ref=e2962]
+                - cell "0.024" [ref=e2963]
+                - cell "0.023" [ref=e2964]
+                - cell "⚠ -5.10%" [ref=e2965]
+                - cell "-0.63" [ref=e2967]
+                - cell "0.023" [ref=e2968]
+                - cell "-5%" [ref=e2969]
+                - cell "0h7m" [ref=e2970]
+              - row [ref=e2971]:
+                - cell "1000BONK/USDT:USDT" [ref=e2972]
+                - cell "long" [ref=e2973]
+                - cell [ref=e2974]
+                - cell "roi" [ref=e2975]
+                - cell "2024-08-02 19:35" [ref=e2976]
+                - cell "2024-08-02 20:35" [ref=e2977]
+                - cell "0.022" [ref=e2978]
+                - cell "0.023" [ref=e2979]
+                - cell "2.00%" [ref=e2980]
+                - cell "0.244" [ref=e2982]
+                - cell "0.021" [ref=e2983]
+                - cell "-5%" [ref=e2984]
+                - cell "0h1m" [ref=e2985]
+              - row [ref=e2986]:
+                - cell "1000BONK/USDT:USDT" [ref=e2987]
+                - cell "long" [ref=e2988]
+                - cell [ref=e2989]
+                - cell "stop_loss" [ref=e2990]
+                - cell "2024-08-05 10:20" [ref=e2991]
+                - cell "2024-08-05 11:20" [ref=e2992]
+                - cell "0.017" [ref=e2993]
+                - cell "0.016" [ref=e2994]
+                - cell "⚠ -5.09%" [ref=e2995]
+                - cell "-0.625" [ref=e2997]
+                - cell "0.016" [ref=e2998]
+                - cell "-5%" [ref=e2999]
+                - cell "0h1m" [ref=e3000]
+              - row [ref=e3001]:
+                - cell "XRP/USDT:USDT" [ref=e3002]
+                - cell "long" [ref=e3003]
+                - cell [ref=e3004]
+                - cell "roi" [ref=e3005]
+                - cell "2024-08-05 13:25" [ref=e3006]
+                - cell "2024-08-05 13:35" [ref=e3007]
+                - cell "0.438" [ref=e3008]
+                - cell "0.454" [ref=e3009]
+                - cell "3.50%" [ref=e3010]
+                - cell "0.423" [ref=e3012]
+                - cell "0.416" [ref=e3013]
+                - cell "-5%" [ref=e3014]
+                - cell "0h0m" [ref=e3015]
+              - row [ref=e3016]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e3017]
+                - cell "long" [ref=e3018]
+                - cell [ref=e3019]
+                - cell "stop_loss" [ref=e3020]
+                - cell "2024-08-07 16:55" [ref=e3021]
+                - cell "2024-08-08 00:20" [ref=e3022]
+                - cell "0.122" [ref=e3023]
+                - cell "0.116" [ref=e3024]
+                - cell "⚠ -5.10%" [ref=e3025]
+                - cell "-0.621" [ref=e3027]
+                - cell "0.116" [ref=e3028]
+                - cell "-5%" [ref=e3029]
+                - cell "0h7m" [ref=e3030]
+              - row [ref=e3031]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e3032]
+                - cell "long" [ref=e3033]
+                - cell [ref=e3034]
+                - cell "roi" [ref=e3035]
+                - cell "2024-08-28 01:00" [ref=e3036]
+                - cell "2024-08-28 02:00" [ref=e3037]
+                - cell "0.143" [ref=e3038]
+                - cell "0.146" [ref=e3039]
+                - cell "2.00%" [ref=e3040]
+                - cell "0.24" [ref=e3042]
+                - cell "0.136" [ref=e3043]
+                - cell "-5%" [ref=e3044]
+                - cell "0h1m" [ref=e3045]
+              - row [ref=e3046]:
+                - cell "1000BONK/USDT:USDT" [ref=e3047]
+                - cell "long" [ref=e3048]
+                - cell [ref=e3049]
+                - cell "stop_loss" [ref=e3050]
+                - cell "2024-10-01 17:15" [ref=e3051]
+                - cell "2024-10-01 17:20" [ref=e3052]
+                - cell "0.023" [ref=e3053]
+                - cell "0.022" [ref=e3054]
+                - cell "⚠ -5.09%" [ref=e3055]
+                - cell "-0.617" [ref=e3057]
+                - cell "0.022" [ref=e3058]
+                - cell "-5%" [ref=e3059]
+                - cell "0h0m" [ref=e3060]
+              - row [ref=e3061]:
+                - cell "1000BONK/USDT:USDT" [ref=e3062]
+                - cell "long" [ref=e3063]
+                - cell [ref=e3064]
+                - cell "roi" [ref=e3065]
+                - cell "2024-10-01 20:40" [ref=e3066]
+                - cell "2024-10-01 20:45" [ref=e3067]
+                - cell "0.023" [ref=e3068]
+                - cell "0.024" [ref=e3069]
+                - cell "3.50%" [ref=e3070]
+                - cell "0.419" [ref=e3072]
+                - cell "0.022" [ref=e3073]
+                - cell "-5%" [ref=e3074]
+                - cell "0h0m" [ref=e3075]
+              - row [ref=e3076]:
+                - cell "1000BONK/USDT:USDT" [ref=e3077]
+                - cell "long" [ref=e3078]
+                - cell [ref=e3079]
+                - cell "stop_loss" [ref=e3080]
+                - cell "2024-10-02 11:05" [ref=e3081]
+                - cell "2024-10-02 13:35" [ref=e3082]
+                - cell "0.023" [ref=e3083]
+                - cell "0.022" [ref=e3084]
+                - cell "⚠ -5.09%" [ref=e3085]
+                - cell "-0.615" [ref=e3087]
+                - cell "0.022" [ref=e3088]
+                - cell "-5%" [ref=e3089]
+                - cell "0h3m" [ref=e3090]
+              - row [ref=e3091]:
+                - cell "1000BONK/USDT:USDT" [ref=e3092]
+                - cell "long" [ref=e3093]
+                - cell [ref=e3094]
+                - cell "roi" [ref=e3095]
+                - cell "2024-10-03 08:35" [ref=e3096]
+                - cell "2024-10-03 09:55" [ref=e3097]
+                - cell "0.021" [ref=e3098]
+                - cell "0.021" [ref=e3099]
+                - cell "2.00%" [ref=e3100]
+                - cell "0.238" [ref=e3102]
+                - cell "0.02" [ref=e3103]
+                - cell "-5%" [ref=e3104]
+                - cell "0h1m" [ref=e3105]
+              - row [ref=e3106]:
+                - cell "1000BONK/USDT:USDT" [ref=e3107]
+                - cell "long" [ref=e3108]
+                - cell [ref=e3109]
+                - cell "roi" [ref=e3110]
+                - cell "2024-10-03 15:25" [ref=e3111]
+                - cell "2024-10-04 01:20" [ref=e3112]
+                - cell "0.02" [ref=e3113]
+                - cell "0.02" [ref=e3114]
+                - cell "2.00%" [ref=e3115]
+                - cell "0.24" [ref=e3117]
+                - cell "0.019" [ref=e3118]
+                - cell "-5%" [ref=e3119]
+                - cell "0h10m" [ref=e3120]
+              - row [ref=e3121]:
+                - cell "APE/USDT:USDT" [ref=e3122]
+                - cell "long" [ref=e3123]
+                - cell [ref=e3124]
+                - cell "roi" [ref=e3125]
+                - cell "2024-10-20 21:50" [ref=e3126]
+                - cell "2024-10-20 22:30" [ref=e3127]
+                - cell "1.385" [ref=e3128]
+                - cell "1.435" [ref=e3129]
+                - cell "3.50%" [ref=e3130]
+                - cell "0.388" [ref=e3132]
+                - cell "1.316" [ref=e3133]
+                - cell "-5%" [ref=e3134]
+                - cell "0h1m" [ref=e3135]
+              - row [ref=e3136]:
+                - cell "APE/USDT:USDT" [ref=e3137]
+                - cell "long" [ref=e3138]
+                - cell [ref=e3139]
+                - cell "stop_loss" [ref=e3140]
+                - cell "2024-10-22 13:35" [ref=e3141]
+                - cell "2024-10-22 17:05" [ref=e3142]
+                - cell "1.406" [ref=e3143]
+                - cell "1.336" [ref=e3144]
+                - cell "⚠ -5.10%" [ref=e3145]
+                - cell "-0.574" [ref=e3147]
+                - cell "1.336" [ref=e3148]
+                - cell "-5%" [ref=e3149]
+                - cell "0h4m" [ref=e3150]
+              - row [ref=e3151]:
+                - cell "APE/USDT:USDT" [ref=e3152]
+                - cell "long" [ref=e3153]
+                - cell [ref=e3154]
+                - cell "roi" [ref=e3155]
+                - cell "2024-10-23 12:05" [ref=e3156]
+                - cell "2024-10-23 13:25" [ref=e3157]
+                - cell "1.185" [ref=e3158]
+                - cell "1.21" [ref=e3159]
+                - cell "2.00%" [ref=e3160]
+                - cell "0.237" [ref=e3162]
+                - cell "1.126" [ref=e3163]
+                - cell "-5%" [ref=e3164]
+                - cell "0h1m" [ref=e3165]
+              - row [ref=e3166]:
+                - cell "APE/USDT:USDT" [ref=e3167]
+                - cell "long" [ref=e3168]
+                - cell [ref=e3169]
+                - cell "roi" [ref=e3170]
+                - cell "2024-10-23 23:10" [ref=e3171]
+                - cell "2024-10-24 01:00" [ref=e3172]
+                - cell "1.138" [ref=e3173]
+                - cell "1.161" [ref=e3174]
+                - cell "1.99%" [ref=e3175]
+                - cell "0.226" [ref=e3177]
+                - cell "1.081" [ref=e3178]
+                - cell "-5%" [ref=e3179]
+                - cell "0h2m" [ref=e3180]
+              - row [ref=e3181]:
+                - cell "DOGE/USDT:USDT" [ref=e3182]
+                - cell "long" [ref=e3183]
+                - cell [ref=e3184]
+                - cell "roi" [ref=e3185]
+                - cell "2024-11-06 08:25" [ref=e3186]
+                - cell "2024-11-06 08:40" [ref=e3187]
+                - cell "0.188" [ref=e3188]
+                - cell "0.195" [ref=e3189]
+                - cell "3.50%" [ref=e3190]
+                - cell "0.422" [ref=e3192]
+                - cell "0.179" [ref=e3193]
+                - cell "-5%" [ref=e3194]
+                - cell "0h0m" [ref=e3195]
+              - row [ref=e3196]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e3197]
+                - cell "long" [ref=e3198]
+                - cell [ref=e3199]
+                - cell "roi" [ref=e3200]
+                - cell "2024-11-12 10:50" [ref=e3201]
+                - cell "2024-11-12 10:55" [ref=e3202]
+                - cell "0.185" [ref=e3203]
+                - cell "0.192" [ref=e3204]
+                - cell "3.50%" [ref=e3205]
+                - cell "0.427" [ref=e3207]
+                - cell "0.176" [ref=e3208]
+                - cell "-5%" [ref=e3209]
+                - cell "0h0m" [ref=e3210]
+              - row [ref=e3211]:
+                - cell "DOGE/USDT:USDT" [ref=e3212]
+                - cell "long" [ref=e3213]
+                - cell [ref=e3214]
+                - cell "roi" [ref=e3215]
+                - cell "2024-11-12 13:05" [ref=e3216]
+                - cell "2024-11-12 13:20" [ref=e3217]
+                - cell "0.363" [ref=e3218]
+                - cell "0.376" [ref=e3219]
+                - cell "3.50%" [ref=e3220]
+                - cell "0.42" [ref=e3222]
+                - cell "0.345" [ref=e3223]
+                - cell "-5%" [ref=e3224]
+                - cell "0h0m" [ref=e3225]
+              - row [ref=e3226]:
+                - cell "DOGE/USDT:USDT" [ref=e3227]
+                - cell "long" [ref=e3228]
+                - cell [ref=e3229]
+                - cell "stop_loss" [ref=e3230]
+                - cell "2024-11-12 13:35" [ref=e3231]
+                - cell "2024-11-12 13:45" [ref=e3232]
+                - cell "0.362" [ref=e3233]
+                - cell "0.344" [ref=e3234]
+                - cell "⚠ -5.09%" [ref=e3235]
+                - cell "-0.626" [ref=e3237]
+                - cell "0.344" [ref=e3238]
+                - cell "-5%" [ref=e3239]
+                - cell "0h0m" [ref=e3240]
+              - row [ref=e3241]:
+                - cell "1000BONK/USDT:USDT" [ref=e3242]
+                - cell "long" [ref=e3243]
+                - cell [ref=e3244]
+                - cell "roi" [ref=e3245]
+                - cell "2024-11-12 12:50" [ref=e3246]
+                - cell "2024-11-12 14:00" [ref=e3247]
+                - cell "0.029" [ref=e3248]
+                - cell "0.03" [ref=e3249]
+                - cell "2.00%" [ref=e3250]
+                - cell "0.246" [ref=e3252]
+                - cell "0.028" [ref=e3253]
+                - cell "-5%" [ref=e3254]
+                - cell "0h1m" [ref=e3255]
+              - row [ref=e3256]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e3257]
+                - cell "long" [ref=e3258]
+                - cell [ref=e3259]
+                - cell "roi" [ref=e3260]
+                - cell "2024-11-12 12:50" [ref=e3261]
+                - cell "2024-11-12 14:00" [ref=e3262]
+                - cell "0.186" [ref=e3263]
+                - cell "0.19" [ref=e3264]
+                - cell "2.00%" [ref=e3265]
+                - cell "0.245" [ref=e3267]
+                - cell "0.177" [ref=e3268]
+                - cell "-5%" [ref=e3269]
+                - cell "0h1m" [ref=e3270]
+              - row [ref=e3271]:
+                - cell "DOT/USDT:USDT" [ref=e3272]
+                - cell "long" [ref=e3273]
+                - cell [ref=e3274]
+                - cell "roi" [ref=e3275]
+                - cell "2024-11-12 13:50" [ref=e3276]
+                - cell "2024-11-12 14:00" [ref=e3277]
+                - cell "5.134" [ref=e3278]
+                - cell "5.319" [ref=e3279]
+                - cell "3.50%" [ref=e3280]
+                - cell "0.413" [ref=e3282]
+                - cell "4.877" [ref=e3283]
+                - cell "-5%" [ref=e3284]
+                - cell "0h0m" [ref=e3285]
+              - row [ref=e3286]:
+                - cell "ENJ/USDT:USDT" [ref=e3287]
+                - cell "long" [ref=e3288]
+                - cell [ref=e3289]
+                - cell "roi" [ref=e3290]
+                - cell "2024-11-12 13:45" [ref=e3291]
+                - cell "2024-11-12 14:45" [ref=e3292]
+                - cell "0.159" [ref=e3293]
+                - cell "0.163" [ref=e3294]
+                - cell "2.00%" [ref=e3295]
+                - cell "0.246" [ref=e3297]
+                - cell "0.151" [ref=e3298]
+                - cell "-5%" [ref=e3299]
+                - cell "0h1m" [ref=e3300]
+              - row [ref=e3301]:
+                - cell "1000BONK/USDT:USDT" [ref=e3302]
+                - cell "long" [ref=e3303]
+                - cell [ref=e3304]
+                - cell "roi" [ref=e3305]
+                - cell "2024-11-12 16:25" [ref=e3306]
+                - cell "2024-11-12 16:40" [ref=e3307]
+                - cell "0.028" [ref=e3308]
+                - cell "0.029" [ref=e3309]
+                - cell "3.50%" [ref=e3310]
+                - cell "0.439" [ref=e3312]
+                - cell "0.027" [ref=e3313]
+                - cell "-5%" [ref=e3314]
+                - cell "0h0m" [ref=e3315]
+              - row [ref=e3316]:
+                - cell "DOGE/USDT:USDT" [ref=e3317]
+                - cell "long" [ref=e3318]
+                - cell [ref=e3319]
+                - cell "roi" [ref=e3320]
+                - cell "2024-11-12 16:25" [ref=e3321]
+                - cell "2024-11-12 16:50" [ref=e3322]
+                - cell "0.353" [ref=e3323]
+                - cell "0.366" [ref=e3324]
+                - cell "3.50%" [ref=e3325]
+                - cell "0.432" [ref=e3327]
+                - cell "0.335" [ref=e3328]
+                - cell "-5%" [ref=e3329]
+                - cell "0h0m" [ref=e3330]
+              - row [ref=e3331]:
+                - cell "1000BONK/USDT:USDT" [ref=e3332]
+                - cell "long" [ref=e3333]
+                - cell [ref=e3334]
+                - cell "roi" [ref=e3335]
+                - cell "2024-11-13 02:40" [ref=e3336]
+                - cell "2024-11-13 03:40" [ref=e3337]
+                - cell "0.033" [ref=e3338]
+                - cell "0.034" [ref=e3339]
+                - cell "2.00%" [ref=e3340]
+                - cell "0.255" [ref=e3342]
+                - cell "0.032" [ref=e3343]
+                - cell "-5%" [ref=e3344]
+                - cell "0h1m" [ref=e3345]
+              - row [ref=e3346]:
+                - cell "GRT/USDT:USDT" [ref=e3347]
+                - cell "long" [ref=e3348]
+                - cell [ref=e3349]
+                - cell "roi" [ref=e3350]
+                - cell "2024-11-13 04:40" [ref=e3351]
+                - cell "2024-11-13 13:30" [ref=e3352]
+                - cell "0.179" [ref=e3353]
+                - cell "0.183" [ref=e3354]
+                - cell "1.99%" [ref=e3355]
+                - cell "0.253" [ref=e3357]
+                - cell "0.17" [ref=e3358]
+                - cell "-5%" [ref=e3359]
+                - cell "0h9m" [ref=e3360]
+              - row [ref=e3361]:
+                - cell "ENJ/USDT:USDT" [ref=e3362]
+                - cell "long" [ref=e3363]
+                - cell [ref=e3364]
+                - cell "roi" [ref=e3365]
+                - cell "2024-11-13 04:30" [ref=e3366]
+                - cell "2024-11-13 13:50" [ref=e3367]
+                - cell "0.157" [ref=e3368]
+                - cell "0.16" [ref=e3369]
+                - cell "1.99%" [ref=e3370]
+                - cell "0.253" [ref=e3372]
+                - cell "0.149" [ref=e3373]
+                - cell "-5%" [ref=e3374]
+                - cell "0h9m" [ref=e3375]
+              - row [ref=e3376]:
+                - cell "DOGE/USDT:USDT" [ref=e3377]
+                - cell "long" [ref=e3378]
+                - cell [ref=e3379]
+                - cell "roi" [ref=e3380]
+                - cell "2024-11-13 20:05" [ref=e3381]
+                - cell "2024-11-13 20:35" [ref=e3382]
+                - cell "0.378" [ref=e3383]
+                - cell "0.392" [ref=e3384]
+                - cell "3.50%" [ref=e3385]
+                - cell "0.45" [ref=e3387]
+                - cell "0.359" [ref=e3388]
+                - cell "-5%" [ref=e3389]
+                - cell "0h1m" [ref=e3390]
+              - row [ref=e3391]:
+                - cell "1000BONK/USDT:USDT" [ref=e3392]
+                - cell "long" [ref=e3393]
+                - cell [ref=e3394]
+                - cell "roi" [ref=e3395]
+                - cell "2024-11-14 15:00" [ref=e3396]
+                - cell "2024-11-14 16:50" [ref=e3397]
+                - cell "0.037" [ref=e3398]
+                - cell "0.038" [ref=e3399]
+                - cell "2.00%" [ref=e3400]
+                - cell "0.261" [ref=e3402]
+                - cell "0.035" [ref=e3403]
+                - cell "-5%" [ref=e3404]
+                - cell "0h2m" [ref=e3405]
+              - row [ref=e3406]:
+                - cell "1000BONK/USDT:USDT" [ref=e3407]
+                - cell "long" [ref=e3408]
+                - cell [ref=e3409]
+                - cell "roi" [ref=e3410]
+                - cell "2024-11-14 23:40" [ref=e3411]
+                - cell "2024-11-15 00:00" [ref=e3412]
+                - cell "0.035" [ref=e3413]
+                - cell "0.036" [ref=e3414]
+                - cell "3.50%" [ref=e3415]
+                - cell "0.46" [ref=e3417]
+                - cell "0.033" [ref=e3418]
+                - cell "-5%" [ref=e3419]
+                - cell "0h0m" [ref=e3420]
+              - row [ref=e3421]:
+                - cell "DOGE/USDT:USDT" [ref=e3422]
+                - cell "long" [ref=e3423]
+                - cell [ref=e3424]
+                - cell "roi" [ref=e3425]
+                - cell "2024-11-14 23:15" [ref=e3426]
+                - cell "2024-11-15 00:15" [ref=e3427]
+                - cell "0.363" [ref=e3428]
+                - cell "0.371" [ref=e3429]
+                - cell "2.20%" [ref=e3430]
+                - cell "0.288" [ref=e3432]
+                - cell "0.345" [ref=e3433]
+                - cell "-5%" [ref=e3434]
+                - cell "0h1m" [ref=e3435]
+              - row [ref=e3436]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e3437]
+                - cell "long" [ref=e3438]
+                - cell [ref=e3439]
+                - cell "stop_loss" [ref=e3440]
+                - cell "2024-11-15 00:00" [ref=e3441]
+                - cell "2024-11-15 04:40" [ref=e3442]
+                - cell "0.215" [ref=e3443]
+                - cell "0.205" [ref=e3444]
+                - cell "⚠ -5.11%" [ref=e3445]
+                - cell "-0.671" [ref=e3447]
+                - cell "0.205" [ref=e3448]
+                - cell "-5%" [ref=e3449]
+                - cell "0h5m" [ref=e3450]
+              - row [ref=e3451]:
+                - cell "1000BONK/USDT:USDT" [ref=e3452]
+                - cell "long" [ref=e3453]
+                - cell [ref=e3454]
+                - cell "roi" [ref=e3455]
+                - cell "2024-11-15 04:50" [ref=e3456]
+                - cell "2024-11-15 05:50" [ref=e3457]
+                - cell "0.033" [ref=e3458]
+                - cell "0.034" [ref=e3459]
+                - cell "2.47%" [ref=e3460]
+                - cell "0.325" [ref=e3462]
+                - cell "0.032" [ref=e3463]
+                - cell "-5%" [ref=e3464]
+                - cell "0h1m" [ref=e3465]
+              - row [ref=e3466]:
+                - cell "1000BONK/USDT:USDT" [ref=e3467]
+                - cell "long" [ref=e3468]
+                - cell [ref=e3469]
+                - cell "stop_loss" [ref=e3470]
+                - cell "2024-11-16 07:15" [ref=e3471]
+                - cell "2024-11-16 11:20" [ref=e3472]
+                - cell "0.042" [ref=e3473]
+                - cell "0.04" [ref=e3474]
+                - cell "⚠ -5.09%" [ref=e3475]
+                - cell "-0.674" [ref=e3477]
+                - cell "0.04" [ref=e3478]
+                - cell "-5%" [ref=e3479]
+                - cell "0h4m" [ref=e3480]
+              - row [ref=e3481]:
+                - cell "XRP/USDT:USDT" [ref=e3482]
+                - cell "long" [ref=e3483]
+                - cell [ref=e3484]
+                - cell "roi" [ref=e3485]
+                - cell "2024-11-17 02:25" [ref=e3486]
+                - cell "2024-11-17 07:00" [ref=e3487]
+                - cell "1.051" [ref=e3488]
+                - cell "1.073" [ref=e3489]
+                - cell "2.00%" [ref=e3490]
+                - cell "0.261" [ref=e3492]
+                - cell "0.998" [ref=e3493]
+                - cell "-5%" [ref=e3494]
+                - cell "0h5m" [ref=e3495]
+              - row [ref=e3496]:
+                - cell "1000BONK/USDT:USDT" [ref=e3497]
+                - cell "long" [ref=e3498]
+                - cell [ref=e3499]
+                - cell "roi" [ref=e3500]
+                - cell "2024-11-17 19:15" [ref=e3501]
+                - cell "2024-11-17 19:50" [ref=e3502]
+                - cell "0.05" [ref=e3503]
+                - cell "0.052" [ref=e3504]
+                - cell "3.50%" [ref=e3505]
+                - cell "0.459" [ref=e3507]
+                - cell "0.047" [ref=e3508]
+                - cell "-5%" [ref=e3509]
+                - cell "0h1m" [ref=e3510]
+              - row [ref=e3511]:
+                - cell "1000BONK/USDT:USDT" [ref=e3512]
+                - cell "long" [ref=e3513]
+                - cell [ref=e3514]
+                - cell "roi" [ref=e3515]
+                - cell "2024-11-18 12:10" [ref=e3516]
+                - cell "2024-11-18 14:15" [ref=e3517]
+                - cell "0.049" [ref=e3518]
+                - cell "0.05" [ref=e3519]
+                - cell "2.00%" [ref=e3520]
+                - cell "0.264" [ref=e3522]
+                - cell "0.046" [ref=e3523]
+                - cell "-5%" [ref=e3524]
+                - cell "0h2m" [ref=e3525]
+              - row [ref=e3526]:
+                - cell "1000BONK/USDT:USDT" [ref=e3527]
+                - cell "long" [ref=e3528]
+                - cell [ref=e3529]
+                - cell "roi" [ref=e3530]
+                - cell "2024-11-18 18:45" [ref=e3531]
+                - cell "2024-11-18 19:50" [ref=e3532]
+                - cell "0.047" [ref=e3533]
+                - cell "0.048" [ref=e3534]
+                - cell "2.00%" [ref=e3535]
+                - cell "0.266" [ref=e3537]
+                - cell "0.045" [ref=e3538]
+                - cell "-5%" [ref=e3539]
+                - cell "0h1m" [ref=e3540]
+              - row [ref=e3541]:
+                - cell "1000BONK/USDT:USDT" [ref=e3542]
+                - cell "long" [ref=e3543]
+                - cell [ref=e3544]
+                - cell "stop_loss" [ref=e3545]
+                - cell "2024-11-20 17:25" [ref=e3546]
+                - cell "2024-11-20 19:15" [ref=e3547]
+                - cell "0.051" [ref=e3548]
+                - cell "0.048" [ref=e3549]
+                - cell "⚠ -5.09%" [ref=e3550]
+                - cell "-0.68" [ref=e3552]
+                - cell "0.048" [ref=e3553]
+                - cell "-5%" [ref=e3554]
+                - cell "0h2m" [ref=e3555]
+              - row [ref=e3556]:
+                - cell "CRV/USDT:USDT" [ref=e3557]
+                - cell "long" [ref=e3558]
+                - cell [ref=e3559]
+                - cell "roi" [ref=e3560]
+                - cell "2024-11-20 18:20" [ref=e3561]
+                - cell "2024-11-20 20:25" [ref=e3562]
+                - cell "0.371" [ref=e3563]
+                - cell "0.379" [ref=e3564]
+                - cell "2.00%" [ref=e3565]
+                - cell "0.267" [ref=e3567]
+                - cell "0.353" [ref=e3568]
+                - cell "-5%" [ref=e3569]
+                - cell "0h2m" [ref=e3570]
+              - row [ref=e3571]:
+                - cell "1000BONK/USDT:USDT" [ref=e3572]
+                - cell "long" [ref=e3573]
+                - cell [ref=e3574]
+                - cell "roi" [ref=e3575]
+                - cell "2024-11-21 02:40" [ref=e3576]
+                - cell "2024-11-21 03:25" [ref=e3577]
+                - cell "0.047" [ref=e3578]
+                - cell "0.048" [ref=e3579]
+                - cell "3.50%" [ref=e3580]
+                - cell "0.464" [ref=e3582]
+                - cell "0.044" [ref=e3583]
+                - cell "-5%" [ref=e3584]
+                - cell "0h1m" [ref=e3585]
+              - row [ref=e3586]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e3587]
+                - cell "long" [ref=e3588]
+                - cell [ref=e3589]
+                - cell "roi" [ref=e3590]
+                - cell "2024-11-21 10:00" [ref=e3591]
+                - cell "2024-11-21 12:10" [ref=e3592]
+                - cell "0.251" [ref=e3593]
+                - cell "0.256" [ref=e3594]
+                - cell "2.00%" [ref=e3595]
+                - cell "0.266" [ref=e3597]
+                - cell "0.238" [ref=e3598]
+                - cell "-5%" [ref=e3599]
+                - cell "0h2m" [ref=e3600]
+              - row [ref=e3601]:
+                - cell "XRP/USDT:USDT" [ref=e3602]
+                - cell "long" [ref=e3603]
+                - cell [ref=e3604]
+                - cell "roi" [ref=e3605]
+                - cell "2024-11-23 20:30" [ref=e3606]
+                - cell "2024-11-23 21:15" [ref=e3607]
+                - cell "1.426" [ref=e3608]
+                - cell "1.477" [ref=e3609]
+                - cell "3.50%" [ref=e3610]
+                - cell "0.469" [ref=e3612]
+                - cell "1.355" [ref=e3613]
+                - cell "-5%" [ref=e3614]
+                - cell "0h1m" [ref=e3615]
+              - row [ref=e3616]:
+                - cell "ALGO/USDT:USDT" [ref=e3617]
+                - cell "long" [ref=e3618]
+                - cell [ref=e3619]
+                - cell "roi" [ref=e3620]
+                - cell "2024-11-23 20:30" [ref=e3621]
+                - cell "2024-11-23 21:30" [ref=e3622]
+                - cell "0.283" [ref=e3623]
+                - cell "0.289" [ref=e3624]
+                - cell "2.00%" [ref=e3625]
+                - cell "0.269" [ref=e3627]
+                - cell "0.269" [ref=e3628]
+                - cell "-5%" [ref=e3629]
+                - cell "0h1m" [ref=e3630]
+              - row [ref=e3631]:
+                - cell "XRP/USDT:USDT" [ref=e3632]
+                - cell "long" [ref=e3633]
+                - cell [ref=e3634]
+                - cell "stop_loss" [ref=e3635]
+                - cell "2024-11-24 12:00" [ref=e3636]
+                - cell "2024-11-24 12:40" [ref=e3637]
+                - cell "1.385" [ref=e3638]
+                - cell "1.316" [ref=e3639]
+                - cell "⚠ -5.09%" [ref=e3640]
+                - cell "-0.691" [ref=e3642]
+                - cell "1.316" [ref=e3643]
+                - cell "-5%" [ref=e3644]
+                - cell "0h1m" [ref=e3645]
+              - row [ref=e3646]:
+                - cell "MANA/USDT:USDT" [ref=e3647]
+                - cell "long" [ref=e3648]
+                - cell [ref=e3649]
+                - cell "stop_loss" [ref=e3650]
+                - cell "2024-11-24 12:40" [ref=e3651]
+                - cell "2024-11-24 14:10" [ref=e3652]
+                - cell "0.612" [ref=e3653]
+                - cell "0.581" [ref=e3654]
+                - cell "⚠ -5.09%" [ref=e3655]
+                - cell "-0.686" [ref=e3657]
+                - cell "0.581" [ref=e3658]
+                - cell "-5%" [ref=e3659]
+                - cell "0h2m" [ref=e3660]
+              - row [ref=e3661]:
+                - cell "ENJ/USDT:USDT" [ref=e3662]
+                - cell "long" [ref=e3663]
+                - cell [ref=e3664]
+                - cell "stop_loss" [ref=e3665]
+                - cell "2024-11-24 13:40" [ref=e3666]
+                - cell "2024-11-24 14:25" [ref=e3667]
+                - cell "0.269" [ref=e3668]
+                - cell "0.255" [ref=e3669]
+                - cell "⚠ -5.09%" [ref=e3670]
+                - cell "-0.685" [ref=e3672]
+                - cell "0.255" [ref=e3673]
+                - cell "-5%" [ref=e3674]
+                - cell "0h1m" [ref=e3675]
+              - row [ref=e3676]:
+                - cell "CRV/USDT:USDT" [ref=e3677]
+                - cell "long" [ref=e3678]
+                - cell [ref=e3679]
+                - cell "roi" [ref=e3680]
+                - cell "2024-11-25 22:40" [ref=e3681]
+                - cell "2024-11-25 22:55" [ref=e3682]
+                - cell "0.507" [ref=e3683]
+                - cell "0.525" [ref=e3684]
+                - cell "3.50%" [ref=e3685]
+                - cell "0.46" [ref=e3687]
+                - cell "0.482" [ref=e3688]
+                - cell "-5%" [ref=e3689]
+                - cell "0h0m" [ref=e3690]
+              - row [ref=e3691]:
+                - cell "ALGO/USDT:USDT" [ref=e3692]
+                - cell "long" [ref=e3693]
+                - cell [ref=e3694]
+                - cell "roi" [ref=e3695]
+                - cell "2024-11-30 03:05" [ref=e3696]
+                - cell "2024-11-30 04:55" [ref=e3697]
+                - cell "0.409" [ref=e3698]
+                - cell "0.417" [ref=e3699]
+                - cell "2.00%" [ref=e3700]
+                - cell "0.265" [ref=e3702]
+                - cell "0.388" [ref=e3703]
+                - cell "-5%" [ref=e3704]
+                - cell "0h2m" [ref=e3705]
+              - row [ref=e3706]:
+                - cell "ENJ/USDT:USDT" [ref=e3707]
+                - cell "long" [ref=e3708]
+                - cell [ref=e3709]
+                - cell "roi" [ref=e3710]
+                - cell "2024-12-01 03:00" [ref=e3711]
+                - cell "2024-12-01 06:45" [ref=e3712]
+                - cell "0.311" [ref=e3713]
+                - cell "0.317" [ref=e3714]
+                - cell "2.00%" [ref=e3715]
+                - cell "0.261" [ref=e3717]
+                - cell "0.295" [ref=e3718]
+                - cell "-5%" [ref=e3719]
+                - cell "0h4m" [ref=e3720]
+              - row [ref=e3721]:
+                - cell "CRV/USDT:USDT" [ref=e3722]
+                - cell "long" [ref=e3723]
+                - cell [ref=e3724]
+                - cell "roi" [ref=e3725]
+                - cell "2024-12-01 06:20" [ref=e3726]
+                - cell "2024-12-01 09:05" [ref=e3727]
+                - cell "0.638" [ref=e3728]
+                - cell "0.651" [ref=e3729]
+                - cell "1.99%" [ref=e3730]
+                - cell "0.264" [ref=e3732]
+                - cell "0.606" [ref=e3733]
+                - cell "-5%" [ref=e3734]
+                - cell "0h3m" [ref=e3735]
+              - row [ref=e3736]:
+                - cell "CRV/USDT:USDT" [ref=e3737]
+                - cell "long" [ref=e3738]
+                - cell [ref=e3739]
+                - cell "roi" [ref=e3740]
+                - cell "2024-12-02 10:45" [ref=e3741]
+                - cell "2024-12-02 11:45" [ref=e3742]
+                - cell "0.687" [ref=e3743]
+                - cell "0.701" [ref=e3744]
+                - cell "2.00%" [ref=e3745]
+                - cell "0.268" [ref=e3747]
+                - cell "0.653" [ref=e3748]
+                - cell "-5%" [ref=e3749]
+                - cell "0h1m" [ref=e3750]
+              - row [ref=e3751]:
+                - cell "ALGO/USDT:USDT" [ref=e3752]
+                - cell "long" [ref=e3753]
+                - cell [ref=e3754]
+                - cell "roi" [ref=e3755]
+                - cell "2024-12-02 10:45" [ref=e3756]
+                - cell "2024-12-02 12:10" [ref=e3757]
+                - cell "0.464" [ref=e3758]
+                - cell "0.474" [ref=e3759]
+                - cell "2.00%" [ref=e3760]
+                - cell "0.268" [ref=e3762]
+                - cell "0.441" [ref=e3763]
+                - cell "-5%" [ref=e3764]
+                - cell "0h1m" [ref=e3765]
+              - row [ref=e3766]:
+                - cell "APE/USDT:USDT" [ref=e3767]
+                - cell "long" [ref=e3768]
+                - cell [ref=e3769]
+                - cell "roi" [ref=e3770]
+                - cell "2024-12-02 11:00" [ref=e3771]
+                - cell "2024-12-02 12:10" [ref=e3772]
+                - cell "1.433" [ref=e3773]
+                - cell "1.463" [ref=e3774]
+                - cell "2.00%" [ref=e3775]
+                - cell "0.258" [ref=e3777]
+                - cell "1.361" [ref=e3778]
+                - cell "-5%" [ref=e3779]
+                - cell "0h1m" [ref=e3780]
+              - row [ref=e3781]:
+                - cell "SAND/USDT:USDT" [ref=e3782]
+                - cell "long" [ref=e3783]
+                - cell [ref=e3784]
+                - cell "stop_loss" [ref=e3785]
+                - cell "2024-12-03 13:50" [ref=e3786]
+                - cell "2024-12-03 14:30" [ref=e3787]
+                - cell "0.742" [ref=e3788]
+                - cell "0.705" [ref=e3789]
+                - cell "⚠ -5.09%" [ref=e3790]
+                - cell "-0.68" [ref=e3792]
+                - cell "0.705" [ref=e3793]
+                - cell "-5%" [ref=e3794]
+                - cell "0h1m" [ref=e3795]
+              - row [ref=e3796]:
+                - cell "MANA/USDT:USDT" [ref=e3797]
+                - cell "long" [ref=e3798]
+                - cell [ref=e3799]
+                - cell "stop_loss" [ref=e3800]
+                - cell "2024-12-03 13:55" [ref=e3801]
+                - cell "2024-12-03 14:30" [ref=e3802]
+                - cell "0.663" [ref=e3803]
+                - cell "0.629" [ref=e3804]
+                - cell "⚠ -5.09%" [ref=e3805]
+                - cell "-0.676" [ref=e3807]
+                - cell "0.629" [ref=e3808]
+                - cell "-5%" [ref=e3809]
+                - cell "0h1m" [ref=e3810]
+              - row [ref=e3811]:
+                - cell "ALGO/USDT:USDT" [ref=e3812]
+                - cell "long" [ref=e3813]
+                - cell [ref=e3814]
+                - cell "roi" [ref=e3815]
+                - cell "2024-12-04 17:15" [ref=e3816]
+                - cell "2024-12-04 18:15" [ref=e3817]
+                - cell "0.473" [ref=e3818]
+                - cell "0.489" [ref=e3819]
+                - cell "3.30%" [ref=e3820]
+                - cell "0.439" [ref=e3822]
+                - cell "0.449" [ref=e3823]
+                - cell "-5%" [ref=e3824]
+                - cell "0h1m" [ref=e3825]
+              - row [ref=e3826]:
+                - cell "CRV/USDT:USDT" [ref=e3827]
+                - cell "long" [ref=e3828]
+                - cell [ref=e3829]
+                - cell "roi" [ref=e3830]
+                - cell "2024-12-04 21:10" [ref=e3831]
+                - cell "2024-12-04 22:15" [ref=e3832]
+                - cell "1.084" [ref=e3833]
+                - cell "1.107" [ref=e3834]
+                - cell "2.00%" [ref=e3835]
+                - cell "0.267" [ref=e3837]
+                - cell "1.03" [ref=e3838]
+                - cell "-5%" [ref=e3839]
+                - cell "0h1m" [ref=e3840]
+              - row [ref=e3841]:
+                - cell "SAND/USDT:USDT" [ref=e3842]
+                - cell "long" [ref=e3843]
+                - cell [ref=e3844]
+                - cell "stop_loss" [ref=e3845]
+                - cell "2024-12-05 00:30" [ref=e3846]
+                - cell "2024-12-05 03:50" [ref=e3847]
+                - cell "0.897" [ref=e3848]
+                - cell "0.852" [ref=e3849]
+                - cell "⚠ -5.09%" [ref=e3850]
+                - cell "-0.686" [ref=e3852]
+                - cell "0.852" [ref=e3853]
+                - cell "-5%" [ref=e3854]
+                - cell "0h3m" [ref=e3855]
+              - row [ref=e3856]:
+                - cell "MANA/USDT:USDT" [ref=e3857]
+                - cell "long" [ref=e3858]
+                - cell [ref=e3859]
+                - cell "roi" [ref=e3860]
+                - cell "2024-12-05 01:10" [ref=e3861]
+                - cell "2024-12-05 04:40" [ref=e3862]
+                - cell "0.751" [ref=e3863]
+                - cell "0.766" [ref=e3864]
+                - cell "2.00%" [ref=e3865]
+                - cell "0.255" [ref=e3867]
+                - cell "0.713" [ref=e3868]
+                - cell "-5%" [ref=e3869]
+                - cell "0h4m" [ref=e3870]
+              - row [ref=e3871]:
+                - cell "1000BONK/USDT:USDT" [ref=e3872]
+                - cell "long" [ref=e3873]
+                - cell [ref=e3874]
+                - cell "stop_loss" [ref=e3875]
+                - cell "2024-12-09 20:40" [ref=e3876]
+                - cell "2024-12-09 21:00" [ref=e3877]
+                - cell "0.041" [ref=e3878]
+                - cell "0.039" [ref=e3879]
+                - cell "⚠ -5.09%" [ref=e3880]
+                - cell "-0.68" [ref=e3882]
+                - cell "0.039" [ref=e3883]
+                - cell "-5%" [ref=e3884]
+                - cell "0h0m" [ref=e3885]
+              - row [ref=e3886]:
+                - cell "DOGE/USDT:USDT" [ref=e3887]
+                - cell "long" [ref=e3888]
+                - cell [ref=e3889]
+                - cell "roi" [ref=e3890]
+                - cell "2024-12-10 03:15" [ref=e3891]
+                - cell "2024-12-10 03:55" [ref=e3892]
+                - cell "0.388" [ref=e3893]
+                - cell "0.402" [ref=e3894]
+                - cell "3.50%" [ref=e3895]
+                - cell "0.462" [ref=e3897]
+                - cell "0.369" [ref=e3898]
+                - cell "-5%" [ref=e3899]
+                - cell "0h1m" [ref=e3900]
+              - row [ref=e3901]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e3902]
+                - cell "long" [ref=e3903]
+                - cell [ref=e3904]
+                - cell "roi" [ref=e3905]
+                - cell "2024-12-10 03:15" [ref=e3906]
+                - cell "2024-12-10 03:55" [ref=e3907]
+                - cell "0.223" [ref=e3908]
+                - cell "0.231" [ref=e3909]
+                - cell "3.50%" [ref=e3910]
+                - cell "0.46" [ref=e3912]
+                - cell "0.212" [ref=e3913]
+                - cell "-5%" [ref=e3914]
+                - cell "0h1m" [ref=e3915]
+              - row [ref=e3916]:
+                - cell "1000BONK/USDT:USDT" [ref=e3917]
+                - cell "long" [ref=e3918]
+                - cell [ref=e3919]
+                - cell "roi" [ref=e3920]
+                - cell "2024-12-10 03:15" [ref=e3921]
+                - cell "2024-12-10 04:25" [ref=e3922]
+                - cell "0.036" [ref=e3923]
+                - cell "0.037" [ref=e3924]
+                - cell "2.00%" [ref=e3925]
+                - cell "0.264" [ref=e3927]
+                - cell "0.034" [ref=e3928]
+                - cell "-5%" [ref=e3929]
+                - cell "0h1m" [ref=e3930]
+              - row [ref=e3931]:
+                - cell "XRP/USDT:USDT" [ref=e3932]
+                - cell "long" [ref=e3933]
+                - cell [ref=e3934]
+                - cell "roi" [ref=e3935]
+                - cell "2024-12-10 03:20" [ref=e3936]
+                - cell "2024-12-10 04:30" [ref=e3937]
+                - cell "2.092" [ref=e3938]
+                - cell "2.136" [ref=e3939]
+                - cell "2.00%" [ref=e3940]
+                - cell "0.264" [ref=e3942]
+                - cell "1.987" [ref=e3943]
+                - cell "-5%" [ref=e3944]
+                - cell "0h1m" [ref=e3945]
+              - row [ref=e3946]:
+                - cell "ALGO/USDT:USDT" [ref=e3947]
+                - cell "long" [ref=e3948]
+                - cell [ref=e3949]
+                - cell "roi" [ref=e3950]
+                - cell "2024-12-10 13:00" [ref=e3951]
+                - cell "2024-12-10 14:00" [ref=e3952]
+                - cell "0.402" [ref=e3953]
+                - cell "0.41" [ref=e3954]
+                - cell "2.00%" [ref=e3955]
+                - cell "0.271" [ref=e3957]
+                - cell "0.382" [ref=e3958]
+                - cell "-5%" [ref=e3959]
+                - cell "0h1m" [ref=e3960]
+              - row [ref=e3961]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e3962]
+                - cell "long" [ref=e3963]
+                - cell [ref=e3964]
+                - cell "roi" [ref=e3965]
+                - cell "2024-12-10 13:00" [ref=e3966]
+                - cell "2024-12-10 14:00" [ref=e3967]
+                - cell "0.223" [ref=e3968]
+                - cell "0.228" [ref=e3969]
+                - cell "2.00%" [ref=e3970]
+                - cell "0.268" [ref=e3972]
+                - cell "0.212" [ref=e3973]
+                - cell "-5%" [ref=e3974]
+                - cell "0h1m" [ref=e3975]
+              - row [ref=e3976]:
+                - cell "1000BONK/USDT:USDT" [ref=e3977]
+                - cell "long" [ref=e3978]
+                - cell [ref=e3979]
+                - cell "stop_loss" [ref=e3980]
+                - cell "2024-12-10 15:40" [ref=e3981]
+                - cell "2024-12-10 17:25" [ref=e3982]
+                - cell "0.035" [ref=e3983]
+                - cell "0.033" [ref=e3984]
+                - cell "⚠ -5.09%" [ref=e3985]
+                - cell "-0.697" [ref=e3987]
+                - cell "0.033" [ref=e3988]
+                - cell "-5%" [ref=e3989]
+                - cell "0h2m" [ref=e3990]
+              - row [ref=e3991]:
+                - cell "MANA/USDT:USDT" [ref=e3992]
+                - cell "long" [ref=e3993]
+                - cell [ref=e3994]
+                - cell "stop_loss" [ref=e3995]
+                - cell "2024-12-10 15:40" [ref=e3996]
+                - cell "2024-12-10 17:40" [ref=e3997]
+                - cell "0.565" [ref=e3998]
+                - cell "0.536" [ref=e3999]
+                - cell "⚠ -5.10%" [ref=e4000]
+                - cell "-0.692" [ref=e4002]
+                - cell "0.536" [ref=e4003]
+                - cell "-5%" [ref=e4004]
+                - cell "0h2m" [ref=e4005]
+              - row [ref=e4006]:
+                - cell "SAND/USDT:USDT" [ref=e4007]
+                - cell "long" [ref=e4008]
+                - cell [ref=e4009]
+                - cell "stop_loss" [ref=e4010]
+                - cell "2024-12-10 15:40" [ref=e4011]
+                - cell "2024-12-10 17:50" [ref=e4012]
+                - cell "0.678" [ref=e4013]
+                - cell "0.644" [ref=e4014]
+                - cell "⚠ -5.10%" [ref=e4015]
+                - cell "-0.692" [ref=e4017]
+                - cell "0.644" [ref=e4018]
+                - cell "-5%" [ref=e4019]
+                - cell "0h2m" [ref=e4020]
+              - row [ref=e4021]:
+                - cell "APE/USDT:USDT" [ref=e4022]
+                - cell "long" [ref=e4023]
+                - cell [ref=e4024]
+                - cell "roi" [ref=e4025]
+                - cell "2024-12-10 15:40" [ref=e4026]
+                - cell "2024-12-10 19:50" [ref=e4027]
+                - cell "1.364" [ref=e4028]
+                - cell "1.392" [ref=e4029]
+                - cell "1.99%" [ref=e4030]
+                - cell "0.271" [ref=e4032]
+                - cell "1.295" [ref=e4033]
+                - cell "-5%" [ref=e4034]
+                - cell "0h4m" [ref=e4035]
+              - row [ref=e4036]:
+                - cell "1000BONK/USDT:USDT" [ref=e4037]
+                - cell "long" [ref=e4038]
+                - cell [ref=e4039]
+                - cell "roi" [ref=e4040]
+                - cell "2024-12-18 05:55" [ref=e4041]
+                - cell "2024-12-18 18:15" [ref=e4042]
+                - cell "0.034" [ref=e4043]
+                - cell "0.034" [ref=e4044]
+                - cell "2.00%" [ref=e4045]
+                - cell "0.265" [ref=e4047]
+                - cell "0.032" [ref=e4048]
+                - cell "-5%" [ref=e4049]
+                - cell "0h12m" [ref=e4050]
+              - row [ref=e4051]:
+                - cell "ENJ/USDT:USDT" [ref=e4052]
+                - cell "long" [ref=e4053]
+                - cell [ref=e4054]
+                - cell "stop_loss" [ref=e4055]
+                - cell "2024-12-19 00:00" [ref=e4056]
+                - cell "2024-12-19 02:00" [ref=e4057]
+                - cell "0.246" [ref=e4058]
+                - cell "0.234" [ref=e4059]
+                - cell "⚠ -5.10%" [ref=e4060]
+                - cell "-0.678" [ref=e4062]
+                - cell "0.234" [ref=e4063]
+                - cell "-5%" [ref=e4064]
+                - cell "0h2m" [ref=e4065]
+              - row [ref=e4066]:
+                - cell "CRV/USDT:USDT" [ref=e4067]
+                - cell "long" [ref=e4068]
+                - cell [ref=e4069]
+                - cell "roi" [ref=e4070]
+                - cell "2024-12-19 02:10" [ref=e4071]
+                - cell "2024-12-19 03:00" [ref=e4072]
+                - cell "0.917" [ref=e4073]
+                - cell "0.95" [ref=e4074]
+                - cell "3.50%" [ref=e4075]
+                - cell "0.459" [ref=e4077]
+                - cell "0.871" [ref=e4078]
+                - cell "-5%" [ref=e4079]
+                - cell "0h1m" [ref=e4080]
+              - row [ref=e4081]:
+                - cell "XRP/USDT:USDT" [ref=e4082]
+                - cell "long" [ref=e4083]
+                - cell [ref=e4084]
+                - cell "roi" [ref=e4085]
+                - cell "2024-12-19 02:15" [ref=e4086]
+                - cell "2024-12-19 03:00" [ref=e4087]
+                - cell "2.222" [ref=e4088]
+                - cell "2.302" [ref=e4089]
+                - cell "3.50%" [ref=e4090]
+                - cell "0.459" [ref=e4092]
+                - cell "2.111" [ref=e4093]
+                - cell "-5%" [ref=e4094]
+                - cell "0h1m" [ref=e4095]
+              - row [ref=e4096]:
+                - cell "DOT/USDT:USDT" [ref=e4097]
+                - cell "long" [ref=e4098]
+                - cell [ref=e4099]
+                - cell "roi" [ref=e4100]
+                - cell "2024-12-19 02:05" [ref=e4101]
+                - cell "2024-12-19 03:05" [ref=e4102]
+                - cell "7.404" [ref=e4103]
+                - cell "7.603" [ref=e4104]
+                - cell "2.59%" [ref=e4105]
+                - cell "0.326" [ref=e4107]
+                - cell "7.034" [ref=e4108]
+                - cell "-5%" [ref=e4109]
+                - cell "0h1m" [ref=e4110]
+              - row [ref=e4111]:
+                - cell "ENJ/USDT:USDT" [ref=e4112]
+                - cell "long" [ref=e4113]
+                - cell [ref=e4114]
+                - cell "roi" [ref=e4115]
+                - cell "2024-12-19 02:05" [ref=e4116]
+                - cell "2024-12-19 03:05" [ref=e4117]
+                - cell "0.235" [ref=e4118]
+                - cell "0.243" [ref=e4119]
+                - cell "3.28%" [ref=e4120]
+                - cell "0.424" [ref=e4122]
+                - cell "0.223" [ref=e4123]
+                - cell "-5%" [ref=e4124]
+                - cell "0h1m" [ref=e4125]
+              - row [ref=e4126]:
+                - cell "1000BONK/USDT:USDT" [ref=e4127]
+                - cell "long" [ref=e4128]
+                - cell [ref=e4129]
+                - cell "roi" [ref=e4130]
+                - cell "2024-12-19 16:05" [ref=e4131]
+                - cell "2024-12-19 16:35" [ref=e4132]
+                - cell "0.029" [ref=e4133]
+                - cell "0.03" [ref=e4134]
+                - cell "3.50%" [ref=e4135]
+                - cell "0.475" [ref=e4137]
+                - cell "0.028" [ref=e4138]
+                - cell "-5%" [ref=e4139]
+                - cell "0h1m" [ref=e4140]
+              - row [ref=e4141]:
+                - cell "CRV/USDT:USDT" [ref=e4142]
+                - cell "long" [ref=e4143]
+                - cell [ref=e4144]
+                - cell "roi" [ref=e4145]
+                - cell "2024-12-19 16:05" [ref=e4146]
+                - cell "2024-12-19 17:00" [ref=e4147]
+                - cell "0.885" [ref=e4148]
+                - cell "0.917" [ref=e4149]
+                - cell "3.50%" [ref=e4150]
+                - cell "0.474" [ref=e4152]
+                - cell "0.841" [ref=e4153]
+                - cell "-5%" [ref=e4154]
+                - cell "0h1m" [ref=e4155]
+              - row [ref=e4156]:
+                - cell "CRV/USDT:USDT" [ref=e4157]
+                - cell "long" [ref=e4158]
+                - cell [ref=e4159]
+                - cell "roi" [ref=e4160]
+                - cell "2024-12-20 06:50" [ref=e4161]
+                - cell "2024-12-20 07:05" [ref=e4162]
+                - cell "0.8" [ref=e4163]
+                - cell "0.829" [ref=e4164]
+                - cell "3.50%" [ref=e4165]
+                - cell "0.482" [ref=e4167]
+                - cell "0.76" [ref=e4168]
+                - cell "-5%" [ref=e4169]
+                - cell "0h0m" [ref=e4170]
+              - row [ref=e4171]:
+                - cell "ALGO/USDT:USDT" [ref=e4172]
+                - cell "long" [ref=e4173]
+                - cell [ref=e4174]
+                - cell "stop_loss" [ref=e4175]
+                - cell "2024-12-20 08:35" [ref=e4176]
+                - cell "2024-12-20 09:25" [ref=e4177]
+                - cell "0.326" [ref=e4178]
+                - cell "0.31" [ref=e4179]
+                - cell "⚠ -5.09%" [ref=e4180]
+                - cell "-0.708" [ref=e4182]
+                - cell "0.31" [ref=e4183]
+                - cell "-5%" [ref=e4184]
+                - cell "0h1m" [ref=e4185]
+              - row [ref=e4186]:
+                - cell "1000BONK/USDT:USDT" [ref=e4187]
+                - cell "long" [ref=e4188]
+                - cell [ref=e4189]
+                - cell "stop_loss" [ref=e4190]
+                - cell "2024-12-20 08:35" [ref=e4191]
+                - cell "2024-12-20 10:10" [ref=e4192]
+                - cell "0.028" [ref=e4193]
+                - cell "0.026" [ref=e4194]
+                - cell "⚠ -5.09%" [ref=e4195]
+                - cell "-0.709" [ref=e4197]
+                - cell "0.026" [ref=e4198]
+                - cell "-5%" [ref=e4199]
+                - cell "0h2m" [ref=e4200]
+              - row [ref=e4201]:
+                - cell "DOT/USDT:USDT" [ref=e4202]
+                - cell "long" [ref=e4203]
+                - cell [ref=e4204]
+                - cell "stop_loss" [ref=e4205]
+                - cell "2024-12-20 08:40" [ref=e4206]
+                - cell "2024-12-20 10:10" [ref=e4207]
+                - cell "6.627" [ref=e4208]
+                - cell "6.296" [ref=e4209]
+                - cell "⚠ -5.09%" [ref=e4210]
+                - cell "-0.676" [ref=e4212]
+                - cell "6.296" [ref=e4213]
+                - cell "-5%" [ref=e4214]
+                - cell "0h2m" [ref=e4215]
+              - row [ref=e4216]:
+                - cell "MANA/USDT:USDT" [ref=e4217]
+                - cell "long" [ref=e4218]
+                - cell [ref=e4219]
+                - cell "stop_loss" [ref=e4220]
+                - cell "2024-12-20 08:40" [ref=e4221]
+                - cell "2024-12-20 10:10" [ref=e4222]
+                - cell "0.462" [ref=e4223]
+                - cell "0.439" [ref=e4224]
+                - cell "⚠ -5.09%" [ref=e4225]
+                - cell "-0.706" [ref=e4227]
+                - cell "0.439" [ref=e4228]
+                - cell "-5%" [ref=e4229]
+                - cell "0h2m" [ref=e4230]
+              - row [ref=e4231]:
+                - cell "1000BONK/USDT:USDT" [ref=e4232]
+                - cell "long" [ref=e4233]
+                - cell [ref=e4234]
+                - cell "roi" [ref=e4235]
+                - cell "2024-12-21 19:35" [ref=e4236]
+                - cell "2024-12-21 20:35" [ref=e4237]
+                - cell "0.03" [ref=e4238]
+                - cell "0.03" [ref=e4239]
+                - cell "2.09%" [ref=e4240]
+                - cell "0.276" [ref=e4242]
+                - cell "0.028" [ref=e4243]
+                - cell "-5%" [ref=e4244]
+                - cell "0h1m" [ref=e4245]
+              - row [ref=e4246]:
+                - cell "CRV/USDT:USDT" [ref=e4247]
+                - cell "long" [ref=e4248]
+                - cell [ref=e4249]
+                - cell "roi" [ref=e4250]
+                - cell "2025-01-19 09:10" [ref=e4251]
+                - cell "2025-01-19 13:55" [ref=e4252]
+                - cell "0.864" [ref=e4253]
+                - cell "0.882" [ref=e4254]
+                - cell "2.00%" [ref=e4255]
+                - cell "0.264" [ref=e4257]
+                - cell "0.821" [ref=e4258]
+                - cell "-5%" [ref=e4259]
+                - cell "0h5m" [ref=e4260]
+              - row [ref=e4261]:
+                - cell "1000BONK/USDT:USDT" [ref=e4262]
+                - cell "long" [ref=e4263]
+                - cell [ref=e4264]
+                - cell "roi" [ref=e4265]
+                - cell "2025-01-20 01:30" [ref=e4266]
+                - cell "2025-01-20 05:10" [ref=e4267]
+                - cell "0.029" [ref=e4268]
+                - cell "0.03" [ref=e4269]
+                - cell "2.00%" [ref=e4270]
+                - cell "0.267" [ref=e4272]
+                - cell "0.028" [ref=e4273]
+                - cell "-5%" [ref=e4274]
+                - cell "0h4m" [ref=e4275]
+              - row [ref=e4276]:
+                - cell "1000BONK/USDT:USDT" [ref=e4277]
+                - cell "long" [ref=e4278]
+                - cell [ref=e4279]
+                - cell "stop_loss" [ref=e4280]
+                - cell "2025-01-20 15:30" [ref=e4281]
+                - cell "2025-01-20 17:05" [ref=e4282]
+                - cell "0.032" [ref=e4283]
+                - cell "0.031" [ref=e4284]
+                - cell "⚠ -5.09%" [ref=e4285]
+                - cell "-0.683" [ref=e4287]
+                - cell "0.031" [ref=e4288]
+                - cell "-5%" [ref=e4289]
+                - cell "0h2m" [ref=e4290]
+              - row [ref=e4291]:
+                - cell "1000BONK/USDT:USDT" [ref=e4292]
+                - cell "long" [ref=e4293]
+                - cell [ref=e4294]
+                - cell "roi" [ref=e4295]
+                - cell "2025-01-20 22:05" [ref=e4296]
+                - cell "2025-01-20 22:45" [ref=e4297]
+                - cell "0.03" [ref=e4298]
+                - cell "0.031" [ref=e4299]
+                - cell "3.50%" [ref=e4300]
+                - cell "0.464" [ref=e4302]
+                - cell "0.028" [ref=e4303]
+                - cell "-5%" [ref=e4304]
+                - cell "0h1m" [ref=e4305]
+              - row [ref=e4306]:
+                - cell "1000BONK/USDT:USDT" [ref=e4307]
+                - cell "long" [ref=e4308]
+                - cell [ref=e4309]
+                - cell "roi" [ref=e4310]
+                - cell "2025-01-21 01:45" [ref=e4311]
+                - cell "2025-01-21 03:50" [ref=e4312]
+                - cell "0.029" [ref=e4313]
+                - cell "0.03" [ref=e4314]
+                - cell "2.00%" [ref=e4315]
+                - cell "0.267" [ref=e4317]
+                - cell "0.028" [ref=e4318]
+                - cell "-5%" [ref=e4319]
+                - cell "0h2m" [ref=e4320]
+              - row [ref=e4321]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e4322]
+                - cell "long" [ref=e4323]
+                - cell [ref=e4324]
+                - cell "roi" [ref=e4325]
+                - cell "2025-01-29 00:10" [ref=e4326]
+                - cell "2025-01-29 01:10" [ref=e4327]
+                - cell "0.113" [ref=e4328]
+                - cell "0.116" [ref=e4329]
+                - cell "2.00%" [ref=e4330]
+                - cell "0.267" [ref=e4332]
+                - cell "0.108" [ref=e4333]
+                - cell "-5%" [ref=e4334]
+                - cell "0h1m" [ref=e4335]
+              - row [ref=e4336]:
+                - cell "ENJ/USDT:USDT" [ref=e4337]
+                - cell "long" [ref=e4338]
+                - cell [ref=e4339]
+                - cell "roi" [ref=e4340]
+                - cell "2025-02-06 15:50" [ref=e4341]
+                - cell "2025-02-07 01:50" [ref=e4342]
+                - cell "0.113" [ref=e4343]
+                - cell "0.116" [ref=e4344]
+                - cell "2.01%" [ref=e4345]
+                - cell "0.269" [ref=e4347]
+                - cell "0.108" [ref=e4348]
+                - cell "-5%" [ref=e4349]
+                - cell "0h10m" [ref=e4350]
+              - row [ref=e4351]:
+                - cell "ALGO/USDT:USDT" [ref=e4352]
+                - cell "long" [ref=e4353]
+                - cell [ref=e4354]
+                - cell "roi" [ref=e4355]
+                - cell "2025-02-25 07:35" [ref=e4356]
+                - cell "2025-02-25 07:50" [ref=e4357]
+                - cell "0.21" [ref=e4358]
+                - cell "0.217" [ref=e4359]
+                - cell "3.50%" [ref=e4360]
+                - cell "0.475" [ref=e4362]
+                - cell "0.199" [ref=e4363]
+                - cell "-5%" [ref=e4364]
+                - cell "0h0m" [ref=e4365]
+              - row [ref=e4366]:
+                - cell "GRT/USDT:USDT" [ref=e4367]
+                - cell "long" [ref=e4368]
+                - cell [ref=e4369]
+                - cell "roi" [ref=e4370]
+                - cell "2025-02-25 07:30" [ref=e4371]
+                - cell "2025-02-25 08:30" [ref=e4372]
+                - cell "0.113" [ref=e4373]
+                - cell "0.116" [ref=e4374]
+                - cell "2.08%" [ref=e4375]
+                - cell "0.281" [ref=e4377]
+                - cell "0.108" [ref=e4378]
+                - cell "-5%" [ref=e4379]
+                - cell "0h1m" [ref=e4380]
+              - row [ref=e4381]:
+                - cell "DOGE/USDT:USDT" [ref=e4382]
+                - cell "long" [ref=e4383]
+                - cell [ref=e4384]
+                - cell "roi" [ref=e4385]
+                - cell "2025-02-25 10:25" [ref=e4386]
+                - cell "2025-02-25 10:35" [ref=e4387]
+                - cell "0.197" [ref=e4388]
+                - cell "0.204" [ref=e4389]
+                - cell "3.50%" [ref=e4390]
+                - cell "0.475" [ref=e4392]
+                - cell "0.187" [ref=e4393]
+                - cell "-5%" [ref=e4394]
+                - cell "0h0m" [ref=e4395]
+              - row [ref=e4396]:
+                - cell "ALGO/USDT:USDT" [ref=e4397]
+                - cell "long" [ref=e4398]
+                - cell [ref=e4399]
+                - cell "roi" [ref=e4400]
+                - cell "2025-02-25 10:20" [ref=e4401]
+                - cell "2025-02-25 11:35" [ref=e4402]
+                - cell "0.212" [ref=e4403]
+                - cell "0.216" [ref=e4404]
+                - cell "2.00%" [ref=e4405]
+                - cell "0.275" [ref=e4407]
+                - cell "0.201" [ref=e4408]
+                - cell "-5%" [ref=e4409]
+                - cell "0h1m" [ref=e4410]
+              - row [ref=e4411]:
+                - cell "GRT/USDT:USDT" [ref=e4412]
+                - cell "long" [ref=e4413]
+                - cell [ref=e4414]
+                - cell "roi" [ref=e4415]
+                - cell "2025-02-25 10:20" [ref=e4416]
+                - cell "2025-02-25 11:40" [ref=e4417]
+                - cell "0.112" [ref=e4418]
+                - cell "0.114" [ref=e4419]
+                - cell "2.00%" [ref=e4420]
+                - cell "0.273" [ref=e4422]
+                - cell "0.106" [ref=e4423]
+                - cell "-5%" [ref=e4424]
+                - cell "0h1m" [ref=e4425]
+              - row [ref=e4426]:
+                - cell "XRP/USDT:USDT" [ref=e4427]
+                - cell "long" [ref=e4428]
+                - cell [ref=e4429]
+                - cell "roi" [ref=e4430]
+                - cell "2025-02-25 09:55" [ref=e4431]
+                - cell "2025-02-25 11:50" [ref=e4432]
+                - cell "2.136" [ref=e4433]
+                - cell "2.181" [ref=e4434]
+                - cell "2.00%" [ref=e4435]
+                - cell "0.273" [ref=e4437]
+                - cell "2.029" [ref=e4438]
+                - cell "-5%" [ref=e4439]
+                - cell "0h2m" [ref=e4440]
+              - row [ref=e4441]:
+                - cell "XRP/USDT:USDT" [ref=e4442]
+                - cell "long" [ref=e4443]
+                - cell [ref=e4444]
+                - cell "stop_loss" [ref=e4445]
+                - cell "2025-03-03 18:45" [ref=e4446]
+                - cell "2025-03-03 19:55" [ref=e4447]
+                - cell "2.465" [ref=e4448]
+                - cell "2.342" [ref=e4449]
+                - cell "⚠ -5.09%" [ref=e4450]
+                - cell "-0.716" [ref=e4452]
+                - cell "2.342" [ref=e4453]
+                - cell "-5%" [ref=e4454]
+                - cell "0h1m" [ref=e4455]
+              - row [ref=e4456]:
+                - cell "ALGO/USDT:USDT" [ref=e4457]
+                - cell "long" [ref=e4458]
+                - cell [ref=e4459]
+                - cell "stop_loss" [ref=e4460]
+                - cell "2025-03-03 18:45" [ref=e4461]
+                - cell "2025-03-03 19:55" [ref=e4462]
+                - cell "0.252" [ref=e4463]
+                - cell "0.239" [ref=e4464]
+                - cell "⚠ -5.09%" [ref=e4465]
+                - cell "-0.716" [ref=e4467]
+                - cell "0.239" [ref=e4468]
+                - cell "-5%" [ref=e4469]
+                - cell "0h1m" [ref=e4470]
+              - row [ref=e4471]:
+                - cell "DOGE/USDT:USDT" [ref=e4472]
+                - cell "long" [ref=e4473]
+                - cell [ref=e4474]
+                - cell "stop_loss" [ref=e4475]
+                - cell "2025-03-03 18:50" [ref=e4476]
+                - cell "2025-03-03 21:50" [ref=e4477]
+                - cell "0.206" [ref=e4478]
+                - cell "0.195" [ref=e4479]
+                - cell "⚠ -5.09%" [ref=e4480]
+                - cell "-0.713" [ref=e4482]
+                - cell "0.195" [ref=e4483]
+                - cell "-5%" [ref=e4484]
+                - cell "0h3m" [ref=e4485]
+              - row [ref=e4486]:
+                - cell "DOT/USDT:USDT" [ref=e4487]
+                - cell "long" [ref=e4488]
+                - cell [ref=e4489]
+                - cell "stop_loss" [ref=e4490]
+                - cell "2025-03-03 18:50" [ref=e4491]
+                - cell "2025-03-04 01:05" [ref=e4492]
+                - cell "4.634" [ref=e4493]
+                - cell "4.402" [ref=e4494]
+                - cell "⚠ -5.08%" [ref=e4495]
+                - cell "-0.707" [ref=e4497]
+                - cell "4.402" [ref=e4498]
+                - cell "-5%" [ref=e4499]
+                - cell "0h6m" [ref=e4500]
+              - row [ref=e4501]:
+                - cell "DOGE/USDT:USDT" [ref=e4502]
+                - cell "long" [ref=e4503]
+                - cell [ref=e4504]
+                - cell "stop_loss" [ref=e4505]
+                - cell "2025-03-10 17:40" [ref=e4506]
+                - cell "2025-03-10 19:00" [ref=e4507]
+                - cell "0.159" [ref=e4508]
+                - cell "0.151" [ref=e4509]
+                - cell "⚠ -5.09%" [ref=e4510]
+                - cell "-0.674" [ref=e4512]
+                - cell "0.151" [ref=e4513]
+                - cell "-5%" [ref=e4514]
+                - cell "0h1m" [ref=e4515]
+              - row [ref=e4516]:
+                - cell "ALGO/USDT:USDT" [ref=e4517]
+                - cell "long" [ref=e4518]
+                - cell [ref=e4519]
+                - cell "stop_loss" [ref=e4520]
+                - cell "2025-03-10 17:50" [ref=e4521]
+                - cell "2025-03-11 00:25" [ref=e4522]
+                - cell "0.189" [ref=e4523]
+                - cell "0.18" [ref=e4524]
+                - cell "⚠ -5.10%" [ref=e4525]
+                - cell "-0.682" [ref=e4527]
+                - cell "0.18" [ref=e4528]
+                - cell "-5%" [ref=e4529]
+                - cell "0h7m" [ref=e4530]
+              - row [ref=e4531]:
+                - cell "CRV/USDT:USDT" [ref=e4532]
+                - cell "long" [ref=e4533]
+                - cell [ref=e4534]
+                - cell "roi" [ref=e4535]
+                - cell "2025-03-28 16:15" [ref=e4536]
+                - cell "2025-03-29 00:35" [ref=e4537]
+                - cell "0.503" [ref=e4538]
+                - cell "0.514" [ref=e4539]
+                - cell "2.02%" [ref=e4540]
+                - cell "0.263" [ref=e4542]
+                - cell "0.478" [ref=e4543]
+                - cell "-5%" [ref=e4544]
+                - cell "0h8m" [ref=e4545]
+              - row [ref=e4546]:
+                - cell "CRV/USDT:USDT" [ref=e4547]
+                - cell "long" [ref=e4548]
+                - cell [ref=e4549]
+                - cell "roi" [ref=e4550]
+                - cell "2025-03-29 07:05" [ref=e4551]
+                - cell "2025-03-29 13:50" [ref=e4552]
+                - cell "0.479" [ref=e4553]
+                - cell "0.489" [ref=e4554]
+                - cell "2.00%" [ref=e4555]
+                - cell "0.262" [ref=e4557]
+                - cell "0.455" [ref=e4558]
+                - cell "-5%" [ref=e4559]
+                - cell "0h7m" [ref=e4560]
+              - row [ref=e4561]:
+                - cell "XRP/USDT:USDT" [ref=e4562]
+                - cell "long" [ref=e4563]
+                - cell [ref=e4564]
+                - cell "stop_loss" [ref=e4565]
+                - cell "2025-04-07 03:55" [ref=e4566]
+                - cell "2025-04-07 06:20" [ref=e4567]
+                - cell "1.811" [ref=e4568]
+                - cell "1.721" [ref=e4569]
+                - cell "⚠ -5.09%" [ref=e4570]
+                - cell "-0.664" [ref=e4572]
+                - cell "1.721" [ref=e4573]
+                - cell "-5%" [ref=e4574]
+                - cell "0h2m" [ref=e4575]
+              - row [ref=e4576]:
+                - cell "ENJ/USDT:USDT" [ref=e4577]
+                - cell "long" [ref=e4578]
+                - cell [ref=e4579]
+                - cell "roi" [ref=e4580]
+                - cell "2025-04-07 06:40" [ref=e4581]
+                - cell "2025-04-07 07:40" [ref=e4582]
+                - cell "0.061" [ref=e4583]
+                - cell "0.062" [ref=e4584]
+                - cell "2.00%" [ref=e4585]
+                - cell "0.259" [ref=e4587]
+                - cell "0.058" [ref=e4588]
+                - cell "-5%" [ref=e4589]
+                - cell "0h1m" [ref=e4590]
+              - row [ref=e4591]:
+                - cell "1000BONK/USDT:USDT" [ref=e4592]
+                - cell "long" [ref=e4593]
+                - cell [ref=e4594]
+                - cell "roi" [ref=e4595]
+                - cell "2025-04-07 06:45" [ref=e4596]
+                - cell "2025-04-07 08:15" [ref=e4597]
+                - cell "0.009" [ref=e4598]
+                - cell "0.009" [ref=e4599]
+                - cell "1.99%" [ref=e4600]
+                - cell "0.259" [ref=e4602]
+                - cell "0.009" [ref=e4603]
+                - cell "-5%" [ref=e4604]
+                - cell "0h2m" [ref=e4605]
+              - row [ref=e4606]:
+                - cell "MANA/USDT:USDT" [ref=e4607]
+                - cell "long" [ref=e4608]
+                - cell [ref=e4609]
+                - cell "roi" [ref=e4610]
+                - cell "2025-04-07 06:40" [ref=e4611]
+                - cell "2025-04-07 08:20" [ref=e4612]
+                - cell "0.196" [ref=e4613]
+                - cell "0.2" [ref=e4614]
+                - cell "2.02%" [ref=e4615]
+                - cell "0.261" [ref=e4617]
+                - cell "0.186" [ref=e4618]
+                - cell "-5%" [ref=e4619]
+                - cell "0h2m" [ref=e4620]
+              - row [ref=e4621]:
+                - cell "ALGO/USDT:USDT" [ref=e4622]
+                - cell "long" [ref=e4623]
+                - cell [ref=e4624]
+                - cell "roi" [ref=e4625]
+                - cell "2025-04-07 06:45" [ref=e4626]
+                - cell "2025-04-07 08:20" [ref=e4627]
+                - cell "0.15" [ref=e4628]
+                - cell "0.153" [ref=e4629]
+                - cell "1.99%" [ref=e4630]
+                - cell "0.259" [ref=e4632]
+                - cell "0.142" [ref=e4633]
+                - cell "-5%" [ref=e4634]
+                - cell "0h2m" [ref=e4635]
+              - row [ref=e4636]:
+                - cell "ENJ/USDT:USDT" [ref=e4637]
+                - cell "long" [ref=e4638]
+                - cell [ref=e4639]
+                - cell "stop_loss" [ref=e4640]
+                - cell "2025-04-21 16:15" [ref=e4641]
+                - cell "2025-04-21 17:15" [ref=e4642]
+                - cell "0.099" [ref=e4643]
+                - cell "0.094" [ref=e4644]
+                - cell "⚠ -5.09%" [ref=e4645]
+                - cell "-0.671" [ref=e4647]
+                - cell "0.094" [ref=e4648]
+                - cell "-5%" [ref=e4649]
+                - cell "0h1m" [ref=e4650]
+              - row [ref=e4651]:
+                - cell "ENJ/USDT:USDT" [ref=e4652]
+                - cell "long" [ref=e4653]
+                - cell [ref=e4654]
+                - cell "roi" [ref=e4655]
+                - cell "2025-04-21 17:20" [ref=e4656]
+                - cell "2025-04-21 18:45" [ref=e4657]
+                - cell "0.095" [ref=e4658]
+                - cell "0.097" [ref=e4659]
+                - cell "2.00%" [ref=e4660]
+                - cell "0.262" [ref=e4662]
+                - cell "0.09" [ref=e4663]
+                - cell "-5%" [ref=e4664]
+                - cell "0h1m" [ref=e4665]
+              - row [ref=e4666]:
+                - cell "ENJ/USDT:USDT" [ref=e4667]
+                - cell "long" [ref=e4668]
+                - cell [ref=e4669]
+                - cell "roi" [ref=e4670]
+                - cell "2025-04-21 20:35" [ref=e4671]
+                - cell "2025-04-21 23:05" [ref=e4672]
+                - cell "0.092" [ref=e4673]
+                - cell "0.094" [ref=e4674]
+                - cell "2.00%" [ref=e4675]
+                - cell "0.262" [ref=e4677]
+                - cell "0.087" [ref=e4678]
+                - cell "-5%" [ref=e4679]
+                - cell "0h3m" [ref=e4680]
+              - row [ref=e4681]:
+                - cell "1000BONK/USDT:USDT" [ref=e4682]
+                - cell "long" [ref=e4683]
+                - cell [ref=e4684]
+                - cell "roi" [ref=e4685]
+                - cell "2025-04-26 08:00" [ref=e4686]
+                - cell "2025-04-26 09:00" [ref=e4687]
+                - cell "0.018" [ref=e4688]
+                - cell "0.019" [ref=e4689]
+                - cell "2.78%" [ref=e4690]
+                - cell "0.368" [ref=e4692]
+                - cell "0.018" [ref=e4693]
+                - cell "-5%" [ref=e4694]
+                - cell "0h1m" [ref=e4695]
+              - row [ref=e4696]:
+                - cell "1000BONK/USDT:USDT" [ref=e4697]
+                - cell "long" [ref=e4698]
+                - cell [ref=e4699]
+                - cell "roi" [ref=e4700]
+                - cell "2025-04-26 12:00" [ref=e4701]
+                - cell "2025-04-26 15:15" [ref=e4702]
+                - cell "0.018" [ref=e4703]
+                - cell "0.019" [ref=e4704]
+                - cell "2.00%" [ref=e4705]
+                - cell "0.266" [ref=e4707]
+                - cell "0.017" [ref=e4708]
+                - cell "-5%" [ref=e4709]
+                - cell "0h3m" [ref=e4710]
+              - row [ref=e4711]:
+                - cell "1000BONK/USDT:USDT" [ref=e4712]
+                - cell "long" [ref=e4713]
+                - cell [ref=e4714]
+                - cell "roi" [ref=e4715]
+                - cell "2025-04-28 15:45" [ref=e4716]
+                - cell "2025-04-28 16:35" [ref=e4717]
+                - cell "0.019" [ref=e4718]
+                - cell "0.02" [ref=e4719]
+                - cell "3.49%" [ref=e4720]
+                - cell "0.467" [ref=e4722]
+                - cell "0.018" [ref=e4723]
+                - cell "-5%" [ref=e4724]
+                - cell "0h1m" [ref=e4725]
+              - row [ref=e4726]:
+                - cell "1000BONK/USDT:USDT" [ref=e4727]
+                - cell "long" [ref=e4728]
+                - cell [ref=e4729]
+                - cell "roi" [ref=e4730]
+                - cell "2025-05-12 18:35" [ref=e4731]
+                - cell "2025-05-12 19:00" [ref=e4732]
+                - cell "0.021" [ref=e4733]
+                - cell "0.022" [ref=e4734]
+                - cell "3.50%" [ref=e4735]
+                - cell "0.472" [ref=e4737]
+                - cell "0.02" [ref=e4738]
+                - cell "-5%" [ref=e4739]
+                - cell "0h0m" [ref=e4740]
+              - row [ref=e4741]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e4742]
+                - cell "long" [ref=e4743]
+                - cell [ref=e4744]
+                - cell "roi" [ref=e4745]
+                - cell "2025-05-12 18:30" [ref=e4746]
+                - cell "2025-05-12 20:40" [ref=e4747]
+                - cell "0.109" [ref=e4748]
+                - cell "0.112" [ref=e4749]
+                - cell "2.00%" [ref=e4750]
+                - cell "0.269" [ref=e4752]
+                - cell "0.104" [ref=e4753]
+                - cell "-5%" [ref=e4754]
+                - cell "0h2m" [ref=e4755]
+              - row [ref=e4756]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e4757]
+                - cell "long" [ref=e4758]
+                - cell [ref=e4759]
+                - cell "roi" [ref=e4760]
+                - cell "2025-05-13 03:05" [ref=e4761]
+                - cell "2025-05-13 05:05" [ref=e4762]
+                - cell "0.106" [ref=e4763]
+                - cell "0.108" [ref=e4764]
+                - cell "2.00%" [ref=e4765]
+                - cell "0.273" [ref=e4767]
+                - cell "0.1" [ref=e4768]
+                - cell "-5%" [ref=e4769]
+                - cell "0h2m" [ref=e4770]
+              - row [ref=e4771]:
+                - cell "1000BONK/USDT:USDT" [ref=e4772]
+                - cell "long" [ref=e4773]
+                - cell [ref=e4774]
+                - cell "roi" [ref=e4775]
+                - cell "2025-05-13 03:00" [ref=e4776]
+                - cell "2025-05-13 07:15" [ref=e4777]
+                - cell "0.021" [ref=e4778]
+                - cell "0.022" [ref=e4779]
+                - cell "2.00%" [ref=e4780]
+                - cell "0.273" [ref=e4782]
+                - cell "0.02" [ref=e4783]
+                - cell "-5%" [ref=e4784]
+                - cell "0h4m" [ref=e4785]
+              - row [ref=e4786]:
+                - cell "1000BONK/USDT:USDT" [ref=e4787]
+                - cell "long" [ref=e4788]
+                - cell [ref=e4789]
+                - cell "stop_loss" [ref=e4790]
+                - cell "2025-05-23 22:55" [ref=e4791]
+                - cell "2025-05-25 00:55" [ref=e4792]
+                - cell "0.022" [ref=e4793]
+                - cell "0.021" [ref=e4794]
+                - cell "⚠ -5.09%" [ref=e4795]
+                - cell "-0.704" [ref=e4797]
+                - cell "0.021" [ref=e4798]
+                - cell "-5%" [ref=e4799]
+                - cell "0h26m" [ref=e4800]
+              - row [ref=e4801]:
+                - cell "1000BONK/USDT:USDT" [ref=e4802]
+                - cell "long" [ref=e4803]
+                - cell [ref=e4804]
+                - cell "roi" [ref=e4805]
+                - cell "2025-07-18 15:25" [ref=e4806]
+                - cell "2025-07-18 16:15" [ref=e4807]
+                - cell "0.033" [ref=e4808]
+                - cell "0.034" [ref=e4809]
+                - cell "3.49%" [ref=e4810]
+                - cell "0.476" [ref=e4812]
+                - cell "0.031" [ref=e4813]
+                - cell "-5%" [ref=e4814]
+                - cell "0h1m" [ref=e4815]
+              - row [ref=e4816]:
+                - cell "CRV/USDT:USDT" [ref=e4817]
+                - cell "long" [ref=e4818]
+                - cell [ref=e4819]
+                - cell "roi" [ref=e4820]
+                - cell "2025-07-18 15:20" [ref=e4821]
+                - cell "2025-07-18 21:20" [ref=e4822]
+                - cell "0.957" [ref=e4823]
+                - cell "0.977" [ref=e4824]
+                - cell "1.97%" [ref=e4825]
+                - cell "0.268" [ref=e4827]
+                - cell "0.909" [ref=e4828]
+                - cell "-5%" [ref=e4829]
+                - cell "0h6m" [ref=e4830]
+              - row [ref=e4831]:
+                - cell "1000BONK/USDT:USDT" [ref=e4832]
+                - cell "long" [ref=e4833]
+                - cell [ref=e4834]
+                - cell "roi" [ref=e4835]
+                - cell "2025-07-23 17:15" [ref=e4836]
+                - cell "2025-07-23 18:45" [ref=e4837]
+                - cell "0.032" [ref=e4838]
+                - cell "0.033" [ref=e4839]
+                - cell "2.00%" [ref=e4840]
+                - cell "0.276" [ref=e4842]
+                - cell "0.03" [ref=e4843]
+                - cell "-5%" [ref=e4844]
+                - cell "0h2m" [ref=e4845]
+              - row [ref=e4846]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e4847]
+                - cell "long" [ref=e4848]
+                - cell [ref=e4849]
+                - cell "stop_loss" [ref=e4850]
+                - cell "2025-07-23 16:55" [ref=e4851]
+                - cell "2025-07-23 20:30" [ref=e4852]
+                - cell "0.135" [ref=e4853]
+                - cell "0.129" [ref=e4854]
+                - cell "⚠ -5.09%" [ref=e4855]
+                - cell "-0.703" [ref=e4857]
+                - cell "0.129" [ref=e4858]
+                - cell "-5%" [ref=e4859]
+                - cell "0h4m" [ref=e4860]
+              - row [ref=e4861]:
+                - cell "SLP/USDT:USDT" [ref=e4862]
+                - cell "long" [ref=e4863]
+                - cell [ref=e4864]
+                - cell "roi" [ref=e4865]
+                - cell "2025-07-24 07:05" [ref=e4866]
+                - cell "2025-07-24 09:00" [ref=e4867]
+                - cell "0.002" [ref=e4868]
+                - cell "0.002" [ref=e4869]
+                - cell "1.99%" [ref=e4870]
+                - cell "0.274" [ref=e4872]
+                - cell "0.002" [ref=e4873]
+                - cell "-5%" [ref=e4874]
+                - cell "0h2m" [ref=e4875]
+              - row [ref=e4876]:
+                - cell "1000BONK/USDT:USDT" [ref=e4877]
+                - cell "long" [ref=e4878]
+                - cell [ref=e4879]
+                - cell "roi" [ref=e4880]
+                - cell "2025-07-28 22:50" [ref=e4881]
+                - cell "2025-07-29 00:15" [ref=e4882]
+                - cell "0.032" [ref=e4883]
+                - cell "0.033" [ref=e4884]
+                - cell "2.00%" [ref=e4885]
+                - cell "0.276" [ref=e4887]
+                - cell "0.03" [ref=e4888]
+                - cell "-5%" [ref=e4889]
+                - cell "0h1m" [ref=e4890]
+              - row [ref=e4891]:
+                - cell "ALGO/USDT:USDT" [ref=e4892]
+                - cell "long" [ref=e4893]
+                - cell [ref=e4894]
+                - cell "roi" [ref=e4895]
+                - cell "2025-08-25 20:40" [ref=e4896]
+                - cell "2025-08-25 22:40" [ref=e4897]
+                - cell "0.242" [ref=e4898]
+                - cell "0.247" [ref=e4899]
+                - cell "2.00%" [ref=e4900]
+                - cell "0.277" [ref=e4902]
+                - cell "0.23" [ref=e4903]
+                - cell "-5%" [ref=e4904]
+                - cell "0h2m" [ref=e4905]
+              - row [ref=e4906]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e4907]
+                - cell "long" [ref=e4908]
+                - cell [ref=e4909]
+                - cell "roi" [ref=e4910]
+                - cell "2025-10-04 15:15" [ref=e4911]
+                - cell "2025-10-04 17:00" [ref=e4912]
+                - cell "0.102" [ref=e4913]
+                - cell "0.104" [ref=e4914]
+                - cell "1.99%" [ref=e4915]
+                - cell "0.276" [ref=e4917]
+                - cell "0.097" [ref=e4918]
+                - cell "-5%" [ref=e4919]
+                - cell "0h2m" [ref=e4920]
+              - row [ref=e4921]:
+                - cell "SLP/USDT:USDT" [ref=e4922]
+                - cell "long" [ref=e4923]
+                - cell [ref=e4924]
+                - cell "stop_loss" [ref=e4925]
+                - cell "2025-10-10 15:55" [ref=e4926]
+                - cell "2025-10-10 20:55" [ref=e4927]
+                - cell "0.002" [ref=e4928]
+                - cell "0.001" [ref=e4929]
+                - cell "⚠ -5.09%" [ref=e4930]
+                - cell "-0.713" [ref=e4932]
+                - cell "0.001" [ref=e4933]
+                - cell "-5%" [ref=e4934]
+                - cell "0h5m" [ref=e4935]
+              - row [ref=e4936]:
+                - cell "1000BONK/USDT:USDT" [ref=e4937]
+                - cell "long" [ref=e4938]
+                - cell [ref=e4939]
+                - cell "stop_loss" [ref=e4940]
+                - cell "2025-10-11 19:25" [ref=e4941]
+                - cell "2025-10-11 21:05" [ref=e4942]
+                - cell "0.014" [ref=e4943]
+                - cell "0.013" [ref=e4944]
+                - cell "⚠ -5.09%" [ref=e4945]
+                - cell "-0.703" [ref=e4947]
+                - cell "0.013" [ref=e4948]
+                - cell "-5%" [ref=e4949]
+                - cell "0h2m" [ref=e4950]
+              - row [ref=e4951]:
+                - cell "CRV/USDT:USDT" [ref=e4952]
+                - cell "long" [ref=e4953]
+                - cell [ref=e4954]
+                - cell "stop_loss" [ref=e4955]
+                - cell "2025-10-11 19:50" [ref=e4956]
+                - cell "2025-10-11 21:05" [ref=e4957]
+                - cell "0.487" [ref=e4958]
+                - cell "0.463" [ref=e4959]
+                - cell "⚠ -5.08%" [ref=e4960]
+                - cell "-0.701" [ref=e4962]
+                - cell "0.463" [ref=e4963]
+                - cell "-5%" [ref=e4964]
+                - cell "0h1m" [ref=e4965]
+              - row [ref=e4966]:
+                - cell "SLP/USDT:USDT" [ref=e4967]
+                - cell "long" [ref=e4968]
+                - cell [ref=e4969]
+                - cell "roi" [ref=e4970]
+                - cell "2025-10-11 20:50" [ref=e4971]
+                - cell "2025-10-11 22:05" [ref=e4972]
+                - cell "0.001" [ref=e4973]
+                - cell "0.001" [ref=e4974]
+                - cell "2.00%" [ref=e4975]
+                - cell "0.276" [ref=e4977]
+                - cell "0.001" [ref=e4978]
+                - cell "-5%" [ref=e4979]
+                - cell "0h1m" [ref=e4980]
+              - row [ref=e4981]:
+                - cell "SAND/USDT:USDT" [ref=e4982]
+                - cell "long" [ref=e4983]
+                - cell [ref=e4984]
+                - cell "roi" [ref=e4985]
+                - cell "2025-10-11 20:10" [ref=e4986]
+                - cell "2025-10-12 03:35" [ref=e4987]
+                - cell "0.193" [ref=e4988]
+                - cell "0.197" [ref=e4989]
+                - cell "2.05%" [ref=e4990]
+                - cell "0.281" [ref=e4992]
+                - cell "0.184" [ref=e4993]
+                - cell "-5%" [ref=e4994]
+                - cell "0h7m" [ref=e4995]
+              - row [ref=e4996]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e4997]
+                - cell "long" [ref=e4998]
+                - cell [ref=e4999]
+                - cell "roi" [ref=e5000]
+                - cell "2025-10-21 02:10" [ref=e5001]
+                - cell "2025-10-21 14:50" [ref=e5002]
+                - cell "0.076" [ref=e5003]
+                - cell "0.077" [ref=e5004]
+                - cell "2.03%" [ref=e5005]
+                - cell "0.276" [ref=e5007]
+                - cell "0.072" [ref=e5008]
+                - cell "-5%" [ref=e5009]
+                - cell "0h13m" [ref=e5010]
+              - row [ref=e5011]:
+                - cell "1000BONK/USDT:USDT" [ref=e5012]
+                - cell "long" [ref=e5013]
+                - cell [ref=e5014]
+                - cell "roi" [ref=e5015]
+                - cell "2026-01-06 16:50" [ref=e5016]
+                - cell "2026-01-06 21:15" [ref=e5017]
+                - cell "0.012" [ref=e5018]
+                - cell "0.012" [ref=e5019]
+                - cell "2.00%" [ref=e5020]
+                - cell "0.273" [ref=e5022]
+                - cell "0.011" [ref=e5023]
+                - cell "-5%" [ref=e5024]
+                - cell "0h4m" [ref=e5025]
+              - row [ref=e5026]:
+                - cell "SLP/USDT:USDT" [ref=e5027]
+                - cell "long" [ref=e5028]
+                - cell [ref=e5029]
+                - cell "roi" [ref=e5030]
+                - cell "2026-01-17 20:00" [ref=e5031]
+                - cell "2026-01-18 00:15" [ref=e5032]
+                - cell "0.001" [ref=e5033]
+                - cell "0.001" [ref=e5034]
+                - cell "2.03%" [ref=e5035]
+                - cell "0.279" [ref=e5037]
+                - cell "0.001" [ref=e5038]
+                - cell "-5%" [ref=e5039]
+                - cell "0h4m" [ref=e5040]
+              - row [ref=e5041]:
+                - cell "SAND/USDT:USDT" [ref=e5042]
+                - cell "long" [ref=e5043]
+                - cell [ref=e5044]
+                - cell "roi" [ref=e5045]
+                - cell "2026-01-18 14:30" [ref=e5046]
+                - cell "2026-01-18 21:05" [ref=e5047]
+                - cell "0.145" [ref=e5048]
+                - cell "0.148" [ref=e5049]
+                - cell "2.00%" [ref=e5050]
+                - cell "0.275" [ref=e5052]
+                - cell "0.137" [ref=e5053]
+                - cell "-5%" [ref=e5054]
+                - cell "0h7m" [ref=e5055]
+              - row [ref=e5056]:
+                - cell "SLP/USDT:USDT" [ref=e5057]
+                - cell "long" [ref=e5058]
+                - cell [ref=e5059]
+                - cell "roi" [ref=e5060]
+                - cell "2026-01-22 13:40" [ref=e5061]
+                - cell "2026-01-22 15:00" [ref=e5062]
+                - cell "0.001" [ref=e5063]
+                - cell "0.001" [ref=e5064]
+                - cell "2.00%" [ref=e5065]
+                - cell "0.277" [ref=e5067]
+                - cell "0.001" [ref=e5068]
+                - cell "-5%" [ref=e5069]
+                - cell "0h1m" [ref=e5070]
+              - row [ref=e5071]:
+                - cell "ENJ/USDT:USDT" [ref=e5072]
+                - cell "long" [ref=e5073]
+                - cell [ref=e5074]
+                - cell "stop_loss" [ref=e5075]
+                - cell "2026-02-05 18:05" [ref=e5076]
+                - cell "2026-02-05 20:20" [ref=e5077]
+                - cell "0.021" [ref=e5078]
+                - cell "0.02" [ref=e5079]
+                - cell "⚠ -5.07%" [ref=e5080]
+                - cell "-0.707" [ref=e5082]
+                - cell "0.02" [ref=e5083]
+                - cell "-5%" [ref=e5084]
+                - cell "0h2m" [ref=e5085]
+              - row [ref=e5086]:
+                - cell "CRV/USDT:USDT" [ref=e5087]
+                - cell "long" [ref=e5088]
+                - cell [ref=e5089]
+                - cell "stop_loss" [ref=e5090]
+                - cell "2026-02-05 18:40" [ref=e5091]
+                - cell "2026-02-05 20:25" [ref=e5092]
+                - cell "0.242" [ref=e5093]
+                - cell "0.23" [ref=e5094]
+                - cell "⚠ -5.09%" [ref=e5095]
+                - cell "-0.711" [ref=e5097]
+                - cell "0.23" [ref=e5098]
+                - cell "-5%" [ref=e5099]
+                - cell "0h2m" [ref=e5100]
+              - row [ref=e5101]:
+                - cell "APE/USDT:USDT" [ref=e5102]
+                - cell "long" [ref=e5103]
+                - cell [ref=e5104]
+                - cell "stop_loss" [ref=e5105]
+                - cell "2026-02-05 18:45" [ref=e5106]
+                - cell "2026-02-05 20:25" [ref=e5107]
+                - cell "0.125" [ref=e5108]
+                - cell "0.119" [ref=e5109]
+                - cell "⚠ -5.05%" [ref=e5110]
+                - cell "-0.702" [ref=e5112]
+                - cell "0.119" [ref=e5113]
+                - cell "-5%" [ref=e5114]
+                - cell "0h2m" [ref=e5115]
+              - row [ref=e5116]:
+                - cell "SLP/USDT:USDT" [ref=e5117]
+                - cell "long" [ref=e5118]
+                - cell [ref=e5119]
+                - cell "stop_loss" [ref=e5120]
+                - cell "2026-02-05 18:50" [ref=e5121]
+                - cell "2026-02-05 20:25" [ref=e5122]
+                - cell "0.001" [ref=e5123]
+                - cell "0.001" [ref=e5124]
+                - cell "⚠ -5.08%" [ref=e5125]
+                - cell "-0.709" [ref=e5127]
+                - cell "0.001" [ref=e5128]
+                - cell "-5%" [ref=e5129]
+                - cell "0h2m" [ref=e5130]
+              - row [ref=e5131]:
+                - cell "DOT/USDT:USDT" [ref=e5132]
+                - cell "long" [ref=e5133]
+                - cell [ref=e5134]
+                - cell "roi" [ref=e5135]
+                - cell "2026-02-26 17:45" [ref=e5136]
+                - cell "2026-02-26 19:00" [ref=e5137]
+                - cell "1.527" [ref=e5138]
+                - cell "1.559" [ref=e5139]
+                - cell "2.00%" [ref=e5140]
+                - cell "0.263" [ref=e5142]
+                - cell "1.451" [ref=e5143]
+                - cell "-5%" [ref=e5144]
+                - cell "0h1m" [ref=e5145]
+              - row [ref=e5146]:
+                - cell "ENJ/USDT:USDT" [ref=e5147]
+                - cell "long" [ref=e5148]
+                - cell [ref=e5149]
+                - cell "stop_loss" [ref=e5150]
+                - cell "2026-03-18 13:45" [ref=e5151]
+                - cell "2026-03-18 15:10" [ref=e5152]
+                - cell "0.024" [ref=e5153]
+                - cell "0.023" [ref=e5154]
+                - cell "⚠ -5.06%" [ref=e5155]
+                - cell "-0.673" [ref=e5157]
+                - cell "0.023" [ref=e5158]
+                - cell "-5%" [ref=e5159]
+                - cell "0h1m" [ref=e5160]
+              - row [ref=e5161]:
+                - cell "ENJ/USDT:USDT" [ref=e5162]
+                - cell "long" [ref=e5163]
+                - cell [ref=e5164]
+                - cell "roi" [ref=e5165]
+                - cell "2026-03-18 15:55" [ref=e5166]
+                - cell "2026-03-18 16:00" [ref=e5167]
+                - cell "0.023" [ref=e5168]
+                - cell "0.024" [ref=e5169]
+                - cell "3.55%" [ref=e5170]
+                - cell "0.467" [ref=e5172]
+                - cell "0.022" [ref=e5173]
+                - cell "-5%" [ref=e5174]
+                - cell "0h0m" [ref=e5175]
+              - row [ref=e5176]:
+                - cell "ENJ/USDT:USDT" [ref=e5177]
+                - cell "long" [ref=e5178]
+                - cell [ref=e5179]
+                - cell "roi" [ref=e5180]
+                - cell "2026-03-19 10:50" [ref=e5181]
+                - cell "2026-03-19 16:00" [ref=e5182]
+                - cell "0.023" [ref=e5183]
+                - cell "0.024" [ref=e5184]
+                - cell "2.12%" [ref=e5185]
+                - cell "0.281" [ref=e5187]
+                - cell "0.022" [ref=e5188]
+                - cell "-5%" [ref=e5189]
+                - cell "0h5m" [ref=e5190]
+              - row [ref=e5191]:
+                - cell "ENJ/USDT:USDT" [ref=e5192]
+                - cell "long" [ref=e5193]
+                - cell [ref=e5194]
+                - cell "roi" [ref=e5195]
+                - cell "2026-04-09 00:40" [ref=e5196]
+                - cell "2026-04-09 01:50" [ref=e5197]
+                - cell "0.026" [ref=e5198]
+                - cell "0.026" [ref=e5199]
+                - cell "2.00%" [ref=e5200]
+                - cell "0.266" [ref=e5202]
+                - cell "0.024" [ref=e5203]
+                - cell "-5%" [ref=e5204]
+                - cell "0h1m" [ref=e5205]
+              - row [ref=e5206]:
+                - cell "ENJ/USDT:USDT" [ref=e5207]
+                - cell "long" [ref=e5208]
+                - cell [ref=e5209]
+                - cell "roi" [ref=e5210]
+                - cell "2026-04-10 08:15" [ref=e5211]
+                - cell "2026-04-10 10:15" [ref=e5212]
+                - cell "0.029" [ref=e5213]
+                - cell "0.029" [ref=e5214]
+                - cell "2.00%" [ref=e5215]
+                - cell "0.267" [ref=e5217]
+                - cell "0.027" [ref=e5218]
+                - cell "-5%" [ref=e5219]
+                - cell "0h2m" [ref=e5220]
+              - row [ref=e5221]:
+                - cell "ENJ/USDT:USDT" [ref=e5222]
+                - cell "long" [ref=e5223]
+                - cell [ref=e5224]
+                - cell "roi" [ref=e5225]
+                - cell "2026-04-12 18:20" [ref=e5226]
+                - cell "2026-04-12 18:45" [ref=e5227]
+                - cell "0.038" [ref=e5228]
+                - cell "0.039" [ref=e5229]
+                - cell "3.50%" [ref=e5230]
+                - cell "0.471" [ref=e5232]
+                - cell "0.036" [ref=e5233]
+                - cell "-5%" [ref=e5234]
+                - cell "0h0m" [ref=e5235]
+              - row [ref=e5236]:
+                - cell "ENJ/USDT:USDT" [ref=e5237]
+                - cell "long" [ref=e5238]
+                - cell [ref=e5239]
+                - cell "roi" [ref=e5240]
+                - cell "2026-04-13 00:15" [ref=e5241]
+                - cell "2026-04-13 01:15" [ref=e5242]
+                - cell "0.036" [ref=e5243]
+                - cell "0.037" [ref=e5244]
+                - cell "2.10%" [ref=e5245]
+                - cell "0.285" [ref=e5247]
+                - cell "0.034" [ref=e5248]
+                - cell "-5%" [ref=e5249]
+                - cell "0h1m" [ref=e5250]
+              - row [ref=e5251]:
+                - cell "ENJ/USDT:USDT" [ref=e5252]
+                - cell "long" [ref=e5253]
+                - cell [ref=e5254]
+                - cell "roi" [ref=e5255]
+                - cell "2026-04-13 02:55" [ref=e5256]
+                - cell "2026-04-13 04:40" [ref=e5257]
+                - cell "0.036" [ref=e5258]
+                - cell "0.037" [ref=e5259]
+                - cell "2.00%" [ref=e5260]
+                - cell "0.272" [ref=e5262]
+                - cell "0.034" [ref=e5263]
+                - cell "-5%" [ref=e5264]
+                - cell "0h2m" [ref=e5265]
+              - row [ref=e5266]:
+                - cell "ENJ/USDT:USDT" [ref=e5267]
+                - cell "long" [ref=e5268]
+                - cell [ref=e5269]
+                - cell "roi" [ref=e5270]
+                - cell "2026-04-13 07:40" [ref=e5271]
+                - cell "2026-04-13 09:00" [ref=e5272]
+                - cell "0.035" [ref=e5273]
+                - cell "0.036" [ref=e5274]
+                - cell "2.00%" [ref=e5275]
+                - cell "0.274" [ref=e5277]
+                - cell "0.033" [ref=e5278]
+                - cell "-5%" [ref=e5279]
+                - cell "0h1m" [ref=e5280]
+              - row [ref=e5281]:
+                - cell "ENJ/USDT:USDT" [ref=e5282]
+                - cell "long" [ref=e5283]
+                - cell [ref=e5284]
+                - cell "roi" [ref=e5285]
+                - cell "2026-04-16 07:50" [ref=e5286]
+                - cell "2026-04-16 08:35" [ref=e5287]
+                - cell "0.077" [ref=e5288]
+                - cell "0.079" [ref=e5289]
+                - cell "3.50%" [ref=e5290]
+                - cell "0.48" [ref=e5292]
+                - cell "0.073" [ref=e5293]
+                - cell "-5%" [ref=e5294]
+                - cell "0h1m" [ref=e5295]
+              - row [ref=e5296]:
+                - cell "ENJ/USDT:USDT" [ref=e5297]
+                - cell "long" [ref=e5298]
+                - cell [ref=e5299]
+                - cell "roi" [ref=e5300]
+                - cell "2026-04-16 19:55" [ref=e5301]
+                - cell "2026-04-16 20:25" [ref=e5302]
+                - cell "0.073" [ref=e5303]
+                - cell "0.076" [ref=e5304]
+                - cell "3.50%" [ref=e5305]
+                - cell "0.485" [ref=e5307]
+                - cell "0.07" [ref=e5308]
+                - cell "-5%" [ref=e5309]
+                - cell "0h1m" [ref=e5310]
+              - row [ref=e5311]:
+                - cell "ENJ/USDT:USDT" [ref=e5312]
+                - cell "long" [ref=e5313]
+                - cell [ref=e5314]
+                - cell "stop_loss" [ref=e5315]
+                - cell "2026-04-17 07:45" [ref=e5316]
+                - cell "2026-04-17 08:50" [ref=e5317]
+                - cell "0.074" [ref=e5318]
+                - cell "0.07" [ref=e5319]
+                - cell "⚠ -5.04%" [ref=e5320]
+                - cell "-0.707" [ref=e5322]
+                - cell "0.07" [ref=e5323]
+                - cell "-5%" [ref=e5324]
+                - cell "0h1m" [ref=e5325]
+              - row [ref=e5326]:
+                - cell "ENJ/USDT:USDT" [ref=e5327]
+                - cell "long" [ref=e5328]
+                - cell [ref=e5329]
+                - cell "stop_loss" [ref=e5330]
+                - cell "2026-04-17 09:15" [ref=e5331]
+                - cell "2026-04-17 10:55" [ref=e5332]
+                - cell "0.069" [ref=e5333]
+                - cell "0.065" [ref=e5334]
+                - cell "⚠ -5.09%" [ref=e5335]
+                - cell "-0.703" [ref=e5337]
+                - cell "0.065" [ref=e5338]
+                - cell "-5%" [ref=e5339]
+                - cell "0h2m" [ref=e5340]
+              - row [ref=e5341]:
+                - cell "ENJ/USDT:USDT" [ref=e5342]
+                - cell "long" [ref=e5343]
+                - cell [ref=e5344]
+                - cell "roi" [ref=e5345]
+                - cell "2026-04-18 11:55" [ref=e5346]
+                - cell "2026-04-18 17:25" [ref=e5347]
+                - cell "0.055" [ref=e5348]
+                - cell "0.057" [ref=e5349]
+                - cell "2.08%" [ref=e5350]
+                - cell "0.283" [ref=e5352]
+                - cell "0.053" [ref=e5353]
+                - cell "-5%" [ref=e5354]
+                - cell "0h6m" [ref=e5355]
+              - row [ref=e5356]:
+                - cell "ENJ/USDT:USDT" [ref=e5357]
+                - cell "long" [ref=e5358]
+                - cell [ref=e5359]
+                - cell "roi" [ref=e5360]
+                - cell "2026-04-19 16:55" [ref=e5361]
+                - cell "2026-04-20 03:05" [ref=e5362]
+                - cell "0.061" [ref=e5363]
+                - cell "0.062" [ref=e5364]
+                - cell "2.18%" [ref=e5365]
+                - cell "0.299" [ref=e5367]
+                - cell "0.058" [ref=e5368]
+                - cell "-5%" [ref=e5369]
+                - cell "0h10m" [ref=e5370]
+              - row [ref=e5371]:
+                - cell "APE/USDT:USDT" [ref=e5372]
+                - cell "long" [ref=e5373]
+                - cell [ref=e5374]
+                - cell "stop_loss" [ref=e5375]
+                - cell "2026-04-25 11:00" [ref=e5376]
+                - cell "2026-04-25 12:10" [ref=e5377]
+                - cell "0.169" [ref=e5378]
+                - cell "0.161" [ref=e5379]
+                - cell "⚠ -5.07%" [ref=e5380]
+                - cell "-0.694" [ref=e5382]
+                - cell "0.161" [ref=e5383]
+                - cell "-5%" [ref=e5384]
+                - cell "0h1m" [ref=e5385]
+              - row [ref=e5386]:
+                - cell "APE/USDT:USDT" [ref=e5387]
+                - cell "long" [ref=e5388]
+                - cell [ref=e5389]
+                - cell "roi" [ref=e5390]
+                - cell "2026-04-26 01:05" [ref=e5391]
+                - cell "2026-04-26 01:20" [ref=e5392]
+                - cell "0.151" [ref=e5393]
+                - cell "0.156" [ref=e5394]
+                - cell "3.50%" [ref=e5395]
+                - cell "0.474" [ref=e5397]
+                - cell "0.143" [ref=e5398]
+                - cell "-5%" [ref=e5399]
+                - cell "0h0m" [ref=e5400]
+              - row [ref=e5401]:
+                - cell "SLP/USDT:USDT" [ref=e5402]
+                - cell "long" [ref=e5403]
+                - cell [ref=e5404]
+                - cell "stop_loss" [ref=e5405]
+                - cell "2026-04-25 12:35" [ref=e5406]
+                - cell "2026-04-26 01:45" [ref=e5407]
+                - cell "0.001" [ref=e5408]
+                - cell "0.001" [ref=e5409]
+                - cell "⚠ -5.08%" [ref=e5410]
+                - cell "-0.694" [ref=e5412]
+                - cell "0.001" [ref=e5413]
+                - cell "-5%" [ref=e5414]
+                - cell "0h13m" [ref=e5415]
+              - row [ref=e5416]:
+                - cell "APE/USDT:USDT" [ref=e5417]
+                - cell "long" [ref=e5418]
+                - cell [ref=e5419]
+                - cell "stop_loss" [ref=e5420]
+                - cell "2026-04-28 17:45" [ref=e5421]
+                - cell "2026-04-29 02:35" [ref=e5422]
+                - cell "0.16" [ref=e5423]
+                - cell "0.152" [ref=e5424]
+                - cell "⚠ -5.04%" [ref=e5425]
+                - cell "-0.679" [ref=e5427]
+                - cell "0.152" [ref=e5428]
+                - cell "-5%" [ref=e5429]
+                - cell "0h9m" [ref=e5430]
+              - row [ref=e5431]:
+                - cell "DOT/USDT:USDT" [ref=e5432]
+                - cell "long" [ref=e5433]
+                - cell [ref=e5434]
+                - cell "roi" [ref=e5435]
+                - cell "2026-06-05 06:25" [ref=e5436]
+                - cell "2026-06-05 07:25" [ref=e5437]
+                - cell "0.95" [ref=e5438]
+                - cell "0.971" [ref=e5439]
+                - cell "2.11%" [ref=e5440]
+                - cell "0.283" [ref=e5442]
+                - cell "0.903" [ref=e5443]
+                - cell "-5%" [ref=e5444]
+                - cell "0h1m" [ref=e5445]
+              - row [ref=e5446]:
+                - cell "GRT/USDT:USDT" [ref=e5447]
+                - cell "long" [ref=e5448]
+                - cell [ref=e5449]
+                - cell "roi" [ref=e5450]
+                - cell "2026-06-05 06:25" [ref=e5451]
+                - cell "2026-06-05 07:25" [ref=e5452]
+                - cell "0.02" [ref=e5453]
+                - cell "0.02" [ref=e5454]
+                - cell "2.00%" [ref=e5455]
+                - cell "0.268" [ref=e5457]
+                - cell "0.019" [ref=e5458]
+                - cell "-5%" [ref=e5459]
+                - cell "0h1m" [ref=e5460]
+              - row [ref=e5461]:
+                - cell "APE/USDT:USDT" [ref=e5462]
+                - cell "long" [ref=e5463]
+                - cell [ref=e5464]
+                - cell "roi" [ref=e5465]
+                - cell "2026-06-05 06:20" [ref=e5466]
+                - cell "2026-06-05 10:30" [ref=e5467]
+                - cell "0.124" [ref=e5468]
+                - cell "0.127" [ref=e5469]
+                - cell "2.00%" [ref=e5470]
+                - cell "0.267" [ref=e5472]
+                - cell "0.118" [ref=e5473]
+                - cell "-5%" [ref=e5474]
+                - cell "0h4m" [ref=e5475]
+              - row [ref=e5476]:
+                - cell "DOT/USDT:USDT" [ref=e5477]
+                - cell "long" [ref=e5478]
+                - cell [ref=e5479]
+                - cell "roi" [ref=e5480]
+                - cell "2026-06-05 16:05" [ref=e5481]
+                - cell "2026-06-05 17:05" [ref=e5482]
+                - cell "0.944" [ref=e5483]
+                - cell "0.972" [ref=e5484]
+                - cell "2.86%" [ref=e5485]
+                - cell "0.389" [ref=e5487]
+                - cell "0.897" [ref=e5488]
+                - cell "-5%" [ref=e5489]
+                - cell "0h1m" [ref=e5490]
+              - row [ref=e5491]:
+                - cell "APE/USDT:USDT" [ref=e5492]
+                - cell "long" [ref=e5493]
+                - cell [ref=e5494]
+                - cell "roi" [ref=e5495]
+                - cell "2026-06-05 19:10" [ref=e5496]
+                - cell "2026-06-05 19:45" [ref=e5497]
+                - cell "0.118" [ref=e5498]
+                - cell "0.122" [ref=e5499]
+                - cell "3.50%" [ref=e5500]
+                - cell "0.477" [ref=e5502]
+                - cell "0.112" [ref=e5503]
+                - cell "-5%" [ref=e5504]
+                - cell "0h1m" [ref=e5505]
+              - row [ref=e5506]:
+                - cell "1000BONK/USDT:USDT" [ref=e5507]
+                - cell "long" [ref=e5508]
+                - cell [ref=e5509]
+                - cell "roi" [ref=e5510]
+                - cell "2026-06-05 19:10" [ref=e5511]
+                - cell "2026-06-05 20:05" [ref=e5512]
+                - cell "0.004" [ref=e5513]
+                - cell "0.004" [ref=e5514]
+                - cell "3.50%" [ref=e5515]
+                - cell "0.48" [ref=e5517]
+                - cell "0.004" [ref=e5518]
+                - cell "-5%" [ref=e5519]
+                - cell "0h1m" [ref=e5520]
+              - row [ref=e5521]:
+                - cell "SAND/USDT:USDT" [ref=e5522]
+                - cell "long" [ref=e5523]
+                - cell [ref=e5524]
+                - cell "roi" [ref=e5525]
+                - cell "2026-06-05 19:10" [ref=e5526]
+                - cell "2026-06-05 20:05" [ref=e5527]
+                - cell "0.051" [ref=e5528]
+                - cell "0.053" [ref=e5529]
+                - cell "3.50%" [ref=e5530]
+                - cell "0.479" [ref=e5532]
+                - cell "0.048" [ref=e5533]
+                - cell "-5%" [ref=e5534]
+                - cell "0h1m" [ref=e5535]
+              - row [ref=e5536]:
+                - cell "DOT/USDT:USDT" [ref=e5537]
+                - cell "long" [ref=e5538]
+                - cell [ref=e5539]
+                - cell "roi" [ref=e5540]
+                - cell "2026-06-05 19:10" [ref=e5541]
+                - cell "2026-06-05 20:10" [ref=e5542]
+                - cell "0.92" [ref=e5543]
+                - cell "0.94" [ref=e5544]
+                - cell "2.07%" [ref=e5545]
+                - cell "0.284" [ref=e5547]
+                - cell "0.874" [ref=e5548]
+                - cell "-5%" [ref=e5549]
+                - cell "0h1m" [ref=e5550]
+              - row [ref=e5551]:
+                - cell "DOT/USDT:USDT" [ref=e5552]
+                - cell "long" [ref=e5553]
+                - cell [ref=e5554]
+                - cell "roi" [ref=e5555]
+                - cell "2026-06-06 04:25" [ref=e5556]
+                - cell "2026-06-06 05:55" [ref=e5557]
+                - cell "0.908" [ref=e5558]
+                - cell "0.927" [ref=e5559]
+                - cell "2.00%" [ref=e5560]
+                - cell "0.281" [ref=e5562]
+                - cell "0.863" [ref=e5563]
+                - cell "-5%" [ref=e5564]
+                - cell "0h2m" [ref=e5565]
+              - row [ref=e5566]:
+                - cell "ENJ/USDT:USDT" [ref=e5567]
+                - cell "long" [ref=e5568]
+                - cell [ref=e5569]
+                - cell "roi" [ref=e5570]
+                - cell "2026-06-12 22:20" [ref=e5571]
+                - cell "2026-06-13 01:50" [ref=e5572]
+                - cell "0.032" [ref=e5573]
+                - cell "0.032" [ref=e5574]
+                - cell "2.06%" [ref=e5575]
+                - cell "0.292" [ref=e5577]
+                - cell "0.03" [ref=e5578]
+                - cell "-5%" [ref=e5579]
+                - cell "0h4m" [ref=e5580]
+              - row [ref=e5581]:
+                - cell "ENJ/USDT:USDT" [ref=e5582]
+                - cell "long" [ref=e5583]
+                - cell [ref=e5584]
+                - cell "roi" [ref=e5585]
+                - cell "2026-06-18 15:45" [ref=e5586]
+                - cell "2026-06-18 16:45" [ref=e5587]
+                - cell "0.034" [ref=e5588]
+                - cell "0.035" [ref=e5589]
+                - cell "2.16%" [ref=e5590]
+                - cell "0.308" [ref=e5592]
+                - cell "0.032" [ref=e5593]
+                - cell "-5%" [ref=e5594]
+                - cell "0h1m" [ref=e5595]
+              - row [ref=e5596]:
+                - cell "SLP/USDT:USDT" [ref=e5597]
+                - cell "long" [ref=e5598]
+                - cell [ref=e5599]
+                - cell "stop_loss" [ref=e5600]
+                - cell "2026-07-02 01:05" [ref=e5601]
+                - cell "2026-07-02 06:55" [ref=e5602]
+                - cell "0" [ref=e5603]
+                - cell "0" [ref=e5604]
+                - cell "⚠ -5.08%" [ref=e5605]
+                - cell "-0.729" [ref=e5607]
+                - cell "0" [ref=e5608]
+                - cell "-5%" [ref=e5609]
+                - cell "0h6m" [ref=e5610]
+              - row [ref=e5611]:
+                - cell "XRP/USDT:USDT" [ref=e5612]
+                - cell "long" [ref=e5613]
+                - cell [ref=e5614]
+                - cell "roi" [ref=e5615]
+                - cell "2026-08-22 10:20" [ref=e5616]
+                - cell "2026-08-22 11:20" [ref=e5617]
+                - cell "1.454" [ref=e5618]
+                - cell "1.484" [ref=e5619]
+                - cell "2.00%" [ref=e5620]
+                - cell "0.282" [ref=e5622]
+                - cell "1.381" [ref=e5623]
+                - cell "-5%" [ref=e5624]
+                - cell "0h1m" [ref=e5625]
+              - row [ref=e5626]:
+                - cell "APE/USDT:USDT" [ref=e5627]
+                - cell "long" [ref=e5628]
+                - cell [ref=e5629]
+                - cell "roi" [ref=e5630]
+                - cell "2026-08-22 10:25" [ref=e5631]
+                - cell "2026-08-22 11:30" [ref=e5632]
+                - cell "0.141" [ref=e5633]
+                - cell "0.144" [ref=e5634]
+                - cell "2.00%" [ref=e5635]
+                - cell "0.282" [ref=e5637]
+                - cell "0.134" [ref=e5638]
+                - cell "-5%" [ref=e5639]
+                - cell "0h1m" [ref=e5640]
+              - row [ref=e5641]:
+                - cell "ALGO/USDT:USDT" [ref=e5642]
+                - cell "long" [ref=e5643]
+                - cell [ref=e5644]
+                - cell "roi" [ref=e5645]
+                - cell "2026-08-22 10:25" [ref=e5646]
+                - cell "2026-08-22 12:10" [ref=e5647]
+                - cell "0.092" [ref=e5648]
+                - cell "0.094" [ref=e5649]
+                - cell "2.00%" [ref=e5650]
+                - cell "0.284" [ref=e5652]
+                - cell "0.088" [ref=e5653]
+                - cell "-5%" [ref=e5654]
+                - cell "0h2m" [ref=e5655]
+              - row [ref=e5656]:
+                - cell "1000FLOKI/USDT:USDT" [ref=e5657]
+                - cell "long" [ref=e5658]
+                - cell [ref=e5659]
+                - cell "stop_loss" [ref=e5660]
+                - cell "2026-08-22 08:50" [ref=e5661]
+                - cell "2026-08-23 03:20" [ref=e5662]
+                - cell "0.027" [ref=e5663]
+                - cell "0.026" [ref=e5664]
+                - cell "⚠ -5.09%" [ref=e5665]
+                - cell "-0.721" [ref=e5667]
+                - cell "0.026" [ref=e5668]
+                - cell "-5%" [ref=e5669]
+                - cell "0h19m" [ref=e5670]
+  - complementary [ref=e2856]
+  - generic:
+    - generic:
+      - generic: Tune grade thresholds
+      - generic: persisted in localStorage · grades re-derive client-side
+    - generic:
+      - table:
+        - rowgroup:
+          - row:
+            - columnheader: Metric
+            - columnheader: Pass
+            - columnheader: Warn
+            - columnheader: Direction
+      - paragraph: Lower pass / warn = stricter. "Higher better" means pass when value ≥ threshold; "lower better" means pass when value ≤ threshold. Worst-trade thresholds are negative (e.g. -0.15 = −15%).
+    - generic:
+      - button: Reset to defaults
+      - button: Cancel
+      - button: Apply
+  - generic:
+    - generic:
+      - generic: Job log
+      - button: Copy
+      - button: ↻ Refresh
+      - button: ✕ Close
+    - generic: Loading…
+  - contentinfo [ref=e2860]: Strategy Lab · results.db → dashboard.html · ingest_results.py · benchmark_runner.py · build_report.py · server.py

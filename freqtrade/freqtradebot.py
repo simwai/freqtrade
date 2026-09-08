@@ -1,26 +1,21 @@
 """
-Freqtrade is the main module of this bot. It contains the class Freqtrade()
+Freqtrade is the main module of this bot. It contains the FreqtradeBot class.
 """
 
 import logging
-import shutil
 import traceback
 from copy import deepcopy
-from datetime import datetime, time, timedelta, timezone
+from datetime import UTC, datetime, time, timedelta
 from math import isclose
-from pathlib import Path
 from threading import Lock
 from time import sleep
 from typing import Any
 
-from schedule import Scheduler
-
 from freqtrade import constants
-from freqtrade.configuration import validate_config_consistency
+from freqtrade.configuration import remove_exchange_credentials, validate_config_consistency
 from freqtrade.constants import BuySell, Config, EntryExecuteMode, ExchangeConfig, LongShort
-from freqtrade.data.converter import order_book_to_dataframe
+from freqtrade.data.converter import count_total_order_book
 from freqtrade.data.dataprovider import DataProvider
-from freqtrade.edge import Edge
 from freqtrade.enums import (
     ExitCheckTuple,
     ExitType,
@@ -35,12 +30,12 @@ from freqtrade.exceptions import (
     ExchangeError,
     InsufficientFundsError,
     InvalidOrderException,
+    OperationalException,
     PricingError,
 )
 from freqtrade.exchange import (
     ROUND_DOWN,
     ROUND_UP,
-    remove_exchange_credentials,
     timeframe_to_minutes,
     timeframe_to_next_date,
     timeframe_to_seconds,
@@ -49,11 +44,6 @@ from freqtrade.exchange.exchange_types import CcxtOrder
 from freqtrade.leverage.liquidation_price import update_liquidation_prices
 from freqtrade.misc import safe_value_fallback, safe_value_fallback2
 from freqtrade.mixins import LoggingMixin
-from freqtrade.optimize.walk_forward_tools import (
-    pending_parameter_file,
-    read_json,
-    write_json_atomic,
-)
 from freqtrade.persistence import Order, PairLocks, Trade, init_db
 from freqtrade.persistence.key_value_store import set_startup_time
 from freqtrade.plugins.pairlistmanager import PairListManager
@@ -71,8 +61,8 @@ from freqtrade.rpc.rpc_types import (
 )
 from freqtrade.strategy.interface import IStrategy
 from freqtrade.strategy.strategy_wrapper import strategy_safe_wrapper
-from freqtrade.util import FtPrecise, MeasureTime, PeriodicCache, dt_from_ts, dt_now
-from freqtrade.util.migrations.binance_mig import migrate_binance_futures_names
+from freqtrade.util import FtPrecise, FtScheduler, MeasureTime, PeriodicCache, dt_from_ts, dt_now
+from freqtrade.util.migrations import migrate_live_content
 from freqtrade.wallets import Wallets
 
 
@@ -101,108 +91,112 @@ class FreqtradeBot(LoggingMixin):
         exchange_config: ExchangeConfig = deepcopy(config["exchange"])
         # Remove credentials from original exchange config to avoid accidental credential exposure
         remove_exchange_credentials(config["exchange"], True)
-
-        self.strategy: IStrategy = StrategyResolver.load_strategy(self.config)
-        self._walk_forward_pending_file = pending_parameter_file(
-            self.config, self.strategy.get_strategy_name()
-        )
-
-        # Check config consistency here since strategies can set certain options
-        validate_config_consistency(config)
-
-        self.exchange = ExchangeResolver.load_exchange(
-            self.config, exchange_config=exchange_config, load_leverage_tiers=True
-        )
-
-        init_db(self.config["db_url"])
-
-        self.wallets = Wallets(self.config, self.exchange)
-
-        PairLocks.timeframe = self.config["timeframe"]
-
-        self.trading_mode: TradingMode = self.config.get("trading_mode", TradingMode.SPOT)
-        self.margin_mode: MarginMode = self.config.get("margin_mode", MarginMode.NONE)
-        self.last_process: datetime | None = None
-
-        # RPC runs in separate threads, can start handling external commands just after
-        # initialization, even before Freqtradebot has a chance to start its throttling,
-        # so anything in the Freqtradebot instance should be ready (initialized), including
-        # the initial state of the bot.
-        # Keep this at the end of this initialization method.
-        self.rpc: RPCManager = RPCManager(self)
-
-        self.dataprovider = DataProvider(self.config, self.exchange, rpc=self.rpc)
-        self.pairlists = PairListManager(self.exchange, self.config, self.dataprovider)
-
-        self.dataprovider.add_pairlisthandler(self.pairlists)
-
-        # Attach Dataprovider to strategy instance
-        self.strategy.dp = self.dataprovider
-        # Attach Wallets to strategy instance
-        self.strategy.wallets = self.wallets
-
-        # Initializing Edge only if enabled
-        self.edge = (
-            Edge(self.config, self.exchange, self.strategy)
-            if self.config.get("edge", {}).get("enabled", False)
-            else None
-        )
-
-        # Init ExternalMessageConsumer if enabled
-        self.emc = (
-            ExternalMessageConsumer(self.config, self.dataprovider)
-            if self.config.get("external_message_consumer", {}).get("enabled", False)
-            else None
-        )
-
-        logger.info("Starting initial pairlist refresh")
-        with MeasureTime(
-            lambda duration, _: logger.info(f"Initial Pairlist refresh took {duration:.2f}s"), 0
-        ):
-            self.active_pair_whitelist = self._refresh_active_whitelist()
-
-        # Set initial bot state from config
-        initial_state = self.config.get("initial_state")
-        self.state = State[initial_state.upper()] if initial_state else State.STOPPED
-
-        # Protect exit-logic from forcesell and vice versa
-        self._exit_lock = Lock()
-        timeframe_secs = timeframe_to_seconds(self.strategy.timeframe)
-        self._exit_reason_cache = PeriodicCache(100, ttl=timeframe_secs)
-        LoggingMixin.__init__(self, logger, timeframe_secs)
-
-        self._schedule = Scheduler()
-
-        if self.trading_mode == TradingMode.FUTURES:
-
-            def update():
-                self.update_funding_fees()
-                self.update_all_liquidation_prices()
-                self.wallets.update()
-
-            # This would be more efficient if scheduled in utc time, and performed at each
-            # funding interval, specified by funding_fee_times on the exchange classes
-            # However, this reduces the precision - and might therefore lead to problems.
-            for time_slot in range(24):
-                for minutes in [1, 31]:
-                    t = str(time(time_slot, minutes, 2))
-                    self._schedule.every().day.at(t).do(update)
-
-        self._schedule.every().day.at("00:02").do(self.exchange.ws_connection_reset)
-
-        self.strategy.ft_bot_start()
-        # Initialize protections AFTER bot start - otherwise parameters are not loaded.
-        self.protections = ProtectionManager(self.config, self.strategy.protections)
-
-        def log_took_too_long(duration: float, time_limit: float):
-            logger.warning(
-                f"Strategy analysis took {duration:.2f}s, more than 25% of the timeframe "
-                f"({time_limit:.2f}s). This can lead to delayed orders and missed signals."
-                "Consider either reducing the amount of work your strategy performs "
-                "or reduce the amount of pairs in the Pairlist."
+        try:
+            self.exchange = ExchangeResolver.load_exchange(
+                self.config, exchange_config=exchange_config, load_leverage_tiers=True
             )
 
-        self._measure_execution = MeasureTime(log_took_too_long, timeframe_secs * 0.25)
+            self.strategy: IStrategy = StrategyResolver.load_strategy(self.config)
+
+            # Check config consistency here since strategies can set certain options
+            validate_config_consistency(config)
+            # Re-validate exchange compatibility
+            self.exchange.validate_config(self.config)
+
+            init_db(self.config["db_url"])
+
+            self.wallets = Wallets(self.config, self.exchange)
+
+            PairLocks.timeframe = self.config["timeframe"]
+
+            self.trading_mode: TradingMode = self.config.get("trading_mode", TradingMode.SPOT)
+            self.margin_mode: MarginMode = self.config.get("margin_mode", MarginMode.NONE)
+            self.last_process: datetime | None = None
+
+            # RPC runs in separate threads, can start handling external commands just after
+            # initialization, even before Freqtradebot has a chance to start its throttling,
+            # so anything in the Freqtradebot instance should be ready (initialized), including
+            # the initial state of the bot.
+            # Keep this at the end of this initialization method.
+            self.rpc: RPCManager = RPCManager(self)
+
+            self.dataprovider = DataProvider(self.config, self.exchange, rpc=self.rpc)
+            self.pairlists = PairListManager(self.exchange, self.config, self.dataprovider)
+
+            self.dataprovider.add_pairlisthandler(self.pairlists)
+
+            # Attach Dataprovider to strategy instance
+            self.strategy.dp = self.dataprovider
+            # Attach Wallets to strategy instance
+            self.strategy.wallets = self.wallets
+
+            # Init ExternalMessageConsumer if enabled
+            self.emc: ExternalMessageConsumer | None = (
+                ExternalMessageConsumer(self.config, self.dataprovider)
+                if self.config.get("external_message_consumer", {}).get("enabled", False)
+                else None
+            )
+
+            logger.info("Starting initial pairlist refresh")
+            with MeasureTime(
+                lambda duration, _: logger.info(f"Initial Pairlist refresh took {duration:.2f}s"), 0
+            ):
+                self.active_pair_whitelist = self._refresh_active_whitelist()
+
+            # Set initial bot state from config
+            initial_state = self.config.get("initial_state")
+            self.state = State[initial_state.upper()] if initial_state else State.STOPPED
+
+            # Protect exit-logic from forcesell and vice versa
+            self._exit_lock = Lock()
+            timeframe_secs = timeframe_to_seconds(self.strategy.timeframe)
+            self._exit_reason_cache = PeriodicCache(100, ttl=timeframe_secs)
+            LoggingMixin.__init__(self, logger, timeframe_secs)
+
+            self._schedule = FtScheduler()
+
+            if self.trading_mode == TradingMode.FUTURES:
+
+                def update():
+                    self.update_funding_fees()
+                    self.update_all_liquidation_prices()
+                    self.wallets.update()
+
+                # This would be more efficient if scheduled in utc time, and performed at each
+                # funding interval, specified by funding_fee_times on the exchange classes
+                # However, this reduces the precision - and might therefore lead to problems.
+                for time_slot in range(24):
+                    for minutes in [1, 31]:
+                        t = str(time(time_slot, minutes, 2))
+                        self._schedule.every().day.at(t).do(update)
+
+            # schedule is in local time by default (!)
+            # Explicit timezones must be configured explicitly.
+            self._schedule.every().day.at("00:02").do(self.exchange.ws_connection_reset)
+            self._schedule.every().day.at("00:07").do(self.wallets.record_wallet_state)
+
+            self.strategy.ft_bot_start()
+            # Initialize protections AFTER bot start - otherwise parameters are not loaded.
+            self.protections = ProtectionManager(self.config, self.strategy.protections)
+
+            # AFTER bot_start and the initial pairlist refresh - informative_pairs() is a user
+            # callback that may rely on either.
+            self.validate_informative_candle_types()
+
+            def log_took_too_long(duration: float, time_limit: float):
+                logger.warning(
+                    f"Strategy analysis took {duration:.2f}s, more than 25% of the timeframe "
+                    f"({time_limit:.2f}s). This can lead to delayed orders and missed signals."
+                    "Consider either reducing the amount of work your strategy performs "
+                    "or reduce the amount of pairs in the Pairlist."
+                )
+
+            self._measure_execution = MeasureTime(log_took_too_long, timeframe_secs * 0.25)
+
+        except Exception as e:
+            # Graceful shutdown in case of failed initialization.
+            self.cleanup()
+            raise e from e
 
     def notify_status(self, msg: str, msg_type=RPCMessageType.STATUS) -> None:
         """
@@ -220,7 +214,7 @@ class FreqtradeBot(LoggingMixin):
         try:
             # Wrap db activities in shutdown to avoid problems if database is gone,
             # and raises further exceptions.
-            if self.config["cancel_open_orders_on_exit"]:
+            if self.config.get("cancel_open_orders_on_exit"):
                 self.cancel_all_open_orders()
 
             self.check_for_open_trades()
@@ -228,14 +222,18 @@ class FreqtradeBot(LoggingMixin):
             logger.warning(f"Exception during cleanup: {e.__class__.__name__} {e}")
 
         finally:
-            self.strategy.ft_bot_cleanup()
+            if getattr(self, "strategy", None):
+                self.strategy.ft_bot_cleanup()
 
-        self.rpc.cleanup()
-        if self.emc:
+        if getattr(self, "rpc", None):
+            self.rpc.cleanup()
+        if hasattr(self, "emc") and self.emc:
             self.emc.shutdown()
-        self.exchange.close()
+        if getattr(self, "exchange", None):
+            self.exchange.close()
         try:
-            Trade.commit()
+            if hasattr(Trade, "session"):
+                Trade.commit()
         except Exception:
             # Exceptions here will be happening if the db disappeared.
             # At which point we can no longer commit anyway.
@@ -246,15 +244,14 @@ class FreqtradeBot(LoggingMixin):
         Called on startup and after reloading the bot - triggers notifications and
         performs startup tasks
         """
-        migrate_binance_futures_names(self.config)
+        migrate_live_content(self.config, self.exchange, self.wallets.get_starting_balance())
         set_startup_time()
 
         self.rpc.startup_messages(self.config, self.pairlists, self.protections)
         # Update older trades with precision and precision mode
         self.startup_backpopulate_precision()
-        if not self.edge:
-            # Adjust stoploss if it was changed
-            Trade.stoploss_reinitialization(self.strategy.stoploss)
+        # Adjust stoploss if it was changed
+        Trade.stoploss_reinitialization(self.strategy.stoploss)
 
         # Only update open orders on startup
         # This will update the database after the initial migration
@@ -262,15 +259,34 @@ class FreqtradeBot(LoggingMixin):
         self.update_all_liquidation_prices()
         self.update_funding_fees()
 
+    def validate_informative_candle_types(self) -> None:
+        """
+        Verify the exchange can deliver every candle type the strategy asks for.
+
+        Leaves a gap on dynamic informative_pairs calls - where the candle type is not
+        part of the initial request.
+        :raises OperationalException: if the exchange doesn't support a requested candle type
+        """
+        unsupported = sorted(
+            {
+                candle_type
+                for _, _, candle_type in self.strategy.gather_informative_pairs()
+                if not self.exchange.check_candle_type_support(candle_type)
+            }
+        )
+        if unsupported:
+            raise OperationalException(
+                f"Strategy {self.strategy.get_strategy_name()} requests informative data of type "
+                f"{', '.join(unsupported)}, which {self.exchange.name} does not provide. "
+                f"Please remove the affected informative pairs from your strategy."
+            )
+
     def process(self) -> None:
         """
         Queries the persistence layer for open trades and handles them,
         otherwise a new trade is created.
         :return: True if one or more trades has been created or closed, False otherwise
         """
-
-        if self._check_walk_forward_update():
-            return
 
         # Check whether markets have to be reloaded and reload them when it's needed
         self.exchange.reload_markets()
@@ -289,7 +305,7 @@ class FreqtradeBot(LoggingMixin):
         )
 
         strategy_safe_wrapper(self.strategy.bot_loop_start, supress_error=True)(
-            current_time=datetime.now(timezone.utc)
+            current_time=datetime.now(UTC)
         )
 
         with self._measure_execution:
@@ -314,87 +330,18 @@ class FreqtradeBot(LoggingMixin):
                 self.process_open_trade_positions()
 
         # Then looking for entry opportunities
-        if self.state == State.RUNNING and self.get_free_open_trades():
-            self.enter_positions()
+        if self.state == State.RUNNING and ((free_trade_slots := self.get_free_open_trades()) > 0):
+            self.enter_positions(free_trade_slots)
         self._schedule.run_pending()
         Trade.commit()
         self.rpc.process_msg_queue(self.dataprovider._msg_queue)
-        self.last_process = datetime.now(timezone.utc)
-
-    def _read_walk_forward_candidate(self) -> dict[str, Any] | None:
-        """Load and validate the pending walk-forward parameter file."""
-        pending = self._walk_forward_pending_file
-        if not pending.is_file():
-            return None
-
-        try:
-            candidate = read_json(pending)
-        except (OSError, ValueError) as exc:
-            logger.warning("Unable to read pending walk-forward parameters: %s", exc)
-            return None
-
-        if candidate.get("strategy_name") != self.strategy.get_strategy_name():
-            logger.warning("Ignoring walk-forward parameters for a different strategy.")
-            return None
-        if not isinstance(candidate.get("params"), dict):
-            logger.warning("Ignoring invalid walk-forward parameter file '%s'.", pending)
-            return None
-
-        active_file = Path(self.strategy.__file__).with_suffix(".json")
-        try:
-            is_same_file = pending.resolve() == active_file.resolve()
-        except OSError:
-            is_same_file = False
-        if is_same_file:
-            logger.error("The pending walk-forward file must not be the active strategy file.")
-            # Remove the misconfigured pending file to avoid infinite loop
-            try:
-                pending.unlink(missing_ok=True)
-            except OSError as exc:
-                logger.warning("Unable to remove misconfigured pending file: %s", exc)
-            return None
-
-        return candidate
-
-    def _check_walk_forward_update(self) -> bool:
-        """Apply a pending walk-forward parameter file when the bot is flat."""
-        if not self.config.get("walk_forward", {}).get("enabled", False):
-            return False
-
-        if Trade.get_open_trade_count() != 0:
-            return False
-
-        pending = self._walk_forward_pending_file
-        candidate = self._read_walk_forward_candidate()
-        if candidate is None:
-            return False
-
-        active_file = Path(self.strategy.__file__).with_suffix(".json")
-
-        history_directory = pending.parent / "applied"
-        if active_file.is_file():
-            history_directory.mkdir(parents=True, exist_ok=True)
-            backup = history_directory / (
-                f"{active_file.stem}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}.json"
-            )
-            shutil.copy2(active_file, backup)
-
-        write_json_atomic(active_file, candidate)
-        try:
-            pending.unlink(missing_ok=True)
-        except OSError as exc:
-            logger.warning("Unable to remove applied pending walk-forward file: %s", exc)
-        self.notify_status(
-            f"Applying walk-forward parameters for {self.strategy.get_strategy_name()}"
-        )
-        self.state = State.RELOAD_CONFIG
-        return True
+        self.last_process = datetime.now(UTC)
 
     def process_stopped(self) -> None:
         """
         Close all orders that were left open
         """
-        if self.config["cancel_open_orders_on_exit"]:
+        if self.config.get("cancel_open_orders_on_exit"):
             self.cancel_all_open_orders()
 
     def check_for_open_trades(self):
@@ -417,18 +364,13 @@ class FreqtradeBot(LoggingMixin):
 
     def _refresh_active_whitelist(self, trades: list[Trade] | None = None) -> list[str]:
         """
-        Refresh active whitelist from pairlist or edge and extend it with
+        Refresh active whitelist from pairlist and extend it with
         pairs that have open trades.
         """
         # Refresh whitelist
         _prev_whitelist = self.pairlists.whitelist
         self.pairlists.refresh_pairlist()
         _whitelist = self.pairlists.whitelist
-
-        # Calculating Edge positioning
-        if self.edge:
-            self.edge.calculate(_whitelist)
-            _whitelist = self.edge.adjust(_whitelist)
 
         if trades:
             # Extend active-pair whitelist with pairs of open trades
@@ -518,7 +460,7 @@ class FreqtradeBot(LoggingMixin):
 
             except InvalidOrderException as e:
                 logger.warning(f"Error updating Order {order.order_id} due to {e}.")
-                if order.order_date_utc - timedelta(days=5) < datetime.now(timezone.utc):
+                if order.order_date_utc - timedelta(days=5) < datetime.now(UTC):
                     logger.warning(
                         "Order is older than 5 days. Assuming order was fully cancelled."
                     )
@@ -549,7 +491,7 @@ class FreqtradeBot(LoggingMixin):
                     order = trade.select_order("stoploss", False)
                 if order:
                     logger.info(
-                        f"Updating {trade.exit_side}-fee on trade {trade}"
+                        f"Updating {trade.exit_side}-fee on trade {trade} "
                         f"for order {order.order_id}."
                     )
                     self.update_trade_state(
@@ -567,7 +509,7 @@ class FreqtradeBot(LoggingMixin):
                     open_order = trade.select_order(trade.entry_side, True)
                     if order and open_order is None:
                         logger.info(
-                            f"Updating {trade.entry_side}-fee on trade {trade}"
+                            f"Updating {trade.entry_side}-fee on trade {trade} "
                             f"for order {order.order_id}."
                         )
                         self.update_trade_state(trade, order.order_id, send_msg=False)
@@ -611,6 +553,7 @@ class FreqtradeBot(LoggingMixin):
             prev_exit_reason = trade.exit_reason
             prev_trade_state = trade.is_open
             prev_trade_amount = trade.amount
+            order_obj: Order | None = None
             for order in orders:
                 trade_order = [o for o in trade.orders if o.order_id == order["id"]]
 
@@ -618,6 +561,15 @@ class FreqtradeBot(LoggingMixin):
                     # We knew this order, but didn't have it updated properly
                     order_obj = trade_order[0]
                 else:
+                    existing_order = Order.order_by_id(order["id"], trade.pair)
+                    if existing_order is not None and existing_order.ft_trade_id != trade.id:
+                        # Order belongs to a different trade
+                        logger.info(
+                            f"Order {order['id']} for {trade.pair} already belongs to "
+                            f"trade {existing_order.ft_trade_id} - skipping."
+                        )
+                        continue
+
                     logger.info(f"Found previously unknown order {order['id']} for {trade.pair}.")
 
                     order_obj = Order.parse_from_ccxt_object(order, trade.pair, order["side"])
@@ -636,13 +588,14 @@ class FreqtradeBot(LoggingMixin):
             Trade.session.refresh(trade)
             if not trade.is_open:
                 # Trade was just closed
-                trade.close_date = trade.date_last_filled_utc
-                self.order_close_notify(
-                    trade,
-                    order_obj,
-                    order_obj.ft_order_side == "stoploss",
-                    send_msg=prev_trade_state != trade.is_open,
-                )
+                if order_obj:
+                    trade.close_date = trade.date_last_filled_utc
+                    self.order_close_notify(
+                        trade,
+                        order_obj,
+                        order_obj.ft_order_side == "stoploss",
+                        send_msg=prev_trade_state != trade.is_open,
+                    )
             else:
                 trade.exit_reason = prev_exit_reason
                 total = (
@@ -650,7 +603,7 @@ class FreqtradeBot(LoggingMixin):
                     if trade.base_currency
                     else 0
                 )
-                if total < trade.amount:
+                if total < trade.amount or (total == 0 and trade.amount == 0):
                     if trade.fully_canceled_entry_order_count == len(trade.orders):
                         logger.warning(
                             f"Trade only had fully canceled entry orders. "
@@ -685,9 +638,11 @@ class FreqtradeBot(LoggingMixin):
             Trade.commit()
 
         except ExchangeError:
+            Trade.rollback()
             logger.warning("Error finding onexchange order.")
         except Exception:
             # catching https://github.com/freqtrade/freqtrade/issues/9025
+            Trade.rollback()
             logger.warning("Error finding onexchange order", exc_info=True)
         return False
 
@@ -695,13 +650,16 @@ class FreqtradeBot(LoggingMixin):
     # enter positions / open trades logic and methods
     #
 
-    def enter_positions(self) -> int:
+    def enter_positions(self, free_trade_slots: int) -> int:
         """
         Tries to execute entry orders for new trades (positions)
+
+        :param free_trade_slots: Number of available slots for new trades.
+        :return: Number of trades created
         """
         trades_created = 0
 
-        whitelist = deepcopy(self.active_pair_whitelist)
+        whitelist = self.active_pair_whitelist.copy()
         if not whitelist:
             self.log_once("Active pair whitelist is empty.", logger.info)
             return trades_created
@@ -732,11 +690,16 @@ class FreqtradeBot(LoggingMixin):
             else:
                 self.log_once("Global pairlock active. Not creating new trades.", logger.info)
             return trades_created
+
         # Create entity and execute trade for each pair from whitelist
         for pair in whitelist:
+            if free_trade_slots <= 0:
+                break
             try:
                 with self._exit_lock:
-                    trades_created += self.create_trade(pair)
+                    if self.create_trade(pair):
+                        free_trade_slots -= 1
+                        trades_created += 1
             except DependencyException as exception:
                 logger.warning("Unable to create trade for %s: %s", pair, exception)
 
@@ -756,14 +719,14 @@ class FreqtradeBot(LoggingMixin):
         """
         logger.debug(f"create_trade for pair {pair}")
 
-        analyzed_df, _ = self.dataprovider.get_analyzed_dataframe(pair, self.strategy.timeframe)
-        nowtime = analyzed_df.iloc[-1]["date"] if len(analyzed_df) > 0 else None
-
         # get_free_open_trades is checked before create_trade is called
         # but it is still used here to prevent opening too many trades within one iteration
         if not self.get_free_open_trades():
             logger.debug(f"Can't open a new trade for {pair}: max number of trades is reached.")
             return False
+
+        analyzed_df, _ = self.dataprovider.get_analyzed_dataframe(pair, self.strategy.timeframe)
+        nowtime = analyzed_df.iloc[-1]["date"] if len(analyzed_df) > 0 else None
 
         # running get_signal on historical data fetched
         (signal, enter_tag) = self.strategy.get_entry_signal(
@@ -783,9 +746,8 @@ class FreqtradeBot(LoggingMixin):
                 else:
                     self.log_once(f"Pair {pair} is currently locked.", logger.info)
                 return False
-            stake_amount = self.wallets.get_trade_stake_amount(
-                pair, self.config["max_open_trades"], self.edge
-            )
+
+            stake_amount = self.wallets.get_trade_stake_amount(pair, self.config["max_open_trades"])
 
             bid_check_dom = self.config.get("entry_pricing", {}).get("check_depth_of_market", {})
             if (bid_check_dom.get("enabled", False)) and (
@@ -844,9 +806,6 @@ class FreqtradeBot(LoggingMixin):
         min_entry_stake = self.exchange.get_min_pair_stake_amount(
             trade.pair, current_entry_rate, 0.0, trade.leverage
         )
-        min_exit_stake = self.exchange.get_min_pair_stake_amount(
-            trade.pair, current_exit_rate, self.strategy.stoploss, trade.leverage
-        )
         max_entry_stake = self.exchange.get_max_pair_stake_amount(
             trade.pair, current_entry_rate, trade.leverage
         )
@@ -854,7 +813,7 @@ class FreqtradeBot(LoggingMixin):
         logger.debug(f"Calling adjust_trade_position for pair {trade.pair}")
         stake_amount, order_tag = self.strategy._adjust_trade_position_internal(
             trade=trade,
-            current_time=datetime.now(timezone.utc),
+            current_time=datetime.now(UTC),
             current_rate=current_entry_rate,
             current_profit=current_entry_profit,
             min_stake=min_entry_stake,
@@ -910,6 +869,9 @@ class FreqtradeBot(LoggingMixin):
                 return
 
             remaining = (trade.amount - amount) * current_exit_rate
+            min_exit_stake = self.exchange.get_min_pair_stake_amount(
+                trade.pair, current_exit_rate, self.strategy.stoploss, trade.leverage
+            )
             if min_exit_stake and remaining != 0 and remaining < min_exit_stake:
                 logger.info(
                     f"Remaining amount of {remaining} would be smaller "
@@ -932,9 +894,9 @@ class FreqtradeBot(LoggingMixin):
         conf_bids_to_ask_delta = conf.get("bids_to_ask_delta", 0)
         logger.info(f"Checking depth of market for {pair} ...")
         order_book = self.exchange.fetch_l2_order_book(pair, 1000)
-        order_book_data_frame = order_book_to_dataframe(order_book["bids"], order_book["asks"])
-        order_book_bids = order_book_data_frame["b_size"].sum()
-        order_book_asks = order_book_data_frame["a_size"].sum()
+        order_book_bids, order_book_asks = count_total_order_book(
+            order_book["bids"], order_book["asks"]
+        )
 
         entry_side = order_book_bids if side == SignalDirection.LONG else order_book_asks
         exit_side = order_book_asks if side == SignalDirection.LONG else order_book_bids
@@ -1015,7 +977,7 @@ class FreqtradeBot(LoggingMixin):
             amount=amount,
             rate=enter_limit_requested,
             time_in_force=time_in_force,
-            current_time=datetime.now(timezone.utc),
+            current_time=datetime.now(UTC),
             entry_tag=enter_tag,
             side=trade_side,
         ):
@@ -1034,6 +996,7 @@ class FreqtradeBot(LoggingMixin):
             reduceOnly=False,
             time_in_force=time_in_force,
             leverage=leverage,
+            initial_order=trade is None,
         )
         order_obj = Order.parse_from_ccxt_object(order, pair, side, amount, enter_limit_requested)
         order_obj.ft_order_tag = enter_tag
@@ -1059,17 +1022,10 @@ class FreqtradeBot(LoggingMixin):
                 # in case of IOC orders we can check immediately
                 # if the order is fulfilled fully or partially
                 logger.warning(
-                    "%s %s order with time in force %s for %s is %s by %s."
-                    " %s amount fulfilled out of %s (%s remaining which is canceled).",
-                    name,
-                    time_in_force,
-                    order_type,
-                    pair,
-                    order_status,
-                    self.exchange.name,
-                    order["filled"],
-                    order["amount"],
-                    order["remaining"],
+                    f"{name} {time_in_force} order with time in force {order_type} for {pair} is "
+                    f"{order_status} by {self.exchange.name}. "
+                    f"{order['filled']} amount fulfilled out of {order['amount']} "
+                    f"({order['remaining']} remaining which is canceled)."
                 )
                 amount = safe_value_fallback(order, "filled", "amount", amount)
                 enter_limit_filled_price = safe_value_fallback(
@@ -1086,13 +1042,15 @@ class FreqtradeBot(LoggingMixin):
         # Fee is applied twice because we make a LIMIT_BUY and LIMIT_SELL
         fee = self.exchange.get_fee(symbol=pair, taker_or_maker="maker")
         base_currency = self.exchange.get_pair_base_currency(pair)
-        open_date = datetime.now(timezone.utc)
-
-        funding_fees = self.exchange.get_funding_fees(
-            pair=pair,
-            amount=amount + trade.amount if trade else amount,
-            is_short=is_short,
-            open_date=trade.date_last_filled_utc if trade else open_date,
+        funding_fees = (
+            self.exchange.get_funding_fees(
+                pair=pair,
+                amount=trade.amount,
+                is_short=is_short,
+                open_date=trade.date_last_filled_utc,
+            )
+            if trade
+            else 0
         )
 
         # This is a new trade
@@ -1109,7 +1067,7 @@ class FreqtradeBot(LoggingMixin):
                 fee_close=fee,
                 open_rate=enter_limit_filled_price,
                 open_rate_requested=enter_limit_requested,
-                open_date=open_date,
+                open_date=datetime.now(UTC),
                 exchange=self.exchange.id,
                 strategy=self.strategy.get_strategy_name(),
                 enter_tag=enter_tag,
@@ -1124,13 +1082,11 @@ class FreqtradeBot(LoggingMixin):
                 precision_mode_price=self.exchange.precision_mode_price,
                 contract_size=self.exchange.get_contract_size(pair),
             )
-            stoploss = self.strategy.stoploss if not self.edge else self.edge.get_stoploss(pair)
+            stoploss = self.strategy.stoploss
             trade.adjust_stop_loss(trade.open_rate, stoploss, initial=True)
 
         else:
-            # This is additional entry, we reset fee_open_currency so timeout checking can work
             trade.is_open = True
-            trade.fee_open_currency = None
             trade.set_funding_fees(funding_fees)
 
         trade.orders.append(order_obj)
@@ -1162,7 +1118,16 @@ class FreqtradeBot(LoggingMixin):
 
         return True
 
-    def cancel_stoploss_on_exchange(self, trade: Trade) -> Trade:
+    def cancel_stoploss_on_exchange(self, trade: Trade, allow_nonblocking: bool = False) -> Trade:
+        """
+        Cancels on exchange stoploss orders for the given trade.
+        :param trade: Trade for which to cancel stoploss order
+        :param allow_nonblocking: If True, will skip cancelling stoploss on exchange
+                                   if the exchange supports blocking stoploss orders.
+        """
+        if allow_nonblocking and not self.exchange.get_option("stoploss_blocks_assets", True):
+            logger.info(f"Skipping cancelling stoploss on exchange for {trade}.")
+            return trade
         # First cancelling stoploss on exchange ...
         for oslo in trade.open_sl_orders:
             try:
@@ -1207,7 +1172,7 @@ class FreqtradeBot(LoggingMixin):
             )(
                 pair=pair,
                 trade=trade,
-                current_time=datetime.now(timezone.utc),
+                current_time=datetime.now(UTC),
                 proposed_rate=enter_limit_requested,
                 entry_tag=entry_tag,
                 side=trade_side,
@@ -1225,7 +1190,7 @@ class FreqtradeBot(LoggingMixin):
             else:
                 leverage = strategy_safe_wrapper(self.strategy.leverage, default_retval=1.0)(
                     pair=pair,
-                    current_time=datetime.now(timezone.utc),
+                    current_time=datetime.now(UTC),
                     current_rate=enter_limit_requested,
                     proposed_leverage=1.0,
                     max_leverage=max_leverage,
@@ -1245,20 +1210,20 @@ class FreqtradeBot(LoggingMixin):
         min_stake_amount = self.exchange.get_min_pair_stake_amount(
             pair,
             enter_limit_requested,
-            self.strategy.stoploss if not mode == "pos_adjust" else 0.0,
+            self.strategy.stoploss if mode != "pos_adjust" else 0.0,
             leverage,
         )
         max_stake_amount = self.exchange.get_max_pair_stake_amount(
             pair, enter_limit_requested, leverage
         )
 
-        if not self.edge and trade is None:
+        if trade is None:
             stake_available = self.wallets.get_available_stake_amount()
             stake_amount = strategy_safe_wrapper(
                 self.strategy.custom_stake_amount, default_retval=stake_amount
             )(
                 pair=pair,
-                current_time=datetime.now(timezone.utc),
+                current_time=datetime.now(UTC),
                 current_rate=enter_limit_requested,
                 proposed_stake=stake_amount,
                 min_stake=min_stake_amount,
@@ -1315,6 +1280,7 @@ class FreqtradeBot(LoggingMixin):
             "leverage": trade.leverage if trade.leverage else None,
             "direction": "Short" if trade.is_short else "Long",
             "limit": open_rate,  # Deprecated (?)
+            "order_rate": open_rate,
             "open_rate": open_rate,
             "order_type": order_type or "unknown",
             "stake_amount": stake_amount,
@@ -1323,7 +1289,7 @@ class FreqtradeBot(LoggingMixin):
             "quote_currency": self.exchange.get_pair_quote_currency(trade.pair),
             "fiat_currency": self.config.get("fiat_display_currency", None),
             "amount": order.safe_amount_after_fee if fill else (order.safe_amount or trade.amount),
-            "open_date": trade.open_date_utc or datetime.now(timezone.utc),
+            "open_date": trade.open_date_utc or datetime.now(UTC),
             "current_rate": current_rate,
             "sub_trade": sub_trade,
         }
@@ -1351,6 +1317,7 @@ class FreqtradeBot(LoggingMixin):
             "leverage": trade.leverage,
             "direction": "Short" if trade.is_short else "Long",
             "limit": trade.open_rate,
+            "order_rate": trade.open_rate,
             "order_type": order_type,
             "stake_amount": trade.stake_amount,
             "open_rate": trade.open_rate,
@@ -1381,6 +1348,7 @@ class FreqtradeBot(LoggingMixin):
             if (
                 not trade.has_open_orders
                 and not trade.has_open_sl_orders
+                and trade.fee_open_currency is not None
                 and not self.wallets.check_exit_amount(trade)
             ):
                 logger.warning(
@@ -1461,22 +1429,21 @@ class FreqtradeBot(LoggingMixin):
         exits: list[ExitCheckTuple] = self.strategy.should_exit(
             trade,
             exit_rate,
-            datetime.now(timezone.utc),
+            datetime.now(UTC),
             enter=enter,
             exit_=exit_,
-            force_stoploss=self.edge.get_stoploss(trade.pair) if self.edge else 0,
+            force_stoploss=0,
         )
         for should_exit in exits:
             if should_exit.exit_flag:
                 exit_tag1 = exit_tag if should_exit.exit_type == ExitType.EXIT_SIGNAL else None
-                if trade.has_open_orders:
-                    if prev_eval := self._exit_reason_cache.get(
+                if trade.has_open_orders and (
+                    prev_eval := self._exit_reason_cache.get(
                         f"{trade.pair}_{trade.id}_{exit_tag1 or should_exit.exit_reason}", None
-                    ):
-                        logger.debug(
-                            f"Exit reason already seen this candle, first seen at {prev_eval}"
-                        )
-                        continue
+                    )
+                ):
+                    logger.debug(f"Exit reason already seen this candle, first seen at {prev_eval}")
+                    continue
 
                 logger.info(
                     f"Exit for {trade.pair} detected. Reason: {should_exit.exit_type}"
@@ -1558,20 +1525,17 @@ class FreqtradeBot(LoggingMixin):
                 self.handle_protections(trade.pair, trade.trade_direction)
                 return True
 
-        if not trade.has_open_position or not trade.is_open:
+        if (
+            not trade.has_open_position
+            or not trade.is_open
+            or (trade.has_open_orders and self.exchange.get_option("stoploss_blocks_assets", True))
+        ):
             # The trade can be closed already (sell-order fill confirmation came in this iteration)
             return False
 
         # If enter order is fulfilled but there is no stoploss, we add a stoploss on exchange
         if len(stoploss_orders) == 0:
             stop_price = trade.stoploss_or_liquidation
-            if self.edge:
-                stoploss = self.edge.get_stoploss(pair=trade.pair)
-                stop_price = (
-                    trade.open_rate * (1 - stoploss)
-                    if trade.is_short
-                    else trade.open_rate * (1 + stoploss)
-                )
 
             if self.create_stoploss_order(trade=trade, stop_price=stop_price):
                 # The above will return False if the placement failed and the trade was force-sold.
@@ -1581,44 +1545,6 @@ class FreqtradeBot(LoggingMixin):
         self.manage_trade_stoploss_orders(trade, stoploss_orders)
 
         return False
-
-    def handle_trailing_stoploss_on_exchange(self, trade: Trade, order: CcxtOrder) -> None:
-        """
-        Check to see if stoploss on exchange should be updated
-        in case of trailing stoploss on exchange
-        :param trade: Corresponding Trade
-        :param order: Current on exchange stoploss order
-        :return: None
-        """
-        stoploss_norm = self.exchange.price_to_precision(
-            trade.pair,
-            trade.stoploss_or_liquidation,
-            rounding_mode=ROUND_DOWN if trade.is_short else ROUND_UP,
-        )
-
-        if self.exchange.stoploss_adjust(stoploss_norm, order, side=trade.exit_side):
-            # we check if the update is necessary
-            update_beat = self.strategy.order_types.get("stoploss_on_exchange_interval", 60)
-            upd_req = datetime.now(timezone.utc) - timedelta(seconds=update_beat)
-            if trade.stoploss_last_update_utc and upd_req >= trade.stoploss_last_update_utc:
-                # cancelling the current stoploss on exchange first
-                logger.info(
-                    f"Cancelling current stoploss on exchange for pair {trade.pair} "
-                    f"(orderid:{order['id']}) in order to add another one ..."
-                )
-
-                self.cancel_stoploss_on_exchange(trade)
-                if not trade.is_open:
-                    logger.warning(
-                        f"Trade {trade} is closed, not creating trailing stoploss order."
-                    )
-                    return
-
-                # Create new stoploss order
-                if not self.create_stoploss_order(trade=trade, stop_price=stoploss_norm):
-                    logger.warning(
-                        f"Could not create trailing stoploss order for pair {trade.pair}."
-                    )
 
     def manage_trade_stoploss_orders(self, trade: Trade, stoploss_orders: list[CcxtOrder]):
         """
@@ -1661,6 +1587,44 @@ class FreqtradeBot(LoggingMixin):
 
         return
 
+    def handle_trailing_stoploss_on_exchange(self, trade: Trade, order: CcxtOrder) -> None:
+        """
+        Check to see if stoploss on exchange should be updated
+        in case of trailing stoploss on exchange
+        :param trade: Corresponding Trade
+        :param order: Current on exchange stoploss order
+        :return: None
+        """
+        stoploss_norm = self.exchange.price_to_precision(
+            trade.pair,
+            trade.stoploss_or_liquidation,
+            rounding_mode=ROUND_DOWN if trade.is_short else ROUND_UP,
+        )
+
+        if self.exchange.stoploss_adjust(stoploss_norm, order, side=trade.exit_side):
+            # we check if the update is necessary
+            update_beat = self.strategy.order_types.get("stoploss_on_exchange_interval", 60)
+            upd_req = datetime.now(UTC) - timedelta(seconds=update_beat)
+            if trade.stoploss_last_update_utc and upd_req >= trade.stoploss_last_update_utc:
+                # cancelling the current stoploss on exchange first
+                logger.info(
+                    f"Cancelling current stoploss on exchange for pair {trade.pair} "
+                    f"(orderid:{order['id']}) in order to add another one ..."
+                )
+
+                self.cancel_stoploss_on_exchange(trade)
+                if not trade.is_open:
+                    logger.warning(
+                        f"Trade {trade} is closed, not creating trailing stoploss order."
+                    )
+                    return
+
+                # Create new stoploss order
+                if not self.create_stoploss_order(trade=trade, stop_price=stoploss_norm):
+                    logger.warning(
+                        f"Could not create trailing stoploss order for pair {trade.pair}."
+                    )
+
     def manage_open_orders(self) -> None:
         """
         Management of open orders on exchange. Unfilled orders might be cancelled if timeout
@@ -1686,9 +1650,7 @@ class FreqtradeBot(LoggingMixin):
                 if not_closed:
                     if fully_cancelled or (
                         open_order
-                        and self.strategy.ft_check_timed_out(
-                            trade, open_order, datetime.now(timezone.utc)
-                        )
+                        and self.strategy.ft_check_timed_out(trade, open_order, datetime.now(UTC))
                     ):
                         self.handle_cancel_order(
                             order, open_order, trade, constants.CANCEL_REASON["TIMEOUT"]
@@ -1718,7 +1680,9 @@ class FreqtradeBot(LoggingMixin):
                         f"Emergency exiting trade {trade}, as the exit order "
                         f"timed out {max_timeouts} times. force selling {order['amount']}."
                     )
-                    self.emergency_exit(trade, order["price"], order["amount"])
+                    # Trade.session.refresh(order_obj)
+
+                    self.emergency_exit(trade, order["price"], order_obj.safe_remaining)
             return canceled
 
     def emergency_exit(
@@ -1752,7 +1716,7 @@ class FreqtradeBot(LoggingMixin):
             )
             trade.delete()
 
-    def replace_order(self, order: CcxtOrder, order_obj: Order | None, trade: Trade) -> None:
+    def replace_order(self, order: CcxtOrder, order_obj: Order, trade: Trade) -> None:
         """
         Check if current analyzed entry order should be replaced or simply cancelled.
         To simply cancel the existing order(no replacement) adjust_order_price() should return None
@@ -1771,7 +1735,7 @@ class FreqtradeBot(LoggingMixin):
             self.strategy.timeframe, latest_candle_open_date
         )
         # Check if new candle
-        if order_obj and latest_candle_close_date > order_obj.order_date_utc:
+        if latest_candle_close_date > order_obj.order_date_utc:
             is_entry = order_obj.side == trade.entry_side
             # New candle
             proposed_rate = self.exchange.get_rate(
@@ -1786,7 +1750,7 @@ class FreqtradeBot(LoggingMixin):
                 trade=trade,
                 order=order_obj,
                 pair=trade.pair,
-                current_time=datetime.now(timezone.utc),
+                current_time=datetime.now(UTC),
                 proposed_rate=proposed_rate,
                 current_order_rate=order_obj.safe_placement_price,
                 entry_tag=trade.enter_tag,
@@ -1911,17 +1875,16 @@ class FreqtradeBot(LoggingMixin):
         :param price: Limit price of the potential new order
         :param amount: Quantity of assets of the potential new order
         :param side: Side of the potential new order
-        :return: True if an existing similar order was found
+        :return: True if an existing similar order was found or if cancellation failed.
         """
         if trade.has_open_orders:
             oo = trade.select_order(side, True)
-            if oo is not None:
-                if price == oo.price and side == oo.side and amount == oo.amount:
-                    logger.info(
-                        f"A similar open order was found for {trade.pair}. "
-                        f"Keeping existing {trade.exit_side} order. {price=},  {amount=}"
-                    )
-                    return True
+            if oo is not None and price == oo.price and side == oo.side and amount == oo.amount:
+                logger.info(
+                    f"A similar open order was found for {trade.pair}. "
+                    f"Keeping existing {trade.exit_side} order. {price=},  {amount=}"
+                )
+                return True
             # cancel open orders of this trade if order is different
             self.cancel_open_orders_of_trade(
                 trade,
@@ -1930,7 +1893,10 @@ class FreqtradeBot(LoggingMixin):
                 True,
             )
             Trade.commit()
-            return False
+            # Cancellation may be refused, in which case the order
+            # remains open. As such, it's safer to return has_open_orders here rather than a
+            # hard False.
+            return trade.has_open_orders
 
         return False
 
@@ -1954,17 +1920,18 @@ class FreqtradeBot(LoggingMixin):
 
         if order["status"] not in constants.NON_OPEN_EXCHANGE_STATES:
             filled_val: float = order.get("filled", 0.0) or 0.0
-            filled_stake = filled_val * trade.open_rate
-            minstake = self.exchange.get_min_pair_stake_amount(
-                trade.pair, trade.open_rate, self.strategy.stoploss
-            )
 
-            if filled_val > 0 and minstake and filled_stake < minstake:
-                logger.warning(
-                    f"Order {order_id} for {trade.pair} not cancelled, "
-                    f"as the filled amount of {filled_val} would result in an unexitable trade."
+            if filled_val > 0:
+                remaining_stake = (trade.amount + filled_val) * trade.open_rate
+                minstake = self.exchange.get_min_pair_stake_amount(
+                    trade.pair, trade.open_rate, self.strategy.stoploss
                 )
-                return False
+                if minstake and remaining_stake < minstake:
+                    logger.warning(
+                        f"Order {order_id} for {trade.pair} not cancelled, "
+                        f"as the filled amount of {filled_val} would result in an unexitable trade."
+                    )
+                    return False
             corder = self.exchange.cancel_order_with_result(order_id, trade.pair, trade.amount)
             order_obj.ft_cancel_reason = reason
             # if replacing, retry fetching the order 3 times if the status is not what we need
@@ -2036,14 +2003,17 @@ class FreqtradeBot(LoggingMixin):
         # Cancelled orders may have the status of 'canceled' or 'closed'
         if order["status"] not in constants.NON_OPEN_EXCHANGE_STATES:
             filled_amt: float = order.get("filled", 0.0) or 0.0
-            # Filled val is in quote currency (after leverage)
-            filled_rem_stake = trade.stake_amount - (filled_amt * trade.open_rate / trade.leverage)
-            minstake = self.exchange.get_min_pair_stake_amount(
-                trade.pair, trade.open_rate, self.strategy.stoploss
-            )
+
             # Double-check remaining amount
             if filled_amt > 0:
                 reason = constants.CANCEL_REASON["PARTIALLY_FILLED"]
+                # Filled val is in quote currency (after leverage)
+                filled_rem_stake = trade.stake_amount - (
+                    filled_amt * trade.open_rate / trade.leverage
+                )
+                minstake = self.exchange.get_min_pair_stake_amount(
+                    trade.pair, trade.open_rate, self.strategy.stoploss
+                )
                 if minstake and filled_rem_stake < minstake:
                     logger.warning(
                         f"Order {order_id} for {trade.pair} not cancelled, as "
@@ -2101,14 +2071,14 @@ class FreqtradeBot(LoggingMixin):
 
     def _safe_exit_amount(self, trade: Trade, pair: str, amount: float) -> float:
         """
-        Get sellable amount.
+        Get exitable amount.
         Should be trade.amount - but will fall back to the available amount if necessary.
         This should cover cases where get_real_amount() was not able to update the amount
         for whatever reason.
         :param trade: Trade we're working with
-        :param pair: Pair we're trying to sell
+        :param pair: Pair we're trying to exit
         :param amount: amount we expect to be available
-        :return: amount to sell
+        :return: amount to exit
         :raise: DependencyException: if available balance is not within 2% of the available amount.
         """
         # Update wallets to ensure amounts tied up in a stoploss is now free!
@@ -2144,11 +2114,12 @@ class FreqtradeBot(LoggingMixin):
         exit_tag: str | None = None,
         ordertype: str | None = None,
         sub_trade_amt: float | None = None,
+        skip_custom_exit_price: bool = False,
     ) -> bool:
         """
         Executes a trade exit for the given trade and limit
         :param trade: Trade instance
-        :param limit: limit rate for the sell order
+        :param limit: limit rate for the exit order
         :param exit_check: CheckTuple with signal and reason
         :return: True if it succeeds False
         """
@@ -2170,29 +2141,33 @@ class FreqtradeBot(LoggingMixin):
         ):
             exit_type = "stoploss"
 
+        order_type = (
+            (ordertype or self.strategy.order_types[exit_type])
+            if exit_check.exit_type != ExitType.EMERGENCY_EXIT
+            else self.strategy.order_types.get("emergency_exit", "market")
+        )
+
         # set custom_exit_price if available
         proposed_limit_rate = limit
-        current_profit = trade.calc_profit_ratio(limit)
-        custom_exit_price = strategy_safe_wrapper(
-            self.strategy.custom_exit_price, default_retval=proposed_limit_rate
-        )(
-            pair=trade.pair,
-            trade=trade,
-            current_time=datetime.now(timezone.utc),
-            proposed_rate=proposed_limit_rate,
-            current_profit=current_profit,
-            exit_tag=exit_reason,
-        )
+        custom_exit_price = limit
+
+        if order_type == "limit" and not skip_custom_exit_price:
+            current_profit = trade.calc_profit_ratio(limit)
+            custom_exit_price = strategy_safe_wrapper(
+                self.strategy.custom_exit_price, default_retval=proposed_limit_rate
+            )(
+                pair=trade.pair,
+                trade=trade,
+                current_time=datetime.now(UTC),
+                proposed_rate=proposed_limit_rate,
+                current_profit=current_profit,
+                exit_tag=exit_reason,
+            )
 
         limit = self.get_valid_price(custom_exit_price, proposed_limit_rate)
 
         # First cancelling stoploss on exchange ...
-        trade = self.cancel_stoploss_on_exchange(trade)
-
-        order_type = ordertype or self.strategy.order_types[exit_type]
-        if exit_check.exit_type == ExitType.EMERGENCY_EXIT:
-            # Emergency sells (default to market!)
-            order_type = self.strategy.order_types.get("emergency_exit", "market")
+        trade = self.cancel_stoploss_on_exchange(trade, allow_nonblocking=True)
 
         amount = self._safe_exit_amount(trade, trade.pair, sub_trade_amt or trade.amount)
         time_in_force = self.strategy.order_time_in_force["exit"]
@@ -2209,18 +2184,19 @@ class FreqtradeBot(LoggingMixin):
                 time_in_force=time_in_force,
                 exit_reason=exit_reason,
                 sell_reason=exit_reason,  # sellreason -> compatibility
-                current_time=datetime.now(timezone.utc),
+                current_time=datetime.now(UTC),
             )
         ):
             logger.info(f"User denied exit for {trade.pair}.")
             return False
 
-        if trade.has_open_orders:
-            if self.handle_similar_open_order(trade, limit, amount, trade.exit_side):
-                return False
+        if trade.has_open_orders and self.handle_similar_open_order(
+            trade, limit, amount, trade.exit_side
+        ):
+            return False
 
         try:
-            # Execute sell and update trade record
+            # Execute exit and update trade record
             order = self.exchange.create_order(
                 pair=trade.pair,
                 ordertype=order_type,
@@ -2230,6 +2206,7 @@ class FreqtradeBot(LoggingMixin):
                 leverage=trade.leverage,
                 reduceOnly=self.trading_mode == TradingMode.FUTURES,
                 time_in_force=time_in_force,
+                initial_order=False,
             )
         except InsufficientFundsError as e:
             logger.warning(f"Unable to place order {e}.")
@@ -2247,7 +2224,7 @@ class FreqtradeBot(LoggingMixin):
         trade.exit_reason = exit_reason
 
         self._notify_exit(trade, order_type, sub_trade=bool(sub_trade_amt), order=order_obj)
-        # In case of market sell orders the order can be closed immediately
+        # In case of market exit orders the order can be closed immediately
         if order.get("status", "unknown") in ("closed", "expired"):
             self.update_trade_state(trade, order_obj.order_id, order)
         Trade.commit()
@@ -2305,7 +2282,7 @@ class FreqtradeBot(LoggingMixin):
             "enter_tag": trade.enter_tag,
             "exit_reason": trade.exit_reason,
             "open_date": trade.open_date_utc,
-            "close_date": trade.close_date_utc or datetime.now(timezone.utc),
+            "close_date": trade.close_date_utc or datetime.now(UTC),
             "stake_amount": trade.stake_amount,
             "stake_currency": self.config["stake_currency"],
             "base_currency": self.exchange.get_pair_base_currency(trade.pair),
@@ -2350,6 +2327,7 @@ class FreqtradeBot(LoggingMixin):
             "direction": "Short" if trade.is_short else "Long",
             "gain": gain,
             "limit": profit_rate or 0,
+            "order_rate": profit_rate or 0,
             "order_type": order_type,
             "amount": order.safe_amount_after_fee,
             "open_rate": trade.open_rate,
@@ -2360,7 +2338,7 @@ class FreqtradeBot(LoggingMixin):
             "enter_tag": trade.enter_tag,
             "exit_reason": trade.exit_reason,
             "open_date": trade.open_date,
-            "close_date": trade.close_date or datetime.now(timezone.utc),
+            "close_date": trade.close_date or datetime.now(UTC),
             "stake_currency": self.config["stake_currency"],
             "base_currency": self.exchange.get_pair_base_currency(trade.pair),
             "quote_currency": self.exchange.get_pair_quote_currency(trade.pair),
@@ -2440,18 +2418,19 @@ class FreqtradeBot(LoggingMixin):
 
     def _update_trade_after_fill(self, trade: Trade, order: Order, send_msg: bool) -> Trade:
         if order.status in constants.NON_OPEN_EXCHANGE_STATES:
-            strategy_safe_wrapper(self.strategy.order_filled, default_retval=None)(
-                pair=trade.pair, trade=trade, order=order, current_time=datetime.now(timezone.utc)
+            strategy_safe_wrapper(self.strategy.order_filled, supress_error=True)(
+                pair=trade.pair, trade=trade, order=order, current_time=datetime.now(UTC)
             )
             # If a entry order was closed, force update on stoploss on exchange
             if order.ft_order_side == trade.entry_side:
                 if send_msg:
+                    if trade.nr_of_successful_entries > 1:
+                        # Reset fee_open_currency so fee checking can work
+                        # Only necessary for additional entries
+                        trade.fee_open_currency = None
                     # Don't cancel stoploss in recovery modes immediately
                     trade = self.cancel_stoploss_on_exchange(trade)
-                if not self.edge:
-                    # TODO: should shorting/leverage be supported by Edge,
-                    # then this will need to be fixed.
-                    trade.adjust_stop_loss(trade.open_rate, self.strategy.stoploss, initial=True)
+                trade.adjust_stop_loss(trade.open_rate, self.strategy.stoploss, initial=True)
             if (
                 order.ft_order_side == trade.entry_side
                 or (trade.amount > 0 and trade.is_open)
@@ -2467,14 +2446,16 @@ class FreqtradeBot(LoggingMixin):
                     stake_currency=self.config["stake_currency"],
                     dry_run=self.config["dry_run"],
                 )
-                if self.strategy.use_custom_stoploss:
-                    current_rate = self.exchange.get_rate(
-                        trade.pair, side="exit", is_short=trade.is_short, refresh=True
-                    )
-                    profit = trade.calc_profit_ratio(current_rate)
-                    self.strategy.ft_stoploss_adjust(
-                        current_rate, trade, datetime.now(timezone.utc), profit, 0, after_fill=True
-                    )
+            if self.strategy.use_custom_stoploss and trade.is_open:
+                current_rate = self.exchange.get_rate(
+                    trade.pair, side="exit", is_short=trade.is_short, refresh=True
+                )
+                profit = trade.calc_profit_ratio(current_rate)
+                self.strategy.ft_stoploss_adjust(
+                    current_rate, trade, datetime.now(UTC), profit, 0, after_fill=True
+                )
+            if not trade.is_open:
+                self.cancel_stoploss_on_exchange(trade)
             # Updating wallets when order is closed
             self.wallets.update()
         return trade
@@ -2499,8 +2480,11 @@ class FreqtradeBot(LoggingMixin):
 
     def handle_protections(self, pair: str, side: LongShort) -> None:
         # Lock pair for one candle to prevent immediate re-entries
-        self.strategy.lock_pair(pair, datetime.now(timezone.utc), reason="Auto lock", side=side)
-        prot_trig = self.protections.stop_per_pair(pair, side=side)
+        self.strategy.lock_pair(pair, datetime.now(UTC), reason="Auto lock", side=side)
+        starting_balance = self.wallets.get_starting_balance()
+        prot_trig = self.protections.stop_per_pair(
+            pair, side=side, starting_balance=starting_balance
+        )
         if prot_trig:
             msg: RPCProtectionMsg = {
                 "type": RPCMessageType.PROTECTION_TRIGGER,
@@ -2509,7 +2493,7 @@ class FreqtradeBot(LoggingMixin):
             }
             self.rpc.send_msg(msg)
 
-        prot_trig_glb = self.protections.global_stop(side=side)
+        prot_trig_glb = self.protections.global_stop(side=side, starting_balance=starting_balance)
         if prot_trig_glb:
             msg = {
                 "type": RPCMessageType.PROTECTION_TRIGGER_GLOBAL,
@@ -2554,10 +2538,9 @@ class FreqtradeBot(LoggingMixin):
         return None
 
     def handle_order_fee(self, trade: Trade, order_obj: Order, order: CcxtOrder) -> None:
-        # Try update amount (binance-fix)
+        # Try update amount (binance-fix - but also applies to different exchanges)
         try:
-            fee_abs = self.get_real_amount(trade, order, order_obj)
-            if fee_abs is not None:
+            if (fee_abs := self.get_real_amount(trade, order, order_obj)) is not None:
                 order_obj.ft_fee_base = fee_abs
         except DependencyException as exception:
             logger.warning("Could not update trade amount: %s", exception)
@@ -2570,17 +2553,15 @@ class FreqtradeBot(LoggingMixin):
         Necessary for exchanges which charge fees in base currency (e.g. binance)
         :return: Absolute fee to apply for this order or None
         """
-        # Init variables
-        order_amount = safe_value_fallback(order, "filled", "amount")
         # Only run for closed orders
         if (
-            trade.fee_updated(order.get("side", ""))
-            or order["status"] == "open"
-            or order_obj.ft_fee_base
+            trade.fee_updated(order.get("side", "")) or order["status"] == "open"
+            # or order_obj.ft_fee_base
         ):
             return None
 
-        trade_base_currency = self.exchange.get_pair_base_currency(trade.pair)
+        order_amount = safe_value_fallback(order, "filled", "amount")
+
         # use fee from order-dict if possible
         if self.exchange.order_has_fee(order):
             fee_cost, fee_currency, fee_rate = self.exchange.extract_cost_curr_rate(
@@ -2595,6 +2576,7 @@ class FreqtradeBot(LoggingMixin):
                 # These are most likely caused by a parsing bug in ccxt
                 # due to multiple trades (https://github.com/ccxt/ccxt/issues/8025)
                 trade.update_fee(fee_cost, fee_currency, fee_rate, order.get("side", ""))
+                trade_base_currency = self.exchange.get_pair_base_currency(trade.pair)
                 if trade_base_currency == fee_currency:
                     # Apply fee to amount
                     return self.apply_fee_conditional(
@@ -2617,9 +2599,7 @@ class FreqtradeBot(LoggingMixin):
         if not trades:
             return False
         # We expect amount and cost to be present in all trade objects.
-        if any(trade.get("amount") is None or trade.get("cost") is None for trade in trades):
-            return False
-        return True
+        return not any(trade.get("amount") is None or trade.get("cost") is None for trade in trades)
 
     def fee_detection_from_trades(
         self, trade: Trade, order: CcxtOrder, order_obj: Order, order_amount: float, trades: list
