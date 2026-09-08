@@ -122,3 +122,6 @@ target/
 !config_examples/config_freqai.example.json
 
 docker-compose-*.yml
+
+# Session state files
+SESSION_STATE-*.md
