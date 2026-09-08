@@ -4,8 +4,7 @@ import numpy as np
 import pandas as pd
 
 from freqtrade.constants import Config
-from freqtrade.data.btanalysis.bt_fileutils import trade_list_to_dataframe
-from freqtrade.data.btanalysis.trade_parallelism import balance_distribution_over_time
+from freqtrade.data.btanalysis import trade_list_to_dataframe
 from freqtrade.exchange import Exchange
 from freqtrade.exchange.exchange_utils_timeframe import timeframe_to_prev_date
 from freqtrade.persistence import KeyValueStore, Trade, WalletHistory
@@ -51,6 +50,8 @@ def _prepare_balance_distribution(
     timeframe = "1d"
     stake_currency = config["stake_currency"]
     min_date = timeframe_to_prev_date(timeframe, KeyValueStore.get_datetime_value("bot_start_time"))
+    from freqtrade.data.btanalysis.trade_parallelism import balance_distribution_over_time
+
     balance_dist = balance_distribution_over_time(
         trade_df,
         min_date=min_date,

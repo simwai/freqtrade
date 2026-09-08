@@ -89,6 +89,10 @@ class Binance(Exchange):
         super().__init__(*args, **kwargs)
         self._spot_delist_schedule_cache: FtTTLCache = FtTTLCache(maxsize=100, ttl=300)
 
+    def set_markets_from_exchange(self, exchange) -> None:
+        """Copy markets from an async ccxt exchange instance into this sync instance."""
+        self.set_markets(exchange.markets)
+
     def get_proxy_coin(self) -> str:
         """
         Get the proxy coin for the given coin

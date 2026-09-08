@@ -764,13 +764,13 @@ class Exchange:
             # Reload async markets, then assign them to sync api
             retrier(self._load_async_markets, retries=retries)(reload=True)
             self._markets = self._api_async.markets
-            self._api.set_markets_from_exchange(self._api_async)
+            self._api.set_markets(self._api_async.markets)
             # Assign options array, as it contains some temporary information from the exchange.
             # ccxt does not implicitly copy options over in set_markets_from_exchange
             self._api.options = self._api_async.options
             if self._exchange_ws:
                 # Set markets to avoid reloading on websocket api
-                self._ws_async.set_markets_from_exchange(self._api_async)
+                self._ws_async.set_markets(self._api_async.markets)
                 self._ws_async.options = self._api.options
             self._last_markets_refresh = dt_ts()
 
