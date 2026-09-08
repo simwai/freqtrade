@@ -26,7 +26,7 @@ BINANCE_ARTICLE_DETAIL_URL = (
 )
 
 
-class BinanceBinanceDelistingFilter(IPairList):
+class BinanceDelistingFilter(IPairList):
     """
     Remove pairs found in new Binance delisting announcements.
 

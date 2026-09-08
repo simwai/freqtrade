@@ -130,7 +130,7 @@ class TestCorrelationPairList:
         assert "min_correlation_periods" in params
         assert "refresh_period" in params
 
-    @patch.object(corr_module, "load_data", new_callable=MagicMock)
+    @patch("freqtrade.data.history.load_data", new_callable=MagicMock)
     def test_load_price_data_backtest(self, mock_load_data, correlation_pairlist):
         """Test loading price data in backtest mode."""
         # Create mock data
@@ -157,7 +157,7 @@ class TestCorrelationPairList:
             assert pair in df.columns
             assert len(df) >= correlation_pairlist._min_periods
 
-    @patch.object(corr_module, "load_data", new_callable=MagicMock)
+    @patch("freqtrade.data.history.load_data", new_callable=MagicMock)
     def test_load_price_data_live(self, mock_load_data, correlation_pairlist):
         """Test loading price data in live mode."""
         dates = pd.date_range(start="2024-01-01", periods=200, freq="5min")
@@ -174,7 +174,7 @@ class TestCorrelationPairList:
 
         assert len(price_data) == 2
 
-    @patch.object(corr_module, "load_data", new_callable=MagicMock)
+    @patch("freqtrade.data.history.load_data", new_callable=MagicMock)
     def test_load_price_data_insufficient_data(self, mock_load_data, correlation_pairlist):
         """Test that pairs with insufficient data are filtered out."""
         dates = pd.date_range(
@@ -338,7 +338,7 @@ class TestCorrelationPairList:
 class TestCorrelationPairListIntegration:
     """Integration tests for CorrelationPairList."""
 
-    @patch.object(corr_module, "load_data", new_callable=MagicMock)
+    @patch("freqtrade.data.history.load_data", new_callable=MagicMock)
     def test_full_flow_backtest(self, mock_load_data, correlation_pairlist, mock_pairlistmanager):
         """Test full flow in backtest mode."""
         # Setup mock data

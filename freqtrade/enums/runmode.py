@@ -11,6 +11,7 @@ class RunMode(StrEnum):
     DRY_RUN = "dry_run"
     BACKTEST = "backtest"
     HYPEROPT = "hyperopt"
+    EDGE = "edge"
     UTIL_EXCHANGE = "util_exchange"
     UTIL_NO_EXCHANGE = "util_no_exchange"
     PLOT = "plot"
