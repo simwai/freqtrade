@@ -5,7 +5,10 @@ Definition of cli arguments used in arguments.py
 from argparse import SUPPRESS, ArgumentTypeError
 
 from freqtrade import constants
-from freqtrade.constants import HYPEROPT_LOSS_BUILTIN
+from freqtrade.constants import (
+    HYPEROPT_BUILTIN_SPACE_OPTIONS,
+    HYPEROPT_LOSS_BUILTIN,
+)
 from freqtrade.enums import CandleType
 
 
@@ -35,8 +38,14 @@ def check_int_nonzero(value: str) -> int:
 
 class Arg:
     # Optional CLI arguments
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, fthelp: dict[str, str] | None = None, **kwargs):
+        """
+        CLI Arguments - used to build subcommand parsers consistently.
+        :param fthelp: dict - fthelp per command - should be "freqtrade <command>": help_text
+            If not provided or not found, 'help' from kwargs is used instead.
+        """
         self.cli = args
+        self.fthelp = fthelp
         self.kwargs = kwargs
 
 
@@ -151,7 +160,8 @@ AVAILABLE_CLI_OPTIONS = {
     ),
     "timerange": Arg(
         "--timerange",
-        help="Specify what timerange of data to use.",
+        help="Limit action to a specific timerange. Format: "
+        "(`yyyymmdd` or `yyyymmddThhmm` - e.g. `20240101-20240201T1200`).",
     ),
     "max_open_trades": Arg(
         "--max-open-trades",
@@ -171,7 +181,11 @@ AVAILABLE_CLI_OPTIONS = {
     "position_stacking": Arg(
         "--eps",
         "--enable-position-stacking",
-        help="Allow buying the same pair multiple times (position stacking).",
+        help=(
+            "Allow buying the same pair multiple times (position stacking). "
+            "Only applicable to backtesting and hyperopt. "
+            "Results archived by this cannot be reproduced in dry/live trading."
+        ),
         action="store_true",
         default=False,
     ),
@@ -184,9 +198,17 @@ AVAILABLE_CLI_OPTIONS = {
     "enable_protections": Arg(
         "--enable-protections",
         "--enableprotections",
-        help="Enable protections for backtesting."
+        help="Enable protections for backtesting. "
         "Will slow backtesting down by a considerable amount, but will include "
         "configured protections",
+        action="store_true",
+        default=False,
+    ),
+    "enable_dynamic_pairlist": Arg(
+        "--enable-dynamic-pairlist",
+        help="Enables dynamic pairlist refreshes in backtesting. "
+        "The pairlist will be generated for each new candle if you're using a "
+        "pairlist handler that supports this feature, for example, ShuffleFilter.",
         action="store_true",
         default=False,
     ),
@@ -194,22 +216,40 @@ AVAILABLE_CLI_OPTIONS = {
         "--strategy-list",
         help="Provide a space-separated list of strategies to backtest. "
         "Please note that timeframe needs to be set either in config "
-        "or via command line. When using this together with `--export trades`, "
-        "the strategy-name is injected into the filename "
-        "(so `backtest-data.json` becomes `backtest-data-SampleStrategy.json`",
+        "or via command line. ",
         nargs="+",
+    ),
+    "backtest_notes": Arg(
+        "--notes",
+        help="Add notes to the backtest results.",
+        metavar="TEXT",
     ),
     "export": Arg(
         "--export",
         help="Export backtest results (default: trades).",
         choices=constants.EXPORT_OPTIONS,
     ),
+    "exportdirectory": Arg(
+        "--backtest-directory",
+        "--export-directory",
+        help="Directory to use for backtest results. "
+        "Example: `--export-directory=user_data/backtest_results/`. ",
+        metavar="PATH",
+    ),
     "exportfilename": Arg(
-        "--export-filename",
         "--backtest-filename",
+        "--export-filename",
+        fthelp={
+            "freqtrade backtesting": (
+                "DEPRECATED: This option is deprecated for backtesting and will be removed "
+                "in a future release. "
+                "Using a custom filename for backtest results is no longer supported. "
+                "Use `--backtest-directory` to specify the directory."
+            ),
+        },
         help="Use this filename for backtest results."
-        "Requires `--export` to be set as well. "
-        "Example: `--export-filename=user_data/backtest_results/backtest_today.json`",
+        "Example: `--backtest-filename=backtest_results_2020-09-27_16-20-48.json`. "
+        "Assumes either `user_data/backtest_results/` or `--export-directory` as base directory.",
         metavar="PATH",
     ),
     "disableparamexport": Arg(
@@ -225,7 +265,7 @@ AVAILABLE_CLI_OPTIONS = {
     ),
     "backtest_breakdown": Arg(
         "--breakdown",
-        help="Show backtesting breakdown per [day, week, month, year].",
+        help="Show backtesting breakdown per [day, week, month, year, weekday].",
         nargs="+",
         choices=constants.BACKTEST_BREAKDOWNS,
     ),
@@ -235,20 +275,7 @@ AVAILABLE_CLI_OPTIONS = {
         default=constants.BACKTEST_CACHE_DEFAULT,
         choices=constants.BACKTEST_CACHE_AGE,
     ),
-    # Edge
-    "stoploss_range": Arg(
-        "--stoplosses",
-        help="Defines a range of stoploss values against which edge will assess the strategy. "
-        'The format is "min,max,step" (without any space). '
-        "Example: `--stoplosses=-0.01,-0.1,-0.001`",
-    ),
     # Hyperopt
-    "hyperopt": Arg(
-        "--hyperopt",
-        help=SUPPRESS,
-        metavar="NAME",
-        required=False,
-    ),
     "hyperopt_path": Arg(
         "--hyperopt-path",
         help="Specify additional lookup path for Hyperopt Loss functions.",
@@ -257,79 +284,32 @@ AVAILABLE_CLI_OPTIONS = {
     "epochs": Arg(
         "-e",
         "--epochs",
-        help=f"Specify number of epochs (default: {constants.HYPEROPT_EPOCH}).",
+        help="Specify number of epochs (default: %(default)d).",
         type=check_int_positive,
         metavar="INT",
+        default=constants.HYPEROPT_EPOCH,
+    ),
+    "early_stop": Arg(
+        "--early-stop",
+        help="Early stop hyperopt if no improvement after (default: %(default)d) epochs.",
+        type=check_int_positive,
+        metavar="INT",
+        default=0,  # 0 to disable by default
     ),
     "spaces": Arg(
         "--spaces",
-        help="Specify which parameters to hyperopt. Space-separated list.",
-        choices=[
-            "all",
-            "buy",
-            "sell",
-            "roi",
-            "stoploss",
-            "trailing",
-            "protection",
-            "trades",
-            "default",
-        ],
+        help=(
+            "Specify which parameters to hyperopt. Space-separated list. "
+            "Available builtin options (custom spaces will not be listed here): "
+            f"{', '.join(HYPEROPT_BUILTIN_SPACE_OPTIONS)}. Default: `default` - "
+            "which includes all spaces except for 'trailing', 'protection', and 'trades'."
+        ),
         nargs="+",
     ),
     "analyze_per_epoch": Arg(
         "--analyze-per-epoch",
         help="Run populate_indicators once per epoch.",
         action="store_true",
-        default=False,
-    ),
-    # Walk-forward optimization
-    "walk_forward_live": Arg(
-        "--live",
-        help="Run walk-forward optimization on a weekly UTC schedule.",
-        action="store_true",
-        default=False,
-    ),
-    "walk_forward_train_days": Arg(
-        "--train-days",
-        help="Number of prior days used for each walk-forward hyperopt (default: 90).",
-        type=check_int_positive,
-        metavar="DAYS",
-    ),
-    "walk_forward_test_days": Arg(
-        "--test-days",
-        help="Number of days in each walk-forward out-of-sample period (default: 7).",
-        type=check_int_positive,
-        metavar="DAYS",
-    ),
-    "walk_forward_step_days": Arg(
-        "--step-days",
-        help="Number of days to move between walk-forward periods (default: 7).",
-        type=check_int_positive,
-        metavar="DAYS",
-    ),
-    "walk_forward_schedule": Arg(
-        "--schedule",
-        help="Weekly UTC schedule for live walk-forward runs (default: `sun 00:05`).",
-        metavar="DAY HH:MM",
-    ),
-    "walk_forward_min_trades": Arg(
-        "--walk-forward-min-trades",
-        help="Reject live walk-forward parameters with fewer trades than this.",
-        type=int,
-        metavar="INT",
-    ),
-    "walk_forward_max_drawdown": Arg(
-        "--walk-forward-max-drawdown",
-        help="Reject live walk-forward parameters above this account drawdown ratio.",
-        type=float,
-        metavar="FLOAT",
-    ),
-    "walk_forward_run_now": Arg(
-        "--run-now",
-        help="Run the first live walk-forward optimization immediately.",
-        action="store_true",
-        default=False,
     ),
     "print_all": Arg(
         "--print-all",
@@ -397,44 +377,6 @@ AVAILABLE_CLI_OPTIONS = {
         "Example: `--hyperopt-filename=hyperopt_results_2020-09-27_16-20-48.pickle`",
         metavar="FILENAME",
     ),
-    "hyperopt_fibonacci": Arg(
-        "--hyperopt-fibonacci",
-        help="Enable Fibonacci stepping mode for hyperopt (multi-stage optimization).",
-        action="store_true",
-        default=False,
-    ),
-    "hyperopt_fibonacci_target": Arg(
-        "--fibonacci-target",
-        help="Target Fibonacci number for hyperopt Fibonacci stepping mode (default: 34). "
-        "Must be a Fibonacci number >= 34 (e.g., 34, 55, 89, 144).",
-        type=check_int_positive,
-        metavar="INT",
-        default=34,
-    ),
-    "hyperopt_space_reduction": Arg(
-        "--space-reduction",
-        help="Space reduction factor for Fibonacci stepping mode (default: 0.15). "
-        "Factor by which to reduce search space bounds between stages (range: 0.01-0.5).",
-        type=float,
-        metavar="FLOAT",
-        default=0.15,
-    ),
-    "hyperopt_initial_points": Arg(
-        "--initial-points",
-        help="Number of initial random points for Fibonacci stepping mode (default: 10). "
-        "Used for the initialization stage before Bayesian optimization begins.",
-        type=check_int_positive,
-        metavar="INT",
-        default=10,
-    ),
-    "hyperopt_estimator": Arg(
-        "--estimator",
-        help="Base estimator for hyperopt (default: ET). "
-        "Options: GP, RF, ET, GBRT. Used across all stages in Fibonacci mode.",
-        choices=["GP", "RF", "ET", "GBRT"],
-        metavar="NAME",
-        default="ET",
-    ),
     # List exchanges
     "print_one_column": Arg(
         "-1",
@@ -446,6 +388,18 @@ AVAILABLE_CLI_OPTIONS = {
         "-a",
         "--all",
         help="Print all exchanges known to the ccxt library.",
+        action="store_true",
+    ),
+    "dex_exchanges": Arg(
+        "--dex-exchanges",
+        help="Print only DEX exchanges.",
+        action="store_true",
+    ),
+    "list_exchanges_futures_options": Arg(
+        "--ccxt-show-futures-options-exchanges",
+        help=SUPPRESS,
+        # Show compatibility with ccxt for futures functionality
+        # Doesn't show in help as it's an internal/debug option.
         action="store_true",
     ),
     # List pairs / markets
@@ -492,6 +446,14 @@ AVAILABLE_CLI_OPTIONS = {
     ),
     "candle_types": Arg(
         "--candle-types",
+        fthelp={
+            "freqtrade download-data": (
+                "Select candle type to download. "
+                "Defaults to the necessary candles for the selected trading mode "
+                "(e.g. 'spot' or ('futures', 'funding_rate' and 'mark') for futures)."
+            ),
+            "_": "Select candle type to convert. Defaults to all available types.",
+        },
         help="Select candle type to convert. Defaults to all available types.",
         choices=[c.value for c in CandleType],
         nargs="+",
@@ -519,6 +481,11 @@ AVAILABLE_CLI_OPTIONS = {
     "include_inactive": Arg(
         "--include-inactive-pairs",
         help="Also download data from inactive pairs.",
+        action="store_true",
+    ),
+    "no_parallel_download": Arg(
+        "--no-parallel-download",
+        help="Disable parallel startup download. Only use this if you experience issues.",
         action="store_true",
     ),
     "new_pairs_days": Arg(
@@ -867,6 +834,14 @@ AVAILABLE_CLI_OPTIONS = {
         "--startup-candle",
         help="Specify startup candles to be checked (`199`, `499`, `999`, `1999`).",
         nargs="+",
+    ),
+    "lookahead_allow_limit_orders": Arg(
+        "--allow-limit-orders",
+        help=(
+            "Allow limit orders in lookahead analysis (could cause false positives "
+            "in lookahead analysis results)."
+        ),
+        action="store_true",
     ),
     "show_sensitive": Arg(
         "--show-sensitive",

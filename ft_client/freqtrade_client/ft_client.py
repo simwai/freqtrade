@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import inspect
 import json
@@ -82,7 +84,7 @@ def print_commands():
 
 
 def main_exec(parsed: dict[str, Any]):
-    if parsed.get("show"):
+    if parsed.get("show") or parsed.get("command") in ("show", "help"):
         print_commands()
         sys.exit()
 

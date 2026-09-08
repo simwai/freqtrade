@@ -13,8 +13,9 @@ from freqtrade.loggers.set_log_levels import (
     reduce_verbosity_for_bias_tester,
     restore_verbosity_for_bias_tester,
 )
+from freqtrade.optimize.analysis.base_analysis import BaseAnalysis, VarHolder
 from freqtrade.optimize.backtesting import Backtesting
-from freqtrade.optimize.base_analysis import BaseAnalysis, VarHolder
+from freqtrade.util import CustomProgress
 
 
 logger = logging.getLogger(__name__)
@@ -58,10 +59,7 @@ class LookaheadAnalysis(BaseAnalysis):
             return False
         else:
             df_cut = df[(df[column_name] == checked_timestamp)]
-            if df_cut[column_name].shape[0] == 0:
-                return False
-            else:
-                return True
+            return df_cut[column_name].shape[0] != 0
         return False
 
     # analyzes two data frames with processed indicators and shows differences between them.
@@ -70,34 +68,31 @@ class LookaheadAnalysis(BaseAnalysis):
         cut_df: DataFrame = cut_vars.indicators[current_pair]
         full_df: DataFrame = full_vars.indicators[current_pair]
 
-        # cut longer dataframe to length of the shorter
-        full_df_cut = full_df[(full_df.date == cut_vars.compared_dt)].reset_index(drop=True)
-        cut_df_cut = cut_df[(cut_df.date == cut_vars.compared_dt)].reset_index(drop=True)
+        # trim full_df to the same index and length as cut_df
+        cut_full_df = full_df.loc[cut_df.index]
+        compare_df = cut_full_df.compare(cut_df)
 
-        # check if dataframes are not empty
-        if full_df_cut.shape[0] != 0 and cut_df_cut.shape[0] != 0:
-            # compare dataframes
-            compare_df = full_df_cut.compare(cut_df_cut)
+        if compare_df.shape[0] > 0:
+            for col_name in compare_df:
+                col_idx = compare_df.columns.get_loc(col_name)
+                compare_df_row = compare_df.iloc[0]
+                # compare_df now comprises tuples with [1] having either 'self' or 'other'
+                if "other" in col_name[1]:
+                    continue
+                self_value = compare_df_row.iloc[col_idx]
+                other_value = compare_df_row.iloc[col_idx + 1]
 
-            if compare_df.shape[0] > 0:
-                for col_name, values in compare_df.items():
-                    col_idx = compare_df.columns.get_loc(col_name)
-                    compare_df_row = compare_df.iloc[0]
-                    # compare_df now comprises tuples with [1] having either 'self' or 'other'
-                    if "other" in col_name[1]:
-                        continue
-                    self_value = compare_df_row.iloc[col_idx]
-                    other_value = compare_df_row.iloc[col_idx + 1]
-
-                    # output differences
-                    if self_value != other_value:
-                        if not self.current_analysis.false_indicators.__contains__(col_name[0]):
-                            self.current_analysis.false_indicators.append(col_name[0])
-                            logger.info(
-                                f"=> found look ahead bias in indicator "
-                                f"{col_name[0]}. "
-                                f"{str(self_value)} != {str(other_value)}"
-                            )
+                # output differences
+                if (
+                    self_value != other_value
+                    and not self.current_analysis.false_indicators.__contains__(col_name[0])
+                ):
+                    self.current_analysis.false_indicators.append(col_name[0])
+                    logger.info(
+                        f"=> found look ahead bias in column "
+                        f"{col_name[0]}. "
+                        f"{str(self_value)} != {str(other_value)}"
+                    )
 
     def prepare_data(self, varholder: VarHolder, pairs_to_load: list[DataFrame]):
         if "freqai" in self.local_config and "identifier" in self.local_config["freqai"]:
@@ -125,14 +120,20 @@ class LookaheadAnalysis(BaseAnalysis):
 
         backtesting = Backtesting(prepare_data_config, self.exchange)
         self.exchange = backtesting.exchange
+        self.local_config["candle_type_def"] = prepare_data_config["candle_type_def"]
         self._fee = backtesting.fee
         backtesting._set_strategy(backtesting.strategylist[0])
 
         varholder.data, varholder.timerange = backtesting.load_bt_data()
-        backtesting.load_bt_data_detail()
         varholder.timeframe = backtesting.timeframe
 
-        varholder.indicators = backtesting.strategy.advise_all_indicators(varholder.data)
+        temp_indicators = backtesting.strategy.advise_all_indicators(varholder.data)
+        filled_indicators = {}
+        for pair, dataframe in temp_indicators.items():
+            filled_indicators[pair] = backtesting.strategy.ft_advise_signals(
+                dataframe, {"pair": pair}
+            )
+        varholder.indicators = filled_indicators
         varholder.result = self.get_result(backtesting, varholder.indicators)
 
     def fill_entry_and_exit_varHolders(self, result_row):
@@ -171,23 +172,23 @@ class LookaheadAnalysis(BaseAnalysis):
         self.fill_entry_and_exit_varHolders(result_row)
 
         # this will trigger a logger-message
-        buy_or_sell_biased: bool = False
+        entry_or_exit_biased: bool = False
 
         # register if buy signal is broken
         if not self.report_signal(
             self.entry_varHolders[idx].result, "open_date", self.entry_varHolders[idx].compared_dt
         ):
             self.current_analysis.false_entry_signals += 1
-            buy_or_sell_biased = True
+            entry_or_exit_biased = True
 
         # register if buy or sell signal is broken
         if not self.report_signal(
             self.exit_varHolders[idx].result, "close_date", self.exit_varHolders[idx].compared_dt
         ):
             self.current_analysis.false_exit_signals += 1
-            buy_or_sell_biased = True
+            entry_or_exit_biased = True
 
-        if buy_or_sell_biased:
+        if entry_or_exit_biased:
             logger.info(
                 f"found lookahead-bias in trade "
                 f"pair: {result_row['pair']}, "
@@ -199,8 +200,8 @@ class LookaheadAnalysis(BaseAnalysis):
         self.analyze_indicators(self.full_varHolder, self.entry_varHolders[idx], result_row["pair"])
         self.analyze_indicators(self.full_varHolder, self.exit_varHolders[idx], result_row["pair"])
 
-    def start(self) -> None:
-        super().start()
+    def start(self, progress: CustomProgress) -> None:
+        self.fill_full_varholder()
 
         reduce_verbosity_for_bias_tester()
 
@@ -222,6 +223,9 @@ class LookaheadAnalysis(BaseAnalysis):
 
         # now we loop through all signals
         # starting from the same datetime to avoid miss-reports of bias
+        trade_task = progress.add_task(
+            "Analyzing trades", total=min(found_signals, self.targeted_trade_amount)
+        )
         for idx, result_row in self.full_varHolder.result["results"].iterrows():
             if self.current_analysis.total_signals == self.targeted_trade_amount:
                 logger.info(f"Found targeted trade amount = {self.targeted_trade_amount} signals.")
@@ -233,10 +237,10 @@ class LookaheadAnalysis(BaseAnalysis):
                     f"minimum trade amount = {self.minimum_trade_amount}. "
                     f"Exiting this lookahead-analysis"
                 )
-                return None
+                return
             if "force_exit" in result_row["exit_reason"]:
                 logger.info(
-                    "found force-exit in pair: {result_row['pair']}, "
+                    f"found force-exit in pair: {result_row['pair']}, "
                     f"timerange:{result_row['open_date']}-{result_row['close_date']}, "
                     f"idx: {idx}, skipping this one to avoid a false-positive."
                 )
@@ -248,6 +252,7 @@ class LookaheadAnalysis(BaseAnalysis):
                 continue
 
             self.analyze_row(idx, result_row)
+            progress.update(trade_task, advance=1)
 
         if len(self.entry_varHolders) < self.minimum_trade_amount:
             logger.info(
