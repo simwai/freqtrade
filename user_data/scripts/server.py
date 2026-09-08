@@ -79,6 +79,325 @@ _REFRESH_LOCK = threading.Lock()
 _REFRESH_JOB_ACTIVE = [False]  # tracks if a refresh/report job is queued or running (list for mutability)
 _KEEP_FINISHED_JOBS = 30  # finished jobs kept in the registry before eviction
 
+# Dry-run registry: a long-lived detached freqtrade trade process is intentionally
+# not run through the FIFO job queue (a multi-day process must not block short
+# backtest/hyperopt/walk-forward jobs). Only one dry run is active at a time; the
+# server tracks the child by pid and tails user_data/logs/dryrun-<id>.log. On
+# restart, the adoption scan picks up an orphan whose parent server died.
+_DRYRUN: dict[str, dict] = {}  # dryrun_id -> {pid, strategy, config, started_at, log_path}
+_DRYRUN_LOCK = threading.Lock()
+_DRYRUN_LOGS_DIR = USER_DATA / "logs"
+_DRYRUN_LOG_TAIL_DEFAULT = 6000
+
+
+def _pid_alive(pid: int) -> bool:
+    """True if pid is a running process. Uses psutil when available, else os.kill(pid, 0)."""
+    if pid is None or pid <= 0:
+        return False
+    try:
+        import psutil  # type: ignore
+
+        return bool(psutil.Process(pid).is_running())
+    except ImportError:
+        pass
+    except Exception:  # noqa: BLE001 - missing/denied process reads as not alive
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+def _dryrun_paths(dryrun_id: str) -> tuple[Path, Path]:
+    """Return (pid_file, log_file) for a dry-run id. Mirrors run_strategy.py."""
+    _DRYRUN_LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    return (
+        _DRYRUN_LOGS_DIR / f"dryrun-{dryrun_id}.pid",
+        _DRYRUN_LOGS_DIR / f"dryrun-{dryrun_id}.log",
+    )
+
+
+def _read_dryrun_log_tail(log_path: Path, tail_chars: int) -> str:
+    """Return up to tail_chars from the end of a dry-run log file."""
+    try:
+        size = log_path.stat().st_size
+    except OSError:
+        return ""
+    if size <= tail_chars:
+        try:
+            return log_path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return ""
+    try:
+        with log_path.open("rb") as handle:
+            handle.seek(size - tail_chars)
+            return handle.read().decode("utf-8", errors="replace")
+    except OSError:
+        return ""
+
+
+def _dryrun_freqtrade_cmdline(pid: int) -> str:
+    """Best-effort command line for a pid, used to avoid adopting foreign pids."""
+    try:
+        import psutil  # type: ignore
+
+        return " ".join(psutil.Process(pid).cmdline() or [])
+    except ImportError:
+        return ""
+    except Exception:  # noqa: BLE001 - missing/denied process has no cmdline
+        return ""
+
+
+def _adopt_one_dryrun(pid_file: Path) -> str | None:
+    """Adopt one dryrun pid file when it points at a live freqtrade trade process."""
+    try:
+        pid = int(pid_file.read_text(encoding="utf-8").strip() or "0")
+    except (OSError, ValueError):
+        pid = 0
+    log_path = pid_file.with_suffix(".log")
+    if pid <= 0 or not _pid_alive(pid):
+        try:
+            pid_file.unlink(missing_ok=True)
+        except OSError:
+            pass
+        return None
+    cmdline = _dryrun_freqtrade_cmdline(pid)
+    if "freqtrade" not in cmdline or "trade" not in cmdline:
+        return None
+    dryrun_id = pid_file.stem.removeprefix("dryrun-")
+    parts = [p for p in cmdline.split() if p]
+    strategy: str | None = None
+    config: str | None = None
+    for index, part in enumerate(parts):
+        if part == "--strategy" and index + 1 < len(parts):
+            strategy = parts[index + 1]
+        elif part in ("-c", "--config") and index + 1 < len(parts):
+            config = parts[index + 1]
+    try:
+        started_at = log_path.stat().st_mtime
+    except OSError:
+        started_at = time.time()
+    with _DRYRUN_LOCK:
+        _DRYRUN[dryrun_id] = {
+            "pid": pid,
+            "strategy": strategy,
+            "config": config,
+            "started_at": started_at,
+            "log_path": str(log_path),
+        }
+    return dryrun_id
+
+
+def _adopt_orphan_dryruns() -> int:
+    """Register live dry-run processes left behind by a previous server process."""
+    if not _DRYRUN_LOGS_DIR.is_dir():
+        return 0
+    adopted = 0
+    for pid_file in sorted(_DRYRUN_LOGS_DIR.glob("dryrun-*.pid")):
+        if _adopt_one_dryrun(pid_file) is not None:
+            adopted += 1
+    return adopted
+
+
+def _dryrun_metadata(
+    dryrun_id: str,
+    tail_chars: int = _DRYRUN_LOG_TAIL_DEFAULT,
+) -> dict[str, object] | None:
+    """Build the public status payload for a registered dryrun id."""
+    with _DRYRUN_LOCK:
+        meta = _DRYRUN.get(dryrun_id)
+    if meta is None:
+        return None
+    pid = int(meta.get("pid") or 0)
+    log_path_raw = meta.get("log_path")
+    log_path = Path(str(log_path_raw)) if log_path_raw else None
+    return {
+        "dryrun_id": dryrun_id,
+        "pid": pid,
+        "alive": _pid_alive(pid),
+        "strategy": meta.get("strategy"),
+        "config": meta.get("config"),
+        "started_at": meta.get("started_at"),
+        "log_path": str(log_path) if log_path else None,
+        "log_tail": _read_dryrun_log_tail(log_path, tail_chars) if log_path is not None else "",
+    }
+
+
+def _dryrun_validate_start(body: dict) -> tuple[str, str, int, str]:
+    """Validate a dry-run start request and return (strategy, config, verbosity, dryrun_id)."""
+    strategy = str(body.get("strategy") or "").strip()
+    if not strategy:
+        raise ValueError("strategy required")
+    from ft_metrics import find_strategy_file
+
+    if find_strategy_file(USER_DATA, strategy) is None:
+        raise ValueError(
+            f"strategy '{strategy}' has no .py under user_data/strategies "
+            "(or strategies_legacy). Pick another strategy."
+        )
+    cfg = str(body.get("config") or "").strip()
+    if cfg:
+        cfg_path = Path(cfg)
+        if not cfg_path.is_absolute():
+            cfg_path = USER_DATA / cfg_path
+        if not cfg_path.is_file():
+            raise ValueError(f"config file not found: {cfg_path}")
+    try:
+        verbosity = int(body.get("verbosity", 1))
+    except (TypeError, ValueError):
+        verbosity = 1
+    # Adopt any orphans first so we only refuse when there's a true live run.
+    _adopt_orphan_dryruns()
+    with _DRYRUN_LOCK:
+        active_id = next(
+            (key for key, value in _DRYRUN.items() if _pid_alive(int(value.get("pid") or 0))),
+            None,
+        )
+    if active_id is not None:
+        raise ValueError(f"a dry run is already active ({active_id}); stop it first.")
+    return strategy, cfg, max(0, min(verbosity, 3)), str(int(time.time()))
+
+
+def _dryrun_launcher_cmd(strategy: str, cfg: str, verbosity: int, dryrun_id: str) -> list[str]:
+    """Build the short-lived run_strategy.py launcher command for a dry run."""
+    cmd = [
+        PYTHON,
+        str(SCRIPTS / "run_strategy.py"),
+        "trade",
+        "--strategy",
+        strategy,
+        "--dryrun-id",
+        dryrun_id,
+    ]
+    if cfg:
+        cmd += ["--config", cfg]
+    if verbosity > 0:
+        cmd += ["-" + "v" * verbosity]
+    return cmd
+
+
+def _run_dryrun_launcher(cmd: list[str]) -> tuple[int, str]:
+    """Run the short-lived launcher and return (exit_code, stdout)."""
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError as ex:
+        raise RuntimeError(f"could not spawn launcher: {ex}") from ex
+    try:
+        out, _ = proc.communicate(timeout=20)
+    except subprocess.TimeoutExpired as ex:
+        proc.kill()
+        raise TimeoutError("launcher timed out before reporting the freqtrade pid") from ex
+    return proc.returncode if proc.returncode is not None else -1, out
+
+
+def _launcher_freqtrade_pid(out: str, pid_path: Path) -> int:
+    """Parse the launcher stdout for the detached freqtrade pid, else read the pid file."""
+    for line in out.splitlines():
+        text = line.strip()
+        if text.startswith("pid:"):
+            try:
+                return int(text.split(":", 1)[1].strip())
+            except (IndexError, ValueError):
+                pass
+    try:
+        return int(pid_path.read_text(encoding="utf-8").strip() or "0")
+    except (OSError, ValueError):
+        return 0
+
+
+def _terminate_dryrun_pid(pid: int, timeout: float = 3.0) -> tuple[bool, str]:
+    """Terminate a dry-run process id and report whether it exited cleanly."""
+    if pid <= 0 or not _pid_alive(pid):
+        return False, "process was not alive"
+    try:
+        import psutil  # type: ignore
+
+        process = psutil.Process(pid)
+        process.terminate()
+        try:
+            process.wait(timeout=timeout)
+        except Exception:  # noqa: BLE001 - fall back to kill when graceful wait fails
+            process.kill()
+        return True, "terminated"
+    except ImportError:
+        return False, "psutil unavailable"
+    except Exception as ex:  # noqa: BLE001 - report termination failures to the caller
+        return False, f"failed to terminate: {ex}"
+
+
+def _remove_dryrun_pid_file(dryrun_id: str) -> None:
+    """Remove a dry-run pid file while preserving its log for postmortem."""
+    pid_path, _ = _dryrun_paths(dryrun_id)
+    try:
+        pid_path.unlink(missing_ok=True)
+    except OSError:
+        pass
+
+
+def _start_registered_dryrun(body: dict) -> dict[str, object]:
+    """Validate, spawn, verify, and register a detached dry run."""
+    strategy, cfg, verbosity, dryrun_id = _dryrun_validate_start(body)
+    pid_path, log_path = _dryrun_paths(dryrun_id)
+    if pid_path.exists():
+        raise ValueError(
+            f"dryrun_id {dryrun_id!r} already has a pid file ({pid_path}); "
+            "pick a new id or remove the file."
+        )
+    code, out = _run_dryrun_launcher(_dryrun_launcher_cmd(strategy, cfg, verbosity, dryrun_id))
+    if code != 0:
+        raise RuntimeError(f"launcher failed (exit {code}). Output: {out[:500]}")
+    freq_pid = _launcher_freqtrade_pid(out, pid_path)
+    if freq_pid <= 0 or not _pid_alive(freq_pid):
+        raise RuntimeError(
+            f"freqtrade process did not stay alive (pid {freq_pid}). See log: {log_path}"
+        )
+    started_at = time.time()
+    with _DRYRUN_LOCK:
+        _DRYRUN[dryrun_id] = {
+            "pid": freq_pid,
+            "strategy": strategy,
+            "config": cfg or None,
+            "started_at": started_at,
+            "log_path": str(log_path),
+        }
+    return {
+        "dryrun_id": dryrun_id,
+        "pid": freq_pid,
+        "strategy": strategy,
+        "config": cfg or None,
+        "started_at": started_at,
+        "log_path": str(log_path),
+    }
+
+
+def _find_dryrun_stop_target(
+    requested_id: str,
+) -> tuple[str, dict[str, str | int | float | None]]:
+    """Resolve the dry run to stop. Prefers an explicit id, else the live one."""
+    with _DRYRUN_LOCK:
+        meta = _DRYRUN.get(requested_id) if requested_id else None
+    if meta is not None:
+        return requested_id, meta
+    with _DRYRUN_LOCK:
+        candidates = [
+            (key, value)
+            for key, value in _DRYRUN.items()
+            if _pid_alive(int(value.get("pid") or 0))
+        ]
+    if not candidates and not requested_id:
+        raise ValueError("no active dry run")
+    if not candidates:
+        raise LookupError(f"dry run {requested_id!r} not found")
+    return candidates[0]
+
 
 def _log_append_locked(job_id: str, text: str) -> None:
     """Append to a job's tail buffer; trim from the front while over budget."""
@@ -1035,6 +1354,9 @@ class LabHandler(BaseHTTPRequestHandler):
         if path == "/api/health":
             self._send_json({"ok": True, "db": DB.exists()})
             return
+        if path in ("/api/dryrun", "/api/dryrun/log"):
+            self._do_dryrun_get(path, qs)
+            return
         # static: trade files, etc.
         if path.startswith("/trades/"):
             self._send_file(path.lstrip("/"))
@@ -1179,7 +1501,111 @@ class LabHandler(BaseHTTPRequestHandler):
             ok = self._set_strategy(name, status, notes)
             self._send_json({"ok": ok, "strategy": name, "status": status})
             return
+        if path in ("/api/dryrun", "/api/dryrun/stop"):
+            self._do_dryrun_post(path, read_body(self))
+            return
         self._send_json({"error": "not found"}, 404)
+
+    def _do_dryrun_post(self, path: str, body: dict) -> None:
+        """Dispatch dry-run POST routes without growing do_POST."""
+        if path == "/api/dryrun/stop":
+            self._do_dryrun_stop_post(body)
+        else:
+            self._do_dryrun_start_post(body)
+
+    def _do_dryrun_start_post(self, body: dict) -> None:
+        """Start a detached dry run and register its freqtrade pid."""
+        try:
+            response = _start_registered_dryrun(body)
+        except ValueError as ex:
+            self._send_json({"error": str(ex)}, 400)
+            return
+        except (OSError, RuntimeError, TimeoutError) as ex:
+            self._send_json({"error": str(ex)}, 500)
+            return
+        self._send_json(response, 201)
+
+    def _do_dryrun_stop_post(self, body: dict) -> None:
+        """Stop a registered dry run and clean up its pid file."""
+        try:
+            dryrun_id, meta = _find_dryrun_stop_target(str(body.get("dryrun_id") or "").strip())
+        except LookupError as ex:
+            self._send_json({"ok": False, "msg": str(ex)}, 404)
+            return
+        except ValueError as ex:
+            self._send_json({"ok": False, "msg": str(ex)}, 400)
+            return
+        ok, msg = _terminate_dryrun_pid(int(meta.get("pid") or 0))
+        _remove_dryrun_pid_file(dryrun_id)
+        with _DRYRUN_LOCK:
+            _DRYRUN.pop(dryrun_id, None)
+        self._send_json({"ok": ok, "msg": msg, "dryrun_id": dryrun_id}, 200 if ok else 400)
+
+    def _do_dryrun_get(self, path: str, qs: dict[str, list[str]]) -> None:
+        """Dispatch dry-run GET routes without growing do_GET."""
+        if path == "/api/dryrun/log":
+            self._do_dryrun_log_get(qs)
+        else:
+            self._do_dryrun_status_get(qs)
+
+    def _do_dryrun_status_get(self, qs: dict[str, list[str]]) -> None:
+        """Return the active dry run, the latest record, and all records."""
+        tail = self._dryrun_tail_param(qs, _DRYRUN_LOG_TAIL_DEFAULT)
+        with _DRYRUN_LOCK:
+            ids = list(_DRYRUN.keys())
+        metas = [m for m in (_dryrun_metadata(i, tail) for i in ids) if m is not None]
+        active = next((m for m in metas if m["alive"]), None)
+        latest = sorted(
+            metas,
+            key=lambda m: float(m.get("started_at") or 0),
+            reverse=True,
+        )
+        self._send_json(
+            {
+                "active": active is not None,
+                "dryrun": active or (latest[0] if latest else None),
+                "all": metas,
+            }
+        )
+
+    def _do_dryrun_log_get(self, qs: dict[str, list[str]]) -> None:
+        """Return the active dry-run log as text, newest tail first when asked."""
+        with _DRYRUN_LOCK:
+            ids = list(_DRYRUN.keys())
+        active: dict[str, object] | None = None
+        for dryrun_id in ids:
+            meta = _dryrun_metadata(dryrun_id, 0)
+            if meta is not None and meta["alive"]:
+                active = meta
+                break
+        if active is None:
+            self._send_json({"error": "no active dry run"}, 404)
+            return
+        tail = self._dryrun_tail_param(qs, None)
+        log_path_raw = active.get("log_path")
+        log_path = Path(str(log_path_raw)) if log_path_raw else None
+        if log_path is None:
+            self._send_text("")
+            return
+        if tail is not None:
+            self._send_text(_read_dryrun_log_tail(log_path, tail))
+            return
+        try:
+            self._send_text(log_path.read_text(encoding="utf-8", errors="replace"))
+        except OSError:
+            self._send_text("")
+
+    @staticmethod
+    def _dryrun_tail_param(qs: dict[str, list[str]], default: int | None) -> int | None:
+        """Parse an optional ?tail=N query value for dry-run log reads."""
+        raw = qs.get("tail", [None])[0] if qs.get("tail") else None
+        if raw in (None, ""):
+            return default
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            return default
+        return value if value >= 0 else default
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -1351,7 +1777,7 @@ class LabHandler(BaseHTTPRequestHandler):
         return {"pair": pair, "timeframe": tf, "effective_timeframe": tf_eff, "candles": candles}
 
     # ---- indicator overlays computed from the user's own library ----
-    # The list is discovered from indicators_pandas_ta instead of a hardcoded
+    # The list is discovered from ft_pandas_ta instead of a hardcoded
     # registry: every public function whose required parameters map to OHLCV
     # columns is offered. Functions taking a DataFrame (pattern detectors) are
     # excluded because the overlay API serves plain series.
@@ -1387,11 +1813,11 @@ class LabHandler(BaseHTTPRequestHandler):
     _INDICATOR_PRICE_SCALE = {"ehlers_super_smoother"}
 
     def _indicator_specs(self) -> dict[str, dict]:
-        """Public indicator functions of indicators_pandas_ta -> {name: spec}."""
+        """Public indicator functions of ft_pandas_ta -> {name: spec}."""
         global _INDICATOR_MODULE
         if _INDICATOR_MODULE is None:
             sys.path.insert(0, str(USER_DATA / "strategies" / "components"))
-            import indicators_pandas_ta as _mod
+            import ft_pandas_ta as _mod
 
             _INDICATOR_MODULE = _mod
         specs: dict[str, dict] = {}
@@ -1496,7 +1922,7 @@ class LabHandler(BaseHTTPRequestHandler):
         return {"found": False, "name": name, "roi": {}}
 
     def _indicator_payload(self, qs: dict) -> dict:
-        """Compute one indicator from indicators_pandas_ta over candle data."""
+        """Compute one indicator from ft_pandas_ta over candle data."""
         import pandas as pd
 
         name = qs.get("name", [None])[0]
@@ -1894,6 +2320,9 @@ def main() -> int:
         run_command([PYTHON, str(SCRIPTS / "ingest_results.py")])
 
     ensure_lookup_indexes()
+    adopted = _adopt_orphan_dryruns()
+    if adopted:
+        print(f"adopted {adopted} orphan dry run(s) from a previous server session")
 
     server = ThreadingHTTPServer(("127.0.0.1", args.port), LabHandler)
     url = f"http://127.0.0.1:{args.port}/"

@@ -1,8 +1,8 @@
-from datetime import datetime, timezone
-from enum import Enum
-from typing import ClassVar
+from datetime import UTC, datetime
+from enum import StrEnum
+from typing import ClassVar, Literal
 
-from sqlalchemy import String
+from sqlalchemy import String, select
 from sqlalchemy.orm import Mapped, mapped_column
 
 from freqtrade.persistence.base import ModelBase, SessionType
@@ -11,16 +11,21 @@ from freqtrade.persistence.base import ModelBase, SessionType
 ValueTypes = str | datetime | float | int
 
 
-class ValueTypesEnum(str, Enum):
+class ValueTypesEnum(StrEnum):
     STRING = "str"
     DATETIME = "datetime"
     FLOAT = "float"
     INT = "int"
 
 
-class KeyStoreKeys(str, Enum):
-    BOT_START_TIME = "bot_start_time"
-    STARTUP_TIME = "startup_time"
+# must be < 50 characters to fit the database column
+KeyStoreKeys = Literal[
+    "bot_start_time",
+    "startup_time",
+    "binance_migration",
+    "wallet_history_migration",
+    "wallet_history_migration_date",
+]
 
 
 class _KeyValueStoreModel(ModelBase):
@@ -33,7 +38,7 @@ class _KeyValueStoreModel(ModelBase):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    key: Mapped[KeyStoreKeys] = mapped_column(String(25), nullable=False, index=True)
+    key: Mapped[KeyStoreKeys] = mapped_column(String(50), nullable=False, index=True)
 
     value_type: Mapped[ValueTypesEnum] = mapped_column(String(20), nullable=False)
 
@@ -57,11 +62,9 @@ class KeyValueStore:
         :param key: Key to store the value for - can be used in get-value to retrieve the key
         :param value: Value to store - can be str, datetime, float or int
         """
-        kv = (
-            _KeyValueStoreModel.session.query(_KeyValueStoreModel)
-            .filter(_KeyValueStoreModel.key == key)
-            .first()
-        )
+        kv = _KeyValueStoreModel.session.scalars(
+            select(_KeyValueStoreModel).filter(_KeyValueStoreModel.key == key)
+        ).first()
         if kv is None:
             kv = _KeyValueStoreModel(key=key)
         if isinstance(value, str):
@@ -87,11 +90,9 @@ class KeyValueStore:
         Delete the value for the given key.
         :param key: Key to delete the value for
         """
-        kv = (
-            _KeyValueStoreModel.session.query(_KeyValueStoreModel)
-            .filter(_KeyValueStoreModel.key == key)
-            .first()
-        )
+        kv = _KeyValueStoreModel.session.scalars(
+            select(_KeyValueStoreModel).filter(_KeyValueStoreModel.key == key)
+        ).first()
         if kv is not None:
             _KeyValueStoreModel.session.delete(kv)
             _KeyValueStoreModel.session.commit()
@@ -102,17 +103,15 @@ class KeyValueStore:
         Get the value for the given key.
         :param key: Key to get the value for
         """
-        kv = (
-            _KeyValueStoreModel.session.query(_KeyValueStoreModel)
-            .filter(_KeyValueStoreModel.key == key)
-            .first()
-        )
+        kv = _KeyValueStoreModel.session.scalars(
+            select(_KeyValueStoreModel).filter(_KeyValueStoreModel.key == key)
+        ).first()
         if kv is None:
             return None
         if kv.value_type == ValueTypesEnum.STRING:
             return kv.string_value
         if kv.value_type == ValueTypesEnum.DATETIME and kv.datetime_value is not None:
-            return kv.datetime_value.replace(tzinfo=timezone.utc)
+            return kv.datetime_value.replace(tzinfo=UTC)
         if kv.value_type == ValueTypesEnum.FLOAT:
             return kv.float_value
         if kv.value_type == ValueTypesEnum.INT:
@@ -126,14 +125,12 @@ class KeyValueStore:
         Get the value for the given key.
         :param key: Key to get the value for
         """
-        kv = (
-            _KeyValueStoreModel.session.query(_KeyValueStoreModel)
-            .filter(
+        kv = _KeyValueStoreModel.session.scalars(
+            select(_KeyValueStoreModel).filter(
                 _KeyValueStoreModel.key == key,
                 _KeyValueStoreModel.value_type == ValueTypesEnum.STRING,
             )
-            .first()
-        )
+        ).first()
         if kv is None:
             return None
         return kv.string_value
@@ -144,17 +141,15 @@ class KeyValueStore:
         Get the value for the given key.
         :param key: Key to get the value for
         """
-        kv = (
-            _KeyValueStoreModel.session.query(_KeyValueStoreModel)
-            .filter(
+        kv = _KeyValueStoreModel.session.scalars(
+            select(_KeyValueStoreModel).filter(
                 _KeyValueStoreModel.key == key,
                 _KeyValueStoreModel.value_type == ValueTypesEnum.DATETIME,
             )
-            .first()
-        )
+        ).first()
         if kv is None or kv.datetime_value is None:
             return None
-        return kv.datetime_value.replace(tzinfo=timezone.utc)
+        return kv.datetime_value.replace(tzinfo=UTC)
 
     @staticmethod
     def get_float_value(key: KeyStoreKeys) -> float | None:
@@ -162,14 +157,12 @@ class KeyValueStore:
         Get the value for the given key.
         :param key: Key to get the value for
         """
-        kv = (
-            _KeyValueStoreModel.session.query(_KeyValueStoreModel)
-            .filter(
+        kv = _KeyValueStoreModel.session.scalars(
+            select(_KeyValueStoreModel).filter(
                 _KeyValueStoreModel.key == key,
                 _KeyValueStoreModel.value_type == ValueTypesEnum.FLOAT,
             )
-            .first()
-        )
+        ).first()
         if kv is None:
             return None
         return kv.float_value
@@ -180,19 +173,17 @@ class KeyValueStore:
         Get the value for the given key.
         :param key: Key to get the value for
         """
-        kv = (
-            _KeyValueStoreModel.session.query(_KeyValueStoreModel)
-            .filter(
+        kv = _KeyValueStoreModel.session.scalars(
+            select(_KeyValueStoreModel).filter(
                 _KeyValueStoreModel.key == key, _KeyValueStoreModel.value_type == ValueTypesEnum.INT
             )
-            .first()
-        )
+        ).first()
         if kv is None:
             return None
         return kv.int_value
 
 
-def set_startup_time():
+def set_startup_time() -> None:
     """
     sets bot_start_time to the first trade open date - or "now" on new databases.
     sets startup_time to "now"
@@ -200,10 +191,11 @@ def set_startup_time():
     st = KeyValueStore.get_value("bot_start_time")
     if st is None:
         from freqtrade.persistence import Trade
+        from sqlalchemy import select
 
-        t = Trade.session.query(Trade).order_by(Trade.open_date.asc()).first()
+        t = Trade.session.scalars(select(Trade).order_by(Trade.open_date.asc())).first()
         if t is not None:
             KeyValueStore.store_value("bot_start_time", t.open_date_utc)
         else:
-            KeyValueStore.store_value("bot_start_time", datetime.now(timezone.utc))
-    KeyValueStore.store_value("startup_time", datetime.now(timezone.utc))
+            KeyValueStore.store_value("bot_start_time", datetime.now(UTC))
+    KeyValueStore.store_value("startup_time", datetime.now(UTC))
