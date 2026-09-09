@@ -619,15 +619,19 @@ def extract_trades_of_period(
 
 
 def get_tick_size_over_time(data: pd.DataFrame) -> pd.Series:
-    """Compute tick size from OHLCV close-price diffs, returned as a constant Series."""
+    """Compute tick size from OHLCV close-price diffs, indexed by date."""
+    if "date" in data.columns:
+        idx = pd.DatetimeIndex(data["date"])
+    else:
+        idx = pd.DatetimeIndex(data.index)
     if data.empty or len(data) < 2:
-        return pd.Series(dtype=float, index=data.index)
+        return pd.Series(dtype=float, index=idx)
     closes = data["close"].dropna()
     if len(closes) < 2:
-        return pd.Series(dtype=float, index=data.index)
+        return pd.Series(dtype=float, index=idx)
     diffs = closes.diff().abs()
     diffs = diffs[diffs > 0]
     if diffs.empty:
-        return pd.Series(dtype=float, index=data.index)
+        return pd.Series(dtype=float, index=idx)
     tick = float(diffs.min())
-    return pd.Series(tick, index=data.index)
+    return pd.Series(tick, index=idx)

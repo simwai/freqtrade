@@ -1331,7 +1331,10 @@ class LabHandler(BaseHTTPRequestHandler):
                 self._send_server_error(e)
             return
         if path == "/api/indicators":
-            self._send_json(self._indicator_list())
+            try:
+                self._send_json(self._indicator_list())
+            except Exception as e:  # noqa: BLE001
+                self._send_server_error(e)
             return
         if path == "/api/tp":
             try:
