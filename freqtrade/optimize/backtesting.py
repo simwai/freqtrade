@@ -626,7 +626,7 @@ class Backtesting:
 
             if not pair_data.empty:
                 # Cleanup from prior runs
-                pair_data.drop(HEADERS[5:] + ["buy", "sell"], axis=1, errors="ignore")
+                pair_data.drop([*HEADERS[5:], "buy", "sell"], axis=1, errors="ignore")
             df_analyzed = self.strategy.ft_advise_signals(pair_data, {"pair": pair})
             # Update dataprovider cache
             self.dataprovider._set_cached_df(

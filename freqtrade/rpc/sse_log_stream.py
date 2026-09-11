@@ -7,7 +7,7 @@ import asyncio
 import json
 import logging
 from collections import deque
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from aiohttp import web
@@ -29,28 +29,30 @@ class SSELogStream:
         self.host = config.get("lab_host", "127.0.0.1")
         self.max_buffer_size = config.get("lab_log_buffer_size", 1000)
         self.log_buffer: deque = deque(maxlen=self.max_buffer_size)
-        self.clients: set = set()
+        self.clients: set[asyncio.Queue] = set()
         self.runner: web.AppRunner | None = None
         self.site: web.TCPSite | None = None
         self._job_counter = 0
         self._job_id_prefix = ""
+        self._loop: asyncio.AbstractEventLoop | None = None
 
     def _generate_job_id(self, action: str, strategy: str) -> str:
         """Generate job ID in format: {action}-{strategy}-{YYYYMMDD}-{NNNN}"""
         self._job_counter += 1
-        date_str = datetime.now().strftime("%Y%m%d")
+        date_str = datetime.now(UTC).strftime("%Y%m%d")
         return f"{action}-{strategy}-{date_str}-{self._job_counter:04d}"
 
     def set_job_prefix(self, action: str, strategy: str) -> str:
         """Set job prefix and return new job ID."""
-        self._job_id_prefix = f"{action}-{strategy}-{datetime.now().strftime('%Y%m%d')}-"
+        date_str = datetime.now(UTC).strftime("%Y%m%d")
+        self._job_id_prefix = f"{action}-{strategy}-{date_str}-"
         self._job_counter = 0
         return self._generate_job_id(action, strategy)
 
     def add_log_record(self, record: logging.LogRecord) -> None:
         """Add a log record to the buffer and broadcast to SSE clients."""
         log_entry = {
-            "timestamp": datetime.fromtimestamp(record.created).isoformat(),
+            "timestamp": datetime.fromtimestamp(record.created, tz=UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
@@ -65,17 +67,16 @@ class SSELogStream:
 
         self.log_buffer.append(log_entry)
 
-        # Broadcast to all connected SSE clients
-        for client in self.clients:
+        # Broadcast to all connected SSE clients. Logging may come from other
+        # threads, so enqueue via the loop's thread-safe entry point.
+        if self._loop is None:
+            return
+        for client_queue in list(self.clients):
             try:
-                client.send(json.dumps(log_entry))
-            except Exception:
-                # Client disconnected, will be cleaned up on next iteration
-                pass
-
-    def _cleanup_clients(self) -> None:
-        """Remove disconnected clients."""
-        self.clients = {c for c in self.clients if not c.closed}
+                self._loop.call_soon_threadsafe(client_queue.put_nowait, log_entry)
+            except RuntimeError:
+                # Loop closed or shutting down
+                return
 
     async def _sse_handler(self, request: web.Request) -> web.StreamResponse:
         """Handle SSE connections."""
@@ -91,7 +92,7 @@ class SSELogStream:
         )
         await response.prepare(request)
 
-        # Send initial buffer
+        # Send buffered backlog to the new client
         for entry in self.log_buffer:
             await response.write(f"data: {json.dumps(entry)}\n\n".encode())
 
@@ -114,17 +115,13 @@ class SSELogStream:
 
         return response
 
-    async def _broadcast_worker(self) -> None:
-        """Background worker to broadcast log entries to clients."""
-        while True:
-            self._cleanup_clients()
-            await asyncio.sleep(1)
-
     async def start(self) -> None:
         """Start the SSE server."""
+        self._loop = asyncio.get_running_loop()
         app = web.Application()
         app.router.add_get("/logs", self._sse_handler)
         app.router.add_get("/logs/stream", self._sse_handler)  # alias
+
         async def _health_handler(request: Request) -> StreamResponse:
             return web.json_response({"status": "ok"})
 
@@ -134,9 +131,6 @@ class SSELogStream:
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, self.host, self.port)
         await self.site.start()
-
-        # Start broadcast worker
-        asyncio.create_task(self._broadcast_worker())
 
         logger.info("SSE log stream started on http://%s:%d/logs", self.host, self.port)
 
@@ -159,7 +153,7 @@ class SSELogHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         try:
             self.sse_stream.add_log_record(record)
-        except Exception:
+        except RuntimeError:
             self.handleError(record)
 
 

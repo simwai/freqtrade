@@ -232,10 +232,12 @@ def start_lab(args: dict[str, Any]) -> None:
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+    _background_tasks: set = set()
 
     def _signal_handler():
         logger.info("Lab mode interrupted by user")
-        loop.create_task(sse_stream.stop())
+        task = loop.create_task(sse_stream.stop())
+        _background_tasks.add(task)
 
     for sig in (signal.SIGINT, signal.SIGTERM):
         try:
@@ -246,7 +248,11 @@ def start_lab(args: dict[str, Any]) -> None:
 
     try:
         loop.run_until_complete(sse_stream.start())
-        logger.info("Lab mode running on http://%s:%d/logs - Press Ctrl+C to stop", config.get("lab_host", "127.0.0.1"), config.get("lab_port", 8080))
+        logger.info(
+            "Lab mode running on http://%s:%d/logs - Press Ctrl+C to stop",
+            config.get("lab_host", "127.0.0.1"),
+            config.get("lab_port", 8080),
+        )
         loop.run_forever()
     except KeyboardInterrupt:
         logger.info("Lab mode interrupted by user")
