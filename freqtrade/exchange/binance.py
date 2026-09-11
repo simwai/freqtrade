@@ -1,7 +1,7 @@
 """Binance exchange subclass"""
 
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import ccxt
@@ -91,7 +91,7 @@ class Binance(Exchange):
 
     def set_markets_from_exchange(self, exchange) -> None:
         """Copy markets from an async ccxt exchange instance into this sync instance."""
-        self.set_markets(exchange.markets)
+        self.set_markets(exchange.markets)  # type: ignore[attr-defined]
 
     def get_proxy_coin(self) -> str:
         """
@@ -103,7 +103,7 @@ class Binance(Exchange):
             return self._config.get(
                 "proxy_coin",
                 self._config["stake_currency"],
-            )  # type: ignore[return-value]
+            )
         return self._config["stake_currency"]
 
     def get_tickers(
@@ -184,7 +184,7 @@ class Binance(Exchange):
                 since_ms = x[3][0][0]
                 logger.info(
                     f"Candle-data for {pair} available starting with "
-                    f"{datetime.fromtimestamp(since_ms // 1000, tz=UTC).isoformat()}."
+                    f"{datetime.fromtimestamp(since_ms // 1000, tz=timezone.utc).isoformat()}."
                 )
                 if until_ms and since_ms >= until_ms:
                     logger.warning(

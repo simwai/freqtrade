@@ -1,12 +1,17 @@
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pandas import DataFrame
 
 from freqtrade.configuration import TimeRange
 
+
+if TYPE_CHECKING:
+    from freqtrade.exchange.exchange import Exchange
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +22,23 @@ class VarHolder:
     indicators: dict[str, DataFrame]
     result: DataFrame
     compared: DataFrame
+    compared_dt: datetime
     from_dt: datetime
     to_dt: datetime
-    compared_dt: datetime
     timeframe: str
     startup_candle: int
+    current_progress: int
+    total_signals: int
 
 
 class BaseAnalysis:
+    exchange: Exchange | None = None
+    _fee: float | None = None
+
     def __init__(self, config: dict[str, Any], strategy_obj: dict):
         self.failed_bias_check = True
         self.full_varHolder = VarHolder()
-        self.exchange: Any | None = None
+        self.exchange = None
         self._fee = None
 
         # pull variables the scope of the lookahead_analysis-instance
@@ -62,3 +72,6 @@ class BaseAnalysis:
     def start(self) -> None:
         # first make a single backtest
         self.fill_full_varholder()
+
+    def prepare_data(self, varholder, pairs):
+        pass

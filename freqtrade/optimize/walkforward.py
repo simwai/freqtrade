@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import pandas as pd
+import psutil
 
 from freqtrade.configuration import TimeRange
 from freqtrade.constants import Config
@@ -18,7 +19,6 @@ from freqtrade.exceptions import OperationalException
 from freqtrade.ft_types import BacktestContentType, BacktestContentTypeIcomplete
 from freqtrade.optimize.backtesting import Backtesting
 from freqtrade.optimize.hyperopt import Hyperopt
-from freqtrade.optimize.hyperopt_tools import HyperoptTools
 from freqtrade.optimize.optimize_reports import generate_strategy_stats
 from freqtrade.optimize.walk_forward_tools import (
     WalkForwardWindow,
@@ -38,7 +38,7 @@ UTC = timezone.utc
 
 
 def _run_id() -> str:
-    return datetime.now(UTC).strftime("%Y%m%d_%H%M%S_%f")
+    return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
 
 
 def _strategy_name(config: Config) -> str:
@@ -90,10 +90,8 @@ def _run_hyperopt(
     hyperopt_config["hyperopt_result_filename"] = "hyperopt.fthypt"
 
     hyperopt = Hyperopt(hyperopt_config)
-    best = hyperopt.start()
-    if hyperopt.interrupted:
-        raise KeyboardInterrupt
-    return best, hyperopt.results_file
+    hyperopt.start()
+    return hyperopt.current_best_epoch, hyperopt.results_file
 
 
 def _window_data(
@@ -162,6 +160,48 @@ class WalkForwardHistoricalRunner:
         )
         self.overall_timerange = timerange
 
+        # Log CPU and RAM information
+        cpu_freq = psutil.cpu_freq()
+        cpu_ghz = cpu_freq.max / 1000 if cpu_freq else "unknown"
+        ram_gb = psutil.virtual_memory().total / (1024**3)
+        total_days = (
+            (timerange.stopdt - timerange.startdt).days
+            if timerange.startdt and timerange.stopdt
+            else 0
+        )
+        logger.info(
+            "Walk-forward started: CPU max %.2f GHz, RAM %.2f GB, "
+            "%d windows (%d train + %d test, step %d days), "
+            "~%d days total, ~%.1f days/window",
+            cpu_ghz,
+            ram_gb,
+            len(self.windows),
+            self.settings["train_days"],
+            self.settings["test_days"],
+            self.settings["step_days"],
+            total_days,
+            total_days / len(self.windows) if self.windows else 0,
+        )
+
+    def _log_window_estimates(self, window_idx: int, elapsed_seconds: float) -> None:
+        """Log per-day and per-week time estimates based on elapsed time."""
+        if window_idx <= 0:
+            return
+        avg_seconds_per_window = elapsed_seconds / window_idx
+        remaining_windows = len(self.windows) - window_idx
+        est_remaining_seconds = avg_seconds_per_window * remaining_windows
+        est_total_seconds = elapsed_seconds + est_remaining_seconds
+        logger.info(
+            "Progress: %d/%d windows, avg %.1fs/window, "
+            "est. remaining: %.1fs (%.1fh), est. total: %.1fh",
+            window_idx,
+            len(self.windows),
+            avg_seconds_per_window,
+            est_remaining_seconds,
+            est_remaining_seconds / 3600,
+            est_total_seconds / 3600,
+        )
+
     def _initial_manifest(self) -> dict[str, Any]:
         return {
             "version": 1,
@@ -176,6 +216,7 @@ class WalkForwardHistoricalRunner:
     def run(self) -> dict[str, Any]:
         manifest = self._initial_manifest()
         write_json_atomic(self.manifest_file, manifest)
+        run_start_time = time_module.time()
 
         backtest_config = deepcopy(self.config)
         backtest_config["runmode"] = RunMode.BACKTEST
@@ -185,7 +226,7 @@ class WalkForwardHistoricalRunner:
         backtesting = Backtesting(backtest_config)
         backtesting._set_strategy(backtesting.strategylist[0])
         data, _ = backtesting.load_bt_data()
-        backtesting.load_bt_data_detail()
+        backtesting._load_bt_data_detail()
 
         active_result: dict[str, Any] | None = None
         all_results: list[pd.DataFrame] = []
@@ -208,7 +249,10 @@ class WalkForwardHistoricalRunner:
 
             applied = False
             if not LocalTrade.bt_trades_open:
-                HyperoptTools.apply_params(backtest_config, backtesting.strategy, best)
+                # Apply best hyperopt parameters to the strategy
+                for attr_name, attr in backtesting.strategy.enumerate_parameters():
+                    if attr.in_space and attr.optimize and attr_name in best:
+                        attr.value = best[attr_name]
                 active_result = best
                 applied = True
 
@@ -218,7 +262,7 @@ class WalkForwardHistoricalRunner:
             start_balance = float(
                 backtesting.wallets.get_total(backtesting.strategy.config["stake_currency"])
             )
-            run_start = int(datetime.now(UTC).timestamp())
+            run_start = int(datetime.now(timezone.utc).timestamp())
             segment_data = _window_data(data, window, backtesting.required_startup)
             processed = backtesting.strategy.advise_all_indicators(segment_data)
             test_start = window.test.startdt
@@ -231,10 +275,8 @@ class WalkForwardHistoricalRunner:
                 processed,
                 test_start,
                 test_stop,
-                preserve_state=True,
-                finalize=window.index == self.windows[-1].index,
             )
-            run_end = int(datetime.now(UTC).timestamp())
+            run_end = int(datetime.now(timezone.utc).timestamp())
             segment_results = content["results"].iloc[before_count:].copy()
             all_results.append(segment_results)
             stats = _stats_for_results(
@@ -261,6 +303,10 @@ class WalkForwardHistoricalRunner:
             manifest["windows"].append(record)
             write_json_atomic(self.manifest_file, manifest)
 
+            # Log progress estimates
+            elapsed = time_module.time() - run_start_time
+            self._log_window_estimates(window.index, elapsed)
+
         all_results = [r for r in all_results if not r.empty]
         if not all_results:
             raise OperationalException("Walk-forward produced no out-of-sample results.")
@@ -278,8 +324,8 @@ class WalkForwardHistoricalRunner:
         aggregate_content = cast(BacktestContentType, dict(content))
         aggregate_content["config"] = aggregate_config
         aggregate_content["results"] = aggregate_results
-        aggregate_content["backtest_start_time"] = int(datetime.now(UTC).timestamp())
-        aggregate_content["backtest_end_time"] = int(datetime.now(UTC).timestamp())
+        aggregate_content["backtest_start_time"] = int(datetime.now(timezone.utc).timestamp())
+        aggregate_content["backtest_end_time"] = int(datetime.now(timezone.utc).timestamp())
         overall_start = self.overall_timerange.startdt
         overall_stop = self.overall_timerange.stopdt
         if overall_start is None or overall_stop is None:
@@ -310,7 +356,7 @@ class WalkForwardLiveRunner:
         self.state_file = self.run_root / "live_state.json"
 
     def _run_once(self, now: datetime | None = None) -> dict[str, Any] | None:
-        current_time = now or datetime.now(UTC)
+        current_time = now or datetime.now(timezone.utc)
         training_range = live_training_timerange(current_time, self.settings["train_days"])
         run_id = _run_id()
         run_directory = self.run_root / run_id
@@ -352,7 +398,7 @@ class WalkForwardLiveRunner:
         state = {
             "last_run": metadata,
             "pending_file": str(pending),
-            "published_at": datetime.now(UTC),
+            "published_at": datetime.now(timezone.utc),
         }
         write_json_atomic(self.state_file, state)
         logger.info("Published pending walk-forward parameters to '%s'.", pending)
@@ -372,15 +418,15 @@ class WalkForwardLiveRunner:
     def run(self, run_now: bool = False) -> None:
         logger.info("Starting scheduled live walk-forward runner.")
         if run_now:
-            self.run_once(datetime.now(UTC))
+            self.run_once(datetime.now(timezone.utc))
         while True:
             try:
-                current = datetime.now(UTC)
+                current = datetime.now(timezone.utc)
                 scheduled = next_schedule(current, self.settings["schedule"])
                 wait_seconds = max((scheduled - current).total_seconds(), 0)
                 logger.info("Next live walk-forward run at %s UTC.", scheduled.isoformat())
                 time_module.sleep(wait_seconds)
-                self.run_once(datetime.now(UTC))
+                self.run_once(datetime.now(timezone.utc))
             except Exception:
                 # One failed cycle must not kill the weekly scheduler; the next
                 # scheduled attempt retries with fresh data.

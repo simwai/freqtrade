@@ -72,7 +72,11 @@ def start_backtesting_show(args: dict[str, Any]) -> None:
     from freqtrade.data.btanalysis import load_backtest_stats
     from freqtrade.optimize.optimize_reports import show_backtest_results, show_sorted_pairlist
 
-    results = load_backtest_stats(config["exportdirectory"], config["exportfilename"])
+    results = load_backtest_stats(
+        config["exportdirectory"] / config["exportfilename"]
+        if config.get("exportfilename")
+        else config["exportdirectory"]
+    )
 
     show_backtest_results(config, results)
     show_sorted_pairlist(config, results)
@@ -88,7 +92,7 @@ def start_hyperopt(args: dict[str, Any]) -> None:
     try:
         from filelock import FileLock, Timeout
 
-        from freqtrade.optimize.hyperopt import Hyperopt
+        from freqtrade.optimize.hyperopt import FibonacciHyperopt, Hyperopt
     except ImportError as e:
         raise OperationalException(
             f"{e}. Please ensure that the hyperopt dependencies are installed."
@@ -96,7 +100,18 @@ def start_hyperopt(args: dict[str, Any]) -> None:
     # Initialize configuration
     config = setup_optimize_configuration(args, RunMode.HYPEROPT)
 
-    logger.info("Starting freqtrade in Hyperopt mode")
+    # Auto-detect Fibonacci mode: if any fibonacci arg is provided, use FibonacciHyperopt
+    fibonacci_mode = any(
+        args.get(key) is not None
+        for key in (
+            "hyperopt_fibonacci_target",
+            "hyperopt_initial_points",
+            "hyperopt_space_reduction",
+            "hyperopt_estimator",
+        )
+    )
+
+    logger.info(f"Starting freqtrade in Hyperopt mode {'(Fibonacci)' if fibonacci_mode else ''}")
 
     lock = FileLock(Hyperopt.get_lock_filename(config))
 
@@ -106,8 +121,12 @@ def start_hyperopt(args: dict[str, Any]) -> None:
             logging.getLogger("hyperopt.tpe").setLevel(logging.WARNING)
             logging.getLogger("filelock").setLevel(logging.WARNING)
 
-            # Initialize backtesting object
-            hyperopt = Hyperopt(config)
+            # Initialize hyperopt object (Fibonacci or standard)
+            hyperopt: Hyperopt | FibonacciHyperopt
+            if fibonacci_mode:
+                hyperopt = FibonacciHyperopt(config)
+            else:
+                hyperopt = Hyperopt(config)
             hyperopt.start()
 
     except Timeout:
@@ -159,3 +178,80 @@ def start_recursive_analysis(args: dict[str, Any]) -> None:
 
     config = setup_utils_configuration(args, RunMode.UTIL_NO_EXCHANGE)
     RecursiveAnalysisSubFunctions.start(config)
+
+
+def start_walkforward(args: dict[str, Any]) -> None:
+    """
+    Start walk-forward optimization script
+    :param args: Cli args from Arguments()
+    :return: None
+    """
+    from freqtrade.configuration import setup_utils_configuration
+    from freqtrade.optimize.walkforward import WalkForwardHistoricalRunner
+
+    config = setup_utils_configuration(args, RunMode.HYPEROPT)
+
+    logger.info("Starting freqtrade in Walk-Forward Optimization mode")
+
+    # Apply walkforward settings from CLI args to config
+    if args.get("walkforward_train_days"):
+        config.setdefault("walk_forward", {})["train_days"] = args["walkforward_train_days"]
+    if args.get("walkforward_test_days"):
+        config.setdefault("walk_forward", {})["test_days"] = args["walkforward_test_days"]
+    if args.get("walkforward_step_days"):
+        config.setdefault("walk_forward", {})["step_days"] = args["walkforward_step_days"]
+    if args.get("walkforward_schedule"):
+        config.setdefault("walk_forward", {})["schedule"] = args["walkforward_schedule"]
+    if args.get("walkforward_min_trades"):
+        config.setdefault("walk_forward", {})["min_trades"] = args["walkforward_min_trades"]
+    if args.get("walkforward_max_drawdown") is not None:
+        config.setdefault("walk_forward", {})["max_drawdown"] = args["walkforward_max_drawdown"]
+
+    walkforward = WalkForwardHistoricalRunner(config)
+    walkforward.run()
+
+
+def start_lab(args: dict[str, Any]) -> None:
+    """
+    Start SSE log stream server (lab mode).
+    :param args: Cli args from Arguments()
+    :return: None
+    """
+    import asyncio
+    import signal
+
+    from freqtrade.configuration import setup_utils_configuration
+    from freqtrade.rpc.sse_log_stream import SSELogStream, remove_sse_logging, setup_sse_logging
+
+    config = setup_utils_configuration(args, RunMode.UTIL_NO_EXCHANGE)
+
+    logger.info("Starting freqtrade in Lab mode (SSE log stream)")
+
+    sse_stream = SSELogStream(config)
+    handler = setup_sse_logging(config, sse_stream)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    def _signal_handler():
+        logger.info("Lab mode interrupted by user")
+        loop.create_task(sse_stream.stop())
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            loop.add_signal_handler(sig, _signal_handler)
+        except NotImplementedError:
+            # Windows doesn't support add_signal_handler
+            pass
+
+    try:
+        loop.run_until_complete(sse_stream.start())
+        logger.info("Lab mode running on http://%s:%d/logs - Press Ctrl+C to stop", config.get("lab_host", "127.0.0.1"), config.get("lab_port", 8080))
+        loop.run_forever()
+    except KeyboardInterrupt:
+        logger.info("Lab mode interrupted by user")
+    finally:
+        loop.run_until_complete(sse_stream.stop())
+        loop.close()
+        remove_sse_logging(handler)
+        logger.info("Lab mode stopped")

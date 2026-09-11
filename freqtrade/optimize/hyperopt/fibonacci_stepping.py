@@ -193,7 +193,7 @@ class FibonacciStepping:
         # Check SKDecimal first since it inherits from Integer
         if isinstance(dim, SKDecimal):
             decimals = dim.decimals
-            scale = 10**decimals
+            scale = 10**decimals  # type: ignore[operator]
 
             if span == 0:
                 margin = max(1, int((dim.high - dim.low) * scale * self.space_reduction))

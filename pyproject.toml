@@ -191,6 +191,7 @@ asyncio_default_fixture_loop_scope = "function"
 addopts = "--dist loadscope"
 
 [tool.mypy]
+python_version = "3.11"
 ignore_missing_imports = true
 namespace_packages = false
 warn_unused_ignores = true

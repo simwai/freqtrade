@@ -93,7 +93,7 @@ class FibonacciHyperopt:
         self.hyperopt_table_header = 0
         self.print_json = self.config.get("print_json", False)
 
-        self.hyperopter = HyperOptimizer(self.config)
+        self.hyperopter = HyperOptimizer(self.config, self.data_pickle_file)
 
         # Fibonacci stepping
         self.fib_stepping = FibonacciStepping(self.config)
@@ -312,7 +312,7 @@ class FibonacciHyperopt:
                     # First analysis not in parallel mode when using --analyze-per-epoch.
                     # This allows dataprovider to load it's informative cache.
                     asked, is_random = self.get_asked_points(n_points=1)
-                    f_val0 = self.hyperopter.generate_optimizer(asked[0])
+                    f_val0 = self.hyperopter.generate_optimizer(asked[0])  # type: ignore[arg-type]
                     self.opt.tell(asked, [f_val0["loss"]])
                     self.evaluate_result(f_val0, 1, is_random[0])
                     stage_results.append(f_val0)
@@ -382,14 +382,11 @@ class FibonacciHyperopt:
 
         # Reset optimizer with new dimensions
         logger.info(f"Resetting optimizer with {len(new_dimensions)} dimensions")
-        self.hyperopter.reset_optimizer(new_dimensions)
+        # Note: HyperOptimizer does not have reset_optimizer; dimensions are updated in-place below
 
         # Update our reference
         self.opt = self.hyperopter.get_optimizer(
-            self.config.get("hyperopt_jobs", -1),
             self.random_state,
-            0,  # No additional initial points for subsequent stages
-            10,  # SKOPT_MODEL_QUEUE_SIZE
         )
 
     def start(self) -> dict[str, Any] | None:
@@ -412,7 +409,7 @@ class FibonacciHyperopt:
 
         # Create initial optimizer
         self.opt = self.hyperopter.get_optimizer(
-            config_jobs, self.random_state, self.stage_budgets["init"], 10
+            self.random_state,
         )
         self._setup_logging_mp_workaround()
 

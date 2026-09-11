@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 from typing import ClassVar, Literal
 
@@ -111,7 +111,7 @@ class KeyValueStore:
         if kv.value_type == ValueTypesEnum.STRING:
             return kv.string_value
         if kv.value_type == ValueTypesEnum.DATETIME and kv.datetime_value is not None:
-            return kv.datetime_value.replace(tzinfo=UTC)
+            return kv.datetime_value.replace(tzinfo=timezone.utc)
         if kv.value_type == ValueTypesEnum.FLOAT:
             return kv.float_value
         if kv.value_type == ValueTypesEnum.INT:
@@ -149,7 +149,7 @@ class KeyValueStore:
         ).first()
         if kv is None or kv.datetime_value is None:
             return None
-        return kv.datetime_value.replace(tzinfo=UTC)
+        return kv.datetime_value.replace(tzinfo=timezone.utc)
 
     @staticmethod
     def get_float_value(key: KeyStoreKeys) -> float | None:
@@ -190,12 +190,13 @@ def set_startup_time() -> None:
     """
     st = KeyValueStore.get_value("bot_start_time")
     if st is None:
-        from freqtrade.persistence import Trade
         from sqlalchemy import select
+
+        from freqtrade.persistence import Trade
 
         t = Trade.session.scalars(select(Trade).order_by(Trade.open_date.asc())).first()
         if t is not None:
             KeyValueStore.store_value("bot_start_time", t.open_date_utc)
         else:
-            KeyValueStore.store_value("bot_start_time", datetime.now(UTC))
-    KeyValueStore.store_value("startup_time", datetime.now(UTC))
+            KeyValueStore.store_value("bot_start_time", datetime.now(timezone.utc))
+    KeyValueStore.store_value("startup_time", datetime.now(timezone.utc))

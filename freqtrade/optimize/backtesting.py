@@ -6,7 +6,11 @@ This module contains the backtesting logic
 
 from __future__ import annotations
 
+import atexit
 import logging
+import signal
+import threading
+import time as time_module
 from collections import defaultdict
 from contextlib import nullcontext
 from copy import deepcopy
@@ -245,6 +249,9 @@ class Backtesting:
 
         self.init_backtest()
 
+        # Register atexit handler for log flushing on normal exit
+        atexit.register(self._flush_logs_on_exit)
+
     def _validate_pairlists_for_backtesting(self):
         if "VolumePairList" in self.pairlists.name_list:
             raise OperationalException(
@@ -316,6 +323,19 @@ class Backtesting:
             self._progress_task = self.progress.add_task("Backtesting", total=0)
         self.abort = False
 
+        # Heartbeat logging for long-running backtests
+        self._heartbeat_interval = self.config.get("backtest_heartbeat_interval", 60)
+        self._heartbeat_thread: threading.Thread | None = None
+        self._heartbeat_stop = threading.Event()
+        self._start_time = time_module.time()
+        self._last_heartbeat = 0
+
+        if self._heartbeat_interval > 0 and self.dataprovider.runmode == RunMode.BACKTEST:
+            self._start_heartbeat()
+
+        # Register signal handlers for graceful shutdown with log flushing
+        self._setup_signal_handlers()
+
     def _set_progress_step(self, action: BacktestState, total: float) -> None:
         """Advance the overall phase bar and (re)start the detail bar for the new phase."""
         if self.progress is None:
@@ -332,6 +352,66 @@ class Backtesting:
         if self.progress is None:
             return
         self.progress.update(self._progress_task, advance=advance)
+
+    def _start_heartbeat(self) -> None:
+        """Start the heartbeat logging thread."""
+        self._heartbeat_stop.clear()
+        self._heartbeat_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
+        self._heartbeat_thread.start()
+        logger.info("Backtest heartbeat started (interval: %ds)", self._heartbeat_interval)
+
+    def _heartbeat_loop(self) -> None:
+        """Background thread that logs periodic heartbeat messages."""
+        while not self._heartbeat_stop.wait(self._heartbeat_interval):
+            elapsed = time_module.time() - self._start_time
+            hours, remainder = divmod(elapsed, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            logger.info(
+                "Backtest heartbeat: running for %dh %dm %.0fs, state=%s",
+                int(hours),
+                int(minutes),
+                seconds,
+                self.state if hasattr(self, "state") else "unknown",
+            )
+            # Force log flush to ensure crash-safe logging
+            for handler in logging.getLogger().handlers:
+                handler.flush()
+
+    def _stop_heartbeat(self) -> None:
+        """Stop the heartbeat logging thread."""
+        if self._heartbeat_thread and self._heartbeat_thread.is_alive():
+            self._heartbeat_stop.set()
+            self._heartbeat_thread.join(timeout=5)
+            logger.info("Backtest heartbeat stopped")
+
+    def _setup_signal_handlers(self) -> None:
+        """Register signal handlers for graceful shutdown with log flushing."""
+
+        def _signal_handler(signum, frame):
+            logger.warning("Received signal %s, flushing logs and stopping heartbeat...", signum)
+            self._stop_heartbeat()
+            # Flush all log handlers
+            for handler in logging.getLogger().handlers:
+                handler.flush()
+            # Re-raise the signal to allow default handling
+            signal.signal(signum, signal.SIG_DFL)
+            signal.raise_signal(signum)
+
+        try:
+            signal.signal(signal.SIGTERM, _signal_handler)
+            signal.signal(signal.SIGINT, _signal_handler)
+            # Windows doesn't have SIGHUP
+            if hasattr(signal, "SIGHUP"):
+                signal.signal(signal.SIGHUP, _signal_handler)
+        except (ValueError, OSError):
+            # Signal handlers may not work in all environments (e.g., Windows, threads)
+            pass
+
+    def _flush_logs_on_exit(self) -> None:
+        """Flush all log handlers on exit (atexit handler)."""
+        self._stop_heartbeat()
+        for handler in logging.getLogger().handlers:
+            handler.flush()
 
     def _set_strategy(self, strategy: IStrategy):
         """
@@ -487,6 +567,9 @@ class Backtesting:
         """
         Backtesting setup method - called once for every call to "backtest()".
         """
+        # Stop heartbeat from previous run
+        self._stop_heartbeat()
+
         self.disable_database_use()
         PairLocks.reset_locks()
         Trade.reset_trades()
@@ -500,11 +583,19 @@ class Backtesting:
         self.canceled_entry_orders = 0
         self.replaced_entry_orders = 0
         self.canceled_exit_orders = 0
+        self.replaced_entry_orders = 0
+        self.canceled_exit_orders = 0
         self.replaced_exit_orders = 0
+        self.replaced_entry_orders = 0
         self.wallet_captures = []
         self.dataprovider.clear_cache()
         if enable_protections:
             self._load_protections(self.strategy)
+        # Restart heartbeat if interval is configured
+        self._start_time = time_module.time()
+        self._last_heartbeat = 0
+        if self._heartbeat_interval > 0 and self.dataprovider.runmode == RunMode.BACKTEST:
+            self._start_heartbeat()
 
     def check_abort(self):
         """

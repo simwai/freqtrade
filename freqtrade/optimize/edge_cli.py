@@ -11,7 +11,7 @@ from freqtrade.configuration import TimeRange, validate_config_consistency
 from freqtrade.constants import Config
 from freqtrade.data.dataprovider import DataProvider
 from freqtrade.edge import Edge
-from freqtrade.optimize.optimize_reports import generate_edge_table
+from freqtrade.optimize.optimize_reports import generate_edge_table  # type: ignore[attr-defined]
 from freqtrade.resolvers import ExchangeResolver, StrategyResolver
 
 
@@ -51,5 +51,5 @@ class EdgeCli:
     def start(self) -> None:
         result = self.edge.calculate(self.config["exchange"]["pair_whitelist"])
         if result:
-            print("")  # blank line for readability
+            print()  # blank line for readability
             generate_edge_table(self.edge._cached_pairs)
