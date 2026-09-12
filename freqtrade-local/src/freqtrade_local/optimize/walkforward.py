@@ -5,13 +5,12 @@ from __future__ import annotations
 import logging
 import time as time_module
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
 import pandas as pd
 import psutil
-
 from freqtrade.configuration import TimeRange
 from freqtrade.constants import Config
 from freqtrade.enums import RunMode
@@ -20,7 +19,9 @@ from freqtrade.ft_types import BacktestContentType, BacktestContentTypeIcomplete
 from freqtrade.optimize.backtesting import Backtesting
 from freqtrade.optimize.hyperopt import Hyperopt
 from freqtrade.optimize.optimize_reports import generate_strategy_stats
-from freqtrade.optimize.walk_forward_tools import (
+from freqtrade.persistence import LocalTrade
+
+from freqtrade_local.optimize.walk_forward_tools import (  # type: ignore[import]
     WalkForwardWindow,
     generate_walk_forward_windows,
     live_training_timerange,
@@ -30,15 +31,12 @@ from freqtrade.optimize.walk_forward_tools import (
     walk_forward_settings,
     write_json_atomic,
 )
-from freqtrade.persistence import LocalTrade
-
 
 logger = logging.getLogger(__name__)
-UTC = timezone.utc
 
 
 def _run_id() -> str:
-    return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
+    return datetime.now(UTC).strftime("%Y%m%d_%H%M%S_%f")
 
 
 def _strategy_name(config: Config) -> str:
@@ -49,7 +47,9 @@ def _run_directory(config: Config, strategy_name: str, run_id: str) -> Path:
     return Path(config["user_data_dir"]) / "walk_forward" / strategy_name / run_id
 
 
-def _best_snapshot(result: dict[str, Any], result_file: Path | None = None) -> dict[str, Any]:
+def _best_snapshot(
+    result: dict[str, Any], result_file: Path | None = None
+) -> dict[str, Any]:
     snapshot = {
         key: result.get(key)
         for key in (
@@ -76,8 +76,9 @@ def _run_hyperopt(
     """Run one isolated hyperopt without touching active strategy parameters."""
     if config.get("freqai", {}).get("enabled", False):
         raise OperationalException(
-            "Walk-forward hyperopt does not support FreqAI yet. FreqAI support will be added "
-            "after the regular strategy workflow is stable."
+            "Walk-forward hyperopt does not support FreqAI yet. "
+            "FreqAI support will be added after the regular strategy "
+            "workflow is stable."
         )
 
     hyperopt_config = deepcopy(config)
@@ -100,8 +101,12 @@ def _window_data(
     """Keep startup candles before a test window, then only candles in that window."""
     result: dict[str, pd.DataFrame] = {}
     for pair, dataframe in data.items():
-        start_index = int(dataframe["date"].searchsorted(window.test.startdt, side="left"))
-        end_index = int(dataframe["date"].searchsorted(window.test.stopdt, side="right"))
+        start_index = int(
+            dataframe["date"].searchsorted(window.test.startdt, side="left")
+        )
+        end_index = int(
+            dataframe["date"].searchsorted(window.test.stopdt, side="right")
+        )
         start_index = max(0, start_index - startup_candles)
         sliced = dataframe.iloc[start_index:end_index].copy()
         if not sliced.empty:
@@ -129,7 +134,9 @@ def _stats_for_results(
     start_dt = timerange.startdt
     stop_dt = timerange.stopdt
     if start_dt is None or stop_dt is None:
-        raise OperationalException("Walk-forward statistics require a finite time range.")
+        raise OperationalException(
+            "Walk-forward statistics require a finite time range."
+        )
     return generate_strategy_stats(
         backtesting.pairlists.whitelist,
         backtesting.strategy.get_strategy_name(),
@@ -260,9 +267,11 @@ class WalkForwardHistoricalRunner:
             backtesting.config["timerange"] = window.test.timerange_str
             before_count = len(LocalTrade.bt_trades)
             start_balance = float(
-                backtesting.wallets.get_total(backtesting.strategy.config["stake_currency"])
+                backtesting.wallets.get_total(
+                    backtesting.strategy.config["stake_currency"]
+                )
             )
-            run_start = int(datetime.now(timezone.utc).timestamp())
+            run_start = int(datetime.now(UTC).timestamp())
             segment_data = _window_data(data, window, backtesting.required_startup)
             processed = backtesting.strategy.advise_all_indicators(segment_data)
             test_start = window.test.startdt
@@ -276,7 +285,7 @@ class WalkForwardHistoricalRunner:
                 test_start,
                 test_stop,
             )
-            run_end = int(datetime.now(timezone.utc).timestamp())
+            run_end = int(datetime.now(UTC).timestamp())
             segment_results = content["results"].iloc[before_count:].copy()
             all_results.append(segment_results)
             stats = _stats_for_results(
@@ -309,7 +318,9 @@ class WalkForwardHistoricalRunner:
 
         all_results = [r for r in all_results if not r.empty]
         if not all_results:
-            raise OperationalException("Walk-forward produced no out-of-sample results.")
+            raise OperationalException(
+                "Walk-forward produced no out-of-sample results."
+            )
         if content is None:
             raise OperationalException("Walk-forward produced no backtesting content.")
 
@@ -324,8 +335,12 @@ class WalkForwardHistoricalRunner:
         aggregate_content = cast(BacktestContentType, dict(content))
         aggregate_content["config"] = aggregate_config
         aggregate_content["results"] = aggregate_results
-        aggregate_content["backtest_start_time"] = int(datetime.now(timezone.utc).timestamp())
-        aggregate_content["backtest_end_time"] = int(datetime.now(timezone.utc).timestamp())
+        aggregate_content["backtest_start_time"] = int(
+            datetime.now(UTC).timestamp()
+        )
+        aggregate_content["backtest_end_time"] = int(
+            datetime.now(UTC).timestamp()
+        )
         overall_start = self.overall_timerange.startdt
         overall_stop = self.overall_timerange.stopdt
         if overall_start is None or overall_stop is None:
@@ -356,11 +371,15 @@ class WalkForwardLiveRunner:
         self.state_file = self.run_root / "live_state.json"
 
     def _run_once(self, now: datetime | None = None) -> dict[str, Any] | None:
-        current_time = now or datetime.now(timezone.utc)
-        training_range = live_training_timerange(current_time, self.settings["train_days"])
+        current_time = now or datetime.now(UTC)
+        training_range = live_training_timerange(
+            current_time, self.settings["train_days"]
+        )
         run_id = _run_id()
         run_directory = self.run_root / run_id
-        logger.info("Running live walk-forward hyperopt for %s.", training_range.timerange_str)
+        logger.info(
+            "Running live walk-forward hyperopt for %s.", training_range.timerange_str
+        )
         best, result_file = _run_hyperopt(self.config, training_range, run_directory)
         if best is None:
             logger.warning("No usable live walk-forward result was produced.")
@@ -370,15 +389,18 @@ class WalkForwardLiveRunner:
         min_trades = self.settings["min_trades"]
         if min_trades and metrics.get("total_trades", 0) < min_trades:
             logger.warning(
-                "Rejecting live walk-forward parameters: %s trades is below the configured "
-                "minimum of %s.",
+                "Rejecting live walk-forward parameters: %s trades is "
+                "below the configured minimum of %s.",
                 metrics.get("total_trades", 0),
                 min_trades,
             )
             return None
 
         max_drawdown = self.settings.get("max_drawdown")
-        if max_drawdown is not None and metrics.get("max_drawdown_account", 0) > max_drawdown:
+        if (
+            max_drawdown is not None
+            and metrics.get("max_drawdown_account", 0) > max_drawdown
+        ):
             logger.warning(
                 "Rejecting live walk-forward parameters: drawdown %.2f exceeds %.2f.",
                 metrics.get("max_drawdown_account", 0),
@@ -398,7 +420,7 @@ class WalkForwardLiveRunner:
         state = {
             "last_run": metadata,
             "pending_file": str(pending),
-            "published_at": datetime.now(timezone.utc),
+            "published_at": datetime.now(UTC),
         }
         write_json_atomic(self.state_file, state)
         logger.info("Published pending walk-forward parameters to '%s'.", pending)
@@ -418,15 +440,17 @@ class WalkForwardLiveRunner:
     def run(self, run_now: bool = False) -> None:
         logger.info("Starting scheduled live walk-forward runner.")
         if run_now:
-            self.run_once(datetime.now(timezone.utc))
+            self.run_once(datetime.now(UTC))
         while True:
             try:
-                current = datetime.now(timezone.utc)
+                current = datetime.now(UTC)
                 scheduled = next_schedule(current, self.settings["schedule"])
                 wait_seconds = max((scheduled - current).total_seconds(), 0)
-                logger.info("Next live walk-forward run at %s UTC.", scheduled.isoformat())
+                logger.info(
+                    "Next live walk-forward run at %s UTC.", scheduled.isoformat()
+                )
                 time_module.sleep(wait_seconds)
-                self.run_once(datetime.now(timezone.utc))
+                self.run_once(datetime.now(UTC))
             except Exception:
                 # One failed cycle must not kill the weekly scheduler; the next
                 # scheduled attempt retries with fresh data.

@@ -24,7 +24,6 @@ class SKDecimal(FloatDistribution):
             raise ValueError("You can only set one of decimals or step")
         if decimals is None and step is None:
             raise ValueError("You must set one of decimals or step")
-        self.decimals = decimals
         # Convert decimals to step
         self.step = step or (1 / 10**decimals if decimals else 1)
         self.name = name or ""

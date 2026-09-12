@@ -9,11 +9,13 @@ import time
 from pathlib import Path
 
 import requests
-
 from freqtrade.enums import RunMode
 from freqtrade.exchange.exchange_types import Tickers
-from freqtrade.plugins.pairlist.IPairList import IPairList, PairlistParameter, SupportsBacktesting
-
+from freqtrade.plugins.pairlist.IPairList import (
+    IPairList,
+    PairlistParameter,
+    SupportsBacktesting,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +23,7 @@ BINANCE_DELISTING_URL = (
     "https://www.binance.com/bapi/composite/v1/public/cms/article/list/query"
     "?type=1&catalogId=161&pageNo=1&pageSize=20"
 )
-BINANCE_ARTICLE_DETAIL_URL = (
-    "https://www.binance.com/bapi/composite/v1/public/cms/article/detail/query?articleCode={code}"
-)
+BINANCE_ARTICLE_DETAIL_URL = "https://www.binance.com/bapi/composite/v1/public/cms/article/detail/query?articleCode={code}"
 
 
 class BinanceDelistingFilter(IPairList):
@@ -51,7 +51,8 @@ class BinanceDelistingFilter(IPairList):
         self._state_file = (
             Path(state_file)
             if state_file
-            else Path(self._config.get("user_data_dir", Path("user_data"))) / "delisting_state.json"
+            else Path(self._config.get("user_data_dir", Path("user_data")))
+            / "delisting_state.json"
         )
 
         self._article_ids: set[str] = set()
@@ -77,7 +78,10 @@ class BinanceDelistingFilter(IPairList):
                 "type": "string",
                 "default": BINANCE_DELISTING_URL,
                 "description": "Announcement listing API URL",
-                "help": "Binance CMS API URL containing the exchange delisting announcements.",
+                "help": (
+                    "Binance CMS API URL containing the exchange "
+                    "delisting announcements."
+                ),
             },
             "article_detail_url": {
                 "type": "string",
@@ -109,7 +113,11 @@ class BinanceDelistingFilter(IPairList):
     def filter_pairlist(self, pairlist: list[str], tickers: Tickers) -> list[str]:
         if not self._enabled:
             return pairlist
-        if self._config.get("runmode") in (RunMode.BACKTEST, RunMode.EDGE, RunMode.HYPEROPT):
+        if self._config.get("runmode") in (
+            RunMode.BACKTEST,
+            RunMode.EDGE,
+            RunMode.HYPEROPT,
+        ):
             return pairlist
 
         self._refresh_delistings()
@@ -117,7 +125,8 @@ class BinanceDelistingFilter(IPairList):
         removed = [pair for pair in pairlist if pair not in filtered]
         if removed:
             self.log_once(
-                f"BinanceDelistingFilter removed pairs from whitelist: {removed}", logger.warning
+                f"BinanceDelistingFilter removed pairs from whitelist: {removed}",
+                logger.warning,
             )
         return filtered
 
@@ -134,7 +143,9 @@ class BinanceDelistingFilter(IPairList):
             return
 
         if self._article_ids:
-            candidates = [article for article in articles if article[0] not in self._article_ids]
+            candidates = [
+                article for article in articles if article[0] not in self._article_ids
+            ]
         else:
             candidates = articles if self._initial_scan else []
 
@@ -143,7 +154,9 @@ class BinanceDelistingFilter(IPairList):
             try:
                 text = self._get_page_text(article_url)
             except requests.RequestException as exc:
-                logger.warning("Unable to fetch Binance delisting article %s: %s", article_url, exc)
+                logger.warning(
+                    "Unable to fetch Binance delisting article %s: %s", article_url, exc
+                )
                 continue
 
             pairs = self._extract_pairs(text)
@@ -193,7 +206,8 @@ class BinanceDelistingFilter(IPairList):
         if not isinstance(payload, dict):
             # Raised as RequestException so _refresh_delistings' handler catches it.
             raise requests.RequestException(
-                f"Binance API returned a non-object payload of type {type(payload).__name__}."
+                "Binance API returned a non-object payload of type "
+                f"{type(payload).__name__}."
             )
         if payload.get("code") != "000000" or not payload.get("success", False):
             raise requests.RequestException(f"Binance API returned an error: {payload}")
@@ -244,10 +258,14 @@ class BinanceDelistingFilter(IPairList):
                 item for item in state.get("article_ids", []) if isinstance(item, str)
             }
             self._delisted_pairs = {
-                item for item in state.get("delisted_pairs", []) if isinstance(item, str)
+                item
+                for item in state.get("delisted_pairs", [])
+                if isinstance(item, str)
             }
         except (OSError, json.JSONDecodeError, AttributeError, TypeError) as exc:
-            logger.warning("Unable to load delisting state from %s: %s", self._state_file, exc)
+            logger.warning(
+                "Unable to load delisting state from %s: %s", self._state_file, exc
+            )
 
     def _save_state(self) -> None:
         state = {
@@ -257,7 +275,11 @@ class BinanceDelistingFilter(IPairList):
         temporary_file = self._state_file.with_name(self._state_file.name + ".tmp")
         try:
             self._state_file.parent.mkdir(parents=True, exist_ok=True)
-            temporary_file.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+            temporary_file.write_text(
+                json.dumps(state, indent=2) + "\n", encoding="utf-8"
+            )
             temporary_file.replace(self._state_file)
         except OSError as exc:
-            logger.warning("Unable to save delisting state to %s: %s", self._state_file, exc)
+            logger.warning(
+                "Unable to save delisting state to %s: %s", self._state_file, exc
+            )

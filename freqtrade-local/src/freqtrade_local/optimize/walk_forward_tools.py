@@ -5,19 +5,17 @@ from __future__ import annotations
 import re
 from copy import deepcopy
 from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any
 
 import rapidjson
-
 from freqtrade.configuration import TimeRange
 from freqtrade.constants import Config
 from freqtrade.misc import deep_merge_dicts
 from freqtrade.optimize.hyperopt_tools import hyperopt_serializer
 
-
-UTC = timezone.utc
+UTC = UTC
 DEFAULT_TRAIN_DAYS = 90
 DEFAULT_TEST_DAYS = 7
 DEFAULT_STEP_DAYS = 7
@@ -56,7 +54,9 @@ def walk_forward_settings(config: Config) -> dict[str, Any]:
 
 def _midnight(value: datetime | date) -> datetime:
     if isinstance(value, datetime):
-        return value.astimezone(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+        return value.astimezone(UTC).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
     return datetime.combine(value, time.min, tzinfo=UTC)
 
 
@@ -102,7 +102,9 @@ def generate_walk_forward_windows(
         test_start += timedelta(days=step_days)
 
     if not windows:
-        raise ValueError("The timerange is too short for the configured training and test periods.")
+        raise ValueError(
+            "The timerange is too short for the configured training and test periods."
+        )
     return windows
 
 
@@ -142,7 +144,9 @@ def parse_schedule(value: str) -> tuple[int, time]:
         day = day_names[day_name.lower()]
         schedule_time = time(int(hour), int(minute))
     except (KeyError, ValueError) as exc:
-        raise ValueError("Walk-forward schedule must contain a valid UTC day and time.") from exc
+        raise ValueError(
+            "Walk-forward schedule must contain a valid UTC day and time."
+        ) from exc
     return day, schedule_time
 
 
@@ -205,4 +209,6 @@ def pending_parameter_file(config: Config, strategy_name: str) -> Path:
         if not path.is_absolute():
             path = Path(config["user_data_dir"]) / path
         return path
-    return Path(config["user_data_dir"]) / "walk_forward" / strategy_name / "pending.json"
+    return (
+        Path(config["user_data_dir"]) / "walk_forward" / strategy_name / "pending.json"
+    )

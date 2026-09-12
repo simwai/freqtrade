@@ -764,13 +764,13 @@ class Exchange:
             # Reload async markets, then assign them to sync api
             retrier(self._load_async_markets, retries=retries)(reload=True)
             self._markets = self._api_async.markets
-            self._api.set_markets(self._api_async.markets)
+            self._api.set_markets_from_exchange(self._api_async)
             # Assign options array, as it contains some temporary information from the exchange.
             # ccxt does not implicitly copy options over in set_markets_from_exchange
             self._api.options = self._api_async.options
             if self._exchange_ws:
                 # Set markets to avoid reloading on websocket api
-                self._ws_async.set_markets(self._api_async.markets)
+                self._ws_async.set_markets_from_exchange(self._api_async)
                 self._ws_async.options = self._api.options
             self._last_markets_refresh = dt_ts()
 
@@ -2522,6 +2522,7 @@ class Exchange:
         :param amount: Amount of order
         :param price: Price of order
         :param taker_or_maker: 'maker' or 'taker' (ignored if "type" is provided)
+        :return: Fee rate as a float
         """
         if order_type and order_type == "market":
             taker_or_maker = "taker"
@@ -2532,7 +2533,7 @@ class Exchange:
             if self._api.markets is None or len(self._api.markets) == 0:
                 self._api.load_markets(params={})
 
-            return self._api.calculate_fee(
+            fee = self._api.calculate_fee(
                 symbol=symbol,
                 type=order_type,
                 side=side,
@@ -2540,6 +2541,19 @@ class Exchange:
                 price=price,
                 takerOrMaker=taker_or_maker,
             )["rate"]
+            if fee is None:
+                # Exchange didn't provide fees for this market - fall back to the exchange default.
+                fee = self._api.fees.get("trading", {}).get(taker_or_maker)
+            if fee is None:
+                msg = f"Could not determine {taker_or_maker} fee for {symbol} - assuming 0."
+                if self._config["dry_run"]:
+                    # Dry-run and backtesting never see real fees - the 0 would be permanent.
+                    logger.warning(f"{msg} Please set 'fee' in your configuration.")
+                else:
+                    # Live trading updates the fee from the order once it filled.
+                    logger.debug(msg)
+                fee = 0.0
+            return fee
         except ccxt.DDoSProtection as e:
             raise DDosProtection(e) from e
         except (ccxt.OperationFailed, ccxt.ExchangeError) as e:

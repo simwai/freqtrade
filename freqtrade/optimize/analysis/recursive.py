@@ -142,7 +142,7 @@ class RecursiveAnalysis(BaseAnalysis):
         )
         prepare_data_config["exchange"]["pair_whitelist"] = pairs_to_load
 
-        backtesting = Backtesting(prepare_data_config, self.exchange)  # type: ignore[has-type]
+        backtesting = Backtesting(prepare_data_config, self.exchange)
         self.exchange = backtesting.exchange
         if self.pair_to_used is None:
             self.pair_to_used = backtesting.pairlists.whitelist[0]

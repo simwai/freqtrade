@@ -10,10 +10,12 @@ from freqtrade import constants
 from freqtrade.configuration import TimeRange, validate_config_consistency
 from freqtrade.constants import Config
 from freqtrade.data.dataprovider import DataProvider
-from freqtrade.edge import Edge
-from freqtrade.optimize.optimize_reports import generate_edge_table  # type: ignore[attr-defined]
 from freqtrade.resolvers import ExchangeResolver, StrategyResolver
 
+from freqtrade_local.plugins.edge.edge_positioning import (
+    Edge,
+    generate_edge_table,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,9 @@ class EdgeCli:
         self.edge._refresh_pairs = False
 
         self.edge._timerange = TimeRange.parse_timerange(
-            None if self.config.get("timerange") is None else str(self.config.get("timerange"))
+            None
+            if self.config.get("timerange") is None
+            else str(self.config.get("timerange"))
         )
         self.strategy.ft_bot_start()
 

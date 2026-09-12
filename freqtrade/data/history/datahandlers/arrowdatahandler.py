@@ -148,7 +148,7 @@ class ArrowDataHandler(IDataHandler):
         """
         time_filter = self._build_arrow_ohlcv_filter(timerange, timeframe)
         try:
-            dataset_reader = dataset.dataset(str(filename), format=self._get_file_extension())  # type: ignore[call-overload]
+            dataset_reader = dataset.dataset(filename, format=self._get_file_extension())
             pairdata = dataset_reader.to_table(filter=time_filter).to_pandas()
         except (ImportError, AttributeError, ValueError, ArrowException) as e:
             # Fallback: load entire file
@@ -237,7 +237,7 @@ class ArrowDataHandler(IDataHandler):
 
         # Use Arrow dataset with optional timerange filtering, fallback to a full read
         try:
-            dataset_reader = dataset.dataset(str(filename), format=self._get_file_extension())  # type: ignore[call-overload]
+            dataset_reader = dataset.dataset(filename, format=self._get_file_extension())
             time_filter = self._build_arrow_trades_filter(timerange)
             tradesdata = dataset_reader.to_table(filter=time_filter).to_pandas()
             logger.debug(

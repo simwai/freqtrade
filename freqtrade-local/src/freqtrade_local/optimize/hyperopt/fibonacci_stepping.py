@@ -1,15 +1,15 @@
 """
 Fibonacci stepping logic for multi-stage hyperopt optimization.
 
-This module implements the Fibonacci-stepping approach for hyperparameter optimization,
-where trials are allocated across multiple stages with progressively narrowing search spaces
-based on Fibonacci numbers.
+This module implements the Fibonacci-stepping approach for
+hyperparameter optimization, where trials are allocated across
+multiple stages with progressively narrowing search spaces based
+on Fibonacci numbers.
 """
 
 import logging
 import warnings
 from typing import Any
-
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=FutureWarning)
@@ -18,7 +18,6 @@ with warnings.catch_warnings():
 from freqtrade.constants import Config
 from freqtrade.exceptions import OperationalException
 from freqtrade.optimize.space import SKDecimal
-
 
 logger = logging.getLogger(__name__)
 
@@ -34,13 +33,15 @@ MIN_FIBONACCI_TARGET = 34
 
 class FibonacciStepping:
     """
-    Manages multi-stage Fibonacci trial allocation and search space reduction.
+    Manages multi-stage Fibonacci trial allocation and search space
+    reduction.
 
-    The Fibonacci stepping approach allocates trials across stages using Fibonacci numbers:
+    The Fibonacci stepping approach allocates trials across stages
+    using Fibonacci numbers:
     - Init: n_initial random trials
     - Stage 1: F_n - n_initial trials (full space)
-    - Stage 2: F_{n-1} trials (reduced space from top F_{n-1} Stage 1 results)
-    - Stage 3: F_{n-2} trials (further reduced space from top F_{n-2} Stage 2 results)
+    - Stage 2: F_{n-1} trials (reduced space from top F_{n-1})
+    - Stage 3: F_{n-2} trials (further reduced from top F_{n-2})
 
     Example with F_n=34, n_initial=10:
     - Init: 10 trials
@@ -63,10 +64,11 @@ class FibonacciStepping:
         # Check fibonacci_target is a valid Fibonacci number >= MIN_FIBONACCI_TARGET
         fib_sequence = self._generate_fibonacci_sequence(self.fibonacci_target * 2)
         if self.fibonacci_target not in fib_sequence:
+            valid = [f for f in fib_sequence if f >= MIN_FIBONACCI_TARGET]
             raise OperationalException(
-                f"hyperopt_fibonacci_target ({self.fibonacci_target}) must be a Fibonacci number. "
-                f"Valid options >= {MIN_FIBONACCI_TARGET}: "
-                f"{[f for f in fib_sequence if f >= MIN_FIBONACCI_TARGET]}"
+                f"hyperopt_fibonacci_target ({self.fibonacci_target}) must be "
+                f"a Fibonacci number. Valid options >= {MIN_FIBONACCI_TARGET}: "
+                f"{valid}"
             )
 
         if self.fibonacci_target < MIN_FIBONACCI_TARGET:
@@ -83,15 +85,19 @@ class FibonacciStepping:
         stage1_trials = fn - self.n_initial
         if stage1_trials < MIN_STAGE1_TRIALS:
             raise OperationalException(
-                f"Stage 1 would have only {stage1_trials} trials (need >= {MIN_STAGE1_TRIALS}). "
-                f"Reduce hyperopt_initial_points (current: {self.n_initial}) or "
-                f"increase hyperopt_fibonacci_target (current: {self.fibonacci_target})."
+                f"Stage 1 would have only {stage1_trials} trials "
+                f"(need >= {MIN_STAGE1_TRIALS}). "
+                f"Reduce hyperopt_initial_points (current: {self.n_initial}) "
+                f"or increase hyperopt_fibonacci_target "
+                f"(current: {self.fibonacci_target})."
             )
 
         if fn_minus_1 < MIN_STAGE2_TRIALS:
             raise OperationalException(
-                f"Stage 2 would have only {fn_minus_1} trials (need >= {MIN_STAGE2_TRIALS}). "
-                f"Increase hyperopt_fibonacci_target (current: {self.fibonacci_target})."
+                f"Stage 2 would have only {fn_minus_1} trials "
+                f"(need >= {MIN_STAGE2_TRIALS}). "
+                f"Increase hyperopt_fibonacci_target "
+                f"(current: {self.fibonacci_target})."
             )
 
         fib_seq_full = self._generate_fibonacci_sequence(fn * 2)
@@ -100,18 +106,22 @@ class FibonacciStepping:
             fn_minus_2 = fib_seq_full[fn_idx - 2]
             if fn_minus_2 < MIN_STAGE3_TRIALS:
                 raise OperationalException(
-                    f"Stage 3 would have only {fn_minus_2} trials (need >= {MIN_STAGE3_TRIALS}). "
-                    f"Increase hyperopt_fibonacci_target (current: {self.fibonacci_target})."
+                    f"Stage 3 would have only {fn_minus_2} trials "
+                    f"(need >= {MIN_STAGE3_TRIALS}). "
+                    f"Increase hyperopt_fibonacci_target "
+                    f"(current: {self.fibonacci_target})."
                 )
 
         if not 0.01 <= self.space_reduction <= 0.5:
             raise OperationalException(
-                f"hyperopt_space_reduction must be between 0.01 and 0.5, got {self.space_reduction}"
+                f"hyperopt_space_reduction must be between 0.01 and "
+                f"0.5, got {self.space_reduction}"
             )
 
         if self.estimator not in ("GP", "RF", "ET", "GBRT"):
             raise OperationalException(
-                f"hyperopt_estimator must be one of GP, RF, ET, GBRT, got {self.estimator}"
+                f"hyperopt_estimator must be one of GP, RF, ET, GBRT, "
+                f"got {self.estimator}"
             )
 
     def _generate_fibonacci_sequence(self, limit: int) -> list[int]:
@@ -143,7 +153,8 @@ class FibonacciStepping:
         Compute trial budgets for each stage.
 
         Returns:
-            Dict with keys: 'init', 'stage1_full', 'stage2_reduced', 'stage3_refined', 'total'
+            Dict with keys: 'init', 'stage1_full', 'stage2_reduced',
+            'stage3_refined', 'total'
         """
         fn, fn_minus_1, fn_minus_2 = self.get_fibonacci_trio(self.fibonacci_target)
 
@@ -196,7 +207,9 @@ class FibonacciStepping:
             scale = 10**decimals  # type: ignore[operator]
 
             if span == 0:
-                margin = max(1, int((dim.high - dim.low) * scale * self.space_reduction))
+                margin = max(
+                    1, int((dim.high - dim.low) * scale * self.space_reduction)
+                )
             else:
                 margin = max(1, int(span * scale * self.space_reduction))
 
@@ -208,9 +221,12 @@ class FibonacciStepping:
                 new_low = dim.low
                 new_high = dim.high
 
-            new_dim = SKDecimal(new_low, new_high, decimals=decimals, name=param_name)
+            new_dim = SKDecimal(
+                new_low, new_high, decimals=decimals, name=param_name
+            )
             logger.debug(
-                f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low:.4f}, {new_high:.4f}]"
+                f"  {param_name}: [{dim.low}, {dim.high}] -> "
+                f"[{new_low:.4f}, {new_high:.4f}]"
             )
             return new_dim
 
@@ -230,7 +246,10 @@ class FibonacciStepping:
                 new_high = dim.high
 
             new_dim = Integer(new_low, new_high, name=param_name)
-            logger.debug(f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low}, {new_high}]")
+            logger.debug(
+                f"  {param_name}: [{dim.low}, {dim.high}] -> "
+                f"[{new_low}, {new_high}]"
+            )
             return new_dim
 
         elif isinstance(dim, Real):
@@ -246,15 +265,21 @@ class FibonacciStepping:
                 new_low = dim.low
                 new_high = dim.high
 
-            new_dim = Real(new_low, new_high, name=param_name, prior=dim.prior)
+            new_dim = Real(
+                new_low, new_high, name=param_name, prior=dim.prior
+            )
             logger.debug(
-                f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low:.4f}, {new_high:.4f}]"
+                f"  {param_name}: [{dim.low}, {dim.high}] -> "
+                f"[{new_low:.4f}, {new_high:.4f}]"
             )
             return new_dim
 
         else:
             # Unknown dimension type, keep as-is
-            logger.warning(f"Unknown dimension type {type(dim)} for {param_name}, keeping original")
+            logger.warning(
+                f"Unknown dimension type {type(dim)} for "
+                f"{param_name}, keeping original"
+            )
             return dim
 
     def reduce_space(
@@ -275,7 +300,9 @@ class FibonacciStepping:
             New list of dimensions with narrowed bounds
         """
         if not top_trials or k <= 0:
-            logger.warning("No trials provided for space reduction, keeping original space")
+            logger.warning(
+                "No trials provided for space reduction, keeping original space"
+            )
             return dimensions
 
         # Use top-k trials (or all available if fewer)
@@ -297,7 +324,9 @@ class FibonacciStepping:
                     values.append(trial["params_dict"][param_name])
 
             if not values:
-                logger.debug(f"No values for parameter {param_name}, keeping original bounds")
+                logger.debug(
+                    f"No values for parameter {param_name}, keeping original bounds"
+                )
                 new_dimensions.append(dim)
                 continue
 
@@ -320,7 +349,8 @@ class FibonacciStepping:
             else:
                 # Unknown dimension type, keep as-is
                 logger.warning(
-                    f"Unknown dimension type {type(dim)} for {param_name}, keeping original"
+                    f"Unknown dimension type {type(dim)} for "
+                    f"{param_name}, keeping original"
                 )
                 new_dimensions.append(dim)
 
@@ -346,20 +376,26 @@ class FibonacciStepping:
                 "name": "Stage 1 (Full Space)",
                 "trials": budgets["stage1_full"],
                 "space": "full",
-                "description": f"Bayesian optimization on full space (F_n={fn})",
+                "description": (
+                    f"Bayesian optimization on full space (F_n={fn})"
+                ),
             },
             "stage2_reduced": {
                 "name": "Stage 2 (Reduced Space)",
                 "trials": budgets["stage2_reduced"],
                 "space": "reduced",
-                "description": (f"Bayesian optimization on reduced space (F_{{n-1}}={fn_minus_1})"),
+                "description": (
+                    f"Bayesian optimization on reduced space "
+                    f"(F_{{n-1}}={fn_minus_1})"
+                ),
             },
             "stage3_refined": {
                 "name": "Stage 3 (Refined Space)",
                 "trials": budgets["stage3_refined"],
                 "space": "further_reduced",
                 "description": (
-                    f"Bayesian optimization on further reduced space (F_{{n-2}}={fn_minus_2})"
+                    f"Bayesian optimization on further reduced space "
+                    f"(F_{{n-2}}={fn_minus_2})"
                 ),
             },
         }

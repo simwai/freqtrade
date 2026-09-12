@@ -1,6 +1,6 @@
 # 02-decision-prompts
 
-Decision format and the project style policy auto-trigger. Decision prompts cover user-owned choices only: scope, findings confirmation, plan approval, and cadence. Deterministic phase skips are recorded and auto-advanced; never framed as decision prompts.
+Decision format, rendering rule, examples, anti-patterns, smallest-request rule, style-policy auto-trigger, stack compatibility check, START routing details, and required-input summaries.
 
 ## Decision format
 
@@ -34,13 +34,9 @@ Rules:
 - Base the recommendation on the option with the most meaningful pros and fewest meaningful cons, not on option order alone.
 - State the recommendation and the reason before the options.
 - Keep pros and cons to one line each.
-- One response, one format. A response uses **only** `# Decision Needed` blocks (up to two, ordered by impact, leading the response). **Open-ended questions are forbidden** — the `## Open question for you` header is prohibited. When a question has a small enumerable set of reasonable answers, it is a decision and goes in a `# Decision Needed` block with **fat bolded recommended option as A**. Probes and decisions do not mix.
-- **Cap is a hard emit-time check, not a preference.** Before emitting any `# Decision Needed` block, count the blocks this response would contain. Three or more is a protocol breach: stop, hold the extras, and emit only the highest-impact one (or two when they are clearly independent and answerable in either order). The remainder wait for the next turn under the same phase header after the user answers. Never stack the full set in one response (see Anti-pattern 3).
-- Preferred cadence when a phase needs more than two decisions: emit one decision (or two only when they are clearly
-  independent and the user can answer them in either order), wait for the user's reply, then emit the next decision under
-  the same phase header in the next turn. Repeat until all decisions are resolved. One decision per turn is the safer
-  default; two is the ceiling. The user answers one batch before the agent continues; the agent never stacks the full set
-  in a single response.
+- One response, one format. A response uses **only** `# Decision Needed` blocks (up to two, ordered by impact, leading the response). **Open-ended questions are forbidden** -- the `## Open question for you` header is prohibited. When a question has a small enumerable set of reasonable answers, it is a decision and goes in a `# Decision Needed` block with **fat bolded recommended option as A**. Probes and decisions do not mix.
+- **Cap is a hard emit-time check, not a preference.** Before emitting any `# Decision Needed` block, count the blocks this response would contain. Three or more is a protocol breach: stop, hold the extras, and emit only the highest-impact one (or two when they are clearly independent and answerable in either order). The remainder wait for the next turn under the same phase header after the user answers. Never stack the full set in one response.
+- Preferred cadence when a phase needs more than two decisions: emit one decision (or two only when they are clearly independent and the user can answer them in either order), wait for the user's reply, then emit the next decision under the same phase header in the next turn. Repeat until all decisions are resolved. One decision per turn is the safer default; two is the ceiling. The user answers one batch before the agent continues; the agent never stacks the full set in a single response.
 - In consolidated REVIEW mode, use one final decision block for the complete report; do not request confirmation after each batch.
 - Consolidation changes response cadence only. It does not change evidence, coverage, or acceptance requirements.
 - Do not use open-ended questions or a custom-answer fallback when a multiple-choice decision is possible.
@@ -48,11 +44,11 @@ Rules:
 - Never emit a decision prompt for a phase skip the model can decide deterministically (e.g., `DOCS` out of scope, upstream pipeline not applicable). Record the skip and its reason; proceed to the next phase.
 - If the answer changes the plan scope, return to PLAN before proceeding.
 
-### Rendering Rule (MANDATORY)
+## Rendering Rule (MANDATORY)
 
 In every `# Decision Needed` block:
 - The recommended option **MUST** be option A
-- Option A **MUST** be rendered as `**A. option text**` (Markdown bold, including the letter and period)
+- Option A **MUST** be rendered as `**A**. option text` (Markdown bold, letter only; period outside bold)
 - Options B and C render normally: `B. option text`
 - This applies to ALL decision prompts in ALL phases and personas
 - No exceptions for consolidated REVIEW, BabaTester, or any other context
@@ -70,7 +66,7 @@ Correct example (two stacked decision blocks, ordered by impact, leading the res
 Question: should the file target be one file or the whole module?
 Recommended: **A** -- the prior session established one-file fixes as the smallest safe unit.
 
-- **A.** one file
+- **A**. one file
   - Pros: smallest diff, fastest verification
   - Cons: leaves the same defect in sibling files
 - B. whole module
@@ -83,7 +79,7 @@ Reply with: A or B.
 Question: which test suite gates the change?
 Recommended: **A** -- the project's CI runs A on every PR.
 
-- **A.** unit
+- **A**. unit
   - Pros: fast, no external deps
   - Cons: misses integration regressions
 - B. integration
@@ -153,7 +149,7 @@ The ask uses the decision format above (this file owns the format; the style-pol
 - `A` (preserve-local)  -> agent writes `policy: preserve-local` to `STYLE_POLICY.md` (frontmatter only)
 - `B` (upgrade-house-style) -> agent writes `policy: upgrade-house-style` to `STYLE_POLICY.md` (frontmatter only)
 
-**Pre-emptiveness.** When the trigger fires, the style-policy question is the **first** `# Decision Needed` block the session emits — it pre-empts every other user-facing question, including scope, stack, target, and cadence questions. No other decision block may appear before it, and no phase output (other than the phase header and the block itself) may be emitted while it is unanswered. The reason is that every downstream question ("which path?", "which stack?") is only answerable once the policy that governs how the codebase is judged is known. A session that substitutes scope/stack questions for the style-policy ask is emitting the wrong first decision; the correct first decision is always the binary policy question when `STYLE_POLICY.md` is missing and the project is not greenfield.
+**Pre-emptiveness.** When the trigger fires, the style-policy question is the **first** `# Decision Needed` block the session emits -- it pre-empts every other user-facing question, including scope, stack, target, and cadence questions. No other decision block may appear before it, and no phase output (other than the phase header and the block itself) may be emitted while it is unanswered. The reason is that every downstream question ("which path?", "which stack?") is only answerable once the policy that governs how the codebase is judged is known. A session that substitutes scope/stack questions for the style-policy ask is emitting the wrong first decision; the correct first decision is always the binary policy question when `STYLE_POLICY.md` is missing and the project is not greenfield.
 
 The artifact is a markdown file with frontmatter only:
 
@@ -229,12 +225,12 @@ On user response:
 
 Scope: infrastructure and storage only. Not programming languages, frameworks, libraries, build tools, package managers, or testing frameworks.
 
-## START routing (STRUCTURED mode)
+## START routing details (STRUCTURED mode)
 
 Route on the first input:
 
 - **Concrete target** (file, module, or code snippet) -> run the project style policy auto-trigger when the trigger condition holds, then `CHECKLIST`.
-- **Directory, glob, or feature-area target** -> run the project style policy auto-trigger when the trigger condition holds, then `CHECKLIST` (relevance discovery runs during CHECKLIST init per `07-protocols.md`).
+- **Directory, glob, or feature-area target** -> run the project style policy auto-trigger when the trigger condition holds, then `CHECKLIST` (relevance discovery runs during CHECKLIST init; if inventory > 1 file and not greenfield, auto-spawn `PARALLEL_REVIEW`; if multiple dependency types detected, auto-spawn `DOCS_PARALLEL`).
 - **Goal or project spec without a concrete target** -> full mode -> run the project style policy auto-trigger when the trigger condition holds, then `INTAKE`.
 - **Greenfield target** (explicit from-scratch request, or the target repo has no existing source files) -> full mode -> `INTAKE` with the `Stack/Style:` field recorded; CHECKLIST and REVIEW run as recorded greenfield skips and the session goes PLAN-first with module conventions established. The auto-trigger skip condition "greenfield" applies.
 - **Exploratory question** -> `DISCUSS`.
@@ -244,9 +240,11 @@ Full mode must always produce an approved task card before entering `CHECKLIST`.
 
 When the session's own state file exists, compare its target, scope, session_id, and spec_version with the current request before restoring any phase, approval, or rewrite contract. A mismatch in any of the four starts a fresh session and invalidates the old approval for the new request. A legacy file (no `session_id`) is always a mismatch for approval purposes.
 
+**Fresh-session load mandate**: On every fresh session (new session_id or mismatch detected), all 8 system files MUST be reloaded from disk in full with NO chunking. Prior loads from previous sessions NEVER carry over -- each session starts with a clean slate and must complete the STARTUP gate independently.
+
 In `DIRECT` mode, do not emit a phase template. Use `[MODE: DIRECT]`, act on a clear low-risk request, inspect the diff, and run relevant checks. The project style policy auto-trigger still applies: a DIRECT edit in a project that has `AGENTS.md` but no `STYLE_POLICY.md` artifact must ask the binary question before touching any file. The check runs once per session.
 
-### ScrumMaster "direct mode" disambiguation
+## ScrumMaster "direct mode" disambiguation
 
 The ScrumMaster phrase "direct mode" for a concrete target means "skip the optional upstream planning pipeline" (`INTAKE -> BACKLOG -> SPRINT -> TASK_PLAN -> SPEC`). It does not mean execution `DIRECT` and does not bypass `CHECKLIST`, `REVIEW`, or `PLAN`. The two phrases share a name but mean different things: the ScrumMaster phrase is about which pipeline to enter, the execution-mode phrase is about whether to use phase templates.
 
@@ -262,9 +260,13 @@ The ScrumMaster phrase "direct mode" for a concrete target means "skip the optio
 
 `BLOCKED -> SPEC`: goal or spec request recorded, spec artifact structure can be followed. `[NEEDS CLARIFICATION]` markers bounded to 3 per spec; answers use the decision format above.
 
-`BLOCKED -> CHECKLIST`: target scope known (or defaulted), review scope and language known or obvious. When target is a directory, glob, or feature-area description, run relevance discovery (per `07-protocols.md`) to populate file inventory before proceeding. Greenfield targets: file inventory is the planned file set recorded as a greenfield skip; stack/style captured at INTAKE. Before emitting `BLOCKED` for a missing target, search the filesystem with `rg` and file-listing tools.
+`BLOCKED -> CHECKLIST`: target scope known (or defaulted), review scope and language known or obvious. When target is a directory, glob, or feature-area description, run relevance discovery per `07-protocols.md` to populate file inventory before proceeding. Greenfield targets: file inventory is the planned file set recorded as a greenfield skip; stack/style captured at INTAKE. Before emitting `BLOCKED` for a missing target, search the filesystem with `rg` and file-listing tools. Use `/noparallel` flag to force sequential CHECKLIST -> REVIEW.
 
-`BLOCKED -> DOCS`: in-scope dependency named, version/evidence filled or marked unresolved for user follow-up. Dependency names and versions are read from the repo: manifests, lockfiles, and imports. "Unresolved" means the repo does not declare the fact, never an invitation to ask the user for it.
+`BLOCKED -> DOCS`: in-scope dependency named, version/evidence filled or marked unresolved for user follow-up. Dependency names and versions are read from the repo: manifests, lockfiles, and imports. "Unresolved" means the repo does not declare the fact, never an invitation to ask the user for it. Single dependency type or `/noparallel` flag.
+
+`BLOCKED -> DOCS_PARALLEL`: in-scope dependencies span multiple types (npm, pip, cargo, go, maven, gradle, etc.); every checklist checkbox ticked. Subagents spawned per dependency type with partitioned evidence collection (max 3 concurrent).
+
+`BLOCKED -> PARALLEL_REVIEW`: docs evidence complete (or DOCS/DOCS_PARALLEL skipped), multi-file inventory (>1) and not greenfield, every checklist checkbox ticked. Partitions file inventory by architectural layer; spawns N BabaSensei reviewers (N = min(ceil(files/50), 4)) + BabaTester with partitioned session state.
 
 `BLOCKED -> REVIEW`: current chunk exists, every prerequisite artifact required by the review path already exists. REVIEW also owns the confirmation decision; the response must include accepted violations, disputed violations, and preservation constraints.
 

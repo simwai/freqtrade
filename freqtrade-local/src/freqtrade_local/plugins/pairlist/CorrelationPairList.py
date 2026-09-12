@@ -9,7 +9,6 @@ import logging
 from pathlib import Path
 
 from cachetools import TTLCache
-from pandas import DataFrame
 
 # why: importing load_data at module top triggers a circular import
 # (`freqtrade.data.history.__init__` mid-init -> `freqtrade.plugins.pairlist`
@@ -17,9 +16,13 @@ from pandas import DataFrame
 # the function that uses it so the module loads cleanly.
 from freqtrade.enums import CandleType
 from freqtrade.exchange.exchange_types import Tickers
-from freqtrade.plugins.pairlist.IPairList import IPairList, PairlistParameter, SupportsBacktesting
+from freqtrade.plugins.pairlist.IPairList import (
+    IPairList,
+    PairlistParameter,
+    SupportsBacktesting,
+)
 from freqtrade.util import dt_now
-
+from pandas import DataFrame
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +54,9 @@ class CorrelationPairList(IPairList):
         self._min_periods = self._pairlistconfig.get("min_correlation_periods", 100)
         self._refresh_period = self._pairlistconfig.get("refresh_period", 3600)
 
-        self._correlation_cache: TTLCache = TTLCache(maxsize=1, ttl=self._refresh_period)
+        self._correlation_cache: TTLCache = TTLCache(
+            maxsize=1, ttl=self._refresh_period
+        )
         self._stake_currency = self._config["stake_currency"]
         self._timeframe = self._config["timeframe"]
         self._candle_type = self._config.get("candle_type_def", CandleType.SPOT)
@@ -64,7 +69,10 @@ class CorrelationPairList(IPairList):
 
     def short_desc(self) -> str:
         """Short whitelist method description - used for startup-messages"""
-        return f"{self.name} - threshold: {self._threshold}, max_per_base: {self._max_per_base}"
+        return (
+            f"{self.name} - threshold: {self._threshold}, "
+            f"max_per_base: {self._max_per_base}"
+        )
 
     @staticmethod
     def description() -> str:
@@ -77,7 +85,10 @@ class CorrelationPairList(IPairList):
                 "type": "number",
                 "default": 0.7,
                 "description": "Correlation threshold",
-                "help": "Minimum Pearson correlation coefficient to include a pair (0.0 to 1.0).",
+                "help": (
+                    "Minimum Pearson correlation coefficient to include "
+                    "a pair (0.0 to 1.0)."
+                ),
             },
             "max_correlated_per_base": {
                 "type": "number",
@@ -89,13 +100,19 @@ class CorrelationPairList(IPairList):
                 "type": "number",
                 "default": 30,
                 "description": "Lookback days",
-                "help": "Number of days of historical data to use for correlation calculation.",
+                "help": (
+                    "Number of days of historical data to use for "
+                    "correlation calculation."
+                ),
             },
             "min_correlation_periods": {
                 "type": "number",
                 "default": 100,
                 "description": "Min correlation periods",
-                "help": "Minimum number of overlapping candles required for valid correlation.",
+                "help": (
+                    "Minimum number of overlapping candles required "
+                    "for valid correlation."
+                ),
             },
             **IPairList.refresh_period_parameter(),
         }
@@ -126,7 +143,8 @@ class CorrelationPairList(IPairList):
                     seen.add(corr_pair)
 
         self.log_once(
-            f"CorrelationPairList: {len(pairlist)} base pairs -> {len(expanded)} total pairs "
+            f"CorrelationPairList: {len(pairlist)} base pairs -> "
+            f"{len(expanded)} total pairs "
             f"({len(expanded) - len(pairlist)} correlated added)",
             logger.info,
         )
@@ -187,11 +205,15 @@ class CorrelationPairList(IPairList):
         """
         # Get all active markets with matching stake currency
         markets = self._exchange.get_markets(
-            quote_currencies=[self._stake_currency], tradable_only=True, active_only=True
+            quote_currencies=[self._stake_currency],
+            tradable_only=True,
+            active_only=True,
         )
 
         if not markets:
-            logger.warning(f"No active markets found for stake currency {self._stake_currency}")
+            logger.warning(
+                f"No active markets found for stake currency {self._stake_currency}"
+            )
             return {}
 
         candidate_pairs = list(markets.keys())
@@ -215,6 +237,7 @@ class CorrelationPairList(IPairList):
         try:
             # Local import: see top-of-file comment about circular-import avoidance.
             from freqtrade.data.history import load_data
+
             data = load_data(
                 datadir=self._datadir,
                 pairs=candidate_pairs,
@@ -241,7 +264,9 @@ class CorrelationPairList(IPairList):
 
         return price_data
 
-    def _calculate_correlation_matrix(self, price_data: dict[str, DataFrame]) -> DataFrame:
+    def _calculate_correlation_matrix(
+        self, price_data: dict[str, DataFrame]
+    ) -> DataFrame:
         """
         Calculate Pearson correlation matrix on returns.
 

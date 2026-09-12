@@ -5,15 +5,14 @@ Helpers when analyzing backtest data
 import logging
 import zipfile
 from copy import copy
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any, Literal
 
-import numpy as np
 import pandas as pd
 
-from freqtrade.constants import LAST_BT_RESULT_FN, IntOrInf
+from freqtrade.constants import LAST_BT_RESULT_FN
 from freqtrade.exceptions import ConfigurationError, OperationalException
 from freqtrade.ft_types import BacktestHistoryEntryType, BacktestResultType
 from freqtrade.misc import file_dump_json, json_load
@@ -52,6 +51,7 @@ BT_DATA_COLUMNS = [
     "open_timestamp",
     "close_timestamp",
     "orders",
+    "funding_fees",
 ]
 
 
@@ -154,33 +154,55 @@ def load_backtest_metadata(filename: Path | str) -> dict[str, Any]:
         raise OperationalException("Unexpected error while loading backtest metadata.") from e
 
 
-def load_backtest_stats(filename: Path | str) -> BacktestResultType:
+def _normalize_filename(file_or_directory: Path | str, filename: Path | str | None) -> Path:
+    """
+    Normalize the filename by ensuring it is a Path object.
+    :param file_or_directory: The directory or file to normalize.
+    :param filename: The filename to normalize.
+    :return: A Path object representing the normalized filename.
+    """
+    if isinstance(file_or_directory, str):
+        file_or_directory = Path(file_or_directory)
+    if file_or_directory.is_dir():
+        if not filename:
+            filename = get_latest_backtest_filename(file_or_directory)
+        if Path(filename).is_file():
+            fn = Path(filename)
+        else:
+            fn = file_or_directory / filename
+    else:
+        fn = file_or_directory
+    return fn
+
+
+def load_backtest_stats(
+    file_or_directory: Path | str, filename: Path | str | None = None
+) -> BacktestResultType:
     """
     Load backtest statistics file.
-    :param filename: pathlib.Path object, or string pointing to the file.
+    :param file_or_directory: pathlib.Path object, or string pointing to the directory,
+        or absolute/relative path to the backtest results file.
+    :param filename: Optional filename to load from (if different from the main filename).
+        Only valid when loading from a directory.
     :return: a dictionary containing the resulting file.
     """
-    if isinstance(filename, str):
-        filename = Path(filename)
-    if filename.is_dir():
-        filename = filename / get_latest_backtest_filename(filename)
-    if not filename.is_file():
-        raise ValueError(f"File {filename} does not exist.")
-    logger.info(f"Loading backtest result from {filename}")
+    fn = _normalize_filename(file_or_directory, filename)
 
-    if filename.suffix == ".zip":
+    if not fn.is_file():
+        raise ValueError(f"File or directory {fn} does not exist.")
+    logger.info(f"Loading backtest result from {fn}")
+
+    if fn.suffix == ".zip":
         data = json_load(
-            StringIO(
-                load_file_from_zip(filename, filename.with_suffix(".json").name).decode("utf-8")
-            )
+            StringIO(load_file_from_zip(fn, fn.with_suffix(".json").name).decode("utf-8"))
         )
     else:
-        with filename.open() as file:
+        with fn.open() as file:
             data = json_load(file)
 
     # Legacy list format does not contain metadata.
     if isinstance(data, dict):
-        data["metadata"] = load_backtest_metadata(filename)
+        data["metadata"] = load_backtest_metadata(fn)
     return data
 
 
@@ -207,7 +229,7 @@ def _get_backtest_files(dirname: Path) -> list[Path]:
     # Get both json and zip files separately and combine the results
     json_files = dirname.glob("backtest-result-*-[0-9][0-9]*.json")
     zip_files = dirname.glob("backtest-result-*-[0-9][0-9]*.zip")
-    return list(reversed(sorted(list(json_files) + list(zip_files))))
+    return sorted(list(json_files) + list(zip_files), reverse=True)
 
 
 def _extract_backtest_result(filename: Path) -> list[BacktestHistoryEntryType]:
@@ -285,8 +307,29 @@ def get_backtest_market_change(filename: Path, include_ts: bool = True) -> pd.Da
     else:
         df = pd.read_feather(filename)
     if include_ts:
-        df.loc[:, "__date_ts"] = df.loc[:, "date"].astype(np.int64) // 1000 // 1000
+        df.loc[:, "__date_ts"] = df.loc[:, "date"].dt.as_unit("ms").astype("int64")
     return df
+
+
+def get_backtest_wallet_change(filename: Path, strategy_name: str) -> pd.DataFrame | None:
+    """
+    Read backtest wallet change file.
+    :param filename: Path to the backtest result zip file
+    :param strategy_name: Name of the strategy to load
+    :return: DataFrame with wallet change data
+    """
+    if filename.suffix != ".zip":
+        return None
+
+    try:
+        data = load_file_from_zip(filename, f"{filename.stem}_{strategy_name}_wallet.feather")
+        df = pd.read_feather(BytesIO(data))
+
+        df.loc[:, "__date_ts"] = df.loc[:, "date"].dt.as_unit("ms").astype("int64")
+        return df
+    except ValueError:
+        pass
+    return None
 
 
 def find_existing_backtest_stats(
@@ -323,7 +366,7 @@ def find_existing_backtest_stats(
 
             if min_backtest_date is not None:
                 backtest_date = strategy_metadata["backtest_start_time"]
-                backtest_date = datetime.fromtimestamp(backtest_date, tz=timezone.utc)
+                backtest_date = datetime.fromtimestamp(backtest_date, tz=UTC)
                 if backtest_date < min_backtest_date:
                     # Do not use a cached result for this strategy as first result is too old.
                     del run_ids[strategy_name]
@@ -356,19 +399,26 @@ def _load_backtest_data_df_compatibility(df: pd.DataFrame) -> pd.DataFrame:
         df["max_stake_amount"] = df["stake_amount"]
     if "orders" not in df.columns:
         df["orders"] = None
+    if "funding_fees" not in df.columns:
+        df["funding_fees"] = 0.0
     return df
 
 
-def load_backtest_data(filename: Path | str, strategy: str | None = None) -> pd.DataFrame:
+def load_backtest_data(
+    file_or_directory: Path | str, strategy: str | None = None, filename: Path | str | None = None
+) -> pd.DataFrame:
     """
-    Load backtest data file.
-    :param filename: pathlib.Path object, or string pointing to a file or directory
+    Load backtest data file, returns a dataframe with the individual trades.
+    :param file_or_directory: pathlib.Path object, or string pointing to the directory,
+        or absolute/relative path to the backtest results file.
     :param strategy: Strategy to load - mainly relevant for multi-strategy backtests
                      Can also serve as protection to load the correct result.
+    :param filename: Optional filename to load from (if different from the main filename).
+        Only valid when loading from a directory.
     :return: a dataframe with the analysis results
     :raise: ValueError if loading goes wrong.
     """
-    data = load_backtest_stats(filename)
+    data = load_backtest_stats(file_or_directory, filename)
     if not isinstance(data, list):
         # new, nested format
         if "strategy" not in data:
@@ -427,20 +477,23 @@ def load_file_from_zip(zip_path: Path, filename: str) -> bytes:
         raise ValueError(f"Bad zip file: {zip_path}.") from None
 
 
-def load_backtest_analysis_data(backtest_dir: Path, name: str):
+def load_backtest_analysis_data(
+    file_or_directory: Path,
+    name: Literal["signals", "rejected", "exited"],
+    filename: Path | str | None = None,
+):
     """
     Load backtest analysis data either from a pickle file or from within a zip file
-    :param backtest_dir: Directory containing backtest results
+    :param file_or_directory: pathlib.Path object, or string pointing to the directory,
+        or absolute/relative path to the backtest results file.
     :param name: Name of the analysis data to load (signals, rejected, exited)
+    :param filename: Optional filename to load from (if different from the main filename).
+        Only valid when loading from a directory.
     :return: Analysis data
     """
     import joblib
 
-    if backtest_dir.is_dir():
-        lbf = Path(get_latest_backtest_filename(backtest_dir))
-        zip_path = backtest_dir / lbf
-    else:
-        zip_path = backtest_dir
+    zip_path = _normalize_filename(file_or_directory, filename)
 
     if zip_path.suffix == ".zip":
         # Load from zip file
@@ -455,10 +508,10 @@ def load_backtest_analysis_data(backtest_dir: Path, name: str):
 
     else:
         # Load from separate pickle file
-        if backtest_dir.is_dir():
-            scpf = Path(backtest_dir, f"{zip_path.stem}_{name}.pkl")
+        if file_or_directory.is_dir():
+            scpf = Path(file_or_directory, f"{zip_path.stem}_{name}.pkl")
         else:
-            scpf = Path(backtest_dir.parent / f"{backtest_dir.stem}_{name}.pkl")
+            scpf = Path(file_or_directory.parent / f"{file_or_directory.stem}_{name}.pkl")
 
         try:
             with scpf.open("rb") as scp:
@@ -470,86 +523,19 @@ def load_backtest_analysis_data(backtest_dir: Path, name: str):
             return None
 
 
-def load_rejected_signals(backtest_dir: Path):
-    """
-    Load rejected signals from backtest directory
-    """
-    return load_backtest_analysis_data(backtest_dir, "rejected")
-
-
-def load_signal_candles(backtest_dir: Path):
-    """
-    Load signal candles from backtest directory
-    """
-    return load_backtest_analysis_data(backtest_dir, "signals")
-
-
-def load_exit_signal_candles(backtest_dir: Path) -> dict[str, dict[str, pd.DataFrame]]:
-    """
-    Load exit signal candles from backtest directory
-    """
-    return load_backtest_analysis_data(backtest_dir, "exited")
-
-
-def analyze_trade_parallelism(results: pd.DataFrame, timeframe: str) -> pd.DataFrame:
-    """
-    Find overlapping trades by expanding each trade once per period it was open
-    and then counting overlaps.
-    :param results: Results Dataframe - can be loaded
-    :param timeframe: Timeframe used for backtest
-    :return: dataframe with open-counts per time-period in timeframe
-    """
-    from freqtrade.exchange import timeframe_to_resample_freq
-
-    timeframe_freq = timeframe_to_resample_freq(timeframe)
-    dates = [
-        pd.Series(
-            pd.date_range(
-                row[1]["open_date"],
-                row[1]["close_date"],
-                freq=timeframe_freq,
-                # Exclude right boundary - the date is the candle open date.
-                inclusive="left",
-            )
-        )
-        for row in results[["open_date", "close_date"]].iterrows()
-    ]
-    deltas = [len(x) for x in dates]
-    dates = pd.Series(pd.concat(dates).values, name="date")
-    df2 = pd.DataFrame(np.repeat(results.values, deltas, axis=0), columns=results.columns)
-
-    df2 = pd.concat([dates, df2], axis=1)
-    df2 = df2.set_index("date")
-    df_final = df2.resample(timeframe_freq)[["pair"]].count()
-    df_final = df_final.rename({"pair": "open_trades"}, axis=1)
-    return df_final
-
-
-def evaluate_result_multi(
-    results: pd.DataFrame, timeframe: str, max_open_trades: IntOrInf
+def trade_list_to_dataframe(
+    trades: list[Trade] | list[LocalTrade], *, minified: bool = True
 ) -> pd.DataFrame:
-    """
-    Find overlapping trades by expanding each trade once per period it was open
-    and then counting overlaps
-    :param results: Results Dataframe - can be loaded
-    :param timeframe: Frequency used for the backtest
-    :param max_open_trades: parameter max_open_trades used during backtest run
-    :return: dataframe with open-counts per time-period in freq
-    """
-    df_final = analyze_trade_parallelism(results, timeframe)
-    return df_final[df_final["open_trades"] > max_open_trades]
-
-
-def trade_list_to_dataframe(trades: list[Trade] | list[LocalTrade]) -> pd.DataFrame:
     """
     Convert list of Trade objects to pandas Dataframe
     :param trades: List of trade objects
+    :param minified: Whether to use minified version of trade JSON
     :return: Dataframe with BT_DATA_COLUMNS
     """
-    df = pd.DataFrame.from_records([t.to_json(True) for t in trades], columns=BT_DATA_COLUMNS)
+    df = pd.DataFrame.from_records([t.to_json(minified) for t in trades], columns=BT_DATA_COLUMNS)
     if len(df) > 0:
-        df["close_date"] = pd.to_datetime(df["close_date"], utc=True)
-        df["open_date"] = pd.to_datetime(df["open_date"], utc=True)
+        df["close_date"] = pd.to_datetime(df["close_timestamp"], unit="ms", utc=True)
+        df["open_date"] = pd.to_datetime(df["open_timestamp"], unit="ms", utc=True)
         df["close_rate"] = df["close_rate"].astype("float64")
     return df
 
@@ -616,22 +602,3 @@ def extract_trades_of_period(
         (trades["open_date"] >= trades_start) & (trades["close_date"] <= trades_stop)
     ]
     return trades
-
-
-def get_tick_size_over_time(data: pd.DataFrame) -> pd.Series:
-    """Compute tick size from OHLCV close-price diffs, indexed by date."""
-    if "date" in data.columns:
-        idx = pd.DatetimeIndex(data["date"])
-    else:
-        idx = pd.DatetimeIndex(data.index)
-    if data.empty or len(data) < 2:
-        return pd.Series(dtype=float, index=idx)
-    closes = data["close"].dropna()
-    if len(closes) < 2:
-        return pd.Series(dtype=float, index=idx)
-    diffs = closes.diff().abs()
-    diffs = diffs[diffs > 0]
-    if diffs.empty:
-        return pd.Series(dtype=float, index=idx)
-    tick = float(diffs.min())
-    return pd.Series(tick, index=idx)

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freqtrade-local"
+version = "0.1.0"
+description = "Local overlay package for custom freqtrade extensions"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "freqtrade>=2026.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+freqtrade-edge = "freqtrade_local.commands.edge:start_edge"
+freqtrade-binance-migrate = "freqtrade_local.commands.binance_migrate:start_migrate_binance_futures"
+freqtrade-walkforward = "freqtrade_local.commands.walkforward:start_walkforward"
+freqtrade-lab = "freqtrade_local.commands.lab:start_lab"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+freqtrade_local = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "UP"]
+
+[tool.ruff.format]
+indent-style = "space"
+line-ending = "lf"

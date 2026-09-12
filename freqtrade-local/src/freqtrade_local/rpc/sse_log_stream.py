@@ -13,7 +13,6 @@ from typing import Any
 from aiohttp import web
 from aiohttp.web import Request, StreamResponse
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -105,7 +104,7 @@ class SSELogStream:
                 try:
                     entry = await asyncio.wait_for(client_queue.get(), timeout=30.0)
                     await response.write(f"data: {json.dumps(entry)}\n\n".encode())
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     # Send heartbeat comment to keep connection alive
                     await response.write(b": heartbeat\n\n")
         except (asyncio.CancelledError, ConnectionResetError):
@@ -157,7 +156,9 @@ class SSELogHandler(logging.Handler):
             self.handleError(record)
 
 
-def setup_sse_logging(config: dict[str, Any], sse_stream: SSELogStream) -> SSELogHandler:
+def setup_sse_logging(
+    config: dict[str, Any], sse_stream: SSELogStream
+) -> SSELogHandler:
     """Set up SSE logging handler on root logger."""
     handler = SSELogHandler(sse_stream)
     handler.setLevel(logging.DEBUG)

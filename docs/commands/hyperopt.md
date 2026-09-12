@@ -1,21 +1,25 @@
 ``` output
 usage: freqtrade hyperopt [-h] [-v] [--no-color] [--logfile FILE] [-V]
-                          [-c PATH] [-d PATH] [--userdir PATH] [-s NAME]
-                          [--strategy-path PATH] [--recursive-strategy-search]
-                          [--freqaimodel NAME] [--freqaimodel-path PATH]
-                          [-i TIMEFRAME] [--timerange TIMERANGE]
-                          [--data-format-ohlcv {json,jsongz,feather,parquet}]
-                          [--max-open-trades INT]
-                          [--stake-amount STAKE_AMOUNT] [--fee FLOAT]
-                          [-p PAIRS [PAIRS ...]] [--hyperopt-path PATH]
-                          [--eps] [--enable-protections]
-                          [--dry-run-wallet DRY_RUN_WALLET]
-                          [--timeframe-detail TIMEFRAME_DETAIL] [-e INT]
-                          [--spaces SPACES [SPACES ...]] [--print-all]
-                          [--print-json] [-j JOBS] [--random-state INT]
-                          [--min-trades INT] [--hyperopt-loss NAME]
-                          [--disable-param-export] [--ignore-missing-spaces]
-                          [--analyze-per-epoch] [--early-stop INT]
+                           [-c PATH] [-d PATH] [--userdir PATH] [-s NAME]
+                           [--strategy-path PATH] [--recursive-strategy-search]
+                           [--freqaimodel NAME] [--freqaimodel-path PATH]
+                           [-i TIMEFRAME] [--timerange TIMERANGE]
+                           [--data-format-ohlcv {json,jsongz,feather,parquet}]
+                           [--max-open-trades INT]
+                           [--stake-amount STAKE_AMOUNT] [--fee FLOAT]
+                           [-p PAIRS [PAIRS ...]] [--hyperopt-path PATH]
+                           [--eps] [--enable-protections]
+                           [--dry-run-wallet DRY_RUN_WALLET]
+                           [--timeframe-detail TIMEFRAME_DETAIL] [-e INT]
+                           [--spaces SPACES [SPACES ...]] [--print-all]
+                           [--print-json] [-j JOBS] [--random-state INT]
+                           [--min-trades INT] [--hyperopt-loss NAME]
+                           [--disable-param-export] [--ignore-missing-spaces]
+                           [--analyze-per-epoch] [--early-stop INT]
+                           [--hyperopt-fibonacci-target INT]
+                           [--hyperopt-initial-points INT]
+                           [--hyperopt-space-reduction FLOAT]
+                           [--hyperopt-estimator {GP,RF,ET,GBRT}]
 
 options:
   -h, --help            show this help message and exit
@@ -97,6 +101,17 @@ options:
   --analyze-per-epoch   Run populate_indicators once per epoch.
   --early-stop INT      Early stop hyperopt if no improvement after (default:
                         0) epochs.
+  --hyperopt-fibonacci-target INT
+                        Fibonacci target number for multi-stage optimization
+                        (must be a Fibonacci number >= 34, default: 34).
+  --hyperopt-initial-points INT
+                        Number of initial random points before Bayesian
+                        optimization (default: 10).
+  --hyperopt-space-reduction FLOAT
+                        Space reduction factor per stage (0.01-0.5, default:
+                        0.15).
+  --hyperopt-estimator {GP,RF,ET,GBRT}
+                        Estimator for Bayesian optimization (default: ET).
 
 Common arguments:
   -v, --verbose         Verbose mode (-vv for more, -vvv to get all messages).

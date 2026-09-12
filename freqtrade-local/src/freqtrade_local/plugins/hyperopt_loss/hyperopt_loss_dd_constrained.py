@@ -15,10 +15,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pandas import DataFrame
-
 from freqtrade.data.metrics import calculate_max_drawdown
 from freqtrade.optimize.hyperopt import IHyperOptLoss
+from pandas import DataFrame
 
 
 class DrawdownConstrainedHyperOptLoss(IHyperOptLoss):
@@ -48,7 +47,9 @@ class DrawdownConstrainedHyperOptLoss(IHyperOptLoss):
         except ValueError:
             return -total_profit
 
-        starting = float(backtest_stats.get("starting_balance", starting_balance or 0.0))
+        starting = float(
+            backtest_stats.get("starting_balance", starting_balance or 0.0)
+        )
         if starting > 0:
             max_dd_frac = max_dd_abs / starting
         else:

@@ -831,8 +831,124 @@ class MyAwesomeStrategy(IStrategy):
 ```
 
 !!! Note "using print"
-    Messages printed via `print()` will not be shown in the hyperopt output unless parallelism is disabled (`-j 1`). 
+    Messages printed via `print()` will not be shown in the hyperopt output unless parallelism is disabled (`-j 1`).
     It is recommended to use the `logging` module instead.
+
+## Fibonacci Stepping Mode (Multi-Stage Optimization)
+
+Fibonacci Stepping is an advanced multi-stage hyperopt mode that progressively narrows the search space across three stages, using Fibonacci-numbered trial budgets. This approach combines broad exploration with focused exploitation for more efficient optimization.
+
+### How It Works
+
+Fibonacci Stepping allocates trials across four phases using Fibonacci numbers:
+
+| Phase | Trials | Search Space | Description |
+|-------|--------|--------------|-------------|
+| **Initialization** | `n_initial` (default: 10) | Full | Random exploration to seed the optimizer |
+| **Stage 1** | `F_n - n_initial` | Full | Bayesian optimization on full space |
+| **Stage 2** | `F_{n-1}` | Reduced (top `F_{n-1}` from Stage 1) | Focused optimization on promising regions |
+| **Stage 3** | `F_{n-2}` | Further reduced (top `F_{n-2}` from Stage 2) | Fine-tuning in best regions |
+
+**Example with `F_n=34`, `n_initial=10`:**
+- Init: 10 trials (random)
+- Stage 1: 24 trials (full space)
+- Stage 2: 21 trials (reduced from top 21)
+- Stage 3: 13 trials (further reduced from top 13)
+- **Total: 68 trials**
+
+The search space is reduced between stages by narrowing parameter bounds around the best results from the previous stage. Categorical parameters keep only categories that appeared in top results.
+
+### Configuration
+
+Enable via config file (`hyperopt_fibonacci` section) or CLI arguments:
+
+```json
+{
+  "hyperopt_fibonacci": {
+    "enabled": true,
+    "target": 34,
+    "initial_points": 10,
+    "space_reduction": 0.15,
+    "estimator": "ET"
+  }
+}
+```
+
+| Parameter | Description | Default | Valid Range |
+|-----------|-------------|---------|-------------|
+| `enabled` | Enable Fibonacci mode | `false` | `true`/`false` |
+| `target` | Fibonacci target (F_n) | 34 | Fibonacci number ≥ 34 (34, 55, 89, 144, ...) |
+| `initial_points` | Initial random trials | 10 | ≥ 1, must leave ≥ 5 for Stage 1 |
+| `space_reduction` | Reduction factor per stage | 0.15 | 0.01 - 0.5 |
+| `estimator` | Bayesian optimizer | "ET" | GP, RF, ET, GBRT |
+
+**Valid Fibonacci targets (≥ 34):** 34, 55, 89, 144, 233, 377, 610, 987, ...
+
+### CLI Usage
+
+Fibonacci mode auto-activates when any Fibonacci argument is provided:
+
+```bash
+# Basic Fibonacci mode (uses defaults: target=34, initial=10)
+freqtrade hyperopt --strategy MyStrategy --config config.json --hyperopt-fibonacci-target 34
+
+# Custom Fibonacci configuration
+freqtrade hyperopt \
+  --strategy MyStrategy \
+  --config config.json \
+  --hyperopt-fibonacci-target 55 \
+  --hyperopt-initial-points 15 \
+  --hyperopt-space-reduction 0.2 \
+  --hyperopt-estimator RF \
+  --spaces all \
+  --hyperopt-loss SharpeHyperOptLossDaily
+```
+
+!!! Warning "Mutual Exclusion"
+    `--epochs` and Fibonacci mode are mutually exclusive. Fibonacci mode calculates its own trial budget from the Fibonacci target. Using both will raise a configuration error.
+
+### Output
+
+Fibonacci mode adds stage information to epoch results:
+
+```
+============================================================
+STAGE 1: FULL SPACE BAYESIAN OPTIMIZATION
+============================================================
+   34/34:  156 trades. Avg profit  0.62%. Total profit  0.0421 BTC. Objective: 1.8234
+
+============================================================
+STAGE 2: REDUCED SPACE BAYESIAN OPTIMIZATION
+============================================================
+   55/55:  142 trades. Avg profit  0.71%. Total profit  0.0487 BTC. Objective: 1.6542
+
+============================================================
+STAGE 3: REFINED SPACE BAYESIAN OPTIMIZATION
+============================================================
+   68/68:  138 trades. Avg profit  0.75%. Total profit  0.0512 BTC. Objective: 1.5891
+
+Fibonacci Hyperopt Summary:
+  Initialization: 10 epochs
+  Stage 1 (Full Space): 24 epochs
+  Stage 2 (Reduced Space): 21 epochs
+  Stage 3 (Refined Space): 13 epochs
+```
+
+Result files (`.fthypt`) include `stage` and `stage_epoch` fields for each epoch, compatible with `hyperopt-list` and `hyperopt-show`.
+
+### When to Use
+
+- **Large search spaces**: When optimizing many parameters simultaneously
+- **Expensive evaluations**: When each backtest takes significant time
+- **Avoiding local optima**: Multi-stage approach explores broadly then exploits
+- **Walk-forward optimization**: Each training window benefits from focused search
+
+### Limitations
+
+- **No early stopping**: All stages run to completion
+- **No resume**: Interrupted runs cannot be resumed mid-stage
+- **Single estimator**: All stages use the same estimator (ET by default)
+- **FreqAI not supported**: Cannot be used with FreqAI strategies
 
 ## Validate backtesting results
 

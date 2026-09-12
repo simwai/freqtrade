@@ -113,9 +113,7 @@ class CustomDataWrapper:
 
     @staticmethod
     def delete_custom_data(trade_id: int) -> None:
-        _CustomData.session.execute(
-            select(_CustomData).filter(_CustomData.ft_trade_id == trade_id)
-        ).delete()
+        _CustomData.session.query(_CustomData).filter(_CustomData.ft_trade_id == trade_id).delete()
         _CustomData.session.commit()
 
     @staticmethod

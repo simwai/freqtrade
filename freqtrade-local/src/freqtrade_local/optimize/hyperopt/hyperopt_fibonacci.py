@@ -15,14 +15,14 @@ from pathlib import Path
 from typing import Any
 
 import rapidjson
-from joblib import Parallel, cpu_count, delayed, wrap_non_picklable_objects
-
 from freqtrade.constants import FTHYPT_FILEVERSION, LAST_BT_RESULT_FN, Config
 from freqtrade.enums import HyperoptState
 from freqtrade.exceptions import OperationalException
 from freqtrade.misc import file_dump_json, plural
-from freqtrade.optimize.hyperopt.fibonacci_stepping import FibonacciStepping
-from freqtrade.optimize.hyperopt.hyperopt_logger import logging_mp_handle, logging_mp_setup
+from freqtrade.optimize.hyperopt.hyperopt_logger import (
+    logging_mp_handle,
+    logging_mp_setup,
+)
 from freqtrade.optimize.hyperopt.hyperopt_optimizer import HyperOptimizer
 from freqtrade.optimize.hyperopt.hyperopt_output import HyperoptOutput
 from freqtrade.optimize.hyperopt_tools import (
@@ -31,7 +31,11 @@ from freqtrade.optimize.hyperopt_tools import (
     hyperopt_serializer,
 )
 from freqtrade.util import get_progress_tracker
+from joblib import Parallel, cpu_count, delayed, wrap_non_picklable_objects
 
+from freqtrade_local.optimize.hyperopt.fibonacci_stepping import (  # type: ignore[import]
+    FibonacciStepping,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -60,15 +64,17 @@ class FibonacciHyperopt:
 
         if self.config.get("hyperopt"):
             raise OperationalException(
-                "Using separate Hyperopt files has been removed in 2021.9. Please convert "
-                "your existing Hyperopt file to the new Hyperoptable strategy interface"
+                "Using separate Hyperopt files has been removed in 2021.9. "
+                "Please convert your existing Hyperopt file to the new "
+                "Hyperoptable strategy interface"
             )
 
         time_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         strategy = str(self.config["strategy"])
         results_dir = Path(
             self.config.get(
-                "hyperopt_results_dir", self.config["user_data_dir"] / "hyperopt_results"
+                "hyperopt_results_dir",
+                self.config["user_data_dir"] / "hyperopt_results",
             )
         )
         results_dir.mkdir(parents=True, exist_ok=True)
@@ -147,7 +153,9 @@ class FibonacciHyperopt:
         )
         # Store hyperopt filename
         latest_filename = Path.joinpath(self.results_file.parent, LAST_BT_RESULT_FN)
-        file_dump_json(latest_filename, {"latest_hyperopt": str(self.results_file.name)}, log=False)
+        file_dump_json(
+            latest_filename, {"latest_hyperopt": str(self.results_file.name)}, log=False
+        )
 
     def print_results(self, results: dict[str, Any]) -> None:
         """
@@ -163,18 +171,23 @@ class FibonacciHyperopt:
                 self.print_all,
             )
 
-    def run_optimizer_parallel(self, parallel: Parallel, asked: list[list]) -> list[dict[str, Any]]:
+    def run_optimizer_parallel(
+        self, parallel: Parallel, asked: list[list]
+    ) -> list[dict[str, Any]]:
         """Start optimizer in a parallel way"""
 
         def optimizer_wrapper(*args, **kwargs):
             # global log queue. This must happen in the file that initializes Parallel
             logging_mp_setup(
-                log_queue, logging.INFO if self.config["verbosity"] < 1 else logging.DEBUG
+                log_queue,
+                logging.INFO if self.config["verbosity"] < 1 else logging.DEBUG,
             )
 
             return self.hyperopter.generate_optimizer(*args, **kwargs)
 
-        return parallel(delayed(wrap_non_picklable_objects(optimizer_wrapper))(v) for v in asked)
+        return parallel(
+            delayed(wrap_non_picklable_objects(optimizer_wrapper))(v) for v in asked
+        )
 
     def _set_random_state(self, random_state: int | None) -> int:
         return random_state or random.randint(1, 2**16 - 1)  # noqa: S311
@@ -187,8 +200,10 @@ class FibonacciHyperopt:
         1. Try to get points using `self.opt.ask` first
         2. Discard the points that have already been evaluated
         3. Retry using `self.opt.ask` up to 3 times
-        4. If still some points are missing in respect to `n_points`, random sample some points
-        5. Repeat until at least `n_points` points in the `asked_non_tried` list
+        4. If still some points are missing in respect to `n_points`,
+           random sample some points
+        5. Repeat until at least `n_points` points in the
+           `asked_non_tried` list
         6. Return a list with length truncated at `n_points`
         """
 
@@ -205,7 +220,9 @@ class FibonacciHyperopt:
         while i < 5 and len(asked_non_tried) < n_points:
             if i < 3:
                 self.opt.cache_ = {}
-                asked = unique_list(self.opt.ask(n_points=n_points * 5 if i > 0 else n_points))
+                asked = unique_list(
+                    self.opt.ask(n_points=n_points * 5 if i > 0 else n_points)
+                )
                 is_random = [False for _ in range(len(asked))]
             else:
                 asked = unique_list(self.opt.space.rvs(n_samples=n_points * 5))
@@ -282,10 +299,12 @@ class FibonacciHyperopt:
         Run a single optimization stage.
 
         Args:
-            stage_name: Name of the stage (init, stage1_full, stage2_reduced, stage3_refined)
+            stage_name: Name of the stage
+                (init, stage1_full, stage2_reduced, stage3_refined)
             n_trials: Number of trials for this stage
             parallel: joblib Parallel instance
-            is_first_stage: Whether this is the first stage (for analyze_per_epoch handling)
+            is_first_stage: Whether this is the first stage
+                (for analyze_per_epoch handling)
 
         Returns:
             List of epoch results for this stage
@@ -303,14 +322,17 @@ class FibonacciHyperopt:
 
         try:
             with get_progress_tracker(cust_callables=[self._hyper_out]) as pbar:
-                task = pbar.add_task(f"{stage_info.get('name', stage_name)}", total=n_trials)
+                task = pbar.add_task(
+                    f"{stage_info.get('name', stage_name)}", total=n_trials
+                )
 
                 start = 0
 
                 # Handle analyze_per_epoch for first stage only
                 if is_first_stage and self.analyze_per_epoch:
-                    # First analysis not in parallel mode when using --analyze-per-epoch.
-                    # This allows dataprovider to load it's informative cache.
+                    # First analysis not in parallel mode when using
+                    # --analyze-per-epoch. This allows dataprovider to
+                    # load it's informative cache.
                     asked, is_random = self.get_asked_points(n_points=1)
                     f_val0 = self.hyperopter.generate_optimizer(asked[0])  # type: ignore[arg-type]
                     self.opt.tell(asked, [f_val0["loss"]])
@@ -344,7 +366,8 @@ class FibonacciHyperopt:
             raise
 
         logger.info(
-            f"Completed {stage_info.get('name', stage_name)}: {len(stage_results)} epochs saved."
+            f"Completed {stage_info.get('name', stage_name)}: "
+            f"{len(stage_results)} epochs saved."
         )
 
         return stage_results
@@ -360,7 +383,9 @@ class FibonacciHyperopt:
         # Get current stage results
         current_results = self.stage_results.get(stage_name, [])
         if not current_results:
-            logger.warning(f"No results for stage {stage_name}, skipping space reduction")
+            logger.warning(
+                f"No results for stage {stage_name}, skipping space reduction"
+            )
             return
 
         # Sort by loss (best first)
@@ -375,14 +400,19 @@ class FibonacciHyperopt:
             return
 
         # Reduce space
-        logger.info(f"Reducing search space for next stage based on top {k} results")
+        logger.info(
+            f"Reducing search space for next stage based on top {k} results"
+        )
         new_dimensions = self.fib_stepping.reduce_space(
             self.hyperopter.dimensions, sorted_results, k
         )
 
         # Reset optimizer with new dimensions
-        logger.info(f"Resetting optimizer with {len(new_dimensions)} dimensions")
-        # Note: HyperOptimizer does not have reset_optimizer; dimensions are updated in-place below
+        logger.info(
+            f"Resetting optimizer with {len(new_dimensions)} dimensions"
+        )
+        # Note: HyperOptimizer does not have reset_optimizer;
+        # dimensions are updated in-place below
 
         # Update our reference
         self.opt = self.hyperopter.get_optimizer(
@@ -397,15 +427,23 @@ class FibonacciHyperopt:
             Best epoch result across all stages, or None if interrupted.
         """
         self.interrupted = False
-        self.random_state = self._set_random_state(self.config.get("hyperopt_random_state"))
-        logger.info(f"Using optimizer random state: {self.random_state}")
+        self.random_state = self._set_random_state(
+            self.config.get("hyperopt_random_state")
+        )
+        logger.info(
+            f"Using optimizer random state: {self.random_state}"
+        )
         self.hyperopt_table_header = -1
         self.hyperopter.prepare_hyperopt()
 
         cpus = cpu_count()
-        logger.info(f"Found {cpus} CPU cores. Let's make them scream!")
+        logger.info(
+            f"Found {cpus} CPU cores. Let's make them scream!"
+        )
         config_jobs = self.config.get("hyperopt_jobs", -1)
-        logger.info(f"Number of parallel jobs set as: {config_jobs}")
+        logger.info(
+            f"Number of parallel jobs set as: {config_jobs}"
+        )
 
         # Create initial optimizer
         self.opt = self.hyperopter.get_optimizer(
@@ -416,7 +454,9 @@ class FibonacciHyperopt:
         try:
             with Parallel(n_jobs=config_jobs) as parallel:
                 jobs = parallel._effective_n_jobs()
-                logger.info(f"Effective number of parallel workers used: {jobs}")
+                logger.info(
+                    f"Effective number of parallel workers used: {jobs}"
+                )
 
                 # Stage 0: Initialization (random trials)
                 if self.stage_budgets["init"] > 0:
@@ -424,7 +464,10 @@ class FibonacciHyperopt:
                     logger.info("STAGE 0: INITIALIZATION (Random Exploration)")
                     logger.info("=" * 60)
                     self._run_stage(
-                        "init", self.stage_budgets["init"], parallel, is_first_stage=True
+                        "init",
+                        self.stage_budgets["init"],
+                        parallel,
+                        is_first_stage=True,
                     )
 
                 # Stage 1: Full space Bayesian optimization
@@ -432,7 +475,9 @@ class FibonacciHyperopt:
                     logger.info("=" * 60)
                     logger.info("STAGE 1: FULL SPACE BAYESIAN OPTIMIZATION")
                     logger.info("=" * 60)
-                    self._run_stage("stage1_full", self.stage_budgets["stage1_full"], parallel)
+                    self._run_stage(
+                        "stage1_full", self.stage_budgets["stage1_full"], parallel
+                    )
 
                     # Prepare reduced space for Stage 2
                     self._prepare_next_stage_space("stage1_full")
@@ -443,7 +488,9 @@ class FibonacciHyperopt:
                     logger.info("STAGE 2: REDUCED SPACE BAYESIAN OPTIMIZATION")
                     logger.info("=" * 60)
                     self._run_stage(
-                        "stage2_reduced", self.stage_budgets["stage2_reduced"], parallel
+                        "stage2_reduced",
+                        self.stage_budgets["stage2_reduced"],
+                        parallel,
                     )
 
                     # Prepare further reduced space for Stage 3
@@ -455,7 +502,9 @@ class FibonacciHyperopt:
                     logger.info("STAGE 3: REFINED SPACE BAYESIAN OPTIMIZATION")
                     logger.info("=" * 60)
                     self._run_stage(
-                        "stage3_refined", self.stage_budgets["stage3_refined"], parallel
+                        "stage3_refined",
+                        self.stage_budgets["stage3_refined"],
+                        parallel,
                     )
 
         except KeyboardInterrupt:
@@ -482,11 +531,14 @@ class FibonacciHyperopt:
             )
 
             HyperoptTools.show_epoch_details(
-                self.current_best_epoch, self.stage_budgets["total"], self.print_json
+                self.current_best_epoch,
+                self.stage_budgets["total"],
+                self.print_json,
             )
         elif self.num_epochs_saved > 0:
             print(
-                f"No good result found for given optimization function in {self.num_epochs_saved} "
+                f"No good result found for given optimization function "
+                f"in {self.num_epochs_saved} "
                 f"{plural(self.num_epochs_saved, 'epoch')}."
             )
         else:

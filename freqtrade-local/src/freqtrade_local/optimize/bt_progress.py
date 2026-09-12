@@ -23,10 +23,17 @@ class BTProgress:
     @property
     def progress(self):
         """
-        Get progress as ratio, capped to be between 0 and 1 (to avoid small calculation errors).
+        Get progress as ratio, capped to be between 0 and 1
+        (to avoid small calculation errors).
         """
         return max(
-            min(round(self._progress / self._max_steps, 5) if self._max_steps > 0 else 0, 1), 0
+            min(
+                round(self._progress / self._max_steps, 5)
+                if self._max_steps > 0
+                else 0,
+                1,
+            ),
+            0,
         )
 
     @property

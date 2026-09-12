@@ -1,8 +1,5 @@
 """Freqtrade bot"""
 
-# Python 3.10 compatibility - MUST be first import
-from freqtrade import _compat  # noqa: F401, E402
-
 __version__ = "2026.9-dev"
 
 if "dev" in __version__:

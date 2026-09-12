@@ -4,7 +4,7 @@ This module contains the argument manager class
 
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Self
 
 from freqtrade.constants import DATETIME_PRINT_FORMAT
@@ -170,7 +170,7 @@ class TimeRange:
             if fmt is None:
                 # Epoch - in seconds (10 digits) or milliseconds (13 digits)
                 return int(text) // 1000 if len(text) == 13 else int(text)
-            return int(datetime.strptime(text, fmt).replace(tzinfo=timezone.utc).timestamp())
+            return int(datetime.strptime(text, fmt).replace(tzinfo=UTC).timestamp())
         raise ValueError(f'Invalid timerange value "{text}"')
 
     @classmethod

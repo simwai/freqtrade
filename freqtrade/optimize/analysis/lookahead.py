@@ -114,11 +114,11 @@ class LookaheadAnalysis(BaseAnalysis):
         )
         prepare_data_config["exchange"]["pair_whitelist"] = pairs_to_load
 
-        if self._fee is not None:  # type: ignore[has-type]
+        if self._fee is not None:
             # Don't re-calculate fee per pair, as fee might differ per pair.
-            prepare_data_config["fee"] = self._fee  # type: ignore[has-type]
+            prepare_data_config["fee"] = self._fee
 
-        backtesting = Backtesting(prepare_data_config, self.exchange)  # type: ignore[has-type]
+        backtesting = Backtesting(prepare_data_config, self.exchange)
         self.exchange = backtesting.exchange
         self.local_config["candle_type_def"] = prepare_data_config["candle_type_def"]
         self._fee = backtesting.fee

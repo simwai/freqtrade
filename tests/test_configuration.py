@@ -1614,7 +1614,8 @@ def test_remove_exchange_credentials(default_conf) -> None:
     assert conf["exchange"]["secret"] is not None
 
     remove_exchange_credentials(conf["exchange"], True)
-    assert conf["exchange"]["api_key"] is None
-    assert conf["exchange"]["secret"] is None
-    assert conf["exchange"].get("password") is None
-    assert conf["exchange"].get("uid") is None
+    # Keys should be deleted, not set to None
+    assert "api_key" not in conf["exchange"]
+    assert "secret" not in conf["exchange"]
+    assert "password" not in conf["exchange"]
+    assert "uid" not in conf["exchange"]

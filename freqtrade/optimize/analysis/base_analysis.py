@@ -1,17 +1,14 @@
-from __future__ import annotations
-
 import logging
+from abc import abstractmethod
 from copy import deepcopy
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
+from datetime import UTC, datetime
+from typing import Any
 
 from pandas import DataFrame
 
 from freqtrade.configuration import TimeRange
+from freqtrade.util import CustomProgress
 
-
-if TYPE_CHECKING:
-    from freqtrade.exchange.exchange import Exchange
 
 logger = logging.getLogger(__name__)
 
@@ -22,23 +19,18 @@ class VarHolder:
     indicators: dict[str, DataFrame]
     result: DataFrame
     compared: DataFrame
-    compared_dt: datetime
     from_dt: datetime
     to_dt: datetime
+    compared_dt: datetime
     timeframe: str
     startup_candle: int
-    current_progress: int
-    total_signals: int
 
 
 class BaseAnalysis:
-    exchange: Exchange | None = None
-    _fee: float | None = None
-
     def __init__(self, config: dict[str, Any], strategy_obj: dict):
         self.failed_bias_check = True
         self.full_varHolder = VarHolder()
-        self.exchange = None
+        self.exchange: Any | None = None
         self._fee = None
 
         # pull variables the scope of the lookahead_analysis-instance
@@ -48,7 +40,7 @@ class BaseAnalysis:
 
     @staticmethod
     def dt_to_timestamp(dt: datetime):
-        timestamp = int(dt.replace(tzinfo=timezone.utc).timestamp())
+        timestamp = int(dt.replace(tzinfo=UTC).timestamp())
         return timestamp
 
     def fill_full_varholder(self):
@@ -58,20 +50,17 @@ class BaseAnalysis:
         parsed_timerange = TimeRange.parse_timerange(self.local_config["timerange"])
 
         if parsed_timerange.startdt is None:
-            self.full_varHolder.from_dt = datetime.fromtimestamp(0, tz=timezone.utc)
+            self.full_varHolder.from_dt = datetime.fromtimestamp(0, tz=UTC)
         else:
             self.full_varHolder.from_dt = parsed_timerange.startdt
 
         if parsed_timerange.stopdt is None:
-            self.full_varHolder.to_dt = datetime.now(timezone.utc)
+            self.full_varHolder.to_dt = datetime.now(UTC)
         else:
             self.full_varHolder.to_dt = parsed_timerange.stopdt
 
         self.prepare_data(self.full_varHolder, self.local_config["pairs"])
 
-    def start(self) -> None:
-        # first make a single backtest
-        self.fill_full_varholder()
-
-    def prepare_data(self, varholder, pairs):
-        pass
+    @abstractmethod
+    def start(self, progress: CustomProgress) -> None:
+        """Start the analysis."""

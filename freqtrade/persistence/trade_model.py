@@ -6,7 +6,7 @@ import logging
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from math import isclose
 from typing import Any, ClassVar, Optional, Self, cast
 
@@ -120,12 +120,12 @@ class Order(ModelBase):
     @property
     def order_date_utc(self) -> datetime:
         """Order-date with UTC timezoneinfo"""
-        return self.order_date.replace(tzinfo=timezone.utc)
+        return self.order_date.replace(tzinfo=UTC)
 
     @property
     def order_filled_utc(self) -> datetime | None:
         """last order-date with UTC timezoneinfo"""
-        return self.order_filled_date.replace(tzinfo=timezone.utc) if self.order_filled_date else None
+        return self.order_filled_date.replace(tzinfo=UTC) if self.order_filled_date else None
 
     @property
     def safe_amount(self) -> float:
@@ -226,7 +226,7 @@ class Order(ModelBase):
                 self.order_filled_date = dt_from_ts(
                     safe_value_fallback(order, "lastTradeTimestamp", default_value=dt_ts())
                 )
-        self.order_update_date = datetime.now(timezone.utc)
+        self.order_update_date = datetime.now(UTC)
 
     def to_ccxt_object(self, stopPriceName: str = "stopPrice") -> dict[str, Any]:
         order: dict[str, Any] = {
@@ -283,7 +283,7 @@ class Order(ModelBase):
                         self.order_date.strftime(DATETIME_PRINT_FORMAT) if self.order_date else None
                     ),
                     "order_timestamp": (
-                        int(self.order_date.replace(tzinfo=timezone.utc).timestamp() * 1000)
+                        int(self.order_date.replace(tzinfo=UTC).timestamp() * 1000)
                         if self.order_date
                         else None
                     ),
@@ -534,7 +534,7 @@ class LocalTrade:
 
     @property
     def open_date_utc(self):
-        return self.open_date.replace(tzinfo=timezone.utc)
+        return self.open_date.replace(tzinfo=UTC)
 
     @property
     def stoploss_last_update_utc(self):
@@ -544,7 +544,7 @@ class LocalTrade:
 
     @property
     def close_date_utc(self):
-        return self.close_date.replace(tzinfo=timezone.utc) if self.close_date else None
+        return self.close_date.replace(tzinfo=UTC) if self.close_date else None
 
     @property
     def entry_side(self) -> str:
@@ -1083,7 +1083,7 @@ class LocalTrade:
             return zero
 
         open_date = self.open_date.replace(tzinfo=None)
-        now = (self.close_date or datetime.now(timezone.utc)).replace(tzinfo=None)
+        now = (self.close_date or datetime.now(UTC)).replace(tzinfo=None)
         sec_per_hour = FtPrecise(3600)
         total_seconds = FtPrecise((now - open_date).total_seconds())
         hours = total_seconds / sec_per_hour or zero
@@ -1636,12 +1636,12 @@ class LocalTrade:
             fee_close=data["fee_close"],
             fee_close_cost=data.get("fee_close_cost"),
             fee_close_currency=data.get("fee_close_currency"),
-            open_date=datetime.fromtimestamp(data["open_timestamp"] // 1000, tz=timezone.utc),
+            open_date=datetime.fromtimestamp(data["open_timestamp"] // 1000, tz=UTC),
             open_rate=data["open_rate"],
             open_rate_requested=data.get("open_rate_requested", data["open_rate"]),
             open_trade_value=data.get("open_trade_value"),
             close_date=(
-                datetime.fromtimestamp(data["close_timestamp"] // 1000, tz=timezone.utc)
+                datetime.fromtimestamp(data["close_timestamp"] // 1000, tz=UTC)
                 if data["close_timestamp"]
                 else None
             ),
@@ -1686,7 +1686,7 @@ class LocalTrade:
                 if order.get("order_date")
                 else None,
                 order_filled_date=(
-                    datetime.fromtimestamp(order["order_filled_timestamp"] // 1000, tz=timezone.utc)
+                    datetime.fromtimestamp(order["order_filled_timestamp"] // 1000, tz=UTC)
                     if order["order_filled_timestamp"]
                     else None
                 ),
@@ -1716,9 +1716,9 @@ class Trade(ModelBase, LocalTrade):
 
     use_db: bool = True
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)  # type: ignore[assignment]
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    orders: Mapped[list[Order]] = relationship(  # type: ignore[assignment]
+    orders: Mapped[list[Order]] = relationship(
         "Order",
         order_by="Order.id",
         cascade="all, delete-orphan",
@@ -1730,74 +1730,74 @@ class Trade(ModelBase, LocalTrade):
         "_CustomData", cascade="all, delete-orphan", lazy="raise"
     )
 
-    exchange: Mapped[str] = mapped_column(String(25), nullable=False)  # type: ignore[assignment]
-    pair: Mapped[str] = mapped_column(String(25), nullable=False, index=True)  # type: ignore[assignment]
-    base_currency: Mapped[str | None] = mapped_column(String(25), nullable=True)  # type: ignore[assignment]
-    stake_currency: Mapped[str | None] = mapped_column(String(25), nullable=True)  # type: ignore[assignment]
-    is_open: Mapped[bool] = mapped_column(nullable=False, default=True, index=True)  # type: ignore[assignment]
-    fee_open: Mapped[float] = mapped_column(Float(), nullable=False, default=0.0)  # type: ignore[assignment]
-    # Fee cost in quote currency for entry the trade  # type: ignore[assignment]
-    fee_open_cost: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    # Currency the fee was paid in. Has no relation to fee_open_cost.  # type: ignore[assignment]
-    fee_open_currency: Mapped[str | None] = mapped_column(String(25), nullable=True)  # type: ignore[assignment]
-    fee_close: Mapped[float | None] = mapped_column(Float(), nullable=False, default=0.0)  # type: ignore[assignment]
-    # Fee cost in quote currency for exit orders  # type: ignore[assignment]
-    fee_close_cost: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    fee_close_currency: Mapped[str | None] = mapped_column(String(25), nullable=True)  # type: ignore[assignment]
-    open_rate: Mapped[float] = mapped_column(Float())  # type: ignore[assignment]
-    open_rate_requested: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    # open_trade_value - calculated via _calc_open_trade_value  # type: ignore[assignment]
-    open_trade_value: Mapped[float] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    close_rate: Mapped[float | None] = mapped_column(Float())  # type: ignore[assignment]
-    close_rate_requested: Mapped[float | None] = mapped_column(Float())  # type: ignore[assignment]
-    realized_profit: Mapped[float] = mapped_column(Float(), default=0.0, nullable=True)  # type: ignore[assignment]
-    close_profit: Mapped[float | None] = mapped_column(Float())  # type: ignore[assignment]
-    close_profit_abs: Mapped[float | None] = mapped_column(Float())  # type: ignore[assignment]
-    stake_amount: Mapped[float] = mapped_column(Float(), nullable=False)  # type: ignore[assignment]
-    max_stake_amount: Mapped[float | None] = mapped_column(Float())  # type: ignore[assignment]
-    amount: Mapped[float] = mapped_column(Float())  # type: ignore[assignment]
-    amount_requested: Mapped[float | None] = mapped_column(Float())  # type: ignore[assignment]
-    open_date: Mapped[datetime] = mapped_column(nullable=False, default=datetime.now)  # type: ignore[assignment]
-    close_date: Mapped[datetime | None] = mapped_column()  # type: ignore[assignment]
+    exchange: Mapped[str] = mapped_column(String(25), nullable=False)
+    pair: Mapped[str] = mapped_column(String(25), nullable=False, index=True)
+    base_currency: Mapped[str | None] = mapped_column(String(25), nullable=True)
+    stake_currency: Mapped[str | None] = mapped_column(String(25), nullable=True)
+    is_open: Mapped[bool] = mapped_column(nullable=False, default=True, index=True)
+    fee_open: Mapped[float] = mapped_column(Float(), nullable=False, default=0.0)
+    # Fee cost in quote currency for entry the trade
+    fee_open_cost: Mapped[float | None] = mapped_column(Float(), nullable=True)
+    # Currency the fee was paid in. Has no relation to fee_open_cost.
+    fee_open_currency: Mapped[str | None] = mapped_column(String(25), nullable=True)
+    fee_close: Mapped[float | None] = mapped_column(Float(), nullable=False, default=0.0)
+    # Fee cost in quote currency for exit orders
+    fee_close_cost: Mapped[float | None] = mapped_column(Float(), nullable=True)
+    fee_close_currency: Mapped[str | None] = mapped_column(String(25), nullable=True)
+    open_rate: Mapped[float] = mapped_column(Float())
+    open_rate_requested: Mapped[float | None] = mapped_column(Float(), nullable=True)
+    # open_trade_value - calculated via _calc_open_trade_value
+    open_trade_value: Mapped[float] = mapped_column(Float(), nullable=True)
+    close_rate: Mapped[float | None] = mapped_column(Float())
+    close_rate_requested: Mapped[float | None] = mapped_column(Float())
+    realized_profit: Mapped[float] = mapped_column(Float(), default=0.0, nullable=True)
+    close_profit: Mapped[float | None] = mapped_column(Float())
+    close_profit_abs: Mapped[float | None] = mapped_column(Float())
+    stake_amount: Mapped[float] = mapped_column(Float(), nullable=False)
+    max_stake_amount: Mapped[float | None] = mapped_column(Float())
+    amount: Mapped[float] = mapped_column(Float())
+    amount_requested: Mapped[float | None] = mapped_column(Float())
+    open_date: Mapped[datetime] = mapped_column(nullable=False, default=datetime.now)
+    close_date: Mapped[datetime | None] = mapped_column()
     # absolute value of the stop loss
-    stop_loss: Mapped[float] = mapped_column(Float(), nullable=True, default=0.0)  # type: ignore[assignment]
-    # percentage value of the stop loss  # type: ignore[assignment]
-    stop_loss_pct: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    # absolute value of the initial stop loss  # type: ignore[assignment]
-    initial_stop_loss: Mapped[float | None] = mapped_column(Float(), nullable=True, default=0.0)  # type: ignore[assignment]
-    # percentage value of the initial stop loss  # type: ignore[assignment]
-    initial_stop_loss_pct: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    is_stop_loss_trailing: Mapped[bool] = mapped_column(nullable=False, default=False)  # type: ignore[assignment]
-    # absolute value of the highest reached price  # type: ignore[assignment]
-    max_rate: Mapped[float | None] = mapped_column(Float(), nullable=True, default=0.0)  # type: ignore[assignment]
-    # Lowest price reached  # type: ignore[assignment]
-    min_rate: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    exit_reason: Mapped[str | None] = mapped_column(String(CUSTOM_TAG_MAX_LENGTH), nullable=True)  # type: ignore[assignment]
-    exit_order_status: Mapped[str | None] = mapped_column(String(100), nullable=True)  # type: ignore[assignment]
-    strategy: Mapped[str | None] = mapped_column(String(100), nullable=True)  # type: ignore[assignment]
-    enter_tag: Mapped[str | None] = mapped_column(String(CUSTOM_TAG_MAX_LENGTH), nullable=True)  # type: ignore[assignment]
-    timeframe: Mapped[int | None] = mapped_column(Integer, nullable=True)  # type: ignore[assignment]
+    stop_loss: Mapped[float] = mapped_column(Float(), nullable=True, default=0.0)
+    # percentage value of the stop loss
+    stop_loss_pct: Mapped[float | None] = mapped_column(Float(), nullable=True)
+    # absolute value of the initial stop loss
+    initial_stop_loss: Mapped[float | None] = mapped_column(Float(), nullable=True, default=0.0)
+    # percentage value of the initial stop loss
+    initial_stop_loss_pct: Mapped[float | None] = mapped_column(Float(), nullable=True)
+    is_stop_loss_trailing: Mapped[bool] = mapped_column(nullable=False, default=False)
+    # absolute value of the highest reached price
+    max_rate: Mapped[float | None] = mapped_column(Float(), nullable=True, default=0.0)
+    # Lowest price reached
+    min_rate: Mapped[float | None] = mapped_column(Float(), nullable=True)
+    exit_reason: Mapped[str | None] = mapped_column(String(CUSTOM_TAG_MAX_LENGTH), nullable=True)
+    exit_order_status: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    strategy: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    enter_tag: Mapped[str | None] = mapped_column(String(CUSTOM_TAG_MAX_LENGTH), nullable=True)
+    timeframe: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    trading_mode: Mapped[TradingMode] = mapped_column(Enum(TradingMode), nullable=True)  # type: ignore[assignment]
-    amount_precision: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    price_precision: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
-    precision_mode: Mapped[int | None] = mapped_column(Integer, nullable=True)  # type: ignore[assignment]
-    precision_mode_price: Mapped[int | None] = mapped_column(Integer, nullable=True)  # type: ignore[assignment]
-    contract_size: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
+    trading_mode: Mapped[TradingMode] = mapped_column(Enum(TradingMode), nullable=True)
+    amount_precision: Mapped[float | None] = mapped_column(Float(), nullable=True)
+    price_precision: Mapped[float | None] = mapped_column(Float(), nullable=True)
+    precision_mode: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    precision_mode_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    contract_size: Mapped[float | None] = mapped_column(Float(), nullable=True)
 
     # Leverage trading properties
-    leverage: Mapped[float] = mapped_column(Float(), nullable=True, default=1.0)  # type: ignore[assignment]
-    is_short: Mapped[bool] = mapped_column(nullable=False, default=False)  # type: ignore[assignment]
-    liquidation_price: Mapped[float | None] = mapped_column(Float(), nullable=True)  # type: ignore[assignment]
+    leverage: Mapped[float] = mapped_column(Float(), nullable=True, default=1.0)
+    is_short: Mapped[bool] = mapped_column(nullable=False, default=False)
+    liquidation_price: Mapped[float | None] = mapped_column(Float(), nullable=True)
 
     # Margin Trading Properties
-    interest_rate: Mapped[float] = mapped_column(Float(), nullable=False, default=0.0)  # type: ignore[assignment]
+    interest_rate: Mapped[float] = mapped_column(Float(), nullable=False, default=0.0)
 
     # Futures properties
-    funding_fees: Mapped[float | None] = mapped_column(Float(), nullable=True, default=None)  # type: ignore[assignment]
-    funding_fee_running: Mapped[float | None] = mapped_column(Float(), nullable=True, default=None)  # type: ignore[assignment]
+    funding_fees: Mapped[float | None] = mapped_column(Float(), nullable=True, default=None)
+    funding_fee_running: Mapped[float | None] = mapped_column(Float(), nullable=True, default=None)
 
-    record_version: Mapped[int] = mapped_column(Integer, nullable=False, default=2)  # type: ignore[assignment]
+    record_version: Mapped[int] = mapped_column(Integer, nullable=False, default=2)
 
     def __init__(self, **kwargs):
         from_json = kwargs.pop("__FROM_JSON", None)

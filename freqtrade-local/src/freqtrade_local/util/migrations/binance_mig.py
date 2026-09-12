@@ -1,14 +1,12 @@
 import logging
 
-from packaging import version
-from sqlalchemy import select
-
 from freqtrade.constants import DOCS_LINK, Config
 from freqtrade.enums import TradingMode
 from freqtrade.exceptions import OperationalException
 from freqtrade.persistence.pairlock import PairLock
 from freqtrade.persistence.trade_model import Trade
-
+from packaging import version
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +31,9 @@ def migrate_binance_futures_names(config: Config):
 
 def _migrate_binance_futures_db(config: Config):
     logger.warning("Migrating binance futures pairs in database.")
-    trades = Trade.get_trades([Trade.exchange == "binance", Trade.trading_mode == "FUTURES"]).all()
+    trades = Trade.get_trades(
+        [Trade.exchange == "binance", Trade.trading_mode == "FUTURES"]
+    ).all()
     for trade in trades:
         if ":" in trade.pair:
             # already migrated
@@ -46,7 +46,9 @@ def _migrate_binance_futures_db(config: Config):
             # Should symbol be migrated too?
             # order.symbol = new_pair
     Trade.commit()
-    pls = PairLock.session.scalars(select(PairLock).filter(PairLock.pair.notlike("%:%"))).all()
+    pls = PairLock.session.scalars(
+        select(PairLock).filter(PairLock.pair.notlike("%:%"))
+    ).all()
     for pl in pls:
         pl.pair = f"{pl.pair}:{config['stake_currency']}"
     # print(pls)
