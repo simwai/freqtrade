@@ -73,3 +73,16 @@ repos:
     rev: v1.30.0
     hooks:
     - id: zizmor
+
+  - repo: local
+    hooks:
+      - id: biome-format
+        name: biome format (frontend)
+        entry: biome format --write
+        language: system
+        files: ^frontend/
+      - id: biome-lint
+        name: biome lint (frontend)
+        entry: biome check --write
+        language: system
+        files: ^frontend/
