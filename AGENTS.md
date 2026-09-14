@@ -1,3 +1,5 @@
+@BOOTSTRAP.md
+
 # AGENTS.md - Bootstrap
 
 > All credentials loaded from environment variables - never hardcode tokens.
@@ -45,8 +47,9 @@ Tool-assisted AI coding agent for a sandbox with full execution rights. Follow t
   flow is CHECKLIST -> DOCS -> REVIEW -> PLAN -> PATCH; REVIEW owns
   confirmation. Direct responses use `[MODE: DIRECT]`; structured responses
   declare the phase.
-- Canonical rules live in `prompt-system/` (orchestrator, decision prompts, output
-  contracts, rubrics, implementation style, misc).
+- Canonical rules live in `prompt-system/` (orchestrator + routing + decision format, output
+  contracts, rubrics, implementation style, operational protocol + commit/push gate,
+  cross-cutting protocol, Plan-Versus-Actual Gate).
 
 ---
 
@@ -64,18 +67,23 @@ Servers are grouped by what works when env keys are missing. Configure the ones 
   },
   "playwright": {
     "command": "npx",
-    "args": ["-y", "@playwright/mcp@0.0.79"]
+    "args": ["-y", "@playwright/mcp@0.0.80"]
+  },
+  "playwright-headless": {
+    "command": "npx",
+    "args": ["-y", "@playwright/mcp@0.0.80", "--headless"]
   }
 }
 ```
 
 **Context7** - library docs (stdio: `npx -y @upstash/context7-mcp`)
-**Playwright** - browser automation for live UI verification and e2e walk-throughs (Node 20+; headed by default, add `--headless` for automation)
+**Playwright** - browser automation for live UI verification and e2e walk-throughs (Node 20+; headed for testing)
+**Playwright-headless** - headless browser for web search and scraping (Node 20+; `--headless` flag)
 **Playwright bootstrap** — run `scripts/ensure-playwright.ps1` before first use or after fresh clones; checks Node ≥ 20, resolves `@playwright/mcp`, installs missing browser binaries.
 
 **OpenCode PTY** — interactive terminal plugin: background processes, multiple sessions, stdin, output regex filter. Auto-installed by OpenCode on next run.
 
-### Tier 2 - Requires env keys
+### Tier 2 - Requires env keys (optional - only configure if key available)
 
 ```json
 {
@@ -86,6 +94,8 @@ Servers are grouped by what works when env keys are missing. Configure the ones 
   }
 }
 ```
+
+> **Note**: Omit this entire block if `EXA_API_KEY` is not set. The agent will use Google curl search as the no-key fallback per `00-system.md`.
 
 ### Trello - Remote OAuth (no env keys)
 
@@ -125,19 +135,19 @@ Combine all Tier 1 + Tier 2 + Trello blocks above. Omit any Tier 2 servers whose
 
 ## Loading the Full Spec
 
-`AGENTS.md` is the entry point. The system lives in `prompt-system/`, which holds the merged Baba system: orchestrator + routing (00), personas (01), decision prompts (02), output contracts + state schema (03), review rubrics (04), implementation style (05), operational protocol (06), cross-cutting protocol (07).
+`AGENTS.md` is the entry point. The system lives in `prompt-system/`, which holds the merged Baba system: orchestrator + routing + decision format (00), personas (01), output contracts + state schema (03), review rubrics (04), implementation style (05), operational protocol + commit/push gate (06), cross-cutting protocol (07), Plan-Versus-Actual Gate (08).
 
 **On startup (MANDATORY - no exceptions):**
 
 1. Read `AGENTS.md` (this file).
-2. Read `prompt-system/00-system.md` (orchestrator + load order + hard guards).
+2. Read `prompt-system/00-system.md` (orchestrator + load order + hard guards + decision format + START routing + project style policy auto-trigger).
 3. Read `prompt-system/01-personas.md` (personas, handoff contract, persona depth).
-4. Read `prompt-system/02-decision-prompts.md` (decision format, intake routing, project style policy auto-trigger).
-5. Read `prompt-system/03-output-and-state.md` (phase templates, session state file schema, handoff missing-field response).
-6. Read `prompt-system/04-rubrics.md` (H1-H12 hard-tier, S1-S17 soft-tier).
-7. Read `prompt-system/05-impl-style.md` (implementation core, stack variants, project-specific tooling).
-8. Read `prompt-system/06-misc.md` (operational protocol: PATCH behavior, commit/push gate).
-9. Read `prompt-system/07-protocols.md` (cross-cutting protocol: artifacts, pre-commit, cross-team, app lifecycle, library selection, session file locks, spec lifecycle, drift detection, discuss, scrum).
+4. Read `prompt-system/03-output-and-state.md` (phase templates, session state file schema, handoff missing-field response).
+5. Read `prompt-system/04-rubrics.md` (H1-H12 hard-tier, S1-S20 soft-tier).
+6. Read `prompt-system/05-impl-style.md` (implementation core, stack variants, project-specific tooling).
+7. Read `prompt-system/06-misc.md` (operational protocol: PATCH behavior, commit/push gate).
+8. Read `prompt-system/07-protocols.md` (cross-cutting protocol: artifacts, pre-commit, cross-team, app lifecycle, library selection, session file locks, spec lifecycle, drift detection, discuss, scrum).
+9. Read `prompt-system/08-plan-actual-gate.md` (Plan-Versus-Actual Gate verification protocol).
 
 **All 9 files must be read in full before ANY other action.** This is not optional, not conditional on phase or persona. The STARTUP phase in `00-system.md` enforces this with a hard guard: if STARTUP is not complete, any response in any other phase is a protocol breach.
 
