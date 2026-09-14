@@ -6,7 +6,7 @@
       <select v-model="strategy">
         <option v-for="name in names" :key="name" :value="name">{{ name }}</option>
       </select>
-      <VChart :option="histOption" autoresize />
+      <VChart :option="histOption" autoresize  style="height:400px" />
     </div>
   </div>
 </template>

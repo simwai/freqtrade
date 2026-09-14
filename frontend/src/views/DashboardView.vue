@@ -17,7 +17,7 @@
           </tr>
         </tbody>
       </table>
-      <VChart :option="profitOption" autoresize />
+      <VChart :option="profitOption" autoresize  style="height:400px" />
       <StrategyDrawer v-if="selected" :name="selected" v-on:close="selected = ''" />
     </div>
   </div>

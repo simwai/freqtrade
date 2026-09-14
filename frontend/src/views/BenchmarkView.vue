@@ -15,7 +15,7 @@
           </tr>
         </tbody>
       </table>
-      <VChart :option="benchOption" autoresize />
+      <VChart :option="benchOption" autoresize  style="height:400px" />
     </div>
   </div>
 </template>
