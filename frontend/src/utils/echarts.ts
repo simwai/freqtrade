@@ -17,3 +17,7 @@ echarts.registerTheme('lab', {
   },
 })
 export default echarts
+import { ScatterChart } from 'echarts/charts'
+import type { ScatterSeriesOption } from 'echarts/charts'
+echarts.use([ScatterChart])
+export type ECScatterOption = ComposeOption<ScatterSeriesOption | TooltipComponentOption | GridComponentOption>

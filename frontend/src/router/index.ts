@@ -5,6 +5,8 @@ import BenchmarkView from "../views/BenchmarkView.vue"
 import HistoryView from "../views/HistoryView.vue"
 import TradeView from "../views/TradeView.vue"
 import LabView from "../views/LabView.vue"
+import HyperoptView from "../views/HyperoptView.vue"
+import WalkForwardView from "../views/WalkForwardView.vue"
 import StrategyDetail from "../views/StrategyDetail.vue"
 
 export default createRouter({
@@ -17,6 +19,8 @@ export default createRouter({
     { path: "/history", component: HistoryView },
     { path: "/trades", component: TradeView },
     { path: "/lab", component: LabView },
+    { path: "/hyperopt", component: HyperoptView },
+    { path: "/walkforward", component: WalkForwardView },
     { path: "/strategies/:name", component: StrategyDetail }
   ]
 })
