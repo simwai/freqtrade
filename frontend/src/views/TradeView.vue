@@ -6,7 +6,7 @@
       <thead><tr><th>Strategy</th><th>Source</th><th>Trades</th><th>File</th></tr></thead>
       <tbody>
         <tr v-for="r in store.trade_runs" :key="r.key">
-          <td>{{ r.strategy }}</td>
+          <td><router-link :to='/trades/' + r.key>{{ r.strategy }}</router-link></td>
           <td>{{ r.source }}</td>
           <td>{{ r.n_trades }}</td>
           <td><a :href="'/trades/' + r.key + '.json'">JSON</a></td>

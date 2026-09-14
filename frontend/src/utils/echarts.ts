@@ -21,3 +21,9 @@ import { ScatterChart } from 'echarts/charts'
 import type { ScatterSeriesOption } from 'echarts/charts'
 echarts.use([ScatterChart])
 export type ECScatterOption = ComposeOption<ScatterSeriesOption | TooltipComponentOption | GridComponentOption>
+import { CandlestickChart, CustomChart } from 'echarts/charts'
+import type { CandlestickSeriesOption, CustomSeriesOption } from 'echarts/charts'
+import { DataZoomComponent } from 'echarts/components'
+import type { DataZoomComponentOption } from 'echarts/components'
+echarts.use([CandlestickChart, CustomChart, DataZoomComponent])
+export type ECOption2 = ComposeOption<ScatterSeriesOption | CandlestickSeriesOption | CustomSeriesOption | TooltipComponentOption | GridComponentOption | DataZoomComponentOption>
