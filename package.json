@@ -19,7 +19,6 @@
   "dependencies": {
     "@nuxt/ui": "^3.0.0",
     "@tailwindcss/vite": "^4.3.3",
-    "axios": "^1.7.9",
     "date-fns": "^4.1.0",
     "echarts": "^6.1.0",
     "pinia": "^3.0.1",
