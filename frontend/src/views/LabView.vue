@@ -18,20 +18,37 @@
       </select>
       <button v-on:click="startRun">Run</button>
     </div>
+    <button v-on:click="loadRunMeta">Run meta</button>
+    <pre>{{ runMetaText }}</pre>
     <div>{{ message }}</div>
     <h3>Jobs</h3>
     <button v-on:click="loadJobs">Refresh jobs</button>
-    <table>
-      <thead><tr><th>ID</th><th>Name</th><th>Status</th></tr></thead>
+    <table v-sortable>
+      <thead><tr><th>ID</th><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody>
         <tr v-for="(j, id) in jobs" :key="id">
           <td>{{ id }}</td>
           <td>{{ j.name }}</td>
           <td>{{ j.status }}</td>
+            <td>
+              <button v-if="j.status === 'running'" v-on:click="jobAction(id, 'pause')">Pause</button>
+              <button v-if="j.status === 'paused'" v-on:click="jobAction(id, 'resume')">Resume</button>
+              <button v-if="j.status === 'running' || j.status === 'paused' || j.status === 'queued'" v-on:click="jobAction(id, 'stop')">Stop</button>
+              <button v-on:click="viewLog(id)">Log</button>
+            </td>
         </tr>
       </tbody>
     </table>
+    <div v-if="logJob">
+      <h4>Log {{ logJob }} <button v-on:click="closeLog">Close</button></h4>
+      <pre>{{ logText }}</pre>
+    </div>
   </div>
+    <div>
+      <h3>Benchmark log</h3>
+      <button v-on:click="loadBenchLog">Load latest bench log</button>
+      <pre>{{ benchLogText }}</pre>
+    </div>
 </template>
 <script setup lang='ts'>
 import { ref, onMounted } from 'vue'
@@ -59,6 +76,38 @@ async function startRun() {
 async function loadJobs() {
   const { data } = await api.get('/api/jobs')
   jobs.value = data
+}
+const logJob = ref('')
+const logText = ref('')
+async function jobAction(id: string, action: string) {
+  message.value = ''
+  await api.post('/api/jobs/' + id + '/' + action, {})
+  await loadJobs()
+}
+async function viewLog(id: string) {
+  logJob.value = id
+  logText.value = 'Loading...'
+  const { data } = await api.get('/api/jobs/' + id + '/log', { params: { tail: 6000 } })
+  logText.value = data.log || ''
+}
+function closeLog() {
+  logJob.value = ''
+  logText.value = ''
+}
+const runMetaText = ref('')
+const benchLogText = ref('')
+async function loadRunMeta() {
+  const { data } = await api.get('/api/run/meta')
+  runMetaText.value = JSON.stringify(data, null, 2)
+}
+async function loadBenchLog() {
+  benchLogText.value = 'Loading...'
+  const { data } = await api.get('/api/jobs')
+  const ids = Object.keys(data || {})
+  const bid = ids.find((x) => (data[x] && data[x].name || '').toLowerCase().includes('bench')) || ids[0]
+  if (!bid) { benchLogText.value = 'no jobs'; return }
+  const r = await api.get('/api/jobs/' + bid + '/log', { params: { tail: 6000 } })
+  benchLogText.value = r.data.log || ''
 }
 onMounted(loadJobs)
 </script>

@@ -4,9 +4,13 @@
     <div v-if="store.loading">Loading...</div>
     <div v-else>
       <input v-model="q" placeholder="filter" />
+      <select v-model="selectedFile" v-on:change="loadFile">
+        <option value="">ho files ({{ files.length }})</option>
+        <option v-for="f in files" :key="fileKey(f)" :value="fileKey(f)">{{ fileLabel(f) }}</option>
+      </select>
       <input v-model.number="minTrades" type="number" />
       <div>{{ filtered.length }} / {{ store.hyperopt.length }} runs</div>
-      <table>
+      <table v-sortable>
         <thead><tr><th>Strategy</th><th>Epochs</th><th>Best Loss</th><th>Best Profit</th><th>Best Sortino</th><th>Best PF</th><th>Trades</th><th>Loss</th><th>Run</th><th></th></tr></thead>
         <tbody>
           <tr v-for="r in filtered" :key="r.source" v-on:click="drill(r.source)">
@@ -27,7 +31,7 @@
         <h3>Epochs {{ detail.count }}</h3>
         <div v-for="(v, k) in detail.corr" :key="k" :class="corrClass(v)">{{ k }}: {{ v }}</div>
         <pre>{{ detail.paramsText }}</pre>
-        <table>
+        <table v-sortable>
           <thead><tr><th>Epoch</th><th>Loss</th><th>Trades</th><th>Profit</th><th>Sortino</th><th>Calmar</th><th>PF</th><th>SQN</th><th>DD</th></tr></thead>
           <tbody>
             <tr v-for="r in detail.records" :key="r.epoch">
@@ -72,6 +76,10 @@ const filtered = computed(() => {
     return (r.strategy || '').toLowerCase().includes(ql)
   }).sort((a: any, b: any) => (b.epochs || 0) - (a.epochs || 0)).slice(0, 60)
 })
+const selectedFile = ref('')
+function fileKey(f: any) { return typeof f === 'string' ? f : (f.source || f.name || f.path || JSON.stringify(f)) }
+function fileLabel(f: any) { return typeof f === 'string' ? f : (f.name || f.source || f.path || JSON.stringify(f)) }
+async function loadFile() { if (selectedFile.value) await drill(selectedFile.value) }
 async function drill(source: string) {
   selected.value = source
   const { data } = await api.get('/api/hyperopt', { params: { source, limit: 200 } })

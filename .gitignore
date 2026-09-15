@@ -137,3 +137,7 @@ frontend/.husky/
 user_data/scripts/_archived/
 
 node_modules/
+
+# Agent runtime artifacts
+.playwright-mcp/
+.session-locks/

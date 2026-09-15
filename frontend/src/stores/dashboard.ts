@@ -12,6 +12,7 @@ export const useDashboardStore = defineStore('dashboard', {
     trade_runs: [],
     history: {},
     scorecard: {},
+    propSpec: {},
     loading: false,
     error: null as string | null
   }),
@@ -33,6 +34,7 @@ export const useDashboardStore = defineStore('dashboard', {
         this.strategies = data.strategies || []
         this.trade_runs = data.trade_runs || []
         this.scorecard = data.scorecard || {}
+        this.propSpec = data.prop_firms_spec || {}
       } catch (e) {
         this.error = String(e)
       } finally {
