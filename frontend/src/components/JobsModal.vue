@@ -23,14 +23,16 @@
           <div class="job-main">
             <span :class="statusClass(j.status)">{{ j.status }}</span>
             <span class="job-id">{{ id }}</span>
-            <span class="hint">{{ j.name || '' }}</span>
+            <span class="hint">{{ j.name || '' }}{{ j.step ? ' · step ' + j.step : '' }}{{ j.code != null ? ' · exit ' + j.code : '' }}</span>
           </div>
           <div class="job-actions">
             <button class="btn-secondary btn-sm" v-on:click="viewLog(String(id))">View log</button>
             <button v-if="j.status === 'running'" class="btn-secondary btn-sm" v-on:click="jobAction(String(id), 'pause')">Pause</button>
             <button v-if="j.status === 'paused'" class="btn-secondary btn-sm" v-on:click="jobAction(String(id), 'resume')">Resume</button>
             <button v-if="j.status === 'running' || j.status === 'paused' || j.status === 'queued'" class="btn-secondary btn-sm" v-on:click="jobAction(String(id), 'stop')">Stop</button>
+            <button v-if="j.status === 'error' || j.status === 'done' || j.status === 'stopped'" class="btn-secondary btn-sm" v-on:click="dismiss(String(id))">Dismiss</button>
           </div>
+          <div v-if="j.status === 'error' && excerpt(j)" class="job-excerpt">{{ excerpt(j) }}</div>
         </div>
 
         <h3>Recent</h3>
@@ -43,6 +45,7 @@
           </div>
           <div class="job-actions">
             <button class="btn-secondary btn-sm" v-on:click="viewLog(String(id))">View log</button>
+            <button class="btn-secondary btn-sm" v-on:click="dismiss(String(id))">Dismiss</button>
           </div>
         </div>
 
@@ -65,10 +68,11 @@ const open = ref(false)
 const jobs = ref<Record<string, any>>({})
 const logJob = ref('')
 const logText = ref('')
+const dismissed = ref([] as string[])
 let pollTimer: any = null
 let escHandler: any = null
 
-const entries = computed(() => Object.entries(jobs.value).sort((a, b) => ((b[1] as any).created || 0) - ((a[1] as any).created || 0)))
+const entries = computed(() => Object.entries(jobs.value).filter(([id]) => !dismissed.value.includes(id)).sort((a, b) => ((b[1] as any).created || 0) - ((a[1] as any).created || 0)))
 const active = computed(() => entries.value.filter(([, j]) => ['running', 'paused', 'queued'].includes((j as any).status)))
 const recent = computed(() => entries.value.filter(([, j]) => ['error', 'done', 'stopped', 'skipped'].includes((j as any).status)).slice(0, 20))
 const activeCount = computed(() => active.value.length)
@@ -96,6 +100,17 @@ async function viewLog(id: string) {
 function closeLog() {
   logJob.value = ''
   logText.value = ''
+}
+
+function dismiss(id: string) {
+  if (!dismissed.value.includes(id)) dismissed.value.push(id)
+}
+
+function excerpt(j: any) {
+  const log = (j.log || '').split('\n').filter((l: string) => l.trim())
+  if (log.length) return log[log.length - 1].slice(-220)
+  if (j.error) return String(j.error).slice(-220)
+  return ''
 }
 
 function statusClass(s: string) {

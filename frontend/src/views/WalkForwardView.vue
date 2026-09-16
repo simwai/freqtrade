@@ -18,7 +18,8 @@
               <thead>
                 <tr>
                   <th scope="col" v-on:click="sortBy('strategy')">Strategy <span class="arrow" v-if="sortKey==='strategy'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('run_id')">Run <span class="arrow" v-if="sortKey==='run_id'">{{ sortAsc ? '▲' : '▼' }}</span></th>
+                  <th scope="col" v-on:click="sortBy('run_id')" class="num">Run <span class="arrow" v-if="sortKey==='run_id'">{{ sortAsc ? '▲' : '▼' }}</span></th>
+                  <th scope="col" v-on:click="sortBy('timerange')" class="num">Date Range <span class="arrow" v-if="sortKey==='timerange'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('n_windows')" class="num">Windows <span class="arrow" v-if="sortKey==='n_windows'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('profitable_windows')" class="num">Profitable <span class="arrow" v-if="sortKey==='profitable_windows'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('oos_trades')" class="num">OOS Trades <span class="arrow" v-if="sortKey==='oos_trades'">{{ sortAsc ? '▲' : '▼' }}</span></th>
@@ -33,9 +34,10 @@
           <div class="table-wrap" ref="wfTableWrap">
             <table>
               <tbody>
-                <tr v-for="r in sortedFiltered" :key="r.source" v-on:click="drill(r.source)">
+                <tr v-for="r in sortedFiltered" :key="r.source" v-on:click="drill(r.source)" :style="selected === r.source ? 'background:var(--card-hover)' : ''">
                   <td>{{ r.strategy }}</td>
-                  <td>{{ r.run_id }}</td>
+                  <td class="num" :title="r.source || ''">{{ (r.run_id || r.source || '').slice(0, 18) }}</td>
+                  <td :title="r.timerange || ''">{{ fmtRange(r.timerange) }}</td>
                   <td class="num">{{ r.n_windows }}</td>
                   <td :class="ratioClass(profitableRatio(r))">{{ r.profitable_windows }}/{{ r.n_windows }}</td>
                   <td class="num">{{ r.oos_trades }}</td>
@@ -52,7 +54,8 @@
 
       <div v-if="detail" class="card detail-panel">
         <div class="section-head">
-          <h3>OOS per window {{ detail.r?.strategy }}</h3>
+          <h3>OOS per window {{ detail.r?.strategy }} · {{ (detail.r?.run_id || '').slice(0, 16) }}</h3>
+          <span class="hint">{{ detailWins.length }} windows · {{ detail.r?.train_days }}/{{ detail.r?.test_days }}/{{ detail.r?.step_days }} d</span>
         </div>
         <div class="chart-box">
           <VChart :option="comboOption" autoresize class="chart" style="height: 280px" />
@@ -132,7 +135,7 @@ const filtered = computed(() => {
     const reg = store.canonical.find((c: any) => c.strategy === r.strategy)
     if (reg && (reg.status || 'active') === 'retired') return false
     if (!ql) return true
-    return (r.strategy || '').toLowerCase().includes(ql)
+    return (r.strategy || '').toLowerCase().includes(ql) || (r.run_id || '').toLowerCase().includes(ql) || (r.source || '').toLowerCase().includes(ql)
   })
 })
 
@@ -194,14 +197,22 @@ function sortDetail(key: string) {
 }
 function fmtNum(v: number) { return v ? v.toLocaleString(undefined, { maximumFractionDigits: 3 }) : '—' }
 function fmtPct(v: number) { return v ? (v * 100).toFixed(1) + '%' : '—' }
+function fmtRange(tr: string) {
+  if (!tr) return '—'
+  const p = String(tr).split('-')
+  const d = (s: string) => (s && s.length === 8) ? s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8) : (s || '?')
+  return d(p[0]) + ' → ' + (p[1] ? d(p[1]) : 'live')
+}
+
+const detailWins = computed(() => sortedWins.value)
 
 const comboOption = computed((): ECOption => ({
   xAxis: { type: 'category', data: ((detail.value && detail.value.wins) || []).map((_w: any, i: number) => 'W' + (i + 1)), axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
   yAxis: [{ type: 'value', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } }, splitLine: { lineStyle: { color: '#2f2745' } } }],
   grid: { left: 50, right: 20, top: 10, bottom: 40 },
   series: [
-    { type: 'bar', data: ((detail.value && detail.value.wins) || []).map((w: any) => w.oos_profit_abs || 0), itemStyle: { color: '#a78bfa' } },
-    { type: 'line', data: ((detail.value && detail.value.wins) || []).map((w: any) => w.oos_profit_abs || 0), itemStyle: { color: '#c4b5fd' } }
+    { type: 'bar', data: ((detail.value && detail.value.wins) || []).map((w: any) => ({ value: w.oos_profit_abs || 0, itemStyle: { color: (w.oos_profit_abs || 0) >= 0 ? '#6ee7a8' : '#f87171' } })) },
+    { type: 'line', data: ((detail.value && detail.value.wins) || []).map((w: any) => w.oos_profit_abs || 0), smooth: true, lineStyle: { color: '#c4b5fd' } }
   ]
 }))
 

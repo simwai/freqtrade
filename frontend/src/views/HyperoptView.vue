@@ -13,6 +13,7 @@
           <option v-for="f in files" :key="fileKey(f)" :value="fileKey(f)">{{ fileLabel(f) }}</option>
         </select>
         <label class="filter-label">Min Trades <input type="number" v-model.number="minTrades" /></label>
+        <label class="filter-label">Epoch limit <input type="number" v-model.number="epochLimit" /></label>
       </div>
 
       <div class="card">
@@ -32,6 +33,7 @@
                   <th scope="col" v-on:click="sortBy('best_profit_factor')" class="num">Best PF <span class="arrow" v-if="sortKey==='best_profit_factor'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('best_trades')" class="num">Trades <span class="arrow" v-if="sortKey==='best_trades'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('loss_function')">Loss <span class="arrow" v-if="sortKey==='loss_function'">{{ sortAsc ? '▲' : '▼' }}</span></th>
+                  <th scope="col" v-on:click="sortBy('spaces')">Spaces <span class="arrow" v-if="sortKey==='spaces'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('run_time')" class="num">Run <span class="arrow" v-if="sortKey==='run_time'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                 </tr>
               </thead>
@@ -48,8 +50,9 @@
                   <td class="num">{{ fmtNum(r.best_sortino) }}</td>
                   <td class="num">{{ fmtNum(r.best_profit_factor) }}</td>
                   <td class="num">{{ r.best_trades }}</td>
-                  <td>{{ r.loss_function }}</td>
-                  <td class="num">{{ fmtNum(r.run_time) }}</td>
+                  <td :title="r.spaces || ''">{{ shortLoss(r.loss_function) }}</td>
+                  <td :title="r.spaces || ''">{{ (r.spaces || '').slice(0, 18) }}</td>
+                  <td class="num">{{ (r.run_time || '').slice(0, 16) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -62,9 +65,12 @@
           <h3>Epochs {{ detail.count }}</h3>
         </div>
         <div class="corr-grid">
-          <div v-for="(v, k) in detail.corr" :key="k" :class="corrClass(v)">{{ k }}: {{ v.toFixed(3) }}</div>
+          <div v-for="(v, k) in detail.corr" :key="k" :class="corrClass(v)">{{ k }} {{ signed(v) }}</div>
         </div>
-        <pre class="code-block">{{ detail.paramsText }}</pre>
+        <details class="paramsBlock" open>
+          <summary>Best epoch params — {{ detail.loss_function || '' }} · loss {{ fmtNum(detail.best_loss) }}</summary>
+          <pre class="code-block">{{ detail.paramsText }}</pre>
+        </details>
         <div class="table-wrap table-stack">
           <div class="thead-scroll">
             <table>
@@ -79,6 +85,9 @@
                   <th scope="col" v-on:click="sortDetail('profit_factor')" class="num">PF <span class="arrow" v-if="detailSortKey==='profit_factor'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortDetail('sqn')" class="num">SQN <span class="arrow" v-if="detailSortKey==='sqn'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortDetail('max_drawdown')" class="num">DD <span class="arrow" v-if="detailSortKey==='max_drawdown'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
+                  <th scope="col" v-on:click="sortDetail('mae')" class="num">MAE% <span class="arrow" v-if="detailSortKey==='mae'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
+                  <th scope="col" v-on:click="sortDetail('exit_eff')" class="num">ExitEff <span class="arrow" v-if="detailSortKey==='exit_eff'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
+                  <th scope="col">Best?</th>
                 </tr>
               </thead>
             </table>
@@ -96,6 +105,9 @@
                   <td class="num">{{ fmtNum(r.profit_factor) }}</td>
                   <td class="num">{{ fmtNum(r.sqn) }}</td>
                   <td class="num">{{ fmtPct(r.max_drawdown) }}</td>
+                  <td class="num">{{ fmtPct2(r.mae) }}</td>
+                  <td class="num">{{ fmtPct0(r.exit_eff) }}</td>
+                  <td><span v-if="r.best" class="pill gA">best</span><span v-else-if="r.init" class="pill gna">init</span></td>
                 </tr>
               </tbody>
             </table>
@@ -126,6 +138,7 @@ import '../utils/echarts'
 const store = useDashboardStore()
 const q = ref('')
 const minTrades = ref(0)
+const epochLimit = ref(200)
 const selectedFile = ref('')
 const detail = ref(null as any)
 const files = ref([] as any[])
@@ -143,7 +156,7 @@ const filtered = computed(() => {
     if (reg && (reg.status || 'active') === 'retired') return false
     if ((r.best_trades || 0) < minTrades.value) return false
     if (!ql) return true
-    return (r.strategy || '').toLowerCase().includes(ql)
+    return (r.strategy || '').toLowerCase().includes(ql) || (r.source || '').toLowerCase().includes(ql) || (r.loss_function || '').toLowerCase().includes(ql)
   })
 })
 
@@ -185,15 +198,17 @@ function fileLabel(f: any) { return typeof f === 'string' ? f : (f.name || f.sou
 async function loadFile() { if (selectedFile.value) await drill(selectedFile.value) }
 async function drill(source: string) {
   selectedFile.value = source
-  const { data } = await api.get('/api/hyperopt', { params: { source, limit: 200 } })
+  const { data } = await api.get('/api/hyperopt', { params: { source, limit: Number(epochLimit.value) || 200 } })
   if (data.error) { detail.value = null; return }
   const hoRow = store.hyperopt.find((x: any) => x.source === data.source)
   let paramsText = ''
   if (hoRow && hoRow.best_params) {
     try { paramsText = JSON.stringify(JSON.parse(hoRow.best_params), null, 2) } catch (e) {}
   }
-  detail.value = Object.assign({}, data, { paramsText })
+  detail.value = Object.assign({}, data, { paramsText, loss_function: hoRow?.loss_function || '', best_loss: hoRow?.best_loss })
 }
+function shortLoss(s: string) { return (s || '').replace('HyperOptLoss', '') }
+function signed(v: number) { return (v > 0 ? '+' : '') + Number(v).toFixed(2) }
 function sortBy(key: string) {
   if (sortKey.value === key) sortAsc.value = !sortAsc.value
   else { sortKey.value = key; sortAsc.value = true }
@@ -204,6 +219,8 @@ function sortDetail(key: string) {
 }
 function fmtNum(v: number) { return v ? v.toLocaleString(undefined, { maximumFractionDigits: 3 }) : '—' }
 function fmtPct(v: number) { return v ? (v * 100).toFixed(1) + '%' : '—' }
+function fmtPct2(v: number) { return v === null || v === undefined ? '—' : (Number(v) * 100).toFixed(2) + '%' }
+function fmtPct0(v: number) { return v === null || v === undefined ? '—' : (Number(v) * 100).toFixed(0) + '%' }
 
 const scatterOption = computed((): ECScatterOption => ({
   xAxis: { type: 'value', name: 'loss', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } }, splitLine: { lineStyle: { color: '#2f2745' } } },

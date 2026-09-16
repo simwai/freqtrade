@@ -158,8 +158,11 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { api } from '../api/client'
+import { useDashboardStore } from '../stores/dashboard'
+
+const store = useDashboardStore()
 
 const benchStrategies = ref('')
 const timerange = ref('20230101-20240101')
@@ -349,10 +352,28 @@ function syncScroll() {
 onMounted(() => {
   loadJobs()
   loadDropdowns()
+  defaultRunRange()
+  document.addEventListener('keydown', onKey)
   if (jobsTableWrap.value) {
     jobsTableWrap.value.addEventListener('scroll', syncScroll)
   }
 })
+onUnmounted(() => { document.removeEventListener('keydown', onKey) })
+
+function onKey(e: KeyboardEvent) {
+  if (e.key === 'Escape' && logJob.value) closeLog()
+}
+
+async function defaultRunRange() {
+  await store.fetchAll()
+  let min = '20220101'
+  let max = '20240101'
+  store.backtests.forEach((r: any) => {
+    const m = /^(\d{8})-(\d{8})$/.exec(r.timerange || '')
+    if (m) { if (m[1] < min) min = m[1]; if (m[2] > max) max = m[2] }
+  })
+  if (timerange.value === '20230101-20240101') timerange.value = min + '-' + max
+}
 </script>
 
 <style scoped>
