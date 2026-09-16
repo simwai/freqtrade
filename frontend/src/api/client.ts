@@ -20,6 +20,10 @@ async function request(path: string, init: any = {}): Promise<any> {
   try {
     res = await fetch(url, { method: init.method || 'GET', headers: { 'Content-Type': 'application/json' }, body: init.body, signal: ctrl.signal })
   } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      // Silent abort - expected when component unmounts during navigation
+      throw e
+    }
     console.error('API error:', e)
     throw e
   } finally {
