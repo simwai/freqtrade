@@ -7,7 +7,7 @@
     <div v-if="store.loading" class="card">Loading...</div>
     <div v-else class="card">
       <p v-if="newestKey" class="hint">auto-loaded · newest run {{ newestKey }}</p>
-      <div class="table-wrap table-stack">
+      <div class="table-wrap table-stack" v-sync-scroll>
         <div class="thead-scroll">
           <table>
             <thead>
@@ -20,7 +20,7 @@
             </thead>
           </table>
         </div>
-        <div class="table-wrap" ref="tradesTableWrap">
+        <div class="table-wrap">
           <table>
             <tbody>
               <tr v-for="r in sortedRuns" :key="r.key" :style="r.key === newestKey ? 'background:var(--card-hover)' : ''">
@@ -37,13 +37,12 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useDashboardStore } from '../stores/dashboard'
 
 const store = useDashboardStore()
 const sortKey = ref('strategy')
 const sortAsc = ref(true)
-const tradesTableWrap = ref<HTMLElement | null>(null)
 
 const sortedRuns = computed(() => {
   const arr = [...store.trade_runs]
@@ -51,8 +50,8 @@ const sortedRuns = computed(() => {
     let av = a[sortKey.value]
     let bv = b[sortKey.value]
     if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return sortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return sortAsc.value ? -1 : 1
+    if (av === '' || av === undefined || av === null) return 1
+    if (bv === '' || bv === undefined || bv === null) return -1
     const an = Number(av), bn = Number(bv)
     const useNum = !isNaN(an) && !isNaN(bn)
     const r = useNum ? an - bn : String(av).localeCompare(String(bv))
@@ -73,13 +72,5 @@ function sortBy(key: string) {
 
 onMounted(async () => {
   await store.fetchAll()
-  await nextTick()
-  if (tradesTableWrap.value) {
-    tradesTableWrap.value.addEventListener('scroll', () => {
-      const tw = tradesTableWrap.value!
-      tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-      tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
-    })
-  }
 })
 </script>

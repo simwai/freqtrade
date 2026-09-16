@@ -12,7 +12,7 @@
       </div>
 
       <div class="card">
-        <div class="table-wrap table-stack">
+        <div class="table-wrap table-stack" v-sync-scroll>
           <div class="thead-scroll">
             <table>
               <thead>
@@ -31,7 +31,7 @@
               </thead>
             </table>
           </div>
-          <div class="table-wrap" ref="wfTableWrap">
+          <div class="table-wrap">
             <table>
               <tbody>
                 <tr v-for="r in sortedFiltered" :key="r.source" v-on:click="drill(r.source)" :style="selected === r.source ? 'background:var(--card-hover)' : ''">
@@ -60,7 +60,7 @@
         <div class="chart-box">
           <VChart :option="comboOption" autoresize class="chart" style="height: 280px" />
         </div>
-        <div class="table-wrap table-stack">
+        <div class="table-wrap table-stack" v-sync-scroll>
           <div class="thead-scroll">
             <table>
               <thead>
@@ -77,7 +77,7 @@
               </thead>
             </table>
           </div>
-          <div class="table-wrap" ref="wfDetailTableWrap">
+          <div class="table-wrap">
             <table>
               <tbody>
                 <tr v-for="(w, i) in sortedWins" :key="i">
@@ -99,7 +99,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -121,8 +121,6 @@ const sortKey = ref('run_time')
 const sortAsc = ref(false)
 const detailSortKey = ref('oos_trades')
 const detailSortAsc = ref(true)
-const wfTableWrap = ref<HTMLElement | null>(null)
-const wfDetailTableWrap = ref<HTMLElement | null>(null)
 
 function profitableRatio(r: any) {
   if (!r.n_windows) return 0
@@ -145,8 +143,8 @@ const sortedFiltered = computed(() => {
     let av = a[sortKey.value]
     let bv = b[sortKey.value]
     if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return sortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return sortAsc.value ? -1 : 1
+    if (av === '' || av === undefined || av === null) return 1
+    if (bv === '' || bv === undefined || bv === null) return -1
     const an = Number(av), bn = Number(bv)
     const useNum = !isNaN(an) && !isNaN(bn)
     const r = useNum ? an - bn : String(av).localeCompare(String(bv))
@@ -162,8 +160,8 @@ const sortedWins = computed(() => {
     let av = a[detailSortKey.value]
     let bv = b[detailSortKey.value]
     if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return detailSortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return detailSortAsc.value ? -1 : 1
+    if (av === '' || av === undefined || av === null) return 1
+    if (bv === '' || bv === undefined || bv === null) return -1
     const an = Number(av), bn = Number(bv)
     const useNum = !isNaN(an) && !isNaN(bn)
     const r = useNum ? an - bn : String(av).localeCompare(String(bv))
@@ -218,21 +216,6 @@ const comboOption = computed((): ECOption => ({
 
 onMounted(async () => {
   await store.fetchAll()
-  await nextTick()
-  if (wfTableWrap.value) {
-    wfTableWrap.value.addEventListener('scroll', () => {
-      const tw = wfTableWrap.value!
-      tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-      tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
-    })
-  }
-  if (wfDetailTableWrap.value) {
-    wfDetailTableWrap.value.addEventListener('scroll', () => {
-      const tw = wfDetailTableWrap.value!
-      tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-      tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
-    })
-  }
 })
 </script>
 

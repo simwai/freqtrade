@@ -20,7 +20,7 @@
         <div class="section-head">
           <h3>{{ filtered.length }} / {{ store.hyperopt.length }} runs</h3>
         </div>
-        <div class="table-wrap table-stack">
+        <div class="table-wrap table-stack" v-sync-scroll>
           <div class="thead-scroll">
             <table>
               <thead>
@@ -39,7 +39,7 @@
               </thead>
             </table>
           </div>
-          <div class="table-wrap" ref="hoTableWrap">
+          <div class="table-wrap">
             <table>
               <tbody>
                 <tr v-for="r in sortedFiltered" :key="r.source" v-on:click="drill(r.source)">
@@ -71,7 +71,7 @@
           <summary>Best epoch params — {{ detail.loss_function || '' }} · loss {{ fmtNum(detail.best_loss) }}</summary>
           <pre class="code-block">{{ detail.paramsText }}</pre>
         </details>
-        <div class="table-wrap table-stack">
+        <div class="table-wrap table-stack" v-sync-scroll>
           <div class="thead-scroll">
             <table>
               <thead>
@@ -92,7 +92,7 @@
               </thead>
             </table>
           </div>
-          <div class="table-wrap" ref="hoDetailTableWrap">
+          <div class="table-wrap">
             <table>
               <tbody>
                 <tr v-for="r in sortedDetail" :key="r.epoch">
@@ -121,7 +121,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -146,8 +146,6 @@ const sortKey = ref('epochs')
 const sortAsc = ref(false)
 const detailSortKey = ref('epoch')
 const detailSortAsc = ref(true)
-const hoTableWrap = ref<HTMLElement | null>(null)
-const hoDetailTableWrap = ref<HTMLElement | null>(null)
 
 const filtered = computed(() => {
   const ql = q.value.toLowerCase()
@@ -166,8 +164,8 @@ const sortedFiltered = computed(() => {
     let av = a[sortKey.value]
     let bv = b[sortKey.value]
     if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return sortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return sortAsc.value ? -1 : 1
+    if (av === '' || av === undefined || av === null) return 1
+    if (bv === '' || bv === undefined || bv === null) return -1
     const an = Number(av), bn = Number(bv)
     const useNum = !isNaN(an) && !isNaN(bn)
     const r = useNum ? an - bn : String(av).localeCompare(String(bv))
@@ -183,8 +181,8 @@ const sortedDetail = computed(() => {
     let av = a[detailSortKey.value]
     let bv = b[detailSortKey.value]
     if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return detailSortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return detailSortAsc.value ? -1 : 1
+    if (av === '' || av === undefined || av === null) return 1
+    if (bv === '' || bv === undefined || bv === null) return -1
     const an = Number(av), bn = Number(bv)
     const useNum = !isNaN(an) && !isNaN(bn)
     const r = useNum ? an - bn : String(av).localeCompare(String(bv))
@@ -233,21 +231,6 @@ onMounted(async () => {
   await store.fetchAll()
   const { data } = await api.get('/api/hyperopt/files')
   files.value = data
-  await nextTick()
-  if (hoTableWrap.value) {
-    hoTableWrap.value.addEventListener('scroll', () => {
-      const tw = hoTableWrap.value!
-      tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-      tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
-    })
-  }
-  if (hoDetailTableWrap.value) {
-    hoDetailTableWrap.value.addEventListener('scroll', () => {
-      const tw = hoDetailTableWrap.value!
-      tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-      tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
-    })
-  }
 })
 </script>
 

@@ -20,6 +20,34 @@ export function sortTableBy(table: any, idx: number, asc: boolean) {
   })
   rows.forEach((r: any) => tbody.appendChild(r))
 }
+export function syncScrollStack(stack: any) {
+  if (!stack || stack.dataset.syncWired) return
+  stack.dataset.syncWired = '1'
+  const head = stack.querySelector('.thead-scroll')
+  const body = stack.querySelectorAll(':scope > .table-wrap')
+  const bodyEl = body.length ? body[body.length - 1] : stack.querySelector('.table-wrap')
+  if (!head || !bodyEl || head === bodyEl) return
+  const paint = (el: any) => {
+    el.classList.toggle('scroll-left', el.scrollLeft > 0)
+    el.classList.toggle('scroll-right', el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
+  }
+  let lock = false
+  const link = (from: any, to: any) => {
+    from.addEventListener('scroll', () => {
+      paint(from)
+      paint(to)
+      if (lock) return
+      lock = true
+      to.scrollLeft = from.scrollLeft
+      paint(to)
+      lock = false
+    })
+  }
+  link(head, bodyEl)
+  link(bodyEl, head)
+  paint(head)
+  paint(bodyEl)
+}
 export function sortableTable(table: any) {
   if (table.dataset.sortWired) return
   table.dataset.sortWired = '1'

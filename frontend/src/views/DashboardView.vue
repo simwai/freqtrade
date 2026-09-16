@@ -9,7 +9,7 @@
     <div v-else>
       <GradeTuner v-model:min-profit="minProfit" v-model:min-trades="minTrades" />
 
-      <div class="table-wrap table-stack">
+      <div class="table-wrap table-stack" v-sync-scroll>
         <div class="thead-scroll">
           <table>
             <thead>
@@ -31,7 +31,7 @@
             </thead>
           </table>
         </div>
-        <div class="table-wrap" ref="tableWrap">
+        <div class="table-wrap">
           <table>
             <tbody>
               <tr v-for="s in sortedFiltered" :key="s.strategy" v-on:click="openStrategy(s.strategy)" v-on:keydown.enter="openStrategy(s.strategy)" tabindex="0" role="button" :aria-label="'Open ' + s.strategy">
@@ -105,7 +105,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -126,7 +126,6 @@ const selected = ref('')
 const metric2 = ref('total_trades')
 const sortKey = ref('profit_total')
 const sortAsc = ref(false)
-const tableWrap = ref<HTMLElement | null>(null)
 
 const filtered = computed(() => store.canonical.filter((s: any) => (s.profit_total || 0) >= minProfit.value).filter((s: any) => (s.total_trades || 0) >= minTrades.value))
 
@@ -136,8 +135,8 @@ const sortedFiltered = computed(() => {
     let av = sortKey.value === 'propPass' ? propPassCount(a) : sortKey.value.split('.').reduce((o: any, k: string) => o?.[k], a)
     let bv = sortKey.value === 'propPass' ? propPassCount(b) : sortKey.value.split('.').reduce((o: any, k: string) => o?.[k], b)
     if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return sortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return sortAsc.value ? -1 : 1
+    if (av === '' || av === undefined || av === null) return 1
+    if (bv === '' || bv === undefined || bv === null) return -1
     const an = Number(av), bn = Number(bv)
     const useNum = !isNaN(an) && !isNaN(bn)
     const r = useNum ? an - bn : String(av).localeCompare(String(bv))
@@ -262,14 +261,6 @@ function propClass(r: any) {
 
 onMounted(async () => {
   await store.fetchAll()
-  await nextTick()
-  if (tableWrap.value) {
-    tableWrap.value.addEventListener('scroll', () => {
-      const tw = tableWrap.value!
-      tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-      tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
-    })
-  }
 })
 </script>
 

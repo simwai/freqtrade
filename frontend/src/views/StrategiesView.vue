@@ -16,7 +16,7 @@
         </select>
       </div>
 
-      <div class="table-wrap table-stack">
+      <div class="table-wrap table-stack" v-sync-scroll>
         <div class="thead-scroll">
           <table>
             <thead>
@@ -119,8 +119,8 @@ const sortedRows = computed(() => {
     let av = sortKey.value === 'propPass' ? propPassCount(a) : sortKey.value.split('.').reduce((o: any, k: string) => o?.[k], a)
     let bv = sortKey.value === 'propPass' ? propPassCount(b) : sortKey.value.split('.').reduce((o: any, k: string) => o?.[k], b)
     if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return sortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return sortAsc.value ? -1 : 1
+    if (av === '' || av === undefined || av === null) return 1
+    if (bv === '' || bv === undefined || bv === null) return -1
     const an = Number(av), bn = Number(bv)
     const useNum = !isNaN(an) && !isNaN(bn)
     const r = useNum ? an - bn : String(av).localeCompare(String(bv))

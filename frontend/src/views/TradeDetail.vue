@@ -80,7 +80,7 @@
 
       <div class="card">
         <h3>Trades {{ trades.length }}</h3>
-        <div class="table-wrap table-stack">
+        <div class="table-wrap table-stack" v-sync-scroll>
           <div class="thead-scroll">
             <table>
               <thead>
@@ -102,7 +102,7 @@
               </thead>
             </table>
           </div>
-          <div class="table-wrap" ref="tradesTableWrap">
+          <div class="table-wrap">
             <table>
               <tbody>
                 <tr v-for="t in sortedTrades" :key="t.o + t.c + t.p">
@@ -176,7 +176,6 @@ const emptyBanner = ref('')
 const tradeSortKey = ref('o')
 const tradeSortAsc = ref(true)
 const tlVChart = ref(null as any)
-const tradesTableWrap = ref<HTMLElement | null>(null)
 const fetchCache = new Map<string, number[][]>()
 const loadSeq = ref(0)
 const zoomSeq = ref(0)
@@ -734,8 +733,8 @@ const sortedTrades = computed(() => {
     let av = a[tradeSortKey.value]
     let bv = b[tradeSortKey.value]
     if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return tradeSortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return tradeSortAsc.value ? -1 : 1
+    if (av === '' || av === undefined || av === null) return 1
+    if (bv === '' || bv === undefined || bv === null) return -1
     const an = Number(av), bn = Number(bv)
     const useNum = !isNaN(an) && !isNaN(bn)
     const r = useNum ? an - bn : String(av).localeCompare(String(bv))
@@ -763,13 +762,6 @@ onMounted(async () => {
   await load()
   await nextTick()
   attachZoom()
-  if (tradesTableWrap.value) {
-    tradesTableWrap.value.addEventListener('scroll', () => {
-      const tw = tradesTableWrap.value!
-      tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-      tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
-    })
-  }
 })
 
 onUnmounted(() => {

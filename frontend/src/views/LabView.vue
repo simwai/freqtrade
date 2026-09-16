@@ -82,6 +82,12 @@
           <label>Train days <input v-model="trainDays" type="number" /></label>
           <label>Test days <input v-model="testDays" type="number" /></label>
           <label>Step days <input v-model="stepDays" type="number" /></label>
+          <label>WF min trades <input v-model="wfMinTrades" placeholder="0" /></label>
+          <label>WF max DD <input v-model="wfMaxDD" placeholder="0.2" /></label>
+        </template>
+        <template v-if="mode === 'hyperopt'">
+          <label class="check"><input v-model="disableExport" type="checkbox" /> disable param export</label>
+          <label class="check"><input v-model="printAll" type="checkbox" /> print all</label>
         </template>
         <label class="check"><input v-model="verbose" type="checkbox" /> verbose</label>
         <button class="btn-primary" v-on:click="startRun">Run</button>
@@ -107,7 +113,7 @@
       <div class="form-row">
         <button class="btn-secondary" v-on:click="loadJobs">Refresh jobs</button>
       </div>
-      <div class="table-wrap table-stack">
+      <div class="table-wrap table-stack" v-sync-scroll>
         <div class="thead-scroll">
           <table>
             <thead>
@@ -120,7 +126,7 @@
             </thead>
           </table>
         </div>
-        <div class="table-wrap" ref="jobsTableWrap">
+        <div class="table-wrap">
           <table>
             <tbody>
               <tr v-for="(j, id) in jobs" :key="id">
@@ -158,7 +164,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { api } from '../api/client'
 import { useDashboardStore } from '../stores/dashboard'
 
@@ -189,6 +195,10 @@ const minTrades = ref('')
 const trainDays = ref(90)
 const testDays = ref(7)
 const stepDays = ref(7)
+const wfMinTrades = ref('')
+const wfMaxDD = ref('')
+const disableExport = ref(false)
+const printAll = ref(false)
 const analyzePerEpoch = ref(false)
 const verbose = ref(false)
 const configPreview = ref('')
@@ -203,7 +213,6 @@ const logJob = ref('')
 const logText = ref('')
 const runMetaText = ref('')
 const benchLogText = ref('')
-const jobsTableWrap = ref<HTMLElement | null>(null)
 
 async function startBench() {
   const list = benchStrategies.value.split(',').map((s: string) => s.trim()).filter(Boolean)
@@ -263,6 +272,12 @@ function buildRunBody() {
     body.train_days = Number(trainDays.value) || 90
     body.test_days = Number(testDays.value) || 7
     body.step_days = Number(stepDays.value) || 7
+    if ((wfMinTrades.value || '').trim() !== '') body.wf_min_trades = Number(wfMinTrades.value)
+    if ((wfMaxDD.value || '').trim() !== '') body.wf_max_drawdown = Number(wfMaxDD.value)
+  }
+  if (mode.value === 'hyperopt') {
+    if (disableExport.value) body.disable_param_export = true
+    if (printAll.value) body.print_all = true
   }
   if (verbose.value) body.verbosity = 3
   return body
@@ -299,10 +314,6 @@ async function loadDropdowns() {
 async function loadJobs() {
   const { data } = await api.get('/api/jobs')
   jobs.value = data
-  await nextTick()
-  if (jobsTableWrap.value) {
-    syncScroll()
-  }
 }
 async function jobAction(id: string, action: string) {
   message.value = ''
@@ -343,20 +354,11 @@ function statusClass(s: string) {
   if (sl === 'stopped') return 'status'
   return 'status'
 }
-function syncScroll() {
-  if (!jobsTableWrap.value) return
-  const tw = jobsTableWrap.value
-  tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-  tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
-}
 onMounted(() => {
   loadJobs()
   loadDropdowns()
   defaultRunRange()
   document.addEventListener('keydown', onKey)
-  if (jobsTableWrap.value) {
-    jobsTableWrap.value.addEventListener('scroll', syncScroll)
-  }
 })
 onUnmounted(() => { document.removeEventListener('keydown', onKey) })
 
