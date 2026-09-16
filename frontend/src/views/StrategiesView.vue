@@ -43,7 +43,7 @@
         <div class="table-wrap">
           <table>
             <tbody>
-              <tr v-for="s in sortedRows" :key="s.strategy" v-on:click="openStrategy(s.strategy)" v-on:keydown.enter="openStrategy(s.strategy)" tabindex="0" role="button" :aria-label="'Open ' + s.strategy">
+              <tr v-for="s in sortedRows" :key="s.strategy" v-on:click="openStrategy(s)" v-on:keydown.enter="openStrategy(s)" tabindex="0" role="button" :aria-label="'Open ' + s.strategy">
                 <td>{{ s.strategy }}</td>
                 <td><span :class="statusClass(s.status)">{{ s.status }}</span></td>
                 <td><span :class="gradePill(s.score?.grade)">{{ s.score?.grade || '?' }}</span></td>
@@ -76,7 +76,7 @@
         <div v-if="editMsg" class="edit-msg">{{ editMsg }}</div>
       </div>
 
-      <StrategyDrawer v-if="selected" :name="selected" v-on:close="selected = ''" />
+      <StrategyDrawer v-if="selected" :name="selected" :run-kind="drawerKind" :run-source="drawerSource" v-on:close="selected = ''" />
     </div>
   </section>
 </template>
@@ -88,6 +88,8 @@ import StrategyDrawer from '../components/StrategyDrawer.vue'
 
 const store = useDashboardStore()
 const selected = ref('')
+const drawerKind = ref('')
+const drawerSource = ref('')
 const editName = ref('')
 const editStatus = ref('active')
 const editNotes = ref('')
@@ -206,7 +208,11 @@ async function saveEdit() {
   editMsg.value = 'saved'
   await store.fetchAll(true)
 }
-function openStrategy(name: string) { selected.value = name }
+function openStrategy(s: any) {
+  selected.value = s.strategy
+  drawerKind.value = s.source || 'backtest'
+  drawerSource.value = s.source || ''
+}
 
 onMounted(() => { store.fetchAll() })
 </script>

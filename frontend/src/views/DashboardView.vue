@@ -2,106 +2,133 @@
   <section>
     <div class="section-head">
       <h2>Dashboard</h2>
+      <div class="controls">
+        <UInput v-model="globalFilter" placeholder="Filter strategies..." class="filter-input" />
+        <UButton variant="ghost" size="sm" @click="resetFilters" :disabled="!globalFilter && !Object.keys(columnVisibility).length">
+          <template #leading>
+            <UIcon name="i-lucide-rotate-ccw" />
+          </template>
+          Reset
+        </UButton>
+      </div>
     </div>
 
-    <div v-if="store.loading" class="card">Loading...</div>
-    <div v-else-if="store.error" class="card" style="color: var(--bad);">{{ store.error }}</div>
+    <GradeTuner v-model:min-profit="minProfit" v-model:min-trades="minTrades" />
+
+    <div v-if="store.loading" class="card">
+      <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+        <span class="ml-3 text-muted">Loading strategies...</span>
+      </div>
+    </div>
+    <div v-else-if="store.error" class="card" style="color: var(--bad);">
+      <div class="flex items-center gap-3">
+        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+        <div>
+          <p class="font-medium">{{ store.error }}</p>
+          <UButton size="sm" variant="outline" @click="refreshData">Retry</UButton>
+        </div>
+      </div>
+    </div>
     <div v-else>
-      <GradeTuner v-model:min-profit="minProfit" v-model:min-trades="minTrades" />
-
-      <div class="table-wrap table-stack" v-sync-scroll>
-        <div class="thead-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col" v-on:click="sortBy('strategy')">Strategy <span class="arrow" v-if="sortKey==='strategy'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('score.grade')">Grade <span class="arrow" v-if="sortKey==='score.grade'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('profit_total')">Profit% <span class="arrow" v-if="sortKey==='profit_total'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('sortino')">Sortino <span class="arrow" v-if="sortKey==='sortino'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('calmar')">Calmar <span class="arrow" v-if="sortKey==='calmar'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('profit_factor')">PF <span class="arrow" v-if="sortKey==='profit_factor'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('max_drawdown_account')">MaxDD <span class="arrow" v-if="sortKey==='max_drawdown_account'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('propPass')">Prop <span class="arrow" v-if="sortKey==='propPass'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('winrate')">Win% <span class="arrow" v-if="sortKey==='winrate'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" class="num" v-on:click="sortBy('total_trades')">Trades <span class="arrow" v-if="sortKey==='total_trades'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" v-on:click="sortBy('basis')">Basis <span class="arrow" v-if="sortKey==='basis'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" v-on:click="sortBy('timerange')">Range <span class="arrow" v-if="sortKey==='timerange'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" v-on:click="sortBy('run_time')">Run <span class="arrow" v-if="sortKey==='run_time'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-              </tr>
-            </thead>
-          </table>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <tbody>
-              <tr v-for="s in sortedFiltered" :key="s.strategy" v-on:click="openStrategy(s.strategy)" v-on:keydown.enter="openStrategy(s.strategy)" tabindex="0" role="button" :aria-label="'Open ' + s.strategy">
-                <td>{{ s.strategy }} <span :class="statusClass(s.status)">{{ s.status }}</span></td>
-                <td><span :class="gradePill(s.score.grade)">{{ s.score.grade }}</span></td>
-                <td class="num" :class="profitClass(s.profit_total)">{{ fmtProfitPct(s.profit_total) }}</td>
-                <td class="num">{{ fmt3(s.sortino) }}</td>
-                <td class="num">{{ fmt3(s.calmar) }}</td>
-                <td class="num">{{ pfFmt(s.profit_factor) }}</td>
-                <td class="num">{{ fmtPct(s.max_drawdown_account) }}</td>
-                <td class="num"><span :class="propClass(s)" :title="propTitle(s)">{{ propText(s) }}</span></td>
-                <td class="num">{{ fmtPct(s.winrate) }}</td>
-                <td class="num">{{ s.total_trades }}</td>
-                <td :title="basisTooltip(s)">{{ basisLabel(s) }}</td>
-                <td style="font-size:12px;color:var(--text-dim)">{{ fmtRange(s.timerange) }}</td>
-                <td>{{ (s.run_time || '').slice(0, 10) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="charts">
-        <div class="chart-box">
-          <VChart :option="profitOption" autoresize class="chart" style="height: 300px" />
-        </div>
-        <div class="chart-box">
-          <select v-model="metric2" class="metric-select">
-            <option value="profit_total">profit</option>
-            <option value="total_trades">trades</option>
-            <option value="winrate">winrate</option>
-          </select>
-          <VChart :option="metric2Option" autoresize class="chart" style="height: 300px" />
-        </div>
-      </div>
-
-      <div class="stats-row">
-        <div class="card">
-          <h3>What to improve next</h3>
-          <div v-for="s in improveNext" :key="s.strategy" class="metric-card" v-on:click="openStrategy(s.strategy)">
-            <div class="mk">{{ s.strategy }} — {{ s.score.grade }}</div>
-            <div class="mv">{{ s.focus || '—' }}</div>
+      <UTable
+        :data="filtered"
+        :columns="columns"
+        :loading="false"
+        :sticky="true"
+        :global-filter="globalFilter"
+        @update:global-filter="globalFilter = $event"
+        :sorting="sorting"
+        @update:sorting="sorting = $event"
+        :column-visibility="columnVisibility"
+        @update:column-visibility="columnVisibility = $event"
+        @row-click="openStrategy"
+        class="w-full"
+        empty="No strategies found matching your filters."
+      >
+        <template #strategy-cell="{ row }">
+          <div class="flex items-center gap-2">
+            <span>{{ row.strategy }}</span>
+            <span :class="statusClass(row.status)">{{ row.status }}</span>
           </div>
-        </div>
-        <div class="card">
-          <h3>Top 5</h3>
-          <table class="mini-table">
-            <tbody>
-              <tr v-for="s in topRows" :key="s.strategy" v-on:click="openStrategy(s.strategy)" v-on:keydown.enter="openStrategy(s.strategy)" tabindex="0" role="button" :aria-label="'Open ' + s.strategy">
-                <td>{{ s.strategy }}</td>
-                <td class="num">{{ fmtNum(s.profit_total) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="card">
-          <h3>Bottom 5</h3>
-          <table class="mini-table">
-            <tbody>
-              <tr v-for="s in flopRows" :key="s.strategy" v-on:click="openStrategy(s.strategy)" v-on:keydown.enter="openStrategy(s.strategy)" tabindex="0" role="button" :aria-label="'Open ' + s.strategy">
-                <td>{{ s.strategy }}</td>
-                <td class="num">{{ fmtNum(s.profit_total) }}</td>
-              </tr>
-            </tbody>
-          </table>
+        </template>
+        <template #grade-cell="{ row }">
+          <span :class="gradePill(row.score?.grade)">{{ row.score?.grade || '?' }}</span>
+        </template>
+        <template #profit-cell="{ row }">
+          <span class="num" :class="profitClass(row.profit_total)">{{ fmtProfitPct(row.profit_total) }}</span>
+        </template>
+        <template #prop-cell="{ row }">
+          <span class="num"><span :class="propClass(row)" :title="propTitle(row)">{{ propText(row) }}</span></span>
+        </template>
+        <template #basis-cell="{ row }">
+          <span :title="basisTooltip(row)">{{ basisLabel(row) }}</span>
+        </template>
+        <template #timerange-cell="{ row }">
+          <span style="font-size:12px;color:var(--text-dim)">{{ fmtRange(row.timerange) }}</span>
+        </template>
+        <template #run-time-cell="{ row }">
+          <span>{{ (row.run_time || '').slice(0, 10) }}</span>
+        </template>
+        <template #actions-cell="{ row }">
+          <UButton size="sm" variant="ghost" @click.stop="openStrategy(row.strategy)">
+            <UIcon name="i-lucide-chevron-right" size="14" />
+          </UButton>
+        </template>
+      </UTable>
+    </div>
+
+    <div class="charts">
+      <div class="chart-box">
+        <VChart :option="profitOption" autoresize class="chart" style="height: 300px" />
+      </div>
+      <div class="chart-box">
+        <USelect v-model="metric2" :options="metric2Options" class="metric-select" />
+        <VChart :option="metric2Option" autoresize class="chart" style="height: 300px" />
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="card">
+        <h3>What to improve next</h3>
+        <div v-for="s in improveNext" :key="s.strategy" class="metric-card" @click="openStrategy(s.strategy)">
+          <div class="mk">{{ s.strategy }} — {{ s.score.grade }}</div>
+          <div class="mv">{{ s.focus || '—' }}</div>
         </div>
       </div>
-
-      <StrategyDrawer v-if="selected" :name="selected" v-on:close="selected = ''" />
+      <div class="card">
+        <h3>Top 5</h3>
+        <UTable
+          :data="topRows"
+          :columns="miniColumns"
+          :loading="false"
+          @row-click="openStrategy"
+          class="w-full"
+          empty="No data"
+        >
+          <template #profit-cell="{ row }">
+            <span class="num">{{ fmtNum(row.profit_total) }}</span>
+          </template>
+        </UTable>
+      </div>
+      <div class="card">
+        <h3>Bottom 5</h3>
+        <UTable
+          :data="flopRows"
+          :columns="miniColumns"
+          :loading="false"
+          @row-click="openStrategy"
+          class="w-full"
+          empty="No data"
+        >
+          <template #profit-cell="{ row }">
+            <span class="num">{{ fmtNum(row.profit_total) }}</span>
+          </template>
+        </UTable>
+      </div>
     </div>
+
+    <StrategyDrawer v-if="selected" :name="selected" @close="selected = ''" />
   </section>
 </template>
 <script setup lang="ts">
