@@ -1,3 +1,4 @@
 ---
-policy: preserve-local
+policy: upgrade-house-style
+style_target: freqtrade_local
 ---
