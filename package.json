@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "husky",
-    "build:dashboard": "tsx scripts/build-dashboard.ts"
+    "openapi": "curl -s http://localhost:15001/openapi.json -o frontend/src/api/openapi.json"
   },
   "dependencies": {
     "@nuxt/ui": "^3.0.0",

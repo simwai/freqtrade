@@ -11,7 +11,8 @@ from pathlib import Path
 
 
 DB = Path("user_data/analysis/results.db")
-HTML = Path("user_data/analysis/dashboard.html").read_text(encoding="utf-8")
+ROOT = Path(__file__).resolve().parent.parent
+BENCH_VIEW = (ROOT / "frontend" / "src" / "views" / "BenchmarkView.vue").read_text(encoding="utf-8")
 
 
 def quartiles(arr):
@@ -93,10 +94,10 @@ print(
     f"({len(new_grouped) - len(old_grouped)} more than before)"
 )
 
-# assertion 3: the source selector and tag labels are wired into the live HTML
-for sel in ('id="benchSource"', "B+T", "backtest-only", "tagFor"):
-    assert sel in HTML, f"missing {sel}"
-print("OK   source selector and tag labels present in live HTML")
+# assertion 3: the source selector and tag labels are wired into the Vue view
+for sel in ('v-model="sourceMode"', '"auto"', '"benchmark"', '"backtest"', "'B+T'", "'B'"):
+    assert sel in BENCH_VIEW, f"missing {sel} in BenchmarkView.vue"
+print("OK   source selector and tag labels present in BenchmarkView.vue")
 
 # assertion 4: quartiles still compute correctly with N>1 strategy values
 sample = [0.1, 0.3, 0.5, 0.7, 0.9, 1.2, 1.5, 5.0]

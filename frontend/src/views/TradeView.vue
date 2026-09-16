@@ -6,6 +6,7 @@
 
     <div v-if="store.loading" class="card">Loading...</div>
     <div v-else class="card">
+      <p v-if="newestKey" class="hint">auto-loaded · newest run {{ newestKey }}</p>
       <div class="table-wrap table-stack">
         <div class="thead-scroll">
           <table>
@@ -22,7 +23,7 @@
         <div class="table-wrap" ref="tradesTableWrap">
           <table>
             <tbody>
-              <tr v-for="r in sortedRuns" :key="r.key">
+              <tr v-for="r in sortedRuns" :key="r.key" :style="r.key === newestKey ? 'background:var(--card-hover)' : ''">
                 <td><router-link :to="'/trades/' + r.key">{{ r.strategy }}</router-link></td>
                 <td>{{ r.source }}</td>
                 <td class="num">{{ r.n_trades }}</td>
@@ -58,6 +59,11 @@ const sortedRuns = computed(() => {
     return sortAsc.value ? r : -r
   })
   return arr
+})
+
+const newestKey = computed(() => {
+  const runs = [...store.trade_runs].sort((a: any, b: any) => (b.run_time || '').localeCompare(a.run_time || ''))
+  return runs.length ? runs[0].key : ''
 })
 
 function sortBy(key: string) {

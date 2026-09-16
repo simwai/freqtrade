@@ -2,21 +2,27 @@
 
 This is the small assert-based self-check required by module 14:
 the smallest thing that fails if the logic breaks. Pure Python, no
-browser. Mirrors the JS in dashboard.html so we can lint the math
-before opening a browser tab.
+browser. The math mirrors the helpers used by both the archived
+dashboard and the Vue benchmark view (quartile split + MAD outliers),
+and the UI assertions target the Vue sources, which are canonical
+since the static dashboard.html generator was retired.
 """
 
 from __future__ import annotations
 
 import importlib.util
-import json
 import re
 from pathlib import Path
 
 
-# extract the two helper functions from the live dashboard so we test
-# what the user actually sees
-HTML = Path("user_data/analysis/dashboard.html").read_text(encoding="utf-8")
+ROOT = Path(__file__).resolve().parent.parent
+BENCH_VIEW = ROOT / "frontend" / "src" / "views" / "BenchmarkView.vue"
+LAB_VIEW = ROOT / "frontend" / "src" / "views" / "LabView.vue"
+TRADE_VIEW = ROOT / "frontend" / "src" / "views" / "TradeView.vue"
+GRADE_TUNER = ROOT / "frontend" / "src" / "components" / "GradeTuner.vue"
+GRADES_TS = ROOT / "frontend" / "src" / "utils" / "grades.ts"
+FRESHNESS_TS = ROOT / "frontend" / "src" / "utils" / "freshness.ts"
+API_SERVER = ROOT / "user_data" / "scripts" / "api_server.py"
 
 
 def _bench_quartiles(arr):
@@ -67,93 +73,93 @@ assert _bench_quartiles([1.0]) == [1.0, 1.0, 1.0, 1.0, 1.0]
 assert _bench_outliers([1.0, 1.0]) == 0  # below the n<4 floor
 print("edge cases OK")
 
-# ---- test 4: every "apples-to-apples" string is gone ----
-assert "apples-to-apples" not in HTML
-print("apples-to-apples removed")
+# ---- test 4: the static dashboard generator is gone ----
+assert not (ROOT / "user_data" / "analysis" / "dashboard.html").exists(), (
+    "dashboard.html should no longer be generated; Vue is the only UI"
+)
+print("static dashboard retired")
 
-# ---- test 5: required new UI controls are present ----
+# ---- test 5: required benchmark controls live in the Vue view ----
+bench = BENCH_VIEW.read_text(encoding="utf-8")
 for sel in (
-    'id="benchMetric"',
-    'id="benchSort"',
-    'id="benchLog"',
-    'id="benchPoints"',
-    'id="tradeRun"',
-    'id="gradeTunerRows"',
-    'id="gradeBackdrop"',
-    'id="tradeLoadBtn"',
+    'v-model="metric"',
+    'v-model="sourceMode"',
+    'value="auto"',
+    'value="benchmark"',
+    'value="backtest"',
+    'v-model="sortMode"',
+    'value="median"',
+    'value="count"',
+    'value="name"',
+    'v-model="useLog"',
+    'v-model="showPoints"',
+    "type: 'boxplot'",
+    "(|z|>2.5)",
 ):
-    assert sel in HTML, f"missing {sel}"
-print("new controls present")
+    assert sel in bench, f"missing {sel} in BenchmarkView.vue"
+print("benchmark controls present")
 
 # ---- test 6: /api/freshness handler is wired ----
-assert "'/api/freshness'" in HTML or '"/api/freshness"' in HTML
-assert "ensureFresh" in HTML
-assert "startFreshnessLoop" in HTML
+api = API_SERVER.read_text(encoding="utf-8")
+assert "/api/freshness" in api
+fresh = FRESHNESS_TS.read_text(encoding="utf-8")
+assert "ensureFresh" in fresh
+assert "startFreshnessLoop" in fresh
 print("freshness hookup present")
 
-# ---- test 7: grade tuner open/apply/reset + re-grade hook ----
-for fn in (
-    "openGradeTuner",
-    "closeGradeTuner",
-    "applyGradeFactors",
-    "resetGradeFactors",
-    "applyTunedScoresInPlace",
-    "scoreRowTuned",
-    "gradeValueTuned",
-    "overallGradeTuned",
-):
-    assert f"function {fn}" in HTML, f"missing function {fn}"
+# ---- test 7: grade tuner apply/reset + re-grade hook ----
+tuner = GRADE_TUNER.read_text(encoding="utf-8")
+for fn in ("apply", "resetFactors", "retune"):
+    assert fn in tuner, f"missing {fn} in GradeTuner.vue"
+grades_ts = GRADES_TS.read_text(encoding="utf-8")
+for fn in ("activeGradeFactors", "saveGradeFactors", "scoreRowTuned"):
+    assert fn in grades_ts, f"missing {fn} in grades.ts"
 print("grade tuner hooks present")
 
-# ---- test 8: trades auto-load ----
-assert "auto-loaded · newest run" in HTML
-assert "renderTradesTab" in HTML
+# ---- test 8: trades auto-load the newest run ----
+trades = TRADE_VIEW.read_text(encoding="utf-8")
+assert "auto-loaded · newest run" in trades
+assert "newestKey" in trades
+assert "/trades/" in trades
 print("trades auto-load present")
 
-# ---- test 9: SCORECARD still present and identical to the python SCORECARD ----
-spec = importlib.util.spec_from_file_location("br", "user_data/scripts/_archived/build_report.py")
+# ---- test 9: TS grade thresholds match the python SCORECARD ----
+spec = importlib.util.spec_from_file_location(
+    "br", str(ROOT / "user_data" / "scripts" / "_archived" / "build_report.py")
+)
 br = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(br)
 py_scorecard = {k: dict(v) for k, v in br.SCORECARD.items()}
-# the embedded LAB.scorecard is a JSON dump; locate the SCORECARD slot
-m = HTML.find('"scorecard":')
-assert m >= 0, "scorecard not embedded"
-# parse the LAB JSON with brace matching from its opening brace -- robust
-# against regenerated layouts where LAB ends with an array or object
-lab_start = HTML.find("const LAB = ") + len("const LAB = ")
-open_idx = HTML.find("{", lab_start)
-assert open_idx >= 0, "could not find start of LAB JSON"
-depth = 0
-in_str = False
-esc = False
-lab_end = -1
-for i in range(open_idx, len(HTML)):
-    ch = HTML[i]
-    if in_str:
-        if esc:
-            esc = False
-        elif ch == "\\":
-            esc = True
-        elif ch == '"':
-            in_str = False
-    else:
-        if ch == '"':
-            in_str = True
-        elif ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                lab_end = i + 1
-                break
-assert lab_end > 0, "could not find end of LAB JSON"
-lab_json = HTML[open_idx:lab_end]
-lab = json.loads(lab_json)
-js_scorecard = lab["scorecard"]
-for k, v in py_scorecard.items():
-    assert js_scorecard[k]["pass"] == v["pass"], (k, v, js_scorecard[k])
-    assert js_scorecard[k]["warn"] == v["warn"], (k, v, js_scorecard[k])
-    assert js_scorecard[k]["higher_is_better"] == v["higher_is_better"]
+# parse DEFAULT_GRADE_DEFS from grades.ts:  key: { pass: P, warn: W, dir: D, ... }
+ts_defs = {
+    k: (p, w, d)
+    for k, p, w, d in re.findall(
+        r"(\w+):\s*\{\s*pass:\s*([-\d.]+),\s*warn:\s*([-\d.]+),\s*dir:\s*(-?\d)",
+        grades_ts,
+    )
+}
+key_map = {"max_drawdown": "max_drawdown_account", "trades": "total_trades"}
+assert set(ts_defs) == {
+    "sortino",
+    "calmar",
+    "profit_factor",
+    "max_drawdown",
+    "winrate",
+    "trades",
+    "worst_trade",
+}, ts_defs.keys()
+for ts_key, (p, w, d) in ts_defs.items():
+    py_key = key_map.get(ts_key, ts_key)
+    v = py_scorecard[py_key]
+    assert float(p) == v["pass"], (ts_key, p, v)
+    assert float(w) == v["warn"], (ts_key, w, v)
+    assert int(d) == (1 if v["higher_is_better"] else -1), (ts_key, d, v)
 print(f"scorecard parity OK: {len(py_scorecard)} metrics")
+
+# ---- test 10: lab run form is fed by dropdown APIs ----
+lab = LAB_VIEW.read_text(encoding="utf-8")
+for sel in ("/api/strategies", "/api/configs", "/api/losses"):
+    assert sel in lab, f"missing {sel} in LabView.vue"
+print("lab dropdowns present")
 
 print("\nALL CHECKS PASSED")
