@@ -3,16 +3,16 @@ import { api } from '../api/client'
 
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
-    canonical: [],
-    backtests: [],
-    benchmarks: [],
-    hyperopt: [],
-    walkforward: [],
-    strategies: [],
-    trade_runs: [],
-    history: {},
-    scorecard: {},
-    propSpec: {},
+    canonical: [] as any[],
+    backtests: [] as any[],
+    benchmarks: [] as any[],
+    hyperopt: [] as any[],
+    walkforward: [] as any[],
+    strategies: [] as any[],
+    trade_runs: [] as any[],
+    history: {} as Record<string, any>,
+    scorecard: {} as Record<string, any>,
+    propSpec: {} as Record<string, any>,
     loading: false,
     error: null as string | null
   }),

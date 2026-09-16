@@ -111,22 +111,43 @@ assert "renderTradesTab" in HTML
 print("trades auto-load present")
 
 # ---- test 9: SCORECARD still present and identical to the python SCORECARD ----
-spec = importlib.util.spec_from_file_location("br", "user_data/scripts/build_report.py")
+spec = importlib.util.spec_from_file_location("br", "user_data/scripts/_archived/build_report.py")
 br = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(br)
 py_scorecard = {k: dict(v) for k, v in br.SCORECARD.items()}
 # the embedded LAB.scorecard is a JSON dump; locate the SCORECARD slot
 m = HTML.find('"scorecard":')
 assert m >= 0, "scorecard not embedded"
-# crude: parse the LAB JSON
+# parse the LAB JSON with brace matching from its opening brace -- robust
+# against regenerated layouts where LAB ends with an array or object
 lab_start = HTML.find("const LAB = ") + len("const LAB = ")
-# the embedded JSON ends at the FIRST `};` on its own line that follows
-# the LAB content. The `state = {...}` object that comes next is the
-# immediate successor; the LAB JSON always ends with `};\n\nconst state`.
-m = re.search(r"\};\s*\n\s*\n\s*const\s+state\b", HTML[lab_start:])
-assert m, "could not find end of LAB JSON"
-lab_end = lab_start + m.start() + 1  # include the closing brace
-lab_json = HTML[lab_start:lab_end]
+open_idx = HTML.find("{", lab_start)
+assert open_idx >= 0, "could not find start of LAB JSON"
+depth = 0
+in_str = False
+esc = False
+lab_end = -1
+for i in range(open_idx, len(HTML)):
+    ch = HTML[i]
+    if in_str:
+        if esc:
+            esc = False
+        elif ch == "\\":
+            esc = True
+        elif ch == '"':
+            in_str = False
+    else:
+        if ch == '"':
+            in_str = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                lab_end = i + 1
+                break
+assert lab_end > 0, "could not find end of LAB JSON"
+lab_json = HTML[open_idx:lab_end]
 lab = json.loads(lab_json)
 js_scorecard = lab["scorecard"]
 for k, v in py_scorecard.items():

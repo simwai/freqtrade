@@ -60,9 +60,9 @@ export function tlExitColor(t: CompactTrade): string {
   const key = String(t.e || '').toLowerCase()
   return (EXIT_PAL as any)[key] || EXIT_PAL.unknown
 }
-export function markerItem(params: any, api: any): any {
+export function markerItem(_params: any, api: any): any {
   const p = api.coord([api.value(0), api.value(1)])
-  const kind = api.value(2), color = api.value(3), txt = api.value(4)
+  const kind = api.value(2), color = api.value(3)
   const s = 7
   if (kind === 0) return { type: 'polygon', shape: { points: [[p[0], p[1]], [p[0] - s, p[1] + s * 1.7], [p[0] + s, p[1] + s * 1.7]] }, style: { fill: color } }
   if (kind === 1) return { type: 'polygon', shape: { points: [[p[0], p[1]], [p[0] - s, p[1] - s * 1.7], [p[0] + s, p[1] - s * 1.7]] }, style: { fill: color } }

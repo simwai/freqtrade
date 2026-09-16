@@ -68,9 +68,15 @@ print(f"DB: {len(b_rows)} benchmark rows, {len(t_rows)} backtest rows")
 print(f"Old behaviour: {len(old_grouped)} strategies on the chart")
 print(f"New behaviour: {len(new_grouped)} strategies on the chart")
 
-# assertion 1: the old behaviour is exactly the bug the user reported
-assert len(old_grouped) == 3, f"expected 3 (the bug), got {len(old_grouped)}"
-print("OK   bug reproduced: only 3 strategies under old behaviour")
+# assertion 1: the old behaviour is the bug the user reported -- benchmarks
+# alone surface far fewer strategies than the merged view. The exact old
+# count depends on how many strategies have benchmark rows in the live DB,
+# so assert the relationship, not a hardcoded number.
+assert len(old_grouped) < len(new_grouped), (
+    f"expected old behaviour to surface fewer strategies than new, "
+    f"got old={len(old_grouped)} new={len(new_grouped)}"
+)
+print(f"OK   bug reproduced: old behaviour surfaces only {len(old_grouped)} strategies")
 
 # assertion 2: the new behaviour surfaces every strategy with at least one
 # non-null metric value across benchmarks + backtests

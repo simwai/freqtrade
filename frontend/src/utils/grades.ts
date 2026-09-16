@@ -16,7 +16,7 @@ export function gradeFromScore(score: number): string {
   return 'na'
 }
 export function scoreStrategy(row: any): number {
-  const d = DEFAULT_GRADE_DEFS
+  const d: Record<string, any> = DEFAULT_GRADE_DEFS
   let s = 0
   let cnt = 0
   for (const k of Object.keys(d)) {

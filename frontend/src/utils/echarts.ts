@@ -26,4 +26,4 @@ import type { CandlestickSeriesOption, CustomSeriesOption } from 'echarts/charts
 import { DataZoomComponent } from 'echarts/components'
 import type { DataZoomComponentOption } from 'echarts/components'
 echarts.use([CandlestickChart, CustomChart, DataZoomComponent])
-export type ECOption2 = ComposeOption<ScatterSeriesOption | CandlestickSeriesOption | CustomSeriesOption | TooltipComponentOption | GridComponentOption | DataZoomComponentOption>
+export type ECOption2 = ComposeOption<ScatterSeriesOption | CandlestickSeriesOption | CustomSeriesOption | LineSeriesOption | BarSeriesOption | TooltipComponentOption | GridComponentOption | DataZoomComponentOption>

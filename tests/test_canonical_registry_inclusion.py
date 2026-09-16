@@ -27,7 +27,7 @@ import pytest
 
 
 SCRIPTS = Path(__file__).resolve().parent.parent / "user_data" / "scripts"
-BUILD_REPORT = SCRIPTS / "build_report.py"
+BUILD_REPORT = SCRIPTS / "_archived" / "build_report.py"
 
 
 def _load_build_report():
