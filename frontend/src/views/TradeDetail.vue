@@ -177,6 +177,7 @@ const tradeSortKey = ref('o')
 const tradeSortAsc = ref(true)
 const tlVChart = ref(null as any)
 const fetchCache = new Map<string, number[][]>()
+const indCache = new Map<string, any>()
 const loadSeq = ref(0)
 const zoomSeq = ref(0)
 const appliedZoomKey = ref('')
@@ -438,7 +439,6 @@ function zoomToTrade(t: any) {
       dz.startValue = v0
       dz.endValue = v1
     } else {
-      const s = dz.start == null ? 0 : dz.start, e = dz.end == null ? 100 : dz.end
       const first = candles.value[0][0], last = candles.value[candles.value.length - 1][0]
       dz.start = (v0 - first) / (last - first) * 100
       dz.end = (v1 - first) / (last - first) * 100
@@ -463,18 +463,33 @@ async function addIndByName(name: string) {
   if (!candles.value.length || !pair.value) { pendingIndName.value = name; return }
   const t0 = candles.value[0][0]
   const t1 = candles.value[candles.value.length - 1][0]
+  const cacheKey = name + '|' + pair.value + '|' + tf.value + '|' + mode.value + '|' + t0 + '|' + t1
+  if (indCache.has(cacheKey)) {
+    const cached = indCache.get(cacheKey)
+    if (inds.value.length < 3) {
+      inds.value.push({ ...cached, id: name + '#' + (++indSeq.value) })
+    }
+    return
+  }
   try {
     const { data } = await api.get('/api/indicator', { params: { name: name, pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: t0, end: t1 } })
     if (data.error || !data.series || !data.series.length) { indNote.value = name + ': no data for ' + pair.value + ' ' + tf.value + ' in this window'; return }
     if (inds.value.length >= 3) return
     indNote.value = ''
+    const cfg = data.series.map((s: any) => ({ data: indParse(s) }))
+    indCache.set(name + '|' + pair.value + '|' + tf.value + '|' + mode.value + '|' + t0 + '|' + t1, {
+      name: name,
+      title: data.title || name,
+      scale: data.scale,
+      cfg: data.series.map((s: any) => ({ data: indParse(s) }))
+    })
     inds.value.push({
       id: name + '#' + (++indSeq.value),
       name: name,
       title: data.title || name,
       scale: data.scale,
       colors: data.series.map((_: any, si: number) => IND_COLORS[(inds.value.length + si) % IND_COLORS.length]),
-      cfg: data.series.map((s: any) => ({ data: indParse(s) }))
+      cfg
     })
   } catch (e) { indNote.value = name + ': failed to load' }
 }
@@ -501,10 +516,17 @@ async function refreshInds() {
   if (!inds.value.length || !candles.value.length || !pair.value) return
   const t0 = candles.value[0][0], t1 = candles.value[candles.value.length - 1][0]
   inds.value.forEach((e: any) => {
+    const cacheKey = e.name + '|' + pair.value + '|' + tf.value + '|' + mode.value + '|' + t0 + '|' + t1
+    if (indCache.has(cacheKey)) {
+      e.cfg = indCache.get(cacheKey).cfg
+      return
+    }
     api.get('/api/indicator', { params: { name: e.name, pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: t0, end: t1 } })
       .then(({ data }: any) => {
         if (data.error || !data.series) return
-        e.cfg = data.series.map((s: any) => ({ data: indParse(s) }))
+        const cfg = data.series.map((s: any) => ({ data: indParse(s) }))
+        e.cfg = cfg
+        indCache.set(e.name + '|' + pair.value + '|' + tf.value + '|' + mode.value + '|' + t0 + '|' + t1, { cfg })
       }).catch(() => {})
   })
 }
@@ -629,7 +651,10 @@ const tlOption = computed((): any => {
 
     if (slOk) {
       const tp = tpPriceForTrade(t, roi.value)
-      if (tp != null) tpPts.push([t0, tp], [t1, tp])
+      if (tp != null) {
+        const hitTp = ['roi', 'trailing', 'signal', 'exit_signal'].includes(String(t.e || '').toLowerCase())
+        tpPts.push({ time: t0, value: tp, hit: hitTp }, { time: t1, value: tp, hit: hitTp })
+      }
     }
   })
 
@@ -690,8 +715,15 @@ const tlOption = computed((): any => {
     { type: 'custom', xAxisIndex: 0, yAxisIndex: 0, z: 12, silent: true, renderItem: (params: any, api: any) => markerItem(params, api), encode: { x: 0, y: 1 }, data: markers }
   ]
   if (tpPts.length) {
-    tpPts.sort((a: any, b: any) => a[0] - b[0])
-    series.push({ type: 'line', xAxisIndex: 0, yAxisIndex: 0, showSymbol: false, silent: true, z: 2, lineStyle: { width: 1, type: 'solid', color: mcolors.win + '88' }, data: tpPts })
+    tpPts.sort((a: any, b: any) => a.time - b.time)
+    const tpHit = tpPts.filter((p: any) => p.hit)
+    const tpMiss = tpPts.filter((p: any) => !p.hit)
+    if (tpHit.length) {
+      series.push({ type: 'line', xAxisIndex: 0, yAxisIndex: 0, showSymbol: false, silent: true, z: 2, lineStyle: { width: 1, type: 'solid', color: mcolors.win + '88' }, data: tpHit.map(p => [p.time, p.value]) })
+    }
+    if (tpMiss.length) {
+      series.push({ type: 'line', xAxisIndex: 0, yAxisIndex: 0, showSymbol: false, silent: true, z: 2, lineStyle: { width: 1, type: 'solid', color: mcolors.loss + '88' }, data: tpMiss.map(p => [p.time, p.value]) })
+    }
   }
   priceOverlays.forEach((e: any) => {
     e.cfg.forEach((s: any, si: number) => series.push({ type: 'line', xAxisIndex: 0, yAxisIndex: 0, showSymbol: false, silent: true, lineStyle: { width: 1.5, color: e.colors[si] }, data: s.data }))

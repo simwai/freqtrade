@@ -210,7 +210,7 @@ async function drill(source: string) {
   detail.value = Object.assign({}, data, { paramsText, loss_function: hoRow?.loss_function || '', best_loss: hoRow?.best_loss })
 }
 function shortLoss(s: string) { return (s || '').replace('HyperOptLoss', '') }
-function openRun(kind: string, source: string) {
+function openRun(_kind: string, source: string) {
   const r = store.hyperopt.find((x: any) => x.source === source)
   if (r) {
     const strategy = r.strategy
