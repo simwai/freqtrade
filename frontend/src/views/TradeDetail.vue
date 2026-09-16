@@ -105,7 +105,7 @@
           <div class="table-wrap">
             <table>
               <tbody>
-                <tr v-for="t in sortedTrades" :key="t.o + t.c + t.p">
+                <tr v-for="t in sortedTrades" :key="t.o + t.c + t.p" v-on:click="zoomToTrade(t)" style="cursor: pointer;">
                   <td>{{ t.p }}</td>
                   <td><span :class="sideClass(t.s)">{{ t.s ? 'short' : 'long' }}</span></td>
                   <td>{{ t.t }}</td>
@@ -424,6 +424,27 @@ function zoomFetch() {
         apply(data.candles)
       }
     }).catch(() => {})
+}
+
+function zoomToTrade(t: any) {
+  if (!candles.value.length) return
+  const t0 = tradeMs(t.o), t1 = tradeMs(t.c)
+  const opt = chartInst()?.getOption?.()
+  const dz = opt && opt.dataZoom && opt.dataZoom[0]
+  if (dz) {
+    const v0 = t0 - Math.max((t1 - t0) * 0.1, 60000)
+    const v1 = t1 + Math.max((t1 - t0) * 0.1, 60000)
+    if (dz.startValue != null && dz.endValue != null) {
+      dz.startValue = v0
+      dz.endValue = v1
+    } else {
+      const s = dz.start == null ? 0 : dz.start, e = dz.end == null ? 100 : dz.end
+      const first = candles.value[0][0], last = candles.value[candles.value.length - 1][0]
+      dz.start = (v0 - first) / (last - first) * 100
+      dz.end = (v1 - first) / (last - first) * 100
+    }
+    chartInst()?.dispatchAction({ type: 'dataZoom', startValue: v0, endValue: v1 })
+  }
 }
 
 function indParse(s: any) {

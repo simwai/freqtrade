@@ -52,6 +52,7 @@
         <div v-if="logJob" class="log-panel card">
           <div class="log-header">
             <h4>Log {{ logJob }}</h4>
+            <button class="btn-secondary btn-sm" v-on:click="viewLog(logJob)">Refresh</button>
             <button class="btn-secondary btn-sm" v-on:click="closeLog">Close</button>
           </div>
           <pre class="code-block">{{ logText }}</pre>

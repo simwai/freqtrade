@@ -8,7 +8,7 @@
       <span class="sub" v-if="stale">Stale</span>
       <span class="sub" v-else-if="builtAt">built {{ builtAt }}</span>
       <JobsModal />
-      <button class="refresh-btn" v-on:click="manualRefresh">Refresh</button>
+      <UButton color="neutral" variant="ghost" size="sm" @click="manualRefresh">Refresh</UButton>
     </header>
 
     <nav class="tabs">
@@ -24,6 +24,8 @@
     <main>
       <router-view />
     </main>
+
+    <Toaster />
   </div>
 </template>
 <script setup lang="ts">
@@ -31,8 +33,10 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { checkFreshness, triggerRefresh, startFreshnessLoop, onVisible } from './utils/freshness'
 import JobsModal from './components/JobsModal.vue'
+import { useToast } from '@nuxt/ui/composables/useToast'
 
 const route = useRoute()
+const toast = useToast()
 const stale = ref(false)
 const builtAt = ref('')
 const currentRoute = computed(() => route.path)
@@ -58,8 +62,13 @@ async function refreshFresh() {
   } catch (e) {}
 }
 async function manualRefresh() {
-  await triggerRefresh()
-  await refreshFresh()
+  try {
+    await triggerRefresh()
+    await refreshFresh()
+    toast.add({ title: 'Refreshed', description: 'Data refreshed successfully.', color: 'success', duration: 2000 })
+  } catch (e) {
+    toast.add({ title: 'Refresh failed', description: 'Could not refresh data.', color: 'error', duration: 3000 })
+  }
 }
 onMounted(() => {
   refreshFresh()

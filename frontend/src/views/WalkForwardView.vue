@@ -27,6 +27,7 @@
                   <th scope="col" v-on:click="sortBy('avg_oos_sortino')" class="num">Avg Sortino <span class="arrow" v-if="sortKey==='avg_oos_sortino'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('avg_oos_profit_factor')" class="num">Avg PF <span class="arrow" v-if="sortKey==='avg_oos_profit_factor'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('loss_function')">Loss <span class="arrow" v-if="sortKey==='loss_function'">{{ sortAsc ? '▲' : '▼' }}</span></th>
+                  <th scope="col">Config</th>
                 </tr>
               </thead>
             </table>
@@ -45,6 +46,7 @@
                   <td class="num">{{ fmtNum(r.avg_oos_sortino) }}</td>
                   <td class="num">{{ fmtNum(r.avg_oos_profit_factor) }}</td>
                   <td>{{ r.loss_function }}</td>
+                  <td><button class="btn-secondary btn-sm" v-on:click.stop="openRun('walkforward', r.source)">Config & code</button></td>
                 </tr>
               </tbody>
             </table>
@@ -100,6 +102,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -112,6 +115,7 @@ import { api } from '../api/client'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 import { ratioClass } from '../utils/pills'
+const router = useRouter()
 
 const store = useDashboardStore()
 const q = ref('')
@@ -200,6 +204,13 @@ function fmtRange(tr: string) {
   const p = String(tr).split('-')
   const d = (s: string) => (s && s.length === 8) ? s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8) : (s || '?')
   return d(p[0]) + ' → ' + (p[1] ? d(p[1]) : 'live')
+}
+function openRun(kind: string, source: string) {
+  const r = store.walkforward.find((x: any) => x.source === source)
+  if (r) {
+    const strategy = r.strategy
+    router.push(`/strategies/${encodeURIComponent(strategy)}?source=${encodeURIComponent(source)}&kind=${kind}`)
+  }
 }
 
 const detailWins = computed(() => sortedWins.value)

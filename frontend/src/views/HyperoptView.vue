@@ -35,6 +35,7 @@
                   <th scope="col" v-on:click="sortBy('loss_function')">Loss <span class="arrow" v-if="sortKey==='loss_function'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('spaces')">Spaces <span class="arrow" v-if="sortKey==='spaces'">{{ sortAsc ? '▲' : '▼' }}</span></th>
                   <th scope="col" v-on:click="sortBy('run_time')" class="num">Run <span class="arrow" v-if="sortKey==='run_time'">{{ sortAsc ? '▲' : '▼' }}</span></th>
+                  <th scope="col">Config</th>
                 </tr>
               </thead>
             </table>
@@ -53,6 +54,7 @@
                   <td :title="r.spaces || ''">{{ shortLoss(r.loss_function) }}</td>
                   <td :title="r.spaces || ''">{{ (r.spaces || '').slice(0, 18) }}</td>
                   <td class="num">{{ (r.run_time || '').slice(0, 16) }}</td>
+                  <td><button class="btn-secondary btn-sm" v-on:click.stop="openRun('hyperopt', r.source)">Config & code</button></td>
                 </tr>
               </tbody>
             </table>
@@ -122,6 +124,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -131,6 +134,7 @@ import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZ
 echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
 import { useDashboardStore } from '../stores/dashboard'
 import { api } from '../api/client'
+const router = useRouter()
 import type { ECScatterOption } from '../utils/echarts'
 import { corrClass } from '../utils/pills'
 import '../utils/echarts'
@@ -206,6 +210,17 @@ async function drill(source: string) {
   detail.value = Object.assign({}, data, { paramsText, loss_function: hoRow?.loss_function || '', best_loss: hoRow?.best_loss })
 }
 function shortLoss(s: string) { return (s || '').replace('HyperOptLoss', '') }
+function openRun(kind: string, source: string) {
+  const r = store.hyperopt.find((x: any) => x.source === source)
+  if (r) {
+    const strategy = r.strategy
+    const kind = r.kind || 'hyperopt'
+    // Open drawer with the specific run context
+    // We'll use the StrategyDrawer component which needs to be imported
+    // For now, we'll use a simple approach - navigate to strategy detail
+    router.push(`/strategies/${encodeURIComponent(strategy)}?source=${encodeURIComponent(source)}&kind=${kind}`)
+  }
+}
 function signed(v: number) { return (v > 0 ? '+' : '') + Number(v).toFixed(2) }
 function sortBy(key: string) {
   if (sortKey.value === key) sortAsc.value = !sortAsc.value

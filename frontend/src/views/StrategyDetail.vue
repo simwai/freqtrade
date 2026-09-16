@@ -277,6 +277,15 @@ function openRun(kind: string, source: string) {
   drawerOpen.value = true
 }
 
+// Auto-open drawer from query params
+onMounted(() => {
+  const kind = route.query.kind as string | undefined
+  const source = route.query.source as string | undefined
+  if (kind && source) {
+    openRun(kind, source)
+  }
+})
+
 const strategy = computed(() => store.canonical.find((s: any) => s.strategy === name) || { strategy: name, score: { grade: '?', grades: {} } })
 const runs = computed(() => store.backtests.filter((b: any) => b.strategy === name).sort((a: any, b: any) => (b.run_time || '').localeCompare(a.run_time || '')))
 const benches = computed(() => store.benchmarks.filter((b: any) => b.strategy === name))
