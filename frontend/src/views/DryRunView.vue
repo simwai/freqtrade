@@ -22,9 +22,20 @@
       <div class="card">
         <h3>Start new</h3>
         <div class="form-row">
-          <label>Strategy <input v-model="strategy" placeholder="strategy name" /></label>
+          <label>Strategy
+            <select v-model="strategy">
+              <option value="">(choose…)</option>
+              <option v-for="s in strategyOptions" :key="s.name" :value="s.name">{{ s.name }}</option>
+            </select>
+          </label>
           <label>Timerange <input v-model="timerange" placeholder="20220101-20240101" /></label>
           <label>Timeframe <input v-model="timeframe" placeholder="5m" /></label>
+          <label>Config
+            <select v-model="dryrunConfig">
+              <option value="">auto (optional)</option>
+              <option v-for="c in configOptions" :key="c.path" :value="c.path">{{ c.name }}</option>
+            </select>
+          </label>
           <button class="btn-primary" v-on:click="startDryrun">Start dry run</button>
           <button class="btn-secondary" v-on:click="stopDryrun">Stop dry run</button>
         </div>
@@ -38,7 +49,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { api } from '../api/client'
 
 const loading = ref(true)
@@ -47,11 +58,32 @@ const logText = ref('')
 const strategy = ref('')
 const timerange = ref('20220101-20240101')
 const timeframe = ref('5m')
+const dryrunConfig = ref('')
+const strategyOptions = ref([] as any[])
+const configOptions = ref([] as any[])
+let pollTimer: any = null
 
 async function loadStatus() {
   const { data } = await api.get('/api/dryrun')
   dryrun.value = data
   loading.value = false
+  armPolling()
+}
+
+function armPolling() {
+  if (pollTimer) return
+  pollTimer = setInterval(() => { if (!document.hidden && dryrun.value && dryrun.value.active) loadStatus() }, 15000)
+}
+
+async function loadDropdowns() {
+  try {
+    const { data } = await api.get('/api/strategies')
+    strategyOptions.value = Array.isArray(data) ? data : []
+  } catch (e) { strategyOptions.value = [] }
+  try {
+    const { data } = await api.get('/api/configs')
+    configOptions.value = (data && data.configs) || []
+  } catch (e) { configOptions.value = [] }
 }
 
 async function loadLog() {
@@ -62,7 +94,9 @@ async function loadLog() {
 
 async function startDryrun() {
   if (!strategy.value) return
-  await api.post('/api/dryrun', { strategy: strategy.value, timerange: timerange.value, timeframe: timeframe.value })
+  const body: any = { strategy: strategy.value, timerange: timerange.value, timeframe: timeframe.value }
+  if (dryrunConfig.value) body.config = dryrunConfig.value
+  await api.post('/api/dryrun', body)
   await loadStatus()
 }
 
@@ -73,8 +107,11 @@ async function stopDryrun() {
 
 async function openGate() {
   if (!strategy.value) return
-  await api.post('/api/dryrun/gate', { strategy: strategy.value, timerange: timerange.value, timeframe: timeframe.value })
+  const body: any = { strategy: strategy.value, timerange: timerange.value, timeframe: timeframe.value }
+  if (dryrunConfig.value) body.config = dryrunConfig.value
+  await api.post('/api/dryrun/gate', body)
 }
 
-onMounted(loadStatus)
+onMounted(() => { loadStatus(); loadDropdowns() })
+onUnmounted(() => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null } })
 </script>

@@ -6,98 +6,224 @@
 
     <div v-if="store.loading" class="card">Loading...</div>
     <div v-else class="card">
-      <div class="table-wrap table-stack">
-        <div class="thead-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col" v-on:click="sortBy('strategy')">Strategy <span class="arrow" v-if="sortKey==='strategy'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" v-on:click="sortBy('source')">Source <span class="arrow" v-if="sortKey==='source'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" v-on:click="sortBy('profit_total')" class="num">Profit <span class="arrow" v-if="sortKey==='profit_total'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" v-on:click="sortBy('total_trades')" class="num">Trades <span class="arrow" v-if="sortKey==='total_trades'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                <th scope="col" v-on:click="sortBy('sortino')" class="num">Sortino <span class="arrow" v-if="sortKey==='sortino'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-              </tr>
-            </thead>
-          </table>
-        </div>
-        <div class="table-wrap" ref="benchTableWrap">
-          <table>
-            <tbody>
-              <tr v-for="b in sortedBenchmarks" :key="b.strategy + b.source">
-                <td>{{ b.strategy }}</td>
-                <td>{{ b.source }}</td>
-                <td class="num" :class="profitClass(b.profit_total)">{{ fmtNum(b.profit_total) }}</td>
-                <td class="num">{{ b.total_trades }}</td>
-                <td class="num">{{ fmtNum(b.sortino) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="controls">
+        <label>Metric:
+          <select v-model="metric">
+            <option value="sortino">Sortino</option>
+            <option value="profit_total">Total Profit</option>
+            <option value="calmar">Calmar</option>
+            <option value="profit_factor">Profit Factor</option>
+            <option value="max_drawdown_account">Max Drawdown</option>
+          </select>
+        </label>
+        <label>Source:
+          <select v-model="sourceMode">
+            <option value="auto">Benchmark + backtest (default)</option>
+            <option value="benchmark">Benchmark only</option>
+            <option value="backtest">Backtest only</option>
+          </select>
+        </label>
+        <label>Sort by:
+          <select v-model="sortMode">
+            <option value="median">Median (default)</option>
+            <option value="count">Run count</option>
+            <option value="name">Strategy name</option>
+          </select>
+        </label>
+        <label><input type="checkbox" v-model="useLog" /> Log scale</label>
+        <label><input type="checkbox" v-model="showPoints" /> Show every run</label>
       </div>
 
       <div class="chart-box">
-        <VChart :option="benchOption" autoresize class="chart" style="height: 320px" />
+        <p class="hint">{{ hint }}</p>
+        <VChart v-if="boxData.length" :option="benchOption" autoresize class="chart" :style="{ height: chartHeight + 'px' }" />
+        <p v-else class="hint">No rows have a value for this metric. Pick a different metric or run more strategies.</p>
       </div>
     </div>
   </section>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { BarChart, LineChart, ScatterChart, CandlestickChart } from 'echarts/charts'
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent } from 'echarts/components'
+import { BarChart, LineChart, ScatterChart, BoxplotChart } from 'echarts/charts'
+import { TitleComponent, TooltipComponent, GridComponent, LegendComponent } from 'echarts/components'
 
-echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
+echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, BoxplotChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent])
 import { useDashboardStore } from '../stores/dashboard'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 
 const store = useDashboardStore()
-const sortKey = ref('profit_total')
-const sortAsc = ref(false)
-const benchTableWrap = ref<HTMLElement | null>(null)
+const metric = ref('sortino')
+const sourceMode = ref('auto')
+const sortMode = ref('median')
+const useLog = ref(false)
+const showPoints = ref(true)
 
-const sortedBenchmarks = computed(() => {
-  const arr = [...store.benchmarks]
-  arr.sort((a: any, b: any) => {
-    let av = a[sortKey.value]
-    let bv = b[sortKey.value]
-    if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return sortAsc.value ? 1 : -1
-    if (bv === '' || bv === undefined || bv === null) return sortAsc.value ? -1 : 1
-    const an = Number(av), bn = Number(bv)
-    const useNum = !isNaN(an) && !isNaN(bn)
-    const r = useNum ? an - bn : String(av).localeCompare(String(bv))
-    return sortAsc.value ? r : -r
+const SENTINEL_VALUES: Record<string, number> = { sortino: -100, sharpe: -100, calmar: -100, sqn: -100 }
+
+function benchQuartiles(arr: number[]) {
+  if (!arr.length) return null
+  const s = [...arr].sort((a, b) => a - b)
+  const n = s.length
+  const pick = (p: number) => s[Math.min(n - 1, Math.max(0, Math.floor(p * (n - 1))))]
+  return [s[0], pick(0.25), pick(0.5), pick(0.75), s[n - 1]]
+}
+
+function benchOutliers(arr: number[]) {
+  if (arr.length < 4) return 0
+  const s = [...arr].sort((a, b) => a - b)
+  const med = s[Math.floor(s.length / 2)]
+  const dev = [...arr].map((v) => Math.abs(v - med)).sort((a, b) => a - b)
+  const mad = dev[Math.floor(dev.length / 2)]
+  if (!mad) return 0
+  const k = 1.4826
+  return arr.filter((v) => Math.abs(v - med) / (k * mad) > 2.5).length
+}
+
+function colorOf(v: number) {
+  if (metric.value === 'max_drawdown_account') return v <= 0.2 ? '#6ee7a8' : v <= 0.4 ? '#fbbf24' : '#f87171'
+  return v >= 1 ? '#6ee7a8' : v >= 0.3 ? '#fbbf24' : '#f87171'
+}
+
+function tagFor(entries: any[]) {
+  const b = entries.filter((e) => e.src === 'B').length
+  const t = entries.filter((e) => e.src === 'T').length
+  if (b && t) return 'B+T'
+  if (b) return 'B'
+  return 'T'
+}
+
+function fmtVal(v: number) {
+  if (v === null || v === undefined) return '—'
+  return Number(v).toLocaleString('en-US', { maximumFractionDigits: 3 })
+}
+
+const boxData = computed(() => {
+  const isRetired = (name: string) => {
+    const row = store.canonical.find((r: any) => r.strategy === name)
+    return !!(row && (row.status || 'active') === 'retired')
+  }
+  const all: any[] = []
+  if (sourceMode.value === 'auto' || sourceMode.value === 'benchmark') {
+    store.benchmarks.forEach((r: any) => { if (!isRetired(r.strategy)) all.push({ ...r, _src: 'B' }) })
+  }
+  if (sourceMode.value === 'auto' || sourceMode.value === 'backtest') {
+    store.backtests.forEach((r: any) => { if (!isRetired(r.strategy)) all.push({ ...r, _src: 'T' }) })
+  }
+  const byStrategy = new Map<string, any[]>()
+  all.forEach((r: any) => {
+    const v = r[metric.value]
+    if (v === null || v === undefined || v === '') return
+    if (!byStrategy.has(r.strategy)) byStrategy.set(r.strategy, [])
+    byStrategy.get(r.strategy)!.push({ value: Number(v), src: r._src })
   })
-  return arr
+  const sentinel = SENTINEL_VALUES[metric.value]
+  const rows: any[] = [...byStrategy.keys()].map((name) => {
+    const entries = byStrategy.get(name)!
+    const kept = sentinel !== undefined ? entries.filter((e) => e.value !== sentinel) : entries
+    const q = benchQuartiles(kept.map((e) => e.value))
+    return { name: name, entries: kept, q: q, color: q ? colorOf(q[2]) : '#8b83a5', n: kept.length, tag: tagFor(entries) }
+  }).filter((b) => b.q !== null)
+  if (sortMode.value === 'name') rows.sort((a, b) => a.name.localeCompare(b.name))
+  else if (sortMode.value === 'count') rows.sort((a, b) => b.n - a.n || a.name.localeCompare(b.name))
+  else rows.sort((a, b) => (b.q as number[])[2] - (a.q as number[])[2])
+  return rows
 })
 
-function sortBy(key: string) {
-  if (sortKey.value === key) sortAsc.value = !sortAsc.value
-  else { sortKey.value = key; sortAsc.value = true }
-}
-function profitClass(v: number) { if (!v) return ''; return v > 0 ? 'good' : v < 0 ? 'bad' : '' }
-function fmtNum(v: number) { return v ? v.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '—' }
+const chartHeight = computed(() => Math.max(380, boxData.value.length * 26 + 90))
 
-const benchOption = computed((): ECOption => ({
-  xAxis: { type: 'category', data: sortedBenchmarks.value.map((b: any) => b.strategy), axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
-  yAxis: { type: 'value', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } }, splitLine: { lineStyle: { color: '#2f2745' } } },
-  grid: { left: 50, right: 20, top: 10, bottom: 40 },
-  series: [{ type: 'line', data: sortedBenchmarks.value.map((b: any) => b.profit_total || 0), lineStyle: { color: '#a78bfa' }, showSymbol: false }]
-}))
+const effectiveLog = computed(() => {
+  if (!useLog.value) return false
+  return !boxData.value.some((b) => b.q && (b.q as number[]).some((v) => v <= 0))
+})
 
-onMounted(async () => {
-  await store.fetchAll()
-  await nextTick()
-  if (benchTableWrap.value) {
-    benchTableWrap.value.addEventListener('scroll', () => {
-      const tw = benchTableWrap.value!
-      tw.classList.toggle('scroll-left', tw.scrollLeft > 0)
-      tw.classList.toggle('scroll-right', tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1)
+const hint = computed(() => {
+  if (!boxData.value.length) return ''
+  const totalRuns = boxData.value.reduce((s, b) => s + b.n, 0)
+  const totalOut = boxData.value.reduce((s, b) => s + benchOutliers(b.entries.map((e: any) => e.value)), 0)
+  const benchCount = boxData.value.filter((b) => b.tag === 'B' || b.tag === 'B+T').length
+  const backtestOnly = boxData.value.length - benchCount
+  const sourceTag = sourceMode.value === 'benchmark' ? 'benchmark only'
+    : sourceMode.value === 'backtest' ? 'backtest only'
+    : benchCount + ' benchmarked · ' + backtestOnly + ' backtest-only'
+  const logNote = useLog.value && !effectiveLog.value ? ' · log scale off: values <=0 cannot be shown on a log axis' : ''
+  return boxData.value.length + ' strategies · ' + totalRuns + ' runs · ' + totalOut + ' outlier' + (totalOut === 1 ? '' : 's') + ' (|z|>2.5) · ' + sourceTag + logNote
+})
+
+const benchOption = computed((): ECOption => {
+  const data = boxData.value
+  const pointData: any[] = []
+  if (showPoints.value) {
+    data.forEach((b, i) => {
+      b.entries.forEach((e: any, j: number) => {
+        const jitter = ((j % 3) - 1) * 0.12
+        pointData.push([e.value, i + jitter, b.name, j, jitter, colorOf(e.value), e.src])
+      })
     })
   }
+  return {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      formatter: (p: any) => {
+        if (p.seriesType === 'boxplot' || p.seriesName === metric.value) {
+          const b = data[p.dataIndex]
+          const q = b.q as number[]
+          return '<b>' + b.name + '</b> [' + b.tag + '] · ' + b.n + ' run' + (b.n === 1 ? '' : 's') + '<br/>'
+            + 'min ' + fmtVal(q[0]) + ' · Q1 ' + fmtVal(q[1]) + ' · med ' + fmtVal(q[2]) + ' · Q3 ' + fmtVal(q[3]) + ' · max ' + fmtVal(q[4])
+        }
+        return '<b>' + p.data[2] + '</b> [' + p.data[6] + '] · run #' + (p.data[3] + 1) + '<br/>value ' + fmtVal(p.data[0])
+      }
+    },
+    grid: { left: 180, right: 60, top: 20, bottom: 40 },
+    xAxis: effectiveLog.value
+      ? { type: 'log', logBase: 10, axisLabel: { color: '#a89fc4' }, splitLine: { lineStyle: { color: '#241d36' } } }
+      : { type: 'value', scale: true, axisLabel: { color: '#a89fc4' }, splitLine: { lineStyle: { color: '#241d36' } } },
+    yAxis: {
+      type: 'category',
+      data: data.map((b) => b.name + '  [' + b.tag + ']'),
+      axisLabel: { color: '#a89fc4' }
+    },
+    series: [
+      {
+        name: metric.value, type: 'boxplot',
+        data: data.map((b) => b.q),
+        itemStyle: { color: 'rgba(167, 139, 250, 0.25)', borderColor: '#a78bfa' }
+      },
+      {
+        name: 'median', type: 'scatter',
+        symbol: 'diamond', symbolSize: 10,
+        data: data.map((b, i) => ({ value: [(b.q as number[])[2], i], itemStyle: { color: b.color, borderColor: '#fff', borderWidth: 1 } })),
+        tooltip: { show: false }
+      },
+      ...(showPoints.value ? [{
+        name: 'runs', type: 'scatter',
+        symbolSize: 6, symbol: 'circle',
+        data: pointData,
+        itemStyle: { color: (p: any) => p.data[5], opacity: 0.6, borderColor: '#1a1430', borderWidth: 0.5 }
+      }] : [])
+    ] as any[]
+  }
 })
+
+onMounted(() => { store.fetchAll() })
 </script>
+
+<style scoped>
+.controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
+.controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-dim); }
+.controls select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 13px;
+  min-width: 200px;
+}
+.controls label:has(input[type="checkbox"]) { flex-direction: row; align-items: center; }
+.hint { color: var(--text-faint); font-size: 12px; }
+</style>

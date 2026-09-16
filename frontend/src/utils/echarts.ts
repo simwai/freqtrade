@@ -1,12 +1,12 @@
 import * as echarts from 'echarts/core'
-import { LineChart, BarChart } from 'echarts/charts'
-import { TitleComponent, TooltipComponent, GridComponent, DatasetComponent } from 'echarts/components'
+import { LineChart, BarChart, BoxplotChart, ScatterChart } from 'echarts/charts'
+import { TitleComponent, TooltipComponent, GridComponent, DatasetComponent, LegendComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
-import type { LineSeriesOption, BarSeriesOption } from 'echarts/charts'
-import type { TitleComponentOption, TooltipComponentOption, GridComponentOption, DatasetComponentOption } from 'echarts/components'
+import type { LineSeriesOption, BarSeriesOption, BoxplotSeriesOption, ScatterSeriesOption } from 'echarts/charts'
+import type { TitleComponentOption, TooltipComponentOption, GridComponentOption, DatasetComponentOption, LegendComponentOption } from 'echarts/components'
 import type { ComposeOption } from 'echarts/core'
-export type ECOption = ComposeOption<LineSeriesOption | BarSeriesOption | TitleComponentOption | TooltipComponentOption | GridComponentOption | DatasetComponentOption>
-echarts.use([LineChart, BarChart, TitleComponent, TooltipComponent, GridComponent, DatasetComponent, CanvasRenderer])
+export type ECOption = ComposeOption<LineSeriesOption | BarSeriesOption | BoxplotSeriesOption | ScatterSeriesOption | TitleComponentOption | TooltipComponentOption | GridComponentOption | DatasetComponentOption | LegendComponentOption>
+echarts.use([LineChart, BarChart, BoxplotChart, ScatterChart, TitleComponent, TooltipComponent, GridComponent, DatasetComponent, LegendComponent, CanvasRenderer])
 echarts.registerTheme('lab', {
   backgroundColor: 'transparent',
   tooltip: {
@@ -17,9 +17,6 @@ echarts.registerTheme('lab', {
   },
 })
 export default echarts
-import { ScatterChart } from 'echarts/charts'
-import type { ScatterSeriesOption } from 'echarts/charts'
-echarts.use([ScatterChart])
 export type ECScatterOption = ComposeOption<ScatterSeriesOption | TooltipComponentOption | GridComponentOption>
 import { CandlestickChart, CustomChart } from 'echarts/charts'
 import type { CandlestickSeriesOption, CustomSeriesOption } from 'echarts/charts'

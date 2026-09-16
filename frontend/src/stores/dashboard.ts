@@ -13,6 +13,13 @@ export const useDashboardStore = defineStore('dashboard', {
     history: {} as Record<string, any>,
     scorecard: {} as Record<string, any>,
     propSpec: {} as Record<string, any>,
+    configs: {} as Record<string, any>,
+    currentCode: {} as Record<string, any>,
+    currentCodeSet: {} as Record<string, any>,
+    snapshotPaths: {} as Record<string, any>,
+    snapshotCombined: {} as Record<string, any>,
+    snapshotFiles: {} as Record<string, any>,
+    backtestConfigs: {} as Record<string, any>,
     loading: false,
     error: null as string | null
   }),
@@ -35,6 +42,13 @@ export const useDashboardStore = defineStore('dashboard', {
         this.trade_runs = data.trade_runs || []
         this.scorecard = data.scorecard || {}
         this.propSpec = data.prop_firms_spec || {}
+        this.configs = data.configs || {}
+        this.currentCode = data.current_code || {}
+        this.currentCodeSet = data.current_code_set || {}
+        this.snapshotPaths = data.snapshot_paths || {}
+        this.snapshotCombined = data.snapshot_combined || {}
+        this.snapshotFiles = data.snapshot_files || {}
+        this.backtestConfigs = data.backtest_configs || {}
       } catch (e) {
         this.error = String(e)
       } finally {

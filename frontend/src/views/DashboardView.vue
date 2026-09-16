@@ -40,7 +40,7 @@
                 <td class="num" :class="profitClass(s.profit_total)">{{ fmtProfitPct(s.profit_total) }}</td>
                 <td class="num">{{ fmt3(s.sortino) }}</td>
                 <td class="num">{{ fmt3(s.calmar) }}</td>
-                <td class="num">{{ fmt3(s.profit_factor) }}</td>
+                <td class="num">{{ pfFmt(s.profit_factor) }}</td>
                 <td class="num">{{ fmtPct(s.max_drawdown_account) }}</td>
                 <td class="num"><span :class="propClass(s)" :title="propTitle(s)">{{ propText(s) }}</span></td>
                 <td class="num">{{ fmtPct(s.winrate) }}</td>
@@ -191,8 +191,21 @@ function gradePill(g: string) {
   return 'pill gna'
 }
 function profitClass(v: number) { if (!v) return ''; return v > 0 ? 'good' : v < 0 ? 'bad' : '' }
-function fmtNum(v: number) { return v ? v.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '—' }
-function fmt3(v: number) { return v === null || v === undefined ? '—' : Number(v).toFixed(3) }
+function fmt(v: any, d = 3) {
+  if (v === null || v === undefined || v === '') return '—'
+  const n = Number(v)
+  if (!isFinite(n)) return '—'
+  return n.toLocaleString('en-US', { maximumFractionDigits: d })
+}
+function fmtNum(v: number) { return fmt(v, 2) }
+function fmt3(v: number) { return fmt(v, 3) }
+function pfFmt(v: any) {
+  if (v === null || v === undefined || v === '') return '—'
+  const n = Number(v)
+  if (n === Infinity) return '∞'
+  if (!isFinite(n)) return '—'
+  return n.toLocaleString('en-US', { maximumFractionDigits: 3 })
+}
 function fmtProfitPct(v: number) { return v === null || v === undefined ? '—' : ((v || 0) * 100).toFixed(1) + '%' }
 function fmtPct(v: number) { return v ? (v * 100).toFixed(1) + '%' : '—' }
 function statusClass(s: string) {
@@ -203,7 +216,12 @@ function statusClass(s: string) {
   if (sl === 'retired') return 'status retired'
   return 'status'
 }
-function fmtRange(tr: string) { return tr || '' }
+function fmtRange(tr: string) {
+  if (!tr) return '—'
+  const p = String(tr).split('-')
+  const d = (s: string) => (s && s.length === 8) ? s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8) : (s || '?')
+  return d(p[0]) + ' → ' + (p[1] ? d(p[1]) : 'live')
+}
 function basisLabel(r: any) {
   if (r.basis === 'registry') return 'no runs yet'
   return r.basis === 'benchmark' ? 'benchmark (fallback)' : 'last backtest'

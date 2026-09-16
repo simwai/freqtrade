@@ -58,13 +58,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { api } from '../api/client'
 
 const open = ref(false)
 const jobs = ref<Record<string, any>>({})
 const logJob = ref('')
 const logText = ref('')
+let pollTimer: any = null
+let escHandler: any = null
 
 const entries = computed(() => Object.entries(jobs.value).sort((a, b) => ((b[1] as any).created || 0) - ((a[1] as any).created || 0)))
 const active = computed(() => entries.value.filter(([, j]) => ['running', 'paused', 'queued'].includes((j as any).status)))
@@ -106,6 +108,23 @@ function statusClass(s: string) {
 }
 
 onMounted(loadJobs)
+
+watch(open, (v) => {
+  if (v) {
+    loadJobs()
+    if (!pollTimer) pollTimer = setInterval(() => { if (!document.hidden) loadJobs() }, 10000)
+    escHandler = (e: KeyboardEvent) => { if (e.key === 'Escape') open.value = false }
+    document.addEventListener('keydown', escHandler)
+  } else {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
+    if (escHandler) { document.removeEventListener('keydown', escHandler); escHandler = null }
+  }
+})
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+  if (escHandler) document.removeEventListener('keydown', escHandler)
+})
 defineExpose({ loadJobs })
 </script>
 

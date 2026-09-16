@@ -48,7 +48,7 @@
                 <td><span :class="statusClass(s.status)">{{ s.status }}</span></td>
                 <td><span :class="gradePill(s.score?.grade)">{{ s.score?.grade || '?' }}</span></td>
                 <td class="num">{{ fmtProfitPct(s.profit_total) }}</td>
-                <td class="num">{{ fmt3(s.profit_factor) }}</td>
+                <td class="num">{{ pfFmt(s.profit_factor) }}</td>
                 <td class="num">{{ fmt3(s.sortino) }}</td>
                 <td class="num">{{ fmt3(s.calmar) }}</td>
                 <td class="num">{{ fmtPct(s.max_drawdown_account) }}</td>
@@ -156,7 +156,19 @@ function startEdit(s: any) {
   editNotes.value = s.notes || ''
   editMsg.value = ''
 }
-function fmt3(v: number) { return v === null || v === undefined ? '—' : Number(v).toFixed(3) }
+function fmt3(v: any) {
+  if (v === null || v === undefined || v === '') return '—'
+  const n = Number(v)
+  if (!isFinite(n)) return '—'
+  return n.toLocaleString('en-US', { maximumFractionDigits: 3 })
+}
+function pfFmt(v: any) {
+  if (v === null || v === undefined || v === '') return '—'
+  const n = Number(v)
+  if (n === Infinity) return '∞'
+  if (!isFinite(n)) return '—'
+  return n.toLocaleString('en-US', { maximumFractionDigits: 3 })
+}
 function fmtPct(v: number) { return v ? (v * 100).toFixed(1) + '%' : '—' }
 function fmtProfitPct(v: number) { return v === null || v === undefined ? '—' : ((v || 0) * 100).toFixed(1) + '%' }
 function basisLabel(r: any) {
