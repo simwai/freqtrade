@@ -7,6 +7,7 @@ import TradeView from "../views/TradeView.vue"
 import LabView from "../views/LabView.vue"
 import HyperoptView from "../views/HyperoptView.vue"
 import WalkForwardView from "../views/WalkForwardView.vue"
+import DryRunView from "../views/DryRunView.vue"
 import StrategyDetail from "../views/StrategyDetail.vue"
 import TradeDetail from "../views/TradeDetail.vue"
 
@@ -23,6 +24,7 @@ export default createRouter({
     { path: "/lab", component: LabView },
     { path: "/hyperopt", component: HyperoptView },
     { path: "/walkforward", component: WalkForwardView },
+    { path: "/dryrun", component: DryRunView },
     { path: "/strategies/:name", component: StrategyDetail }
   ]
 })

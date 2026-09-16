@@ -27,10 +27,9 @@ async function request(path: string, init: any = {}): Promise<any> {
   }
   if (!res.ok) {
     const err = new Error('API error ' + res.status)
-    console.error('API error:', err)
     throw err
   }
-  const data = await res.json().catch(() => null)
+  const data = await res.clone().json().catch(() => res.text())
   return { data: data }
 }
 export const api = {

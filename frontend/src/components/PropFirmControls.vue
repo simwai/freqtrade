@@ -4,5 +4,5 @@
     <p>Risk controls.</p>
   </div>
 </template>
-<script setup lang='ts'>
+<script setup lang="ts">
 </script>
