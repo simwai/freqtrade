@@ -184,6 +184,8 @@ const benchOption = computed((): ECOption => {
   }
   return {
     backgroundColor: 'transparent',
+    title: { text: metric.value + ' by strategy', left: 'center', textStyle: { color: '#a89fc4', fontSize: 13, fontWeight: 600 } },
+    legend: { textStyle: { color: '#a89fc4' }, bottom: 0, data: showPoints.value ? [metric.value, 'median', 'runs'] : [metric.value, 'median'] },
     tooltip: {
       trigger: 'item',
       formatter: (p: any) => {

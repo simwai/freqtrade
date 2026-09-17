@@ -159,6 +159,7 @@ import { useDashboardStore } from '../stores/dashboard'
 import { api } from '../api/client'
 import type { ECOption2 } from '../utils/echarts'
 import '../utils/echarts'
+import { useUrlState } from '../composables/useUrlState'
 import {
   tradeMs, tlBisect, tmSuperSmoother, tpPriceForTrade, tlExitColor, markerItem,
   candleColors, markerColors, markMode, exitStyle, persistPreset,
@@ -190,7 +191,7 @@ const indNote = ref('')
 const pendingIndName = ref('')
 const note = ref('')
 const emptyBanner = ref('')
-const tradeFilter = ref('')
+const tradeFilter = useUrlState({ key: 'filter', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const tradeSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'o', desc: false }])
 const tradeVisibility = ref<Record<string, boolean>>({})
 

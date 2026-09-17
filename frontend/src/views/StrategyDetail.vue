@@ -283,6 +283,7 @@ import { api } from '../api/client'
 import StrategyDrawer from '../components/StrategyDrawer.vue'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
+import { useUrlState } from '../composables/useUrlState'
 import type { CompactTrade } from '../utils/trades'
 
 const route = useRoute()
@@ -311,7 +312,7 @@ onMounted(() => {
 
 const strategy = computed(() => store.canonical.find((s: any) => s.strategy === name) || { strategy: name, score: { grade: '?', grades: {} } })
 const runs = computed(() => store.backtests.filter((b: any) => b.strategy === name).sort((a: any, b: any) => (b.run_time || '').localeCompare(a.run_time || '')))
-const runsFilter = ref('')
+const runsFilter = useUrlState({ key: 'runs', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const runsSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'run_time', desc: true }])
 const columnVisibility = ref<Record<string, boolean>>({})
 

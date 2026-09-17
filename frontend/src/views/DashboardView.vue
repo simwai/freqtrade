@@ -206,6 +206,7 @@ function resetFilters() {
 }
 
 const profitOption = computed((): ECOption => ({
+  title: { text: 'Profit by strategy', left: 'center', textStyle: { color: '#a89fc4', fontSize: 13, fontWeight: 600 } },
   xAxis: { type: 'category', data: filteredData.value.map((s: any) => s.strategy), axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
   yAxis: { type: 'value', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } }, splitLine: { lineStyle: { color: '#2f2745' } } },
   grid: { left: 50, right: 20, top: 10, bottom: 40 },
@@ -213,6 +214,7 @@ const profitOption = computed((): ECOption => ({
 }))
 
 const metric2Option = computed((): ECOption => ({
+  title: { text: 'Second metric by strategy', left: 'center', textStyle: { color: '#a89fc4', fontSize: 13, fontWeight: 600 } },
   xAxis: { type: 'category', data: filteredData.value.map((s: any) => s.strategy), axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
   yAxis: { type: 'value', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } }, splitLine: { lineStyle: { color: '#2f2745' } } },
   grid: { left: 50, right: 20, top: 10, bottom: 40 },
