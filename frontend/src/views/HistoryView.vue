@@ -72,9 +72,10 @@ echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, TitleComponent, 
 import { useDashboardStore } from '../stores/dashboard'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
+import { useUrlState } from '../composables/useUrlState'
 
 const store = useDashboardStore()
-const selected = ref([] as string[])
+const selected = useUrlState<string[]>({ key: 'sel', defaultValue: [], parse: (v) => (v ? v.split(',') : []), serialize: (v) => v.join(',') })
 const useLog = ref(false)
 const strategySearch = ref('')
 

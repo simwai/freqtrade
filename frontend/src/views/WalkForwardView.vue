@@ -127,11 +127,12 @@ import { api } from '../api/client'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 import { ratioClass } from '../utils/pills'
+import { useUrlState } from '../composables/useUrlState'
 const router = useRouter()
 
 const store = useDashboardStore()
 const toast = useToast()
-const q = ref('')
+const q = useUrlState({ key: 'q', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const selected = ref('')
 const detail = ref(null as any)
 

@@ -122,6 +122,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useDashboardStore } from '../stores/dashboard'
 import { api } from '../api/client'
 import StrategyDrawer from '../components/StrategyDrawer.vue'
+import { useUrlState } from '../composables/useUrlState'
 
 const store = useDashboardStore()
 const selected = ref('')
@@ -131,7 +132,7 @@ const editName = ref('')
 const editStatus = ref('active')
 const editNotes = ref('')
 const editMsg = ref('')
-const query = ref('')
+const query = useUrlState({ key: 'q', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const statusFilter = ref('all')
 const globalFilter = ref('')
 

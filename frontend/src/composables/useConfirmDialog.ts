@@ -1,6 +1,8 @@
-// @ts-ignore - auto-imported by Nuxt UI Vite plugin
-const useOverlay = globalThis.useOverlay
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+
+// Note: useOverlay is auto-imported by the Nuxt UI Vite plugin
+// (globally declared in auto-imports.d.ts). Do NOT import it explicitly
+// and do NOT read it off globalThis -- both break at runtime or in types.
 
 export interface ConfirmOptions {
   title: string

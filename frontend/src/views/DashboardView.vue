@@ -146,13 +146,14 @@ import GradeTuner from '../components/GradeTuner.vue'
 import StrategyDrawer from '../components/StrategyDrawer.vue'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
+import { useUrlState } from '../composables/useUrlState'
 
 const store = useDashboardStore()
 const minProfit = ref(0)
 const minTrades = ref(0)
 const selected = ref('')
 const metric2 = ref('total_trades')
-const globalFilter = ref('')
+const globalFilter = useUrlState({ key: 'filter', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 
 const sorting = ref<{ id: string; desc: boolean }[]>([{ id: 'profit_total', desc: true }])
 const columnVisibility = ref<Record<string, boolean>>({})

@@ -32,7 +32,7 @@ const props = defineProps<{
   confirmLabel?: string
   cancelLabel?: string
   color?: 'error' | 'warning' | 'neutral'
-  open: boolean
+  open?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -40,7 +40,7 @@ const emit = defineEmits<{
   close: [value: boolean]
 }>()
 
-const isOpen = ref(props.open)
+const isOpen = ref(props.open ?? true)
 
 watch(() => props.open, (v) => { isOpen.value = v })
 watch(isOpen, (v) => { emit('update:open', v) })

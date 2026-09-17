@@ -62,10 +62,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDashboardStore } from '../stores/dashboard'
+import { useUrlState } from '../composables/useUrlState'
 
 const store = useDashboardStore()
 const router = useRouter()
-const q = ref('')
+const q = useUrlState({ key: 'q', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 
 const sorting = ref<{ id: string; desc: boolean }[]>([{ id: 'strategy', desc: false }])
 const columnVisibility = ref<Record<string, boolean>>({})
