@@ -20,20 +20,20 @@
           </select>
         </label>
         <template v-if="benchMode !== 'backtest'">
-          <label>Epochs <input v-model="benchEpochs" type="number" /></label>
-          <label>Loss
+          <label><UTooltip text="Number of optimization epochs. More epochs explore more parameter combinations but take longer."><span class="tip">Epochs</span></UTooltip> <input v-model="benchEpochs" type="number" /></label>
+          <label><UTooltip text="Loss function scoring each epoch. Lower loss wins; profit-based losses prefer raw return, Sharpe-style losses prefer risk-adjusted return."><span class="tip">Loss</span></UTooltip>
             <select v-model="benchLoss">
               <option v-for="l in lossOptions" :key="l" :value="l">{{ l }}</option>
             </select>
           </label>
-          <label>Spaces <input v-model="benchSpaces" placeholder="buy sell roi stoploss trailing" /></label>
-          <label>Jobs <input v-model="benchJobs" placeholder="-1" /></label>
-          <label>Seed <input v-model="benchSeed" placeholder="auto" /></label>
+          <label><UTooltip text="Parameter spaces to optimize, space separated: buy sell roi stoploss trailing."><span class="tip">Spaces</span></UTooltip> <input v-model="benchSpaces" placeholder="buy sell roi stoploss trailing" /></label>
+          <label><UTooltip text="Parallel workers. -1 uses all cores; lower it if the machine runs out of memory."><span class="tip">Jobs</span></UTooltip> <input v-model="benchJobs" placeholder="-1" /></label>
+          <label><UTooltip text="Random seed for reproducible runs. Empty means random."><span class="tip">Seed</span></UTooltip> <input v-model="benchSeed" placeholder="auto" /></label>
         </template>
         <template v-if="benchMode === 'walkforward'">
-          <label>Train d <input v-model="benchTrain" type="number" /></label>
-          <label>Test d <input v-model="benchTest" type="number" /></label>
-          <label>Step d <input v-model="benchStep" type="number" /></label>
+          <label><UTooltip text="Training window length in days for each walk-forward step."><span class="tip">Train d</span></UTooltip> <input v-model="benchTrain" type="number" /></label>
+          <label><UTooltip text="Out-of-sample test window length in days for each step."><span class="tip">Test d</span></UTooltip> <input v-model="benchTest" type="number" /></label>
+          <label><UTooltip text="Step size in days between consecutive windows."><span class="tip">Step d</span></UTooltip> <input v-model="benchStep" type="number" /></label>
         </template>
         <button class="btn-primary" v-on:click="startBench">Run benchmark</button>
       </div>
@@ -66,33 +66,33 @@
         </label>
         <div class="hint">{{ configHint }}</div>
         <template v-if="mode !== 'backtest'">
-          <label>Epochs <input v-model="epochs" type="number" /></label>
-          <label>Loss
+          <label><UTooltip text="Number of optimization epochs. More epochs explore more parameter combinations but take longer."><span class="tip">Epochs</span></UTooltip> <input v-model="epochs" type="number" /></label>
+          <label><UTooltip text="Loss function scoring each epoch. Lower loss wins."><span class="tip">Loss</span></UTooltip>
             <select v-model="loss">
               <option v-for="l in lossOptions" :key="l" :value="l">{{ l }}</option>
             </select>
           </label>
-          <label>Spaces <input v-model="spaces" placeholder="buy sellroi trailing" /></label>
-          <label>Jobs <input v-model="runJobs" placeholder="auto" /></label>
-          <label>Seed <input v-model="randomState" placeholder="random" /></label>
-          <label>Min trades <input v-model="minTrades" placeholder="0" /></label>
-          <label class="check"><input v-model="analyzePerEpoch" type="checkbox" /> analyze per epoch</label>
+          <label><UTooltip text="Parameter spaces to optimize, space separated: buy sell roi stoploss trailing."><span class="tip">Spaces</span></UTooltip> <input v-model="spaces" placeholder="buy sellroi trailing" /></label>
+          <label><UTooltip text="Parallel workers. Empty means auto."><span class="tip">Jobs</span></UTooltip> <input v-model="runJobs" placeholder="auto" /></label>
+          <label><UTooltip text="Random seed for reproducible runs. Empty means random."><span class="tip">Seed</span></UTooltip> <input v-model="randomState" placeholder="random" /></label>
+          <label><UTooltip text="Skip epochs with fewer trades than this. Filters out noise from tiny samples."><span class="tip">Min trades</span></UTooltip> <input v-model="minTrades" placeholder="0" /></label>
+          <label class="check"><input v-model="analyzePerEpoch" type="checkbox" /> <UTooltip text="Analyze every epoch, not just the best one. Slower but shows the full search distribution."><span class="tip">analyze per epoch</span></UTooltip></label>
         </template>
         <template v-if="mode === 'walkforward'">
-          <label>Train days <input v-model="trainDays" type="number" /></label>
-          <label>Test days <input v-model="testDays" type="number" /></label>
-          <label>Step days <input v-model="stepDays" type="number" /></label>
-          <label>WF min trades <input v-model="wfMinTrades" placeholder="0" /></label>
-          <label>WF max DD <input v-model="wfMaxDD" placeholder="0.2" /></label>
+          <label><UTooltip text="Training window length in days for each walk-forward step."><span class="tip">Train days</span></UTooltip> <input v-model="trainDays" type="number" /></label>
+          <label><UTooltip text="Out-of-sample test window length in days for each step."><span class="tip">Test days</span></UTooltip> <input v-model="testDays" type="number" /></label>
+          <label><UTooltip text="Step size in days between consecutive windows."><span class="tip">Step days</span></UTooltip> <input v-model="stepDays" type="number" /></label>
+          <label><UTooltip text="Minimum out-of-sample trades per window, otherwise the window is discarded."><span class="tip">WF min trades</span></UTooltip> <input v-model="wfMinTrades" placeholder="0" /></label>
+          <label><UTooltip text="Maximum out-of-sample drawdown as a fraction, e.g. 0.2 for 20%."><span class="tip">WF max DD</span></UTooltip> <input v-model="wfMaxDD" placeholder="0.2" /></label>
         </template>
         <template v-if="mode === 'hyperopt'">
-          <label class="check"><input v-model="disableExport" type="checkbox" /> disable param export</label>
-          <label class="check"><input v-model="printAll" type="checkbox" /> print all</label>
+          <label class="check"><input v-model="disableExport" type="checkbox" /> <UTooltip text="Do not write the best parameters back to the strategy directory."><span class="tip">disable param export</span></UTooltip></label>
+          <label class="check"><input v-model="printAll" type="checkbox" /> <UTooltip text="Print every epoch result instead of only improvements."><span class="tip">print all</span></UTooltip></label>
         </template>
-        <label class="check"><input v-model="verbose" type="checkbox" /> verbose</label>
+        <label class="check"><input v-model="verbose" type="checkbox" /> <UTooltip text="Verbose backend logging for this run."><span class="tip">verbose</span></UTooltip></label>
         <button class="btn-primary" v-on:click="startRun">Run</button>
       </div>
-      <div v-if="formError" class="edit-msg">{{ formError }}</div>
+      <div v-if="formError" class="edit-msg" role="alert">{{ formError }}</div>
       <pre v-if="configPreview" class="code-block">{{ configPreview }}</pre>
     </div>
 
@@ -400,6 +400,7 @@ async function defaultRunRange() {
 </script>
 
 <style scoped>
+.tip { border-bottom: 1px dotted var(--text-faint); cursor: help; }
 .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
 .form-row label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-dim); }
 .form-row input, .form-row select {

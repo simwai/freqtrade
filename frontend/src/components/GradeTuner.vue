@@ -15,7 +15,7 @@
           <th>Metric</th>
           <th>Pass</th>
           <th>Warn</th>
-          <th>Direction</th>
+          <th><UTooltip text="Whether a higher value is better (e.g. profit) or a lower value is better (e.g. drawdown)."><span class="tip">Direction</span></UTooltip></th>
         </tr>
       </thead>
       <tbody>
@@ -77,6 +77,7 @@ onMounted(loadFactors)
 
 <style scoped>
 .grade-tuner { padding: 16px; }
+.tip { border-bottom: 1px dotted var(--text-faint); cursor: help; }
 .tuner-inputs { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
 .tuner-inputs label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-dim); }
 .tuner-inputs input {

@@ -211,5 +211,5 @@ onMounted(async () => {
 .btn-row { display: flex; gap: 8px; }
 .check { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-dim); }
 .hint { color: var(--text-faint); font-size: 12px; }
-.hist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
+.hist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; }
 </style>

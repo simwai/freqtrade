@@ -1,19 +1,17 @@
 <template>
-  <div class="drawer-overlay" v-on:click="close"></div>
-  <div class="drawer" role="dialog" aria-label="Run details">
-    <div class="drawer-header">
-      <h2>{{ title }}</h2>
-      <span v-if="runKind" class="grade-pill" :class="kindPill(runKind)">{{ runKind }}</span>
-      <span v-else class="grade-pill" :class="gradePill(strategy.score?.grade)">{{ strategy.score?.grade || '?' }}</span>
-      <button class="close-btn" v-on:click="close" aria-label="Close details">×</button>
-    </div>
-    <div class="drawer-tabs">
-      <button :class="{ active: tab === 'overview' }" v-on:click="tab = 'overview'">Overview</button>
-      <button :class="{ active: tab === 'code' }" v-on:click="tab = 'code'">Code</button>
-      <button :class="{ active: tab === 'config' }" v-on:click="tab = 'config'">Config</button>
-      <button v-if="showParams" :class="{ active: tab === 'params' }" v-on:click="tab = 'params'">Params</button>
-      <button :class="{ active: tab === 'prop' }" v-on:click="tab = 'prop'">Prop</button>
-    </div>
+  <USlideover v-model:open="isOpen" :side="side" :title="title" :description="headerDesc">
+    <template #body>
+      <div class="drawer-sub">
+        <span v-if="runKind" class="grade-pill" :class="kindPill(runKind)">{{ runKind }}</span>
+        <span v-else class="grade-pill" :class="gradePill(strategy.score?.grade)">{{ strategy.score?.grade || '?' }}</span>
+      </div>
+      <div class="drawer-tabs">
+        <button :class="{ active: tab === 'overview' }" v-on:click="tab = 'overview'">Overview</button>
+        <button :class="{ active: tab === 'code' }" v-on:click="tab = 'code'">Code</button>
+        <button :class="{ active: tab === 'config' }" v-on:click="tab = 'config'">Config</button>
+        <button v-if="showParams" :class="{ active: tab === 'params' }" v-on:click="tab = 'params'">Params</button>
+        <button :class="{ active: tab === 'prop' }" v-on:click="tab = 'prop'">Prop</button>
+      </div>
 
     <div v-if="tab === 'overview'" class="drawer-content">
       <div v-if="run" class="kv">
@@ -87,10 +85,11 @@
       </div>
       <div v-else class="empty-state">No prop evaluations.</div>
     </div>
-  </div>
+    </template>
+  </USlideover>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useDashboardStore } from '../stores/dashboard'
 import { api } from '../api/client'
 
@@ -100,6 +99,8 @@ const store = useDashboardStore()
 const tab = ref('overview')
 const codeText = ref('')
 const codeFileIdx = ref(0)
+const isOpen = ref(true)
+const side = ref<'right' | 'bottom'>('right')
 const strategy = computed(() => store.canonical.find((s: any) => s.strategy === props.name) || { strategy: props.name, score: { grade: '?', grades: {} } })
 const runs = computed(() => store.backtests.filter((b: any) => b.strategy === props.name).slice(0, 10))
 
@@ -115,6 +116,16 @@ const run = computed(() => {
 
 const showParams = computed(() => runKind.value === 'hyperopt' || !!(strategy.value as any).best_params || !!(strategy.value as any).params_json)
 const title = computed(() => run.value ? props.name + ' · ' + runKind.value : (strategy.value as any).strategy || props.name)
+const headerDesc = computed(() => {
+  if (run.value) return (run.value as any).source || ''
+  return codeBadgeText()
+})
+
+watch(isOpen, (v) => { if (!v) emit('close') })
+
+function syncSide() {
+  try { side.value = window.innerWidth < 768 ? 'bottom' : 'right' } catch (e) {}
+}
 
 const runOverview = computed(() => {
   const r: any = run.value
@@ -242,10 +253,11 @@ const paramsText = computed(() => {
   try { return JSON.stringify(typeof raw === 'string' ? JSON.parse(raw) : raw, null, 2) } catch (e) { return String(raw) }
 })
 
-function close() { emit('close') }
-function onKey(e: KeyboardEvent) { if (e.key === 'Escape') close() }
-onMounted(() => { document.addEventListener('keydown', onKey) })
-onUnmounted(() => { document.removeEventListener('keydown', onKey) })
+onMounted(() => {
+  syncSide()
+  window.addEventListener('resize', syncSide)
+})
+onUnmounted(() => { window.removeEventListener('resize', syncSide) })
 function kindPill(k: string) { return k === 'benchmark' ? 'pill gA' : 'pill gna' }
 function gradePill(g: string) {
   if (!g || g === '—') return 'pill gna'
@@ -272,14 +284,9 @@ function fmtNum(v: number) { return v ? v.toLocaleString(undefined, { maximumFra
 </script>
 
 <style scoped>
-.drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 99; }
-.drawer { position: fixed; right: 0; top: 0; bottom: 0; width: 420px; max-width: 100vw; background: var(--card); border-left: 1px solid var(--border); z-index: 100; display: flex; flex-direction: column; box-shadow: -8px 0 24px rgba(0,0,0,.4); }
-.drawer-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
-.drawer-header h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.drawer-sub { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .grade-pill { font-size: 12px; font-weight: 600; }
-.close-btn { background: transparent; border: none; color: var(--text-dim); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; }
-.close-btn:hover { color: var(--bad); }
-.drawer-tabs { display: flex; gap: 4px; padding: 8px 16px; background: var(--bg-soft); border-bottom: 1px solid var(--border); }
+.drawer-tabs { display: flex; gap: 4px; padding: 8px 0; margin-bottom: 4px; }
 .drawer-tabs button { background: transparent; border: 1px solid transparent; color: var(--text-dim); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; }
 .drawer-tabs button:hover { color: var(--lavender); background: var(--card-hover); }
 .drawer-tabs button.active { background: var(--lavender-ink); color: #fff; }

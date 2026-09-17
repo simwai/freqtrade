@@ -10,6 +10,7 @@
           </template>
           Reset
         </UButton>
+        <ColumnToggle :columns="columns" :visibility="columnVisibility" @update:visibility="columnVisibility = $event" />
       </div>
     </div>
 
@@ -316,7 +317,7 @@ onMounted(async () => {
   font-size: 12px;
   margin-bottom: 8px;
 }
-.stats-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.stats-row { display: flex; gap: 16px; flex-wrap: wrap; }
 .mini-table { width: 100%; font-size: 12px; }
 .mini-table td { padding: 6px 8px; border-top: 1px solid var(--border); }
 .mini-table td.num { text-align: right; }

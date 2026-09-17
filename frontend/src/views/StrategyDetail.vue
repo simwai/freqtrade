@@ -10,7 +10,21 @@
     </div>
     <div v-if="strategy.notes || strategy.score" class="hint">{{ strategy.notes }}{{ strategy.notes ? ' · ' : '' }}{{ passWarnFail() }}</div>
 
-    <div v-if="store.loading" class="card">Loading...</div>
+    <div v-if="store.loading" class="card">
+      <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+        <span class="ml-3 text-muted">Loading strategy...</span>
+      </div>
+    </div>
+    <div v-else-if="store.error" class="card" style="color: var(--bad);">
+      <div class="flex items-center gap-3">
+        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+        <div>
+          <p class="font-medium">{{ store.error }}</p>
+          <UButton size="sm" variant="outline" @click="store.fetchAll(true)">Retry</UButton>
+        </div>
+      </div>
+    </div>
     <div v-else-if="!strategy.strategy" class="card">Unknown strategy {{ name }}</div>
     <div v-else>
       <div class="card">
@@ -96,7 +110,10 @@
       <div class="card">
         <div class="section-head">
           <h3>All runs</h3>
-          <UInput v-model="runsFilter" placeholder="Filter runs..." size="sm" class="filter-input" />
+          <div class="controls">
+            <UInput v-model="runsFilter" placeholder="Filter runs..." size="sm" class="filter-input" />
+            <ColumnToggle :columns="runsColumns" :visibility="columnVisibility" @update:visibility="columnVisibility = $event" />
+          </div>
         </div>
         <UTable
           :data="filteredRuns"
@@ -105,6 +122,8 @@
           :sticky="true"
           :sorting="runsSorting"
           @update:sorting="runsSorting = $event"
+          :column-visibility="columnVisibility"
+          @update:column-visibility="columnVisibility = $event"
           class="w-full"
           empty="No runs for this strategy yet."
         >
@@ -294,6 +313,7 @@ const strategy = computed(() => store.canonical.find((s: any) => s.strategy === 
 const runs = computed(() => store.backtests.filter((b: any) => b.strategy === name).sort((a: any, b: any) => (b.run_time || '').localeCompare(a.run_time || '')))
 const runsFilter = ref('')
 const runsSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'run_time', desc: true }])
+const columnVisibility = ref<Record<string, boolean>>({})
 
 const runsColumns = [
   { accessorKey: 'run_time', header: 'Run' },

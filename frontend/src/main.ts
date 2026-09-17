@@ -4,8 +4,10 @@ import App from './App.vue'
 import router from './router'
 import './style.css'
 import ui from '@nuxt/ui/vue-plugin'
+import ColumnToggle from './components/ColumnToggle.vue'
 
 const app = createApp(App)
+app.component('ColumnToggle', ColumnToggle)
 app.use(createPinia())
 app.use(router)
 app.use(ui)

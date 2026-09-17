@@ -5,8 +5,21 @@
       <h2>Trade Detail {{ runLabel }}</h2>
     </div>
 
-    <div v-if="loading" class="card">Loading...</div>
-    <div v-else-if="error" class="card" style="color: var(--bad);">{{ error }}</div>
+    <div v-if="loading" class="card">
+      <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+        <span class="ml-3 text-muted">Loading trade detail...</span>
+      </div>
+    </div>
+    <div v-else-if="error" class="card" style="color: var(--bad);">
+      <div class="flex items-center gap-3">
+        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+        <div>
+          <p class="font-medium">{{ error }}</p>
+          <UButton size="sm" variant="outline" @click="load">Retry</UButton>
+        </div>
+      </div>
+    </div>
     <div v-else class="card">
       <div class="section-head">
         <h2>Trade map</h2>
@@ -81,7 +94,10 @@
       <div class="card">
         <div class="section-head">
           <h3>Trades {{ trades.length }}</h3>
-          <UInput v-model="tradeFilter" placeholder="Filter trades..." size="sm" class="filter-input" />
+          <div class="controls">
+            <UInput v-model="tradeFilter" placeholder="Filter trades..." size="sm" class="filter-input" />
+            <ColumnToggle :columns="tradeColumns" :visibility="tradeVisibility" @update:visibility="tradeVisibility = $event" />
+          </div>
         </div>
         <UTable
           :data="filteredShown"
@@ -119,6 +135,9 @@
           </template>
           <template #cell-d="{ row }">
             <span class="num">{{ durText(row.original) }}</span>
+          </template>
+          <template #cell-actions="{ row }">
+            <UButton size="xs" variant="ghost" @click="zoomToTrade(row.original ?? row)">Zoom</UButton>
           </template>
         </UTable>
         <p class="hint">Click a row to zoom the trade map to that trade.</p>
@@ -189,6 +208,7 @@ const tradeColumns = [
   { accessorKey: 'sl', header: 'Stop loss' },
   { accessorKey: 'slr', header: 'SL%' },
   { accessorKey: 'd', header: 'Duration' },
+  { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
 ]
 
 const filteredShown = computed(() => {

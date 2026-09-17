@@ -11,6 +11,7 @@
           </template>
           Reset
         </UButton>
+        <ColumnToggle :columns="columns" :visibility="columnVisibility" @update:visibility="columnVisibility = $event" />
       </div>
     </div>
 
@@ -86,9 +87,14 @@
           <span>{{ ((row.original as any).run_time || '').slice(0, 10) }}</span>
         </template>
         <template #cell-actions="{ row }">
-          <UButton size="sm" variant="ghost" @click.stop="startEdit(row.original)">
-            <UIcon name="i-lucide-edit" size="14" />
-          </UButton>
+          <div class="flex gap-1">
+            <UButton size="sm" variant="ghost" aria-label="Open details" @click.stop="openStrategy(row.original ?? row)">
+              <UIcon name="i-lucide-chevron-right" size="14" />
+            </UButton>
+            <UButton size="sm" variant="ghost" aria-label="Edit strategy" @click.stop="startEdit(row.original)">
+              <UIcon name="i-lucide-edit" size="14" />
+            </UButton>
+          </div>
         </template>
       </UTable>
     </div>

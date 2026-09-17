@@ -11,6 +11,7 @@
           </template>
           Reset
         </UButton>
+        <ColumnToggle :columns="columns" :visibility="columnVisibility" @update:visibility="columnVisibility = $event" />
       </div>
     </div>
 

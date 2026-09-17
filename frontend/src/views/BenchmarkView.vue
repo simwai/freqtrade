@@ -4,34 +4,34 @@
       <h2>Benchmark</h2>
     </div>
 
-    <div v-if="store.loading" class="card">Loading...</div>
+    <div v-if="store.loading" class="card">
+      <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+        <span class="ml-3 text-muted">Loading benchmarks...</span>
+      </div>
+    </div>
+    <div v-else-if="store.error" class="card" style="color: var(--bad);">
+      <div class="flex items-center gap-3">
+        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+        <div>
+          <p class="font-medium">{{ store.error }}</p>
+          <UButton size="sm" variant="outline" @click="store.fetchAll(true)">Retry</UButton>
+        </div>
+      </div>
+    </div>
     <div v-else class="card">
       <div class="controls">
-        <label>Metric:
-          <select v-model="metric">
-            <option value="sortino">Sortino</option>
-            <option value="profit_total">Total Profit</option>
-            <option value="calmar">Calmar</option>
-            <option value="profit_factor">Profit Factor</option>
-            <option value="max_drawdown_account">Max Drawdown</option>
-          </select>
-        </label>
-        <label>Source:
-          <select v-model="sourceMode">
-            <option value="auto">Benchmark + backtest (default)</option>
-            <option value="benchmark">Benchmark only</option>
-            <option value="backtest">Backtest only</option>
-          </select>
-        </label>
-        <label>Sort by:
-          <select v-model="sortMode">
-            <option value="median">Median (default)</option>
-            <option value="count">Run count</option>
-            <option value="name">Strategy name</option>
-          </select>
-        </label>
-        <label><input type="checkbox" v-model="useLog" /> Log scale</label>
-        <label><input type="checkbox" v-model="showPoints" /> Show every run</label>
+        <UFormField name="metric" label="Metric">
+          <USelect v-model="metric" :options="metricOptions" />
+        </UFormField>
+        <UFormField name="sourceMode" label="Source">
+          <USelect v-model="sourceMode" :options="sourceOptions" />
+        </UFormField>
+        <UFormField name="sortMode" label="Sort by">
+          <USelect v-model="sortMode" :options="sortOptions" />
+        </UFormField>
+        <UCheckbox v-model="useLog" label="Log scale" />
+        <UCheckbox v-model="showPoints" label="Show every run" />
       </div>
 
       <div class="chart-box">
@@ -61,6 +61,24 @@ const sourceMode = ref('auto')
 const sortMode = ref('median')
 const useLog = ref(false)
 const showPoints = ref(true)
+
+const metricOptions = [
+  { label: 'Sortino', value: 'sortino' },
+  { label: 'Total Profit', value: 'profit_total' },
+  { label: 'Calmar', value: 'calmar' },
+  { label: 'Profit Factor', value: 'profit_factor' },
+  { label: 'Max Drawdown', value: 'max_drawdown_account' },
+]
+const sourceOptions = [
+  { label: 'Benchmark + backtest (default)', value: 'auto' },
+  { label: 'Benchmark only', value: 'benchmark' },
+  { label: 'Backtest only', value: 'backtest' },
+]
+const sortOptions = [
+  { label: 'Median (default)', value: 'median' },
+  { label: 'Run count', value: 'count' },
+  { label: 'Strategy name', value: 'name' },
+]
 
 const SENTINEL_VALUES: Record<string, number> = { sortino: -100, sharpe: -100, calmar: -100, sqn: -100 }
 
