@@ -42,36 +42,36 @@
         @update:sorting="sorting = $event"
         :column-visibility="columnVisibility"
         @update:column-visibility="columnVisibility = $event"
-        @row-click="openStrategy"
+        @select="(row: any) => openStrategy(row.original?.strategy ?? row.strategy)"
         class="w-full"
         empty="No strategies found matching your filters."
       >
-        <template #strategy-cell="{ row }">
+        <template #cell-strategy="{ row }">
           <div class="flex items-center gap-2">
-            <span>{{ row.strategy }}</span>
-            <span :class="statusClass(row.status)">{{ row.status }}</span>
+            <span>{{ (row.original as any).strategy }}</span>
+            <span :class="statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
           </div>
         </template>
-        <template #grade-cell="{ row }">
-          <span :class="gradePill(row.score?.grade)">{{ row.score?.grade || '?' }}</span>
+        <template #cell-score.grade="{ row }">
+          <span :class="gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade || '?' }}</span>
         </template>
-        <template #profit-cell="{ row }">
-          <span class="num" :class="profitClass(row.profit_total)">{{ fmtProfitPct(row.profit_total) }}</span>
+        <template #cell-profit_total="{ row }">
+          <span class="num" :class="profitClass((row.original as any).profit_total)">{{ fmtProfitPct((row.original as any).profit_total) }}</span>
         </template>
-        <template #prop-cell="{ row }">
-          <span class="num"><span :class="propClass(row)" :title="propTitle(row)">{{ propText(row) }}</span></span>
+        <template #cell-propPass="{ row }">
+          <span class="num"><span :class="propClass(row.original)" :title="propTitle(row.original)">{{ propText(row.original) }}</span></span>
         </template>
-        <template #basis-cell="{ row }">
-          <span :title="basisTooltip(row)">{{ basisLabel(row) }}</span>
+        <template #cell-basis="{ row }">
+          <span :title="basisTooltip(row.original)">{{ basisLabel(row.original) }}</span>
         </template>
-        <template #timerange-cell="{ row }">
-          <span style="font-size:12px;color:var(--text-dim)">{{ fmtRange(row.timerange) }}</span>
+        <template #cell-timerange="{ row }">
+          <span style="font-size:12px;color:var(--text-dim)">{{ fmtRange((row.original as any).timerange) }}</span>
         </template>
-        <template #run-time-cell="{ row }">
-          <span>{{ (row.run_time || '').slice(0, 10) }}</span>
+        <template #cell-run_time="{ row }">
+          <span>{{ ((row.original as any).run_time || '').slice(0, 10) }}</span>
         </template>
-        <template #actions-cell="{ row }">
-          <UButton size="sm" variant="ghost" @click.stop="openStrategy(row.strategy)">
+        <template #cell-actions="{ row }">
+          <UButton size="sm" variant="ghost" @click.stop="openStrategy((row.original as any).strategy)">
             <UIcon name="i-lucide-chevron-right" size="14" />
           </UButton>
         </template>
@@ -102,12 +102,12 @@
           :data="topRows"
           :columns="miniColumns"
           :loading="false"
-          @row-click="openStrategy"
+          @select="(row: any) => openStrategy(row.original?.strategy ?? row.strategy)"
           class="w-full"
           empty="No data"
         >
-          <template #profit-cell="{ row }">
-            <span class="num">{{ fmtNum(row.profit_total) }}</span>
+          <template #cell-profit_total="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).profit_total) }}</span>
           </template>
         </UTable>
       </div>
@@ -117,12 +117,12 @@
           :data="flopRows"
           :columns="miniColumns"
           :loading="false"
-          @row-click="openStrategy"
+          @select="(row: any) => openStrategy(row.original?.strategy ?? row.strategy)"
           class="w-full"
           empty="No data"
         >
-          <template #profit-cell="{ row }">
-            <span class="num">{{ fmtNum(row.profit_total) }}</span>
+          <template #cell-profit_total="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).profit_total) }}</span>
           </template>
         </UTable>
       </div>
@@ -151,46 +151,77 @@ const minProfit = ref(0)
 const minTrades = ref(0)
 const selected = ref('')
 const metric2 = ref('total_trades')
-const sortKey = ref('profit_total')
-const sortAsc = ref(false)
+const globalFilter = ref('')
+
+const sorting = ref<{ id: string; desc: boolean }[]>([{ id: 'profit_total', desc: true }])
+const columnVisibility = ref<Record<string, boolean>>({})
 
 const filtered = computed(() => store.canonical.filter((s: any) => (s.profit_total || 0) >= minProfit.value).filter((s: any) => (s.total_trades || 0) >= minTrades.value))
 
-const sortedFiltered = computed(() => {
-  const arr = [...filtered.value]
-  arr.sort((a: any, b: any) => {
-    let av = sortKey.value === 'propPass' ? propPassCount(a) : sortKey.value.split('.').reduce((o: any, k: string) => o?.[k], a)
-    let bv = sortKey.value === 'propPass' ? propPassCount(b) : sortKey.value.split('.').reduce((o: any, k: string) => o?.[k], b)
-    if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return 1
-    if (bv === '' || bv === undefined || bv === null) return -1
-    const an = Number(av), bn = Number(bv)
-    const useNum = !isNaN(an) && !isNaN(bn)
-    const r = useNum ? an - bn : String(av).localeCompare(String(bv))
-    return sortAsc.value ? r : -r
+const columns = [
+  { accessorKey: 'strategy', header: 'Strategy' },
+  { accessorKey: 'score.grade', header: 'Grade', size: 80 },
+  { accessorKey: 'profit_total', header: 'Profit%', size: 100 },
+  { accessorKey: 'sortino', header: 'Sortino', size: 90 },
+  { accessorKey: 'calmar', header: 'Calmar', size: 90 },
+  { accessorKey: 'profit_factor', header: 'PF', size: 90 },
+  { accessorKey: 'max_drawdown_account', header: 'MaxDD', size: 90 },
+  { accessorKey: 'propPass', header: 'Prop', size: 90 },
+  { accessorKey: 'winrate', header: 'Win%', size: 90 },
+  { accessorKey: 'total_trades', header: 'Trades', size: 90 },
+  { accessorKey: 'basis', header: 'Basis', size: 120 },
+  { accessorKey: 'timerange', header: 'Range', size: 130 },
+  { accessorKey: 'run_time', header: 'Run', size: 100 },
+  { accessorKey: 'actions', header: '', size: 50, enableSorting: false, enableGlobalFilter: false },
+]
+
+const miniColumns = [
+  { accessorKey: 'strategy', header: 'Strategy' },
+  { accessorKey: 'profit_total', header: 'Profit', size: 100 },
+]
+
+const metric2Options = [
+  { label: 'profit', value: 'profit_total' },
+  { label: 'trades', value: 'total_trades' },
+  { label: 'winrate', value: 'winrate' },
+]
+
+const filteredData = computed(() => {
+  const q = globalFilter.value.trim().toLowerCase()
+  if (!q) return filtered.value
+  return filtered.value.filter((s: any) => {
+    return Object.values(s).some((v) => {
+      if (v === null || v === undefined || v === '') return false
+      return String(v).toLowerCase().includes(q)
+    })
   })
-  return arr
 })
 
+function resetFilters() {
+  globalFilter.value = ''
+  columnVisibility.value = {}
+  sorting.value = [{ id: 'profit_total', desc: true }]
+}
+
 const profitOption = computed((): ECOption => ({
-  xAxis: { type: 'category', data: filtered.value.map((s: any) => s.strategy), axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
+  xAxis: { type: 'category', data: filteredData.value.map((s: any) => s.strategy), axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
   yAxis: { type: 'value', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } }, splitLine: { lineStyle: { color: '#2f2745' } } },
   grid: { left: 50, right: 20, top: 10, bottom: 40 },
-  series: [{ type: 'bar', data: filtered.value.map((s: any) => (s.profit_total || 0) * 100), itemStyle: { color: '#a78bfa' } }]
+  series: [{ type: 'bar', data: filteredData.value.map((s: any) => (s.profit_total || 0) * 100), itemStyle: { color: '#a78bfa' } }]
 }))
 
 const metric2Option = computed((): ECOption => ({
-  xAxis: { type: 'category', data: filtered.value.map((s: any) => s.strategy), axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
+  xAxis: { type: 'category', data: filteredData.value.map((s: any) => s.strategy), axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
   yAxis: { type: 'value', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } }, splitLine: { lineStyle: { color: '#2f2745' } } },
   grid: { left: 50, right: 20, top: 10, bottom: 40 },
-  series: [{ type: 'bar', data: filtered.value.map((s: any) => s[metric2.value] || 0), itemStyle: { color: '#c4b5fd' } }]
+  series: [{ type: 'bar', data: filteredData.value.map((s: any) => s[metric2.value] || 0), itemStyle: { color: '#c4b5fd' } }]
 }))
 
 const topRows = computed(() => [...store.canonical].sort((a: any, b: any) => (b.profit_total || 0) - (a.profit_total || 0)).slice(0, 5))
 const flopRows = computed(() => [...store.canonical].sort((a: any, b: any) => (a.profit_total || 0) - (b.profit_total || 0)).slice(0, 5))
 
 const improveNext = computed(() => {
-  const rows = filtered.value.filter((r: any) => r.basis !== 'registry' && r.score?.grade !== 'A').slice(0, 6)
+  const rows = filteredData.value.filter((r: any) => r.basis !== 'registry' && r.score?.grade !== 'A').slice(0, 6)
   return rows.map((r: any) => {
     const grades = r.score?.grades || {}
     const labels = (store.scorecard || {}) as any
@@ -202,10 +233,6 @@ const improveNext = computed(() => {
   })
 })
 
-function sortBy(key: string) {
-  if (sortKey.value === key) sortAsc.value = !sortAsc.value
-  else { sortKey.value = key; sortAsc.value = true }
-}
 function openStrategy(name: string) { selected.value = name }
 function gradePill(g: string) {
   if (!g || g === '—') return 'pill gna'
@@ -224,16 +251,7 @@ function fmt(v: any, d = 3) {
   return n.toLocaleString('en-US', { maximumFractionDigits: d })
 }
 function fmtNum(v: number) { return fmt(v, 2) }
-function fmt3(v: number) { return fmt(v, 3) }
-function pfFmt(v: any) {
-  if (v === null || v === undefined || v === '') return '—'
-  const n = Number(v)
-  if (n === Infinity) return '∞'
-  if (!isFinite(n)) return '—'
-  return n.toLocaleString('en-US', { maximumFractionDigits: 3 })
-}
 function fmtProfitPct(v: number) { return v === null || v === undefined ? '—' : ((v || 0) * 100).toFixed(1) + '%' }
-function fmtPct(v: number) { return v ? (v * 100).toFixed(1) + '%' : '—' }
 function statusClass(s: string) {
   if (!s) return 'status'
   const sl = s.toLowerCase()
@@ -256,13 +274,6 @@ function basisTooltip(r: any) {
   if (r.basis === 'registry') return 'registered in the strategies table; no backtest or benchmark ingested yet'
   return 'metrics from ' + (r.basis === 'benchmark' ? 'benchmark' : 'backtest') + ' run ' + (r.source || '?') + ' · ' + (r.run_time || '?')
 }
-function propPassCount(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return -1
-  const vals = Object.values(pf) as any[]
-  if (vals.every((p: any) => p.verdict === 'na')) return -1
-  return vals.filter((p: any) => p.verdict === 'pass').length
-}
 function propText(r: any) {
   const pf = r.prop_firms
   if (!pf) return '—'
@@ -284,6 +295,10 @@ function propClass(r: any) {
   if (!keys.some((k) => (pf as any)[k].verdict !== 'na')) return 'pill gna'
   const passed = keys.filter((k) => (pf as any)[k].verdict === 'pass').length
   return passed === keys.length ? 'pill gA' : passed > 0 ? 'pill gC' : 'pill gF'
+}
+
+function refreshData() {
+  store.fetchAll(true)
 }
 
 onMounted(async () => {

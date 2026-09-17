@@ -4,27 +4,47 @@
       <h2>History</h2>
     </div>
 
-    <div v-if="store.loading" class="card">Loading...</div>
+    <div v-if="store.loading" class="card">
+      <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+        <span class="ml-3 text-muted">Loading history...</span>
+      </div>
+    </div>
+    <div v-else-if="store.error" class="card" style="color: var(--bad);">
+      <div class="flex items-center gap-3">
+        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+        <div>
+          <p class="font-medium">{{ store.error }}</p>
+          <UButton size="sm" variant="outline" @click="refreshData">Retry</UButton>
+        </div>
+      </div>
+    </div>
     <div v-else>
       <div class="card filters">
-        <label class="filter-label">Strategies
-          <select v-model="selected" multiple size="6" class="filter-select">
-            <option value="__top">top 8 by runs</option>
-            <option value="__all">all strategies</option>
-            <option v-for="name in names" :key="name" :value="name">{{ name }}</option>
-          </select>
-        </label>
-        <div class="btn-row">
-          <button class="btn-secondary btn-sm" v-on:click="selectAll">Select all</button>
-          <button class="btn-secondary btn-sm" v-on:click="selectTop">Top 8</button>
-          <button class="btn-secondary btn-sm" v-on:click="clearAll">Clear</button>
+        <div class="strategy-picker">
+          <span class="filter-label">Strategies</span>
+          <UInput v-model="strategySearch" placeholder="Search strategies..." size="sm" class="picker-search" />
+          <div class="btn-row">
+            <UButton size="xs" variant="ghost" @click="selectAll">Select all</UButton>
+            <UButton size="xs" variant="ghost" @click="selectTop">Top 8</UButton>
+            <UButton size="xs" variant="ghost" @click="clearAll">Clear</UButton>
+          </div>
+          <div class="picker-list">
+            <UCheckbox
+              v-for="name in visibleNames"
+              :key="name"
+              :label="name"
+              :model-value="selected.includes(name)"
+              @update:model-value="toggleName(name, $event === true)"
+            />
+            <p v-if="!visibleNames.length" class="hint">No strategies match the search.</p>
+          </div>
+          <span class="hint">{{ selected.length }} selected</span>
         </div>
-        <label class="filter-label">Second metric
-          <select v-model="metric2" v-on:change="persistMetric2" class="filter-select">
-            <option v-for="(m, k) in metrics2" :key="k" :value="k">{{ m.label }}</option>
-          </select>
-        </label>
-        <label class="check"><input type="checkbox" v-model="useLog" /> Log scale</label>
+        <UFormField name="metric2" label="Second metric">
+          <USelect v-model="metric2" :options="metric2Options" @change="persistMetric2" class="filter-select" />
+        </UFormField>
+        <UCheckbox v-model="useLog" label="Log scale" />
       </div>
 
       <p v-if="!picked.length" class="hint">No history to chart. Strategies need at least two backtest runs.</p>
@@ -56,6 +76,7 @@ import '../utils/echarts'
 const store = useDashboardStore()
 const selected = ref([] as string[])
 const useLog = ref(false)
+const strategySearch = ref('')
 
 const metrics2: Record<string, { label: string, pct: boolean }> = {
   sortino: { label: 'Sortino', pct: false },
@@ -67,6 +88,8 @@ const metrics2: Record<string, { label: string, pct: boolean }> = {
 }
 
 const metric2 = ref('sortino')
+
+const metric2Options = computed(() => Object.entries(metrics2).map(([value, m]) => ({ label: m.label, value: value })))
 try {
   const saved = localStorage.getItem('histMetric2')
   if (saved && metrics2[saved]) metric2.value = saved
@@ -81,13 +104,25 @@ const names = computed(() => Object.keys(store.history).filter((n) => {
   return !row || (row.status || 'active') !== 'retired'
 }).sort((a, b) => (store.history[b].dates.length - store.history[a].dates.length)))
 
-const picked = computed(() => {
-  if (selected.value.includes('__top')) {
-    return Object.entries(store.history).sort((a, b) => b[1].dates.length - a[1].dates.length).slice(0, 8).map(([name]) => name)
-  }
-  if (selected.value.includes('__all')) return Object.keys(store.history)
-  return selected.value.filter((v) => !v.startsWith('__'))
+const visibleNames = computed(() => {
+  const s = strategySearch.value.trim().toLowerCase()
+  if (!s) return names.value
+  return names.value.filter((n) => n.toLowerCase().includes(s))
 })
+
+function toggleName(name: string, checked: boolean) {
+  if (checked) {
+    if (!selected.value.includes(name)) selected.value = [...selected.value, name]
+  } else {
+    selected.value = selected.value.filter((v) => v !== name)
+  }
+}
+
+const picked = computed(() => selected.value.filter((v) => !v.startsWith('__')))
+
+function refreshData() {
+  store.fetchAll(true)
+}
 
 function seriesOf(name: string) {
   return store.history[name] || { dates: [], profit: [] }
@@ -140,7 +175,7 @@ function optionFor(name: string): ECOption {
 }
 
 function selectAll() { selected.value = [...names.value] }
-function selectTop() { selected.value = ['__top'] }
+function selectTop() { selected.value = names.value.slice(0, 8) }
 function clearAll() { selected.value = [] }
 
 onMounted(async () => {
@@ -150,6 +185,9 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.strategy-picker { display: flex; flex-direction: column; gap: 8px; min-width: 240px; max-width: 340px; }
+.picker-search { width: 100%; }
+.picker-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; padding: 4px 2px; }
 .filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
 .filter-label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-dim); }
 .filter-select {

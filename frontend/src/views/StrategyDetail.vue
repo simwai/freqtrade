@@ -94,41 +94,45 @@
       </div>
 
       <div class="card">
-        <h3>All runs</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Run</th>
-                <th scope="col" class="num">Grade</th>
-                <th scope="col" class="num">Profit%</th>
-                <th scope="col" class="num">Trades</th>
-                <th scope="col" class="num">PF</th>
-                <th scope="col" class="num">Sortino</th>
-                <th scope="col" class="num">MaxDD</th>
-                <th scope="col">TF</th>
-                <th scope="col">Range</th>
-                <th scope="col">Source</th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="r in runs" :key="r.source">
-                <td>{{ (r.run_time || '').slice(0, 16) }}</td>
-                <td class="num"><span :class="gradePill(r.score?.grade)">{{ r.score?.grade }}</span></td>
-                <td class="num">{{ fmtPct1((r.profit_total || 0) * 100) }}</td>
-                <td class="num">{{ fmt0(r.total_trades) }}</td>
-                <td class="num">{{ pfFmt(r.profit_factor) }}</td>
-                <td class="num">{{ fmt(r.sortino) }}</td>
-                <td class="num">{{ fmtPct(r.max_drawdown_account) }}</td>
-                <td>{{ r.timeframe || '' }}</td>
-                <td style="font-size:12px;color:var(--text-dim)" :title="r.timerange || ''">{{ fmtRange(r.timerange) }}</td>
-                <td :title="r.source || ''">{{ (r.source || '').slice(-28) }}</td>
-                <td><button class="btn-secondary btn-sm" v-on:click="openRun('backtest', r.source)">Config &amp; code</button></td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="section-head">
+          <h3>All runs</h3>
+          <UInput v-model="runsFilter" placeholder="Filter runs..." size="sm" class="filter-input" />
         </div>
+        <UTable
+          :data="filteredRuns"
+          :columns="runsColumns"
+          :loading="false"
+          :sticky="true"
+          :sorting="runsSorting"
+          @update:sorting="runsSorting = $event"
+          class="w-full"
+          empty="No runs for this strategy yet."
+        >
+          <template #cell-grade="{ row }">
+            <span class="num"><span :class="gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade }}</span></span>
+          </template>
+          <template #cell-profit_total="{ row }">
+            <span class="num">{{ fmtPct1(((row.original as any).profit_total || 0) * 100) }}</span>
+          </template>
+          <template #cell-profit_factor="{ row }">
+            <span class="num">{{ pfFmt((row.original as any).profit_factor) }}</span>
+          </template>
+          <template #cell-sortino="{ row }">
+            <span class="num">{{ fmt((row.original as any).sortino) }}</span>
+          </template>
+          <template #cell-max_drawdown_account="{ row }">
+            <span class="num">{{ fmtPct((row.original as any).max_drawdown_account) }}</span>
+          </template>
+          <template #cell-timerange="{ row }">
+            <span style="font-size:12px;color:var(--text-dim)" :title="(row.original as any).timerange || ''">{{ fmtRange((row.original as any).timerange) }}</span>
+          </template>
+          <template #cell-source="{ row }">
+            <span :title="(row.original as any).source || ''">{{ ((row.original as any).source || '').slice(-28) }}</span>
+          </template>
+          <template #cell-actions="{ row }">
+            <UButton size="xs" variant="ghost" @click="openRun('backtest', (row.original as any).source)">Config &amp; code</UButton>
+          </template>
+        </UTable>
       </div>
 
       <div class="card">
@@ -288,6 +292,33 @@ onMounted(() => {
 
 const strategy = computed(() => store.canonical.find((s: any) => s.strategy === name) || { strategy: name, score: { grade: '?', grades: {} } })
 const runs = computed(() => store.backtests.filter((b: any) => b.strategy === name).sort((a: any, b: any) => (b.run_time || '').localeCompare(a.run_time || '')))
+const runsFilter = ref('')
+const runsSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'run_time', desc: true }])
+
+const runsColumns = [
+  { accessorKey: 'run_time', header: 'Run' },
+  { accessorKey: 'grade', header: 'Grade' },
+  { accessorKey: 'profit_total', header: 'Profit%' },
+  { accessorKey: 'total_trades', header: 'Trades' },
+  { accessorKey: 'profit_factor', header: 'PF' },
+  { accessorKey: 'sortino', header: 'Sortino' },
+  { accessorKey: 'max_drawdown_account', header: 'MaxDD' },
+  { accessorKey: 'timeframe', header: 'TF' },
+  { accessorKey: 'timerange', header: 'Range' },
+  { accessorKey: 'source', header: 'Source' },
+  { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
+]
+
+const filteredRuns = computed(() => {
+  const f = runsFilter.value.trim().toLowerCase()
+  if (!f) return runs.value
+  return runs.value.filter((r: any) =>
+    (r.run_time || '').toLowerCase().includes(f) ||
+    (r.source || '').toLowerCase().includes(f) ||
+    (r.timeframe || '').toLowerCase().includes(f) ||
+    (r.timerange || '').toLowerCase().includes(f)
+  )
+})
 const benches = computed(() => store.benchmarks.filter((b: any) => b.strategy === name))
 const hos = computed(() => store.hyperopt.filter((b: any) => b.strategy === name))
 const wfs = computed(() => store.walkforward.filter((b: any) => b.strategy === name))

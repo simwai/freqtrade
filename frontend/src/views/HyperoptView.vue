@@ -2,64 +2,87 @@
   <section>
     <div class="section-head">
       <h2>Hyperopt</h2>
+      <div class="controls">
+        <UInput v-model="q" placeholder="Filter runs..." class="filter-input" />
+        <USelect v-model="selectedFile" :options="fileOptions" placeholder="ho files" class="filter-select" @change="loadFile" />
+        <UButton variant="ghost" size="sm" @click="resetFilters" :disabled="!q && !selectedFile && !minTrades && !Object.keys(columnVisibility).length">
+          <template #leading>
+            <UIcon name="i-lucide-rotate-ccw" />
+          </template>
+          Reset
+        </UButton>
+      </div>
     </div>
 
-    <div v-if="store.loading" class="card">Loading...</div>
+    <div v-if="store.loading" class="card">
+      <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+        <span class="ml-3 text-muted">Loading hyperopt runs...</span>
+      </div>
+    </div>
+    <div v-else-if="store.error" class="card" style="color: var(--bad);">
+      <div class="flex items-center gap-3">
+        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+        <div>
+          <p class="font-medium">{{ store.error }}</p>
+          <UButton size="sm" variant="outline" @click="refreshData">Retry</UButton>
+        </div>
+      </div>
+    </div>
     <div v-else>
       <div class="card filters">
-        <input v-model="q" placeholder="filter" class="filter-input" />
-        <select v-model="selectedFile" v-on:change="loadFile" class="filter-select">
-          <option value="">ho files ({{ files.length }})</option>
-          <option v-for="f in files" :key="fileKey(f)" :value="fileKey(f)">{{ fileLabel(f) }}</option>
-        </select>
-        <label class="filter-label">Min Trades <input type="number" v-model.number="minTrades" /></label>
-        <label class="filter-label">Epoch limit <input type="number" v-model.number="epochLimit" /></label>
+        <UFormField name="minTrades" label="Min Trades">
+          <UInput type="number" v-model.number="minTrades" />
+        </UFormField>
+        <UFormField name="epochLimit" label="Epoch limit">
+          <UInput type="number" v-model.number="epochLimit" />
+        </UFormField>
+        <span class="hint">{{ filtered.length }} / {{ store.hyperopt.length }} runs</span>
       </div>
 
       <div class="card">
-        <div class="section-head">
-          <h3>{{ filtered.length }} / {{ store.hyperopt.length }} runs</h3>
-        </div>
-        <div class="table-wrap table-stack" v-sync-scroll>
-          <div class="thead-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col" v-on:click="sortBy('strategy')">Strategy <span class="arrow" v-if="sortKey==='strategy'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('epochs')" class="num">Epochs <span class="arrow" v-if="sortKey==='epochs'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('best_loss')" class="num">Best Loss <span class="arrow" v-if="sortKey==='best_loss'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('best_profit_total')" class="num">Best Profit <span class="arrow" v-if="sortKey==='best_profit_total'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('best_sortino')" class="num">Best Sortino <span class="arrow" v-if="sortKey==='best_sortino'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('best_profit_factor')" class="num">Best PF <span class="arrow" v-if="sortKey==='best_profit_factor'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('best_trades')" class="num">Trades <span class="arrow" v-if="sortKey==='best_trades'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('loss_function')">Loss <span class="arrow" v-if="sortKey==='loss_function'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('spaces')">Spaces <span class="arrow" v-if="sortKey==='spaces'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortBy('run_time')" class="num">Run <span class="arrow" v-if="sortKey==='run_time'">{{ sortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col">Config</th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <tbody>
-                <tr v-for="r in sortedFiltered" :key="r.source" v-on:click="drill(r.source)">
-                  <td>{{ r.strategy }}</td>
-                  <td class="num">{{ r.epochs }}</td>
-                  <td class="num">{{ fmtNum(r.best_loss) }}</td>
-                  <td class="num">{{ fmtNum(r.best_profit_total) }}</td>
-                  <td class="num">{{ fmtNum(r.best_sortino) }}</td>
-                  <td class="num">{{ fmtNum(r.best_profit_factor) }}</td>
-                  <td class="num">{{ r.best_trades }}</td>
-                  <td :title="r.spaces || ''">{{ shortLoss(r.loss_function) }}</td>
-                  <td :title="r.spaces || ''">{{ (r.spaces || '').slice(0, 18) }}</td>
-                  <td class="num">{{ (r.run_time || '').slice(0, 16) }}</td>
-                  <td><button class="btn-secondary btn-sm" v-on:click.stop="openRun('hyperopt', r.source)">Config & code</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <UTable
+          :data="sortedFiltered"
+          :columns="columns"
+          :loading="false"
+          :sticky="true"
+          :sorting="sorting"
+          @update:sorting="sorting = $event"
+          :column-visibility="columnVisibility"
+          @update:column-visibility="columnVisibility = $event"
+          @select="(row: any) => drill(row.original?.source ?? row.source)"
+          class="w-full"
+          empty="No hyperopt runs found matching your filters."
+        >
+          <template #cell-strategy="{ row }">
+            <span>{{ (row.original as any).strategy }}</span>
+          </template>
+          <template #cell-best_loss="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).best_loss) }}</span>
+          </template>
+          <template #cell-best_profit_total="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).best_profit_total) }}</span>
+          </template>
+          <template #cell-best_sortino="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).best_sortino) }}</span>
+          </template>
+          <template #cell-best_profit_factor="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).best_profit_factor) }}</span>
+          </template>
+          <template #cell-loss_function="{ row }">
+            <span :title="(row.original as any).spaces || ''">{{ shortLoss((row.original as any).loss_function) }}</span>
+          </template>
+          <template #cell-spaces="{ row }">
+            <span :title="(row.original as any).spaces || ''">{{ ((row.original as any).spaces || '').slice(0, 18) }}</span>
+          </template>
+          <template #cell-run_time="{ row }">
+            <span class="num">{{ ((row.original as any).run_time || '').slice(0, 16) }}</span>
+          </template>
+          <template #cell-actions="{ row }">
+            <UButton size="sm" variant="ghost" @click.stop="openRun('hyperopt', (row.original as any).source)">Config &amp; code</UButton>
+          </template>
+        </UTable>
+        <p class="hint">Showing up to 60 runs — refine the filter to narrow results.</p>
       </div>
 
       <div v-if="detail" class="card detail-panel">
@@ -73,48 +96,47 @@
           <summary>Best epoch params — {{ detail.loss_function || '' }} · loss {{ fmtNum(detail.best_loss) }}</summary>
           <pre class="code-block">{{ detail.paramsText }}</pre>
         </details>
-        <div class="table-wrap table-stack" v-sync-scroll>
-          <div class="thead-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col" v-on:click="sortDetail('epoch')">Epoch <span class="arrow" v-if="detailSortKey==='epoch'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('loss')" class="num">Loss <span class="arrow" v-if="detailSortKey==='loss'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('trades')" class="num">Trades <span class="arrow" v-if="detailSortKey==='trades'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('profit_total')" class="num">Profit <span class="arrow" v-if="detailSortKey==='profit_total'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('sortino')" class="num">Sortino <span class="arrow" v-if="detailSortKey==='sortino'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('calmar')" class="num">Calmar <span class="arrow" v-if="detailSortKey==='calmar'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('profit_factor')" class="num">PF <span class="arrow" v-if="detailSortKey==='profit_factor'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('sqn')" class="num">SQN <span class="arrow" v-if="detailSortKey==='sqn'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('max_drawdown')" class="num">DD <span class="arrow" v-if="detailSortKey==='max_drawdown'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('mae')" class="num">MAE% <span class="arrow" v-if="detailSortKey==='mae'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortDetail('exit_eff')" class="num">ExitEff <span class="arrow" v-if="detailSortKey==='exit_eff'">{{ detailSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col">Best?</th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <tbody>
-                <tr v-for="r in sortedDetail" :key="r.epoch">
-                  <td>{{ r.epoch }}</td>
-                  <td class="num">{{ fmtNum(r.loss) }}</td>
-                  <td class="num">{{ r.trades }}</td>
-                  <td class="num">{{ fmtNum(r.profit_total) }}</td>
-                  <td class="num">{{ fmtNum(r.sortino) }}</td>
-                  <td class="num">{{ fmtNum(r.calmar) }}</td>
-                  <td class="num">{{ fmtNum(r.profit_factor) }}</td>
-                  <td class="num">{{ fmtNum(r.sqn) }}</td>
-                  <td class="num">{{ fmtPct(r.max_drawdown) }}</td>
-                  <td class="num">{{ fmtPct2(r.mae) }}</td>
-                  <td class="num">{{ fmtPct0(r.exit_eff) }}</td>
-                  <td><span v-if="r.best" class="pill gA">best</span><span v-else-if="r.init" class="pill gna">init</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <UTable
+          :data="detailRecords"
+          :columns="detailColumns"
+          :loading="false"
+          :sticky="true"
+          :sorting="detailSorting"
+          @update:sorting="detailSorting = $event"
+          class="w-full"
+          empty="No epochs."
+        >
+          <template #cell-loss="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).loss) }}</span>
+          </template>
+          <template #cell-profit_total="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).profit_total) }}</span>
+          </template>
+          <template #cell-sortino="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).sortino) }}</span>
+          </template>
+          <template #cell-calmar="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).calmar) }}</span>
+          </template>
+          <template #cell-profit_factor="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).profit_factor) }}</span>
+          </template>
+          <template #cell-sqn="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).sqn) }}</span>
+          </template>
+          <template #cell-max_drawdown="{ row }">
+            <span class="num">{{ fmtPct((row.original as any).max_drawdown) }}</span>
+          </template>
+          <template #cell-mae="{ row }">
+            <span class="num">{{ fmtPct2((row.original as any).mae) }}</span>
+          </template>
+          <template #cell-exit_eff="{ row }">
+            <span class="num">{{ fmtPct0((row.original as any).exit_eff) }}</span>
+          </template>
+          <template #cell-best="{ row }">
+            <span v-if="(row.original as any).best" class="pill gA">best</span><span v-else-if="(row.original as any).init" class="pill gna">init</span>
+          </template>
+        </UTable>
         <div class="chart-box">
           <VChart :option="scatterOption" autoresize class="chart" style="height: 280px" />
         </div>
@@ -140,16 +162,48 @@ import { corrClass } from '../utils/pills'
 import '../utils/echarts'
 
 const store = useDashboardStore()
+const toast = useToast()
 const q = ref('')
 const minTrades = ref(0)
 const epochLimit = ref(200)
 const selectedFile = ref('')
 const detail = ref(null as any)
 const files = ref([] as any[])
-const sortKey = ref('epochs')
-const sortAsc = ref(false)
-const detailSortKey = ref('epoch')
-const detailSortAsc = ref(true)
+
+const sorting = ref<{ id: string; desc: boolean }[]>([{ id: 'epochs', desc: true }])
+const columnVisibility = ref<Record<string, boolean>>({})
+const detailSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'epoch', desc: false }])
+
+const fileOptions = computed(() => files.value.map((f: any) => ({ label: fileLabel(f), value: fileKey(f) })))
+
+const columns = [
+  { accessorKey: 'strategy', header: 'Strategy' },
+  { accessorKey: 'epochs', header: 'Epochs' },
+  { accessorKey: 'best_loss', header: 'Best Loss' },
+  { accessorKey: 'best_profit_total', header: 'Best Profit' },
+  { accessorKey: 'best_sortino', header: 'Best Sortino' },
+  { accessorKey: 'best_profit_factor', header: 'Best PF' },
+  { accessorKey: 'best_trades', header: 'Trades' },
+  { accessorKey: 'loss_function', header: 'Loss' },
+  { accessorKey: 'spaces', header: 'Spaces' },
+  { accessorKey: 'run_time', header: 'Run' },
+  { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
+]
+
+const detailColumns = [
+  { accessorKey: 'epoch', header: 'Epoch' },
+  { accessorKey: 'loss', header: 'Loss' },
+  { accessorKey: 'trades', header: 'Trades' },
+  { accessorKey: 'profit_total', header: 'Profit' },
+  { accessorKey: 'sortino', header: 'Sortino' },
+  { accessorKey: 'calmar', header: 'Calmar' },
+  { accessorKey: 'profit_factor', header: 'PF' },
+  { accessorKey: 'sqn', header: 'SQN' },
+  { accessorKey: 'max_drawdown', header: 'DD' },
+  { accessorKey: 'mae', header: 'MAE%' },
+  { accessorKey: 'exit_eff', header: 'ExitEff' },
+  { accessorKey: 'best', header: 'Best?', enableSorting: false },
+]
 
 const filtered = computed(() => {
   const ql = q.value.toLowerCase()
@@ -162,52 +216,58 @@ const filtered = computed(() => {
   })
 })
 
+function compareCells(av: any, bv: any, desc: boolean): number {
+  if (av === undefined && bv === undefined) return 0
+  if (av === '' || av === undefined || av === null) return 1
+  if (bv === '' || bv === undefined || bv === null) return -1
+  const an = Number(av), bn = Number(bv)
+  const useNum = !isNaN(an) && !isNaN(bn)
+  const r = useNum ? an - bn : String(av).localeCompare(String(bv))
+  return desc ? -r : r
+}
+
 const sortedFiltered = computed(() => {
+  const s = sorting.value[0] || { id: 'epochs', desc: true }
   const arr = [...filtered.value]
-  arr.sort((a: any, b: any) => {
-    let av = a[sortKey.value]
-    let bv = b[sortKey.value]
-    if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return 1
-    if (bv === '' || bv === undefined || bv === null) return -1
-    const an = Number(av), bn = Number(bv)
-    const useNum = !isNaN(an) && !isNaN(bn)
-    const r = useNum ? an - bn : String(av).localeCompare(String(bv))
-    return sortAsc.value ? r : -r
-  })
+  arr.sort((a: any, b: any) => compareCells(a[s.id], b[s.id], s.desc))
   return arr.slice(0, 60)
 })
 
-const sortedDetail = computed(() => {
+const detailRecords = computed(() => {
   if (!detail.value || !detail.value.records) return []
-  const arr = [...detail.value.records]
-  arr.sort((a: any, b: any) => {
-    let av = a[detailSortKey.value]
-    let bv = b[detailSortKey.value]
-    if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return 1
-    if (bv === '' || bv === undefined || bv === null) return -1
-    const an = Number(av), bn = Number(bv)
-    const useNum = !isNaN(an) && !isNaN(bn)
-    const r = useNum ? an - bn : String(av).localeCompare(String(bv))
-    return detailSortAsc.value ? r : -r
-  })
-  return arr
+  return detail.value.records
 })
+
+function resetFilters() {
+  q.value = ''
+  selectedFile.value = ''
+  minTrades.value = 0
+  columnVisibility.value = {}
+  sorting.value = [{ id: 'epochs', desc: true }]
+}
+
+function refreshData() {
+  store.fetchAll(true)
+}
 
 function fileKey(f: any) { return typeof f === 'string' ? f : (f.source || f.name || f.path || JSON.stringify(f)) }
 function fileLabel(f: any) { return typeof f === 'string' ? f : (f.name || f.source || f.path || JSON.stringify(f)) }
 async function loadFile() { if (selectedFile.value) await drill(selectedFile.value) }
 async function drill(source: string) {
   selectedFile.value = source
-  const { data } = await api.get('/api/hyperopt', { params: { source, limit: Number(epochLimit.value) || 200 } })
-  if (data.error) { detail.value = null; return }
-  const hoRow = store.hyperopt.find((x: any) => x.source === data.source)
-  let paramsText = ''
-  if (hoRow && hoRow.best_params) {
-    try { paramsText = JSON.stringify(JSON.parse(hoRow.best_params), null, 2) } catch (e) {}
+  try {
+    const { data } = await api.get('/api/hyperopt', { params: { source, limit: Number(epochLimit.value) || 200 } })
+    if (data.error) { detail.value = null; toast.add({ title: 'Hyperopt detail failed', description: String(data.error), color: 'error', duration: 3000 }); return }
+    const hoRow = store.hyperopt.find((x: any) => x.source === data.source)
+    let paramsText = ''
+    if (hoRow && hoRow.best_params) {
+      try { paramsText = JSON.stringify(JSON.parse(hoRow.best_params), null, 2) } catch (e) {}
+    }
+    detail.value = Object.assign({}, data, { paramsText, loss_function: hoRow?.loss_function || '', best_loss: hoRow?.best_loss })
+  } catch (e) {
+    detail.value = null
+    toast.add({ title: 'Hyperopt detail failed', description: 'Could not load run detail.', color: 'error', duration: 3000 })
   }
-  detail.value = Object.assign({}, data, { paramsText, loss_function: hoRow?.loss_function || '', best_loss: hoRow?.best_loss })
 }
 function shortLoss(s: string) { return (s || '').replace('HyperOptLoss', '') }
 function openRun(_kind: string, source: string) {
@@ -222,14 +282,6 @@ function openRun(_kind: string, source: string) {
   }
 }
 function signed(v: number) { return (v > 0 ? '+' : '') + Number(v).toFixed(2) }
-function sortBy(key: string) {
-  if (sortKey.value === key) sortAsc.value = !sortAsc.value
-  else { sortKey.value = key; sortAsc.value = true }
-}
-function sortDetail(key: string) {
-  if (detailSortKey.value === key) detailSortAsc.value = !detailSortAsc.value
-  else { detailSortKey.value = key; detailSortAsc.value = true }
-}
 function fmtNum(v: number) { return v ? v.toLocaleString(undefined, { maximumFractionDigits: 3 }) : '—' }
 function fmtPct(v: number) { return v ? (v * 100).toFixed(1) + '%' : '—' }
 function fmtPct2(v: number) { return v === null || v === undefined ? '—' : (Number(v) * 100).toFixed(2) + '%' }

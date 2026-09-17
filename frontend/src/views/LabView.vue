@@ -109,46 +109,37 @@
     <div class="card">
       <div class="section-head">
         <h3>Jobs</h3>
+        <UButton variant="ghost" size="sm" @click="loadJobs">
+          <template #leading>
+            <UIcon name="i-lucide-refresh-cw" size="14" />
+          </template>
+          Refresh jobs
+        </UButton>
       </div>
-      <div class="form-row">
-        <button class="btn-secondary" v-on:click="loadJobs">Refresh jobs</button>
-      </div>
-      <div class="table-wrap table-stack" v-sync-scroll>
-        <div class="thead-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col" >ID</th>
-                <th scope="col" >Name</th>
-                <th scope="col" >Status</th>
-                <th scope="col" >Actions</th>
-              </tr>
-            </thead>
-          </table>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <tbody>
-              <tr v-for="(j, id) in jobs" :key="id">
-                <td>{{ id }}</td>
-                <td>{{ j.name }}</td>
-                <td><span :class="statusClass(j.status)">{{ j.status }}</span></td>
-                <td>
-                  <button v-if="j.status === 'running'" class="btn-secondary btn-sm" v-on:click="jobAction(id, 'pause')">Pause</button>
-                  <button v-if="j.status === 'paused'" class="btn-secondary btn-sm" v-on:click="jobAction(id, 'resume')">Resume</button>
-                  <button v-if="j.status === 'running' || j.status === 'paused' || j.status === 'queued'" class="btn-secondary btn-sm" v-on:click="jobAction(id, 'stop')">Stop</button>
-                  <button class="btn-secondary btn-sm" v-on:click="viewLog(id)">Log</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <UTable
+        :data="jobRows"
+        :columns="jobsColumns"
+        :loading="false"
+        class="w-full"
+        empty="No jobs yet — start a benchmark or single run above."
+      >
+        <template #cell-status="{ row }">
+          <span :class="statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
+        </template>
+        <template #cell-actions="{ row }">
+          <div class="flex gap-1 flex-wrap">
+            <UButton v-if="(row.original as any).status === 'running'" size="xs" variant="ghost" @click="jobAction((row.original as any).id, 'pause')">Pause</UButton>
+            <UButton v-if="(row.original as any).status === 'paused'" size="xs" variant="ghost" @click="jobAction((row.original as any).id, 'resume')">Resume</UButton>
+            <UButton v-if="(row.original as any).status === 'running' || (row.original as any).status === 'paused' || (row.original as any).status === 'queued'" size="xs" variant="ghost" color="error" @click="stopJob((row.original as any).id)">Stop</UButton>
+            <UButton size="xs" variant="ghost" @click="viewLog((row.original as any).id)">Log</UButton>
+          </div>
+        </template>
+      </UTable>
 
       <div v-if="logJob" class="log-panel card">
         <div class="log-header">
           <h4>Log {{ logJob }}</h4>
-          <button class="btn-secondary btn-sm" v-on:click="closeLog">Close</button>
+          <UButton size="xs" variant="ghost" @click="closeLog">Close</UButton>
         </div>
         <pre class="code-block">{{ logText }}</pre>
       </div>
@@ -157,18 +148,21 @@
     <div class="card">
       <div class="section-head">
         <h3>Benchmark log</h3>
+        <UButton variant="ghost" size="sm" @click="loadBenchLog">Load latest bench log</UButton>
       </div>
-      <button class="btn-secondary" v-on:click="loadBenchLog">Load latest bench log</button>
       <pre class="code-block">{{ benchLogText }}</pre>
     </div>
   </section>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { api } from '../api/client'
 import { useDashboardStore } from '../stores/dashboard'
+import { useConfirmDialog } from '../composables/useConfirmDialog'
 
 const store = useDashboardStore()
+const toast = useToast()
+const { confirm } = useConfirmDialog()
 
 const benchStrategies = ref('')
 const timerange = ref('20230101-20240101')
@@ -213,6 +207,15 @@ const logJob = ref('')
 const logText = ref('')
 const runMetaText = ref('')
 const benchLogText = ref('')
+
+const jobRows = computed(() => Object.entries(jobs.value || {}).map(([id, j]: [string, any]) => ({ id: id, name: j?.name || '', status: j?.status || '' })))
+
+const jobsColumns = [
+  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'name', header: 'Name' },
+  { accessorKey: 'status', header: 'Status' },
+  { accessorKey: 'actions', header: 'Actions', enableSorting: false, enableGlobalFilter: false },
+]
 
 async function startBench() {
   const list = benchStrategies.value.split(',').map((s: string) => s.trim()).filter(Boolean)
@@ -312,13 +315,31 @@ async function loadDropdowns() {
   } catch (e) {}
 }
 async function loadJobs() {
-  const { data } = await api.get('/api/jobs')
-  jobs.value = data
+  try {
+    const { data } = await api.get('/api/jobs')
+    jobs.value = data
+  } catch (e) {
+    toast.add({ title: 'Jobs refresh failed', description: 'Could not load jobs.', color: 'error', duration: 3000 })
+  }
 }
 async function jobAction(id: string, action: string) {
   message.value = ''
-  await api.post('/api/jobs/' + id + '/' + action, {})
-  await loadJobs()
+  try {
+    await api.post('/api/jobs/' + id + '/' + action, {})
+    await loadJobs()
+  } catch (e) {
+    toast.add({ title: 'Job action failed', description: 'Could not ' + action + ' job ' + id + '.', color: 'error', duration: 3000 })
+  }
+}
+async function stopJob(id: string) {
+  const confirmed = await confirm({
+    title: 'Stop job',
+    description: 'Stop job ' + id + '? A running backtest or optimization will be terminated.',
+    confirmLabel: 'Stop job',
+    color: 'error'
+  })
+  if (!confirmed) return
+  await jobAction(id, 'stop')
 }
 async function viewLog(id: string) {
   logJob.value = id

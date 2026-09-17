@@ -79,51 +79,49 @@
       </div>
 
       <div class="card">
-        <h3>Trades {{ trades.length }}</h3>
-        <div class="table-wrap table-stack" v-sync-scroll>
-          <div class="thead-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col" v-on:click="sortTrades('p')">Pair <span class="arrow" v-if="tradeSortKey==='p'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('s')">Side <span class="arrow" v-if="tradeSortKey==='s'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('t')">Enter tag <span class="arrow" v-if="tradeSortKey==='t'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('e')">Exit reason <span class="arrow" v-if="tradeSortKey==='e'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('o')" class="num">Open <span class="arrow" v-if="tradeSortKey==='o'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('c')" class="num">Close <span class="arrow" v-if="tradeSortKey==='c'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('or')" class="num">Open rate <span class="arrow" v-if="tradeSortKey==='or'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('cr')" class="num">Close rate <span class="arrow" v-if="tradeSortKey==='cr'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('pr')" class="num">Profit% <span class="arrow" v-if="tradeSortKey==='pr'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('pa')" class="num">Profit abs <span class="arrow" v-if="tradeSortKey==='pa'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('sl')" class="num">Stop loss <span class="arrow" v-if="tradeSortKey==='sl'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('slr')" class="num">SL% <span class="arrow" v-if="tradeSortKey==='slr'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                  <th scope="col" v-on:click="sortTrades('d')" class="num">Duration <span class="arrow" v-if="tradeSortKey==='d'">{{ tradeSortAsc ? '▲' : '▼' }}</span></th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <tbody>
-                <tr v-for="t in sortedTrades" :key="t.o + t.c + t.p" v-on:click="zoomToTrade(t)" style="cursor: pointer;">
-                  <td>{{ t.p }}</td>
-                  <td><span :class="sideClass(t.s)">{{ t.s ? 'short' : 'long' }}</span></td>
-                  <td>{{ t.t }}</td>
-                  <td>{{ t.e }}</td>
-                  <td class="num">{{ t.o }}</td>
-                  <td class="num">{{ t.c }}</td>
-                  <td class="num">{{ fmtNum(t.or) }}</td>
-                  <td class="num">{{ fmtNum(t.cr) }}</td>
-                  <td class="num" :class="profitClass(t.pr)">{{ ((t.pr || 0) * 100).toFixed(2) }}%</td>
-                  <td class="num">{{ fmtNum(t.pa) }}</td>
-                  <td class="num">{{ fmtNum(t.sl) }}</td>
-                  <td class="num">{{ (t.slr || 0) * 100 }}%</td>
-                  <td class="num">{{ durText(t) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="section-head">
+          <h3>Trades {{ trades.length }}</h3>
+          <UInput v-model="tradeFilter" placeholder="Filter trades..." size="sm" class="filter-input" />
         </div>
+        <UTable
+          :data="filteredShown"
+          :columns="tradeColumns"
+          :loading="false"
+          :sticky="true"
+          :sorting="tradeSorting"
+          @update:sorting="tradeSorting = $event"
+          :column-visibility="tradeVisibility"
+          @update:column-visibility="tradeVisibility = $event"
+          @select="(row: any) => zoomToTrade(row.original ?? row)"
+          class="w-full"
+          empty="No trades match the current pair and exit-reason filters."
+        >
+          <template #cell-s="{ row }">
+            <span :class="sideClass((row.original as any).s)">{{ (row.original as any).s ? 'short' : 'long' }}</span>
+          </template>
+          <template #cell-or="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).or) }}</span>
+          </template>
+          <template #cell-cr="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).cr) }}</span>
+          </template>
+          <template #cell-pr="{ row }">
+            <span class="num" :class="profitClass((row.original as any).pr)">{{ (((row.original as any).pr || 0) * 100).toFixed(2) }}%</span>
+          </template>
+          <template #cell-pa="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).pa) }}</span>
+          </template>
+          <template #cell-sl="{ row }">
+            <span class="num">{{ fmtNum((row.original as any).sl) }}</span>
+          </template>
+          <template #cell-slr="{ row }">
+            <span class="num">{{ ((row.original as any).slr || 0) * 100 }}%</span>
+          </template>
+          <template #cell-d="{ row }">
+            <span class="num">{{ durText(row.original) }}</span>
+          </template>
+        </UTable>
+        <p class="hint">Click a row to zoom the trade map to that trade.</p>
       </div>
     </div>
   </section>
@@ -173,8 +171,35 @@ const indNote = ref('')
 const pendingIndName = ref('')
 const note = ref('')
 const emptyBanner = ref('')
-const tradeSortKey = ref('o')
-const tradeSortAsc = ref(true)
+const tradeFilter = ref('')
+const tradeSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'o', desc: false }])
+const tradeVisibility = ref<Record<string, boolean>>({})
+
+const tradeColumns = [
+  { accessorKey: 'p', header: 'Pair' },
+  { accessorKey: 's', header: 'Side' },
+  { accessorKey: 't', header: 'Enter tag' },
+  { accessorKey: 'e', header: 'Exit reason' },
+  { accessorKey: 'o', header: 'Open' },
+  { accessorKey: 'c', header: 'Close' },
+  { accessorKey: 'or', header: 'Open rate' },
+  { accessorKey: 'cr', header: 'Close rate' },
+  { accessorKey: 'pr', header: 'Profit%' },
+  { accessorKey: 'pa', header: 'Profit abs' },
+  { accessorKey: 'sl', header: 'Stop loss' },
+  { accessorKey: 'slr', header: 'SL%' },
+  { accessorKey: 'd', header: 'Duration' },
+]
+
+const filteredShown = computed(() => {
+  const f = tradeFilter.value.trim().toLowerCase()
+  if (!f) return shown.value
+  return shown.value.filter((t: any) =>
+    (t.p || '').toLowerCase().includes(f) ||
+    (t.t || '').toLowerCase().includes(f) ||
+    (t.e || '').toLowerCase().includes(f)
+  )
+})
 const tlVChart = ref(null as any)
 const fetchCache = new Map<string, number[][]>()
 const indCache = new Map<string, any>()
@@ -773,27 +798,6 @@ const histOption = computed((): ECOption2 => {
     yAxis: { type: 'value', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } }, splitLine: { lineStyle: { color: '#2f2745' } } },
     series: [{ name: 'Trades', type: 'bar', data: counts, itemStyle: { color: '#a78bfa' } }]
   }
-})
-
-function sortTrades(key: string) {
-  if (tradeSortKey.value === key) tradeSortAsc.value = !tradeSortAsc.value
-  else { tradeSortKey.value = key; tradeSortAsc.value = true }
-}
-
-const sortedTrades = computed(() => {
-  const arr = [...shown.value]
-  arr.sort((a: any, b: any) => {
-    let av = a[tradeSortKey.value]
-    let bv = b[tradeSortKey.value]
-    if (av === undefined && bv === undefined) return 0
-    if (av === '' || av === undefined || av === null) return 1
-    if (bv === '' || bv === undefined || bv === null) return -1
-    const an = Number(av), bn = Number(bv)
-    const useNum = !isNaN(an) && !isNaN(bn)
-    const r = useNum ? an - bn : String(av).localeCompare(String(bv))
-    return tradeSortAsc.value ? r : -r
-  })
-  return arr
 })
 
 function sideClass(s: number | boolean) { return s ? 'status retired' : 'status active' }
