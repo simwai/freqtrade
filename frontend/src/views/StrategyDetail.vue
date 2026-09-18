@@ -127,28 +127,28 @@
           class="w-full"
           empty="No runs for this strategy yet."
         >
-          <template #cell-grade="{ row }">
+          <template #grade-cell="{ row }">
             <span class="num"><span :class="gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade }}</span></span>
           </template>
-          <template #cell-profit_total="{ row }">
+          <template #profit_total-cell="{ row }">
             <span class="num">{{ fmtPct1(((row.original as any).profit_total || 0) * 100) }}</span>
           </template>
-          <template #cell-profit_factor="{ row }">
+          <template #profit_factor-cell="{ row }">
             <span class="num">{{ pfFmt((row.original as any).profit_factor) }}</span>
           </template>
-          <template #cell-sortino="{ row }">
+          <template #sortino-cell="{ row }">
             <span class="num">{{ fmt((row.original as any).sortino) }}</span>
           </template>
-          <template #cell-max_drawdown_account="{ row }">
+          <template #max_drawdown_account-cell="{ row }">
             <span class="num">{{ fmtPct((row.original as any).max_drawdown_account) }}</span>
           </template>
-          <template #cell-timerange="{ row }">
+          <template #timerange-cell="{ row }">
             <span style="font-size:12px;color:var(--text-dim)" :title="(row.original as any).timerange || ''">{{ fmtRange((row.original as any).timerange) }}</span>
           </template>
-          <template #cell-source="{ row }">
+          <template #source-cell="{ row }">
             <span :title="(row.original as any).source || ''">{{ ((row.original as any).source || '').slice(-28) }}</span>
           </template>
-          <template #cell-actions="{ row }">
+          <template #actions-cell="{ row }">
             <UButton size="xs" variant="ghost" @click="openRun('backtest', (row.original as any).source)">Config &amp; code</UButton>
           </template>
         </UTable>
@@ -270,6 +270,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { sortableHeader } from '../utils/table'
 import { useRoute } from 'vue-router'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
@@ -317,16 +318,16 @@ const runsSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'run_time', desc
 const columnVisibility = ref<Record<string, boolean>>({})
 
 const runsColumns = [
-  { accessorKey: 'run_time', header: 'Run' },
-  { accessorKey: 'grade', header: 'Grade' },
-  { accessorKey: 'profit_total', header: 'Profit%' },
-  { accessorKey: 'total_trades', header: 'Trades' },
-  { accessorKey: 'profit_factor', header: 'PF' },
-  { accessorKey: 'sortino', header: 'Sortino' },
-  { accessorKey: 'max_drawdown_account', header: 'MaxDD' },
-  { accessorKey: 'timeframe', header: 'TF' },
-  { accessorKey: 'timerange', header: 'Range' },
-  { accessorKey: 'source', header: 'Source' },
+  { accessorKey: 'run_time', header: sortableHeader('Run') },
+  { accessorKey: 'grade', accessorFn: (r: any) => r.score?.grade, header: sortableHeader('Grade') },
+  { accessorKey: 'profit_total', header: sortableHeader('Profit%') },
+  { accessorKey: 'total_trades', header: sortableHeader('Trades') },
+  { accessorKey: 'profit_factor', header: sortableHeader('PF') },
+  { accessorKey: 'sortino', header: sortableHeader('Sortino') },
+  { accessorKey: 'max_drawdown_account', header: sortableHeader('MaxDD') },
+  { accessorKey: 'timeframe', header: sortableHeader('TF') },
+  { accessorKey: 'timerange', header: sortableHeader('Range') },
+  { accessorKey: 'source', header: sortableHeader('Source') },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
 ]
 
@@ -593,3 +594,4 @@ onMounted(async () => {
 .rec-row { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
 .code-block { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; overflow: auto; max-height: 300px; font-size: 11px; white-space: pre-wrap; }
 </style>
+

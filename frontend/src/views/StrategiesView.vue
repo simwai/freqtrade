@@ -44,49 +44,49 @@
         class="w-full"
         empty="No strategies found matching your filters."
       >
-        <template #cell-strategy="{ row }">
+        <template #strategy-cell="{ row }">
           <span>{{ (row.original as any).strategy }}</span>
         </template>
-        <template #cell-status="{ row }">
+        <template #status-cell="{ row }">
           <span :class="statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
         </template>
-        <template #cell-score.grade="{ row }">
+        <template #["score.grade-cell"]="{ row }">
           <span :class="gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade || '?' }}</span>
         </template>
-        <template #cell-profit_total="{ row }">
+        <template #profit_total-cell="{ row }">
           <span class="num" :class="profitClass((row.original as any).profit_total)">{{ fmtProfitPct((row.original as any).profit_total) }}</span>
         </template>
-        <template #cell-profit_factor="{ row }">
+        <template #profit_factor-cell="{ row }">
           <span class="num">{{ pfFmt((row.original as any).profit_factor) }}</span>
         </template>
-        <template #cell-sortino="{ row }">
+        <template #sortino-cell="{ row }">
           <span class="num">{{ fmt3((row.original as any).sortino) }}</span>
         </template>
-        <template #cell-calmar="{ row }">
+        <template #calmar-cell="{ row }">
           <span class="num">{{ fmt3((row.original as any).calmar) }}</span>
         </template>
-        <template #cell-max_drawdown_account="{ row }">
+        <template #max_drawdown_account-cell="{ row }">
           <span class="num">{{ fmtPct((row.original as any).max_drawdown_account) }}</span>
         </template>
-        <template #cell-n_backtests="{ row }">
+        <template #n_backtests-cell="{ row }">
           <span class="num">{{ (row.original as any).n_backtests }}</span>
         </template>
-        <template #cell-n_trades="{ row }">
+        <template #n_trades-cell="{ row }">
           <span class="num">{{ (row.original as any).n_trades }}</span>
         </template>
-        <template #cell-propPass="{ row }">
+        <template #propPass-cell="{ row }">
           <span class="num"><span :class="propClass(row.original)" :title="propTitle(row.original)">{{ propText(row.original) }}</span></span>
         </template>
-        <template #cell-basis="{ row }">
+        <template #basis-cell="{ row }">
           <span :title="basisTooltip(row.original)">{{ basisLabel(row.original) }}</span>
         </template>
-        <template #cell-timerange="{ row }">
+        <template #timerange-cell="{ row }">
           <span style="font-size:12px;color:var(--text-dim)">{{ fmtRange((row.original as any).timerange) }}</span>
         </template>
-        <template #cell-run_time="{ row }">
+        <template #run_time-cell="{ row }">
           <span>{{ ((row.original as any).run_time || '').slice(0, 10) }}</span>
         </template>
-        <template #cell-actions="{ row }">
+        <template #actions-cell="{ row }">
           <div class="flex gap-1">
             <UButton size="sm" variant="ghost" aria-label="Open details" @click.stop="openStrategy(row.original ?? row)">
               <UIcon name="i-lucide-chevron-right" size="14" />
@@ -119,6 +119,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { sortableHeader } from '../utils/table'
 import { useDashboardStore } from '../stores/dashboard'
 import { api } from '../api/client'
 import StrategyDrawer from '../components/StrategyDrawer.vue'
@@ -167,20 +168,20 @@ const filteredRows = computed(() => baseRows.value.filter((r: any) => {
 }))
 
 const columns = [
-  { accessorKey: 'strategy', header: 'Name' },
-  { accessorKey: 'status', header: 'Status' },
-  { accessorKey: 'score.grade', header: 'Grade' },
-  { accessorKey: 'profit_total', header: 'Profit%' },
-  { accessorKey: 'profit_factor', header: 'PF' },
-  { accessorKey: 'sortino', header: 'Sortino' },
-  { accessorKey: 'calmar', header: 'Calmar' },
-  { accessorKey: 'max_drawdown_account', header: 'MaxDD' },
-  { accessorKey: 'propPass', header: 'Prop' },
-  { accessorKey: 'n_backtests', header: 'Backtests' },
-  { accessorKey: 'n_trades', header: 'Trades' },
-  { accessorKey: 'basis', header: 'Basis' },
-  { accessorKey: 'timerange', header: 'Range' },
-  { accessorKey: 'run_time', header: 'Run' },
+  { accessorKey: 'strategy', header: sortableHeader('Name') },
+  { accessorKey: 'status', header: sortableHeader('Status') },
+  { accessorKey: 'score.grade', header: sortableHeader('Grade') },
+  { accessorKey: 'profit_total', header: sortableHeader('Profit%') },
+  { accessorKey: 'profit_factor', header: sortableHeader('PF') },
+  { accessorKey: 'sortino', header: sortableHeader('Sortino') },
+  { accessorKey: 'calmar', header: sortableHeader('Calmar') },
+  { accessorKey: 'max_drawdown_account', header: sortableHeader('MaxDD') },
+  { accessorKey: 'propPass', accessorFn: (r: any) => propPassCount(r), header: sortableHeader('Prop') },
+  { accessorKey: 'n_backtests', header: sortableHeader('Backtests') },
+  { accessorKey: 'n_trades', header: sortableHeader('Trades') },
+  { accessorKey: 'basis', header: sortableHeader('Basis') },
+  { accessorKey: 'timerange', header: sortableHeader('Range') },
+  { accessorKey: 'run_time', header: sortableHeader('Run') },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
 ]
 
@@ -243,6 +244,13 @@ function basisLabel(r: any) {
 function basisTooltip(r: any) {
   if (r.basis === 'registry') return 'registered in the strategies table; no backtest or benchmark ingested yet'
   return 'metrics from ' + (r.basis === 'benchmark' ? 'benchmark' : 'backtest') + ' run ' + (r.source || '?') + ' · ' + (r.run_time || '?')
+}
+function propPassCount(r: any) {
+  const pf = r.prop_firms
+  if (!pf) return -1
+  const vals = Object.values(pf) as any[]
+  if (vals.every((p: any) => p.verdict === 'na')) return -1
+  return vals.filter((p: any) => p.verdict === 'pass').length
 }
 function propText(r: any) {
   const pf = r.prop_firms

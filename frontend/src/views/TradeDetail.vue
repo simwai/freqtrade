@@ -112,31 +112,31 @@
           class="w-full"
           empty="No trades match the current pair and exit-reason filters."
         >
-          <template #cell-s="{ row }">
+          <template #s-cell="{ row }">
             <span :class="sideClass((row.original as any).s)">{{ (row.original as any).s ? 'short' : 'long' }}</span>
           </template>
-          <template #cell-or="{ row }">
+          <template #or-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).or) }}</span>
           </template>
-          <template #cell-cr="{ row }">
+          <template #cr-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).cr) }}</span>
           </template>
-          <template #cell-pr="{ row }">
+          <template #pr-cell="{ row }">
             <span class="num" :class="profitClass((row.original as any).pr)">{{ (((row.original as any).pr || 0) * 100).toFixed(2) }}%</span>
           </template>
-          <template #cell-pa="{ row }">
+          <template #pa-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).pa) }}</span>
           </template>
-          <template #cell-sl="{ row }">
+          <template #sl-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).sl) }}</span>
           </template>
-          <template #cell-slr="{ row }">
+          <template #slr-cell="{ row }">
             <span class="num">{{ ((row.original as any).slr || 0) * 100 }}%</span>
           </template>
-          <template #cell-d="{ row }">
+          <template #d-cell="{ row }">
             <span class="num">{{ durText(row.original) }}</span>
           </template>
-          <template #cell-actions="{ row }">
+          <template #actions-cell="{ row }">
             <UButton size="xs" variant="ghost" @click="zoomToTrade(row.original ?? row)">Zoom</UButton>
           </template>
         </UTable>
@@ -147,6 +147,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { sortableHeader } from '../utils/table'
 import { useRoute } from 'vue-router'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
@@ -196,19 +197,19 @@ const tradeSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'o', desc: fals
 const tradeVisibility = ref<Record<string, boolean>>({})
 
 const tradeColumns = [
-  { accessorKey: 'p', header: 'Pair' },
-  { accessorKey: 's', header: 'Side' },
-  { accessorKey: 't', header: 'Enter tag' },
-  { accessorKey: 'e', header: 'Exit reason' },
-  { accessorKey: 'o', header: 'Open' },
-  { accessorKey: 'c', header: 'Close' },
-  { accessorKey: 'or', header: 'Open rate' },
-  { accessorKey: 'cr', header: 'Close rate' },
-  { accessorKey: 'pr', header: 'Profit%' },
-  { accessorKey: 'pa', header: 'Profit abs' },
-  { accessorKey: 'sl', header: 'Stop loss' },
-  { accessorKey: 'slr', header: 'SL%' },
-  { accessorKey: 'd', header: 'Duration' },
+  { accessorKey: 'p', header: sortableHeader('Pair') },
+  { accessorKey: 's', header: sortableHeader('Side') },
+  { accessorKey: 't', header: sortableHeader('Enter tag') },
+  { accessorKey: 'e', header: sortableHeader('Exit reason') },
+  { accessorKey: 'o', header: sortableHeader('Open') },
+  { accessorKey: 'c', header: sortableHeader('Close') },
+  { accessorKey: 'or', header: sortableHeader('Open rate') },
+  { accessorKey: 'cr', header: sortableHeader('Close rate') },
+  { accessorKey: 'pr', header: sortableHeader('Profit%') },
+  { accessorKey: 'pa', header: sortableHeader('Profit abs') },
+  { accessorKey: 'sl', header: sortableHeader('Stop loss') },
+  { accessorKey: 'slr', header: sortableHeader('SL%') },
+  { accessorKey: 'd', header: sortableHeader('Duration') },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
 ]
 
@@ -872,3 +873,4 @@ onUnmounted(() => {
 .empty-banner { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 12px; margin-bottom: 8px; }
 .empty-banner code { font-family: monospace; }
 </style>
+

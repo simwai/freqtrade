@@ -47,31 +47,31 @@
         class="w-full"
         empty="No strategies found matching your filters."
       >
-        <template #cell-strategy="{ row }">
+        <template #strategy-cell="{ row }">
           <div class="flex items-center gap-2">
             <span>{{ (row.original as any).strategy }}</span>
             <span :class="statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
           </div>
         </template>
-        <template #cell-score.grade="{ row }">
+        <template #["score.grade-cell"]="{ row }">
           <span :class="gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade || '?' }}</span>
         </template>
-        <template #cell-profit_total="{ row }">
+        <template #profit_total-cell="{ row }">
           <span class="num" :class="profitClass((row.original as any).profit_total)">{{ fmtProfitPct((row.original as any).profit_total) }}</span>
         </template>
-        <template #cell-propPass="{ row }">
+        <template #propPass-cell="{ row }">
           <span class="num"><span :class="propClass(row.original)" :title="propTitle(row.original)">{{ propText(row.original) }}</span></span>
         </template>
-        <template #cell-basis="{ row }">
+        <template #basis-cell="{ row }">
           <span :title="basisTooltip(row.original)">{{ basisLabel(row.original) }}</span>
         </template>
-        <template #cell-timerange="{ row }">
+        <template #timerange-cell="{ row }">
           <span style="font-size:12px;color:var(--text-dim)">{{ fmtRange((row.original as any).timerange) }}</span>
         </template>
-        <template #cell-run_time="{ row }">
+        <template #run_time-cell="{ row }">
           <span>{{ ((row.original as any).run_time || '').slice(0, 10) }}</span>
         </template>
-        <template #cell-actions="{ row }">
+        <template #actions-cell="{ row }">
           <UButton size="sm" variant="ghost" @click.stop="openStrategy((row.original as any).strategy)">
             <UIcon name="i-lucide-chevron-right" size="14" />
           </UButton>
@@ -107,7 +107,7 @@
           class="w-full"
           empty="No data"
         >
-          <template #cell-profit_total="{ row }">
+          <template #profit_total-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).profit_total) }}</span>
           </template>
         </UTable>
@@ -122,7 +122,7 @@
           class="w-full"
           empty="No data"
         >
-          <template #cell-profit_total="{ row }">
+          <template #profit_total-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).profit_total) }}</span>
           </template>
         </UTable>
@@ -147,6 +147,7 @@ import StrategyDrawer from '../components/StrategyDrawer.vue'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 import { useUrlState } from '../composables/useUrlState'
+import { sortableHeader } from '../utils/table'
 
 const store = useDashboardStore()
 const minProfit = ref(0)
@@ -161,25 +162,25 @@ const columnVisibility = ref<Record<string, boolean>>({})
 const filtered = computed(() => store.canonical.filter((s: any) => (s.profit_total || 0) >= minProfit.value).filter((s: any) => (s.total_trades || 0) >= minTrades.value))
 
 const columns = [
-  { accessorKey: 'strategy', header: 'Strategy' },
-  { accessorKey: 'score.grade', header: 'Grade', size: 80 },
-  { accessorKey: 'profit_total', header: 'Profit%', size: 100 },
-  { accessorKey: 'sortino', header: 'Sortino', size: 90 },
-  { accessorKey: 'calmar', header: 'Calmar', size: 90 },
-  { accessorKey: 'profit_factor', header: 'PF', size: 90 },
-  { accessorKey: 'max_drawdown_account', header: 'MaxDD', size: 90 },
-  { accessorKey: 'propPass', header: 'Prop', size: 90 },
-  { accessorKey: 'winrate', header: 'Win%', size: 90 },
-  { accessorKey: 'total_trades', header: 'Trades', size: 90 },
-  { accessorKey: 'basis', header: 'Basis', size: 120 },
-  { accessorKey: 'timerange', header: 'Range', size: 130 },
-  { accessorKey: 'run_time', header: 'Run', size: 100 },
+  { accessorKey: 'strategy', header: sortableHeader('Strategy') },
+  { accessorKey: 'score.grade', header: sortableHeader('Grade'), size: 80 },
+  { accessorKey: 'profit_total', header: sortableHeader('Profit%'), size: 100 },
+  { accessorKey: 'sortino', header: sortableHeader('Sortino'), size: 90 },
+  { accessorKey: 'calmar', header: sortableHeader('Calmar'), size: 90 },
+  { accessorKey: 'profit_factor', header: sortableHeader('PF'), size: 90 },
+  { accessorKey: 'max_drawdown_account', header: sortableHeader('MaxDD'), size: 90 },
+  { accessorKey: 'propPass', accessorFn: (r: any) => propPassCount(r), header: sortableHeader('Prop'), size: 90 },
+  { accessorKey: 'winrate', header: sortableHeader('Win%'), size: 90 },
+  { accessorKey: 'total_trades', header: sortableHeader('Trades'), size: 90 },
+  { accessorKey: 'basis', header: sortableHeader('Basis'), size: 120 },
+  { accessorKey: 'timerange', header: sortableHeader('Range'), size: 130 },
+  { accessorKey: 'run_time', header: sortableHeader('Run'), size: 100 },
   { accessorKey: 'actions', header: '', size: 50, enableSorting: false, enableGlobalFilter: false },
 ]
 
 const miniColumns = [
-  { accessorKey: 'strategy', header: 'Strategy' },
-  { accessorKey: 'profit_total', header: 'Profit', size: 100 },
+  { accessorKey: 'strategy', header: sortableHeader('Strategy') },
+  { accessorKey: 'profit_total', header: sortableHeader('Profit'), size: 100 },
 ]
 
 const metric2Options = [
@@ -277,6 +278,13 @@ function basisLabel(r: any) {
 function basisTooltip(r: any) {
   if (r.basis === 'registry') return 'registered in the strategies table; no backtest or benchmark ingested yet'
   return 'metrics from ' + (r.basis === 'benchmark' ? 'benchmark' : 'backtest') + ' run ' + (r.source || '?') + ' · ' + (r.run_time || '?')
+}
+function propPassCount(r: any) {
+  const pf = r.prop_firms
+  if (!pf) return -1
+  const vals = Object.values(pf) as any[]
+  if (vals.every((p: any) => p.verdict === 'na')) return -1
+  return vals.filter((p: any) => p.verdict === 'pass').length
 }
 function propText(r: any) {
   const pf = r.prop_firms

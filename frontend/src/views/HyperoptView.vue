@@ -55,31 +55,31 @@
           class="w-full"
           empty="No hyperopt runs found matching your filters."
         >
-          <template #cell-strategy="{ row }">
+          <template #strategy-cell="{ row }">
             <span>{{ (row.original as any).strategy }}</span>
           </template>
-          <template #cell-best_loss="{ row }">
+          <template #best_loss-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).best_loss) }}</span>
           </template>
-          <template #cell-best_profit_total="{ row }">
+          <template #best_profit_total-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).best_profit_total) }}</span>
           </template>
-          <template #cell-best_sortino="{ row }">
+          <template #best_sortino-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).best_sortino) }}</span>
           </template>
-          <template #cell-best_profit_factor="{ row }">
+          <template #best_profit_factor-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).best_profit_factor) }}</span>
           </template>
-          <template #cell-loss_function="{ row }">
+          <template #loss_function-cell="{ row }">
             <span :title="(row.original as any).spaces || ''">{{ shortLoss((row.original as any).loss_function) }}</span>
           </template>
-          <template #cell-spaces="{ row }">
+          <template #spaces-cell="{ row }">
             <span :title="(row.original as any).spaces || ''">{{ ((row.original as any).spaces || '').slice(0, 18) }}</span>
           </template>
-          <template #cell-run_time="{ row }">
+          <template #run_time-cell="{ row }">
             <span class="num">{{ ((row.original as any).run_time || '').slice(0, 16) }}</span>
           </template>
-          <template #cell-actions="{ row }">
+          <template #actions-cell="{ row }">
             <UButton size="sm" variant="ghost" @click.stop="openRun('hyperopt', (row.original as any).source)">Config &amp; code</UButton>
           </template>
         </UTable>
@@ -107,34 +107,34 @@
           class="w-full"
           empty="No epochs."
         >
-          <template #cell-loss="{ row }">
+          <template #loss-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).loss) }}</span>
           </template>
-          <template #cell-profit_total="{ row }">
+          <template #profit_total-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).profit_total) }}</span>
           </template>
-          <template #cell-sortino="{ row }">
+          <template #sortino-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).sortino) }}</span>
           </template>
-          <template #cell-calmar="{ row }">
+          <template #calmar-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).calmar) }}</span>
           </template>
-          <template #cell-profit_factor="{ row }">
+          <template #profit_factor-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).profit_factor) }}</span>
           </template>
-          <template #cell-sqn="{ row }">
+          <template #sqn-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).sqn) }}</span>
           </template>
-          <template #cell-max_drawdown="{ row }">
+          <template #max_drawdown-cell="{ row }">
             <span class="num">{{ fmtPct((row.original as any).max_drawdown) }}</span>
           </template>
-          <template #cell-mae="{ row }">
+          <template #mae-cell="{ row }">
             <span class="num">{{ fmtPct2((row.original as any).mae) }}</span>
           </template>
-          <template #cell-exit_eff="{ row }">
+          <template #exit_eff-cell="{ row }">
             <span class="num">{{ fmtPct0((row.original as any).exit_eff) }}</span>
           </template>
-          <template #cell-best="{ row }">
+          <template #best-cell="{ row }">
             <span v-if="(row.original as any).best" class="pill gA">best</span><span v-else-if="(row.original as any).init" class="pill gna">init</span>
           </template>
         </UTable>
@@ -147,6 +147,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { sortableHeader } from '../utils/table'
 import { useRouter } from 'vue-router'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
@@ -179,31 +180,31 @@ const detailSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'epoch', desc:
 const fileOptions = computed(() => files.value.map((f: any) => ({ label: fileLabel(f), value: fileKey(f) })))
 
 const columns = [
-  { accessorKey: 'strategy', header: 'Strategy' },
-  { accessorKey: 'epochs', header: 'Epochs' },
-  { accessorKey: 'best_loss', header: 'Best Loss' },
-  { accessorKey: 'best_profit_total', header: 'Best Profit' },
-  { accessorKey: 'best_sortino', header: 'Best Sortino' },
-  { accessorKey: 'best_profit_factor', header: 'Best PF' },
-  { accessorKey: 'best_trades', header: 'Trades' },
-  { accessorKey: 'loss_function', header: 'Loss' },
-  { accessorKey: 'spaces', header: 'Spaces' },
-  { accessorKey: 'run_time', header: 'Run' },
+  { accessorKey: 'strategy', header: sortableHeader('Strategy') },
+  { accessorKey: 'epochs', header: sortableHeader('Epochs') },
+  { accessorKey: 'best_loss', header: sortableHeader('Best Loss') },
+  { accessorKey: 'best_profit_total', header: sortableHeader('Best Profit') },
+  { accessorKey: 'best_sortino', header: sortableHeader('Best Sortino') },
+  { accessorKey: 'best_profit_factor', header: sortableHeader('Best PF') },
+  { accessorKey: 'best_trades', header: sortableHeader('Trades') },
+  { accessorKey: 'loss_function', header: sortableHeader('Loss') },
+  { accessorKey: 'spaces', header: sortableHeader('Spaces') },
+  { accessorKey: 'run_time', header: sortableHeader('Run') },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
 ]
 
 const detailColumns = [
-  { accessorKey: 'epoch', header: 'Epoch' },
-  { accessorKey: 'loss', header: 'Loss' },
-  { accessorKey: 'trades', header: 'Trades' },
-  { accessorKey: 'profit_total', header: 'Profit' },
-  { accessorKey: 'sortino', header: 'Sortino' },
-  { accessorKey: 'calmar', header: 'Calmar' },
-  { accessorKey: 'profit_factor', header: 'PF' },
-  { accessorKey: 'sqn', header: 'SQN' },
-  { accessorKey: 'max_drawdown', header: 'DD' },
-  { accessorKey: 'mae', header: 'MAE%' },
-  { accessorKey: 'exit_eff', header: 'ExitEff' },
+  { accessorKey: 'epoch', header: sortableHeader('Epoch') },
+  { accessorKey: 'loss', header: sortableHeader('Loss') },
+  { accessorKey: 'trades', header: sortableHeader('Trades') },
+  { accessorKey: 'profit_total', header: sortableHeader('Profit') },
+  { accessorKey: 'sortino', header: sortableHeader('Sortino') },
+  { accessorKey: 'calmar', header: sortableHeader('Calmar') },
+  { accessorKey: 'profit_factor', header: sortableHeader('PF') },
+  { accessorKey: 'sqn', header: sortableHeader('SQN') },
+  { accessorKey: 'max_drawdown', header: sortableHeader('DD') },
+  { accessorKey: 'mae', header: sortableHeader('MAE%') },
+  { accessorKey: 'exit_eff', header: sortableHeader('ExitEff') },
   { accessorKey: 'best', header: 'Best?', enableSorting: false },
 ]
 

@@ -49,25 +49,25 @@
           class="w-full"
           empty="No walk-forward runs found matching your filters."
         >
-          <template #cell-run_id="{ row }">
+          <template #run_id-cell="{ row }">
             <span class="num" :title="(row.original as any).source || ''">{{ ((row.original as any).run_id || (row.original as any).source || '').slice(0, 18) }}</span>
           </template>
-          <template #cell-timerange="{ row }">
+          <template #timerange-cell="{ row }">
             <span :title="(row.original as any).timerange || ''">{{ fmtRange((row.original as any).timerange) }}</span>
           </template>
-          <template #cell-profitable_windows="{ row }">
+          <template #profitable_windows-cell="{ row }">
             <span :class="ratioClass(profitableRatio(row.original))">{{ (row.original as any).profitable_windows }}/{{ (row.original as any).n_windows }}</span>
           </template>
-          <template #cell-oos_profit_abs="{ row }">
+          <template #oos_profit_abs-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).oos_profit_abs) }}</span>
           </template>
-          <template #cell-avg_oos_sortino="{ row }">
+          <template #avg_oos_sortino-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).avg_oos_sortino) }}</span>
           </template>
-          <template #cell-avg_oos_profit_factor="{ row }">
+          <template #avg_oos_profit_factor-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).avg_oos_profit_factor) }}</span>
           </template>
-          <template #cell-actions="{ row }">
+          <template #actions-cell="{ row }">
             <UButton size="sm" variant="ghost" @click.stop="openRun('walkforward', (row.original as any).source)">Config &amp; code</UButton>
           </template>
         </UTable>
@@ -92,19 +92,19 @@
           class="w-full"
           empty="No windows."
         >
-          <template #cell-oos_profit_abs="{ row }">
+          <template #oos_profit_abs-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).oos_profit_abs) }}</span>
           </template>
-          <template #cell-oos_winrate="{ row }">
+          <template #oos_winrate-cell="{ row }">
             <span class="num">{{ fmtPct((row.original as any).oos_winrate) }}</span>
           </template>
-          <template #cell-oos_sortino="{ row }">
+          <template #oos_sortino-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).oos_sortino) }}</span>
           </template>
-          <template #cell-oos_pf="{ row }">
+          <template #oos_pf-cell="{ row }">
             <span class="num">{{ fmtNum((row.original as any).oos_pf) }}</span>
           </template>
-          <template #cell-oos_dd="{ row }">
+          <template #oos_dd-cell="{ row }">
             <span class="num">{{ fmtPct((row.original as any).oos_dd) }}</span>
           </template>
         </UTable>
@@ -114,6 +114,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { sortableHeader } from '../utils/table'
 import { useRouter } from 'vue-router'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
@@ -141,28 +142,28 @@ const columnVisibility = ref<Record<string, boolean>>({})
 const detailSorting = ref<{ id: string; desc: boolean }[]>([{ id: '_idx', desc: false }])
 
 const columns = [
-  { accessorKey: 'strategy', header: 'Strategy' },
-  { accessorKey: 'run_id', header: 'Run' },
-  { accessorKey: 'timerange', header: 'Date Range' },
-  { accessorKey: 'n_windows', header: 'Windows' },
-  { accessorKey: 'profitable_windows', header: 'Profitable' },
-  { accessorKey: 'oos_trades', header: 'OOS Trades' },
-  { accessorKey: 'oos_profit_abs', header: 'OOS Profit' },
-  { accessorKey: 'avg_oos_sortino', header: 'Avg Sortino' },
-  { accessorKey: 'avg_oos_profit_factor', header: 'Avg PF' },
-  { accessorKey: 'loss_function', header: 'Loss' },
+  { accessorKey: 'strategy', header: sortableHeader('Strategy') },
+  { accessorKey: 'run_id', header: sortableHeader('Run') },
+  { accessorKey: 'timerange', header: sortableHeader('Date Range') },
+  { accessorKey: 'n_windows', header: sortableHeader('Windows') },
+  { accessorKey: 'profitable_windows', header: sortableHeader('Profitable') },
+  { accessorKey: 'oos_trades', header: sortableHeader('OOS Trades') },
+  { accessorKey: 'oos_profit_abs', header: sortableHeader('OOS Profit') },
+  { accessorKey: 'avg_oos_sortino', header: sortableHeader('Avg Sortino') },
+  { accessorKey: 'avg_oos_profit_factor', header: sortableHeader('Avg PF') },
+  { accessorKey: 'loss_function', header: sortableHeader('Loss') },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
 ]
 
 const detailColumns = [
-  { accessorKey: '_idx', header: '#' },
-  { accessorKey: 'test_range', header: 'Test range' },
-  { accessorKey: 'oos_trades', header: 'Trades' },
-  { accessorKey: 'oos_profit_abs', header: 'Profit' },
-  { accessorKey: 'oos_winrate', header: 'WinRate' },
-  { accessorKey: 'oos_sortino', header: 'Sortino' },
-  { accessorKey: 'oos_pf', header: 'PF' },
-  { accessorKey: 'oos_dd', header: 'DD' },
+  { accessorKey: '_idx', header: sortableHeader('#') },
+  { accessorKey: 'test_range', header: sortableHeader('Test range') },
+  { accessorKey: 'oos_trades', header: sortableHeader('Trades') },
+  { accessorKey: 'oos_profit_abs', header: sortableHeader('Profit') },
+  { accessorKey: 'oos_winrate', header: sortableHeader('WinRate') },
+  { accessorKey: 'oos_sortino', header: sortableHeader('Sortino') },
+  { accessorKey: 'oos_pf', header: sortableHeader('PF') },
+  { accessorKey: 'oos_dd', header: sortableHeader('DD') },
 ]
 
 function profitableRatio(r: any) {

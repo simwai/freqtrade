@@ -45,13 +45,13 @@
         class="w-full"
         empty="No trade runs found matching your filters."
       >
-        <template #cell-strategy="{ row }">
+        <template #strategy-cell="{ row }">
           <router-link :to="'/trades/' + (row.original as any).key">{{ (row.original as any).strategy }}</router-link>
         </template>
-        <template #cell-file="{ row }">
+        <template #file-cell="{ row }">
           <a :href="'/trades/' + (row.original as any).key + '.json'" target="_blank" @click.stop>JSON</a>
         </template>
-        <template #cell-actions="{ row }">
+        <template #actions-cell="{ row }">
           <UButton size="sm" variant="ghost" @click.stop="openRun(row.original ?? row)">Open</UButton>
         </template>
       </UTable>
@@ -60,6 +60,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { sortableHeader } from '../utils/table'
 import { useRouter } from 'vue-router'
 import { useDashboardStore } from '../stores/dashboard'
 import { useUrlState } from '../composables/useUrlState'
@@ -72,9 +73,9 @@ const sorting = ref<{ id: string; desc: boolean }[]>([{ id: 'strategy', desc: fa
 const columnVisibility = ref<Record<string, boolean>>({})
 
 const columns = [
-  { accessorKey: 'strategy', header: 'Strategy' },
-  { accessorKey: 'source', header: 'Source' },
-  { accessorKey: 'n_trades', header: 'Trades' },
+  { accessorKey: 'strategy', header: sortableHeader('Strategy') },
+  { accessorKey: 'source', header: sortableHeader('Source') },
+  { accessorKey: 'n_trades', header: sortableHeader('Trades') },
   { accessorKey: 'file', header: 'File', enableSorting: false, enableGlobalFilter: false },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
 ]

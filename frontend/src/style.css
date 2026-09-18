@@ -320,6 +320,10 @@ details.paramsBlock[open] summary { margin-bottom: 8px; }
 :focus-visible { outline: 2px solid var(--lavender-deep); outline-offset: 2px; border-radius: 4px; }
 table tr:focus-visible { outline-offset: -2px; }
 
+/* sortable table headers (rendered by utils/table.ts): fill the cell so the
+   whole header — not just the label text — toggles sorting */
+.th-sort { display: inline-flex; align-items: center; gap: 4px; width: 100%; cursor: pointer; user-select: none; }
+
 /* grade pills carry a shape prefix so grades do not rely on color alone */
 .pill.gA::before { content: '● '; }
 .pill.gB::before { content: '◆ '; }

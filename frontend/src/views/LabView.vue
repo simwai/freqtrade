@@ -107,26 +107,31 @@
     <div v-if="message" class="message">{{ message }}</div>
 
     <div class="card">
-      <div class="section-head">
-        <h3>Jobs</h3>
-        <UButton variant="ghost" size="sm" @click="loadJobs">
-          <template #leading>
-            <UIcon name="i-lucide-refresh-cw" size="14" />
-          </template>
-          Refresh jobs
-        </UButton>
-      </div>
+        <div class="section-head">
+          <h3>Jobs</h3>
+          <div class="controls">
+            <UButton variant="ghost" size="sm" @click="loadJobs">
+              <template #leading>
+                <UIcon name="i-lucide-refresh-cw" size="14" />
+              </template>
+              Refresh jobs
+            </UButton>
+            <ColumnToggle :columns="jobsColumns" :visibility="columnVisibility" @update:visibility="columnVisibility = $event" />
+          </div>
+        </div>
       <UTable
         :data="jobRows"
         :columns="jobsColumns"
         :loading="false"
+        :column-visibility="columnVisibility"
+        @update:column-visibility="columnVisibility = $event"
         class="w-full"
         empty="No jobs yet — start a benchmark or single run above."
       >
-        <template #cell-status="{ row }">
+        <template #status-cell="{ row }">
           <span :class="statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
         </template>
-        <template #cell-actions="{ row }">
+        <template #actions-cell="{ row }">
           <div class="flex gap-1 flex-wrap">
             <UButton v-if="(row.original as any).status === 'running'" size="xs" variant="ghost" @click="jobAction((row.original as any).id, 'pause')">Pause</UButton>
             <UButton v-if="(row.original as any).status === 'paused'" size="xs" variant="ghost" @click="jobAction((row.original as any).id, 'resume')">Resume</UButton>
@@ -157,6 +162,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import * as z from 'zod'
+import { sortableHeader } from '../utils/table'
 import { api } from '../api/client'
 import { useDashboardStore } from '../stores/dashboard'
 import { useConfirmDialog } from '../composables/useConfirmDialog'
@@ -231,10 +237,12 @@ const benchLogText = ref('')
 
 const jobRows = computed(() => Object.entries(jobs.value || {}).map(([id, j]: [string, any]) => ({ id: id, name: j?.name || '', status: j?.status || '' })))
 
+const columnVisibility = ref<Record<string, boolean>>({})
+
 const jobsColumns = [
-  { accessorKey: 'id', header: 'ID' },
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'status', header: 'Status' },
+  { accessorKey: 'id', header: sortableHeader('ID') },
+  { accessorKey: 'name', header: sortableHeader('Name') },
+  { accessorKey: 'status', header: sortableHeader('Status') },
   { accessorKey: 'actions', header: 'Actions', enableSorting: false, enableGlobalFilter: false },
 ]
 
