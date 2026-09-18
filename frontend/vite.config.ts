@@ -11,11 +11,19 @@ export default defineConfig({
     port: 15000,
     proxy: {
       '/api': {
-        target: 'http://localhost:15001',
+        target: 'http://localhost:8088',
         changeOrigin: true,
         ws: true,
         timeout: 120000,
         proxyTimeout: 120000
+      },
+      // Trade JSON blobs are served by the backend's /trades static mount.
+      // Without this, dev-mode requests fall through to the SPA fallback and
+      // return index.html with status 200, which the trade views silently
+      // parse as "no trades".
+      '/trades': {
+        target: 'http://localhost:8088',
+        changeOrigin: true
       }
     }
   }

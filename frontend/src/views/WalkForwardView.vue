@@ -137,7 +137,7 @@ const q = useUrlState({ key: 'q', defaultValue: '', parse: (v) => v ?? '', seria
 const selected = ref('')
 const detail = ref(null as any)
 
-const sorting = ref<{ id: string; desc: boolean }[]>([{ id: 'run_time', desc: true }])
+const sorting = ref<{ id: string; desc: boolean }[]>([{ id: 'run_id', desc: true }])
 const columnVisibility = ref<Record<string, boolean>>({})
 const detailSorting = ref<{ id: string; desc: boolean }[]>([{ id: '_idx', desc: false }])
 
@@ -197,7 +197,7 @@ function compareCells(av: any, bv: any, desc: boolean): number {
 }
 
 const sortedFiltered = computed(() => {
-  const s = sorting.value[0] || { id: 'run_time', desc: true }
+  const s = sorting.value[0] || { id: 'run_id', desc: true }
   const arr = [...filtered.value]
   arr.sort((a: any, b: any) => compareCells(a[s.id], b[s.id], s.desc))
   return arr.slice(0, 80)
@@ -211,7 +211,7 @@ const detailWins = computed(() => {
 function resetFilters() {
   q.value = ''
   columnVisibility.value = {}
-  sorting.value = [{ id: 'run_time', desc: true }]
+  sorting.value = [{ id: 'run_id', desc: true }]
 }
 
 function refreshData() {

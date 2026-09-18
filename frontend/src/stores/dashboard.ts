@@ -25,8 +25,10 @@ export const useDashboardStore = defineStore('dashboard', {
   }),
   actions: {
     async fetchAll(force = false) {
-      if (force == false) {
-        if (this.canonical.length) return
+      if (!force && this.canonical.length) {
+        this.loading = false
+        this.error = null
+        return
       }
       this.loading = true
       this.error = null

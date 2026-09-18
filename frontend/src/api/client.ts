@@ -13,7 +13,7 @@ async function request(path: string, init: any = {}): Promise<any> {
     const s = qs.toString()
     if (s) url += (url.includes('?') ? '&' : '?') + s
   }
-  if (url.charAt(0) === '/') url = BASE_URL + url
+  if (!import.meta.env.DEV && url.charAt(0) === '/') url = BASE_URL + url
   const ctrl = new AbortController()
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
   let res: Response
