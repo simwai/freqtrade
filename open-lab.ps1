@@ -36,23 +36,42 @@ function Stop-PortUser([int]$port, [string]$label) {
     Start-Sleep -Seconds 1
 }
 
+function Launch-ServiceWindow([string]$title, [string]$command) {
+    $psCmd = @"
+`$ErrorActionPreference = 'Stop'
+Write-Host "[open-lab] $title window started" -ForegroundColor Cyan
+try {
+    $command
+} catch {
+    Write-Host "[open-lab] $title error: `$_" -ForegroundColor Red
+} finally {
+    Write-Host ""
+    Write-Host "[open-lab] $title stopped. Close this window to dismiss." -ForegroundColor Yellow
+    `$null = `$Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+}
+"@
+    Start-Process -FilePath 'powershell' -ArgumentList "-NoExit -NoProfile -Command $psCmd" -WorkingDirectory $Root
+}
+
 # --- Ensure ports are free ---
 Stop-PortUser -port $ApiPort -label 'analysis API'
 Stop-PortUser -port $RpcPort -label 'RPC server'
 
 # --- Backend 1: analysis/lab API server ---
 Write-Status "Starting analysis API server on port $ApiPort ..."
-Start-Process -FilePath 'python' -ArgumentList "user_data/scripts/api_server.py --port $ApiPort" -WorkingDirectory $Root
+Launch-ServiceWindow -title 'Analysis API' -command "pdm run python user_data/scripts/api_server.py --port $ApiPort"
 
 # --- Backend 2: freqtrade RPC/webserver ---
 Write-Status "Starting RPC server on port $RpcPort ..."
-$rpcProc = Start-Process -FilePath 'freqtrade' -ArgumentList "webserver --port $RpcPort" -WorkingDirectory $Root -PassThru -WindowStyle Hidden
-Start-Sleep -Seconds 3
-if (-not $rpcProc -or $rpcProc.HasExited) {
-    Write-Host "[open-lab] Failed to start RPC server via 'freqtrade webserver'. Trying 'python -m freqtrade webserver' ..." -ForegroundColor Yellow
-    $rpcProc = Start-Process -FilePath 'python' -ArgumentList "-m freqtrade webserver --port $RpcPort" -WorkingDirectory $Root -PassThru -WindowStyle Hidden
-    Start-Sleep -Seconds 3
+$rpcCommand = @"
+try {
+    pdm run python -m freqtrade webserver --port $RpcPort
+} catch {
+    Write-Host "[open-lab] 'pdm run python -m freqtrade webserver' failed." -ForegroundColor Red
+    Write-Host `$_
 }
+"@
+Launch-ServiceWindow -title 'RPC Server' -command $rpcCommand
 
 # --- Wait for API ---
 Write-Status "Waiting for analysis API ..."
@@ -87,7 +106,7 @@ if ($rpcReady) {
 
 # --- Frontend ---
 Write-Status "Starting frontend dev server ..."
-Start-Process -FilePath 'cmd' -ArgumentList '/c', 'npm run dev' -WorkingDirectory $Root
+Launch-ServiceWindow -title 'Frontend Dev Server' -command "npm run dev"
 
 # --- Browser ---
 Write-Status "Opening browser ..."
@@ -98,4 +117,4 @@ Write-Host "[open-lab] Servers started in separate terminal windows." -Foregroun
 Write-Host "[open-lab] Frontend:  $FrontendUrl" -ForegroundColor Green
 Write-Host "[open-lab] API:      http://127.0.0.1:$ApiPort" -ForegroundColor Green
 Write-Host "[open-lab] RPC:      http://127.0.0.1:$RpcPort" -ForegroundColor Green
-Write-Host "[open-lab] Close this window when done." -ForegroundColor Yellow
+Write-Host "[open-lab] Each service window will stay open until you close it manually." -ForegroundColor Yellow
