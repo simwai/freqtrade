@@ -234,7 +234,6 @@ async function drill(source: string) {
     detail.value = { r: wrows[0], wins: wrows[0].windows || [] }
   } catch (e) {
     detail.value = null
-    toast.add({ title: 'Walk-forward detail failed', description: 'Could not load run detail.', color: 'error', duration: 3000 })
   }
 }
 

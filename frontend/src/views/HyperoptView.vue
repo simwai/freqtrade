@@ -3,8 +3,8 @@
     <div class="section-head">
       <h2>Hyperopt</h2>
       <div class="controls">
-        <UInput v-model="q" placeholder="Filter runs..." class="filter-input" />
-        <USelect v-model="selectedFile" :options="fileOptions" placeholder="ho files" class="filter-select" @change="loadFile" />
+        <UInput v-model="q" placeholder="Filter runs..." class="filter-input" @input="debugFilter" />
+        <USelect v-model="selectedFile" :options="fileOptions" placeholder="Hyperopt result file" class="filter-select" @change="loadFile" />
         <UButton variant="ghost" size="sm" @click="resetFilters" :disabled="!q && !selectedFile && !minTrades && !Object.keys(columnVisibility).length">
           <template #leading>
             <UIcon name="i-lucide-rotate-ccw" />
@@ -32,12 +32,14 @@
     </div>
     <div v-else>
       <div class="card filters">
-        <UFormField name="minTrades" label="Min Trades">
-          <UInput type="number" v-model.number="minTrades" />
-        </UFormField>
-        <UFormField name="epochLimit" label="Epoch limit">
-          <UInput type="number" v-model.number="epochLimit" />
-        </UFormField>
+        <div class="filters-inline">
+          <UFormField name="minTrades" label="Min Trades">
+            <UInput type="number" v-model.number="minTrades" />
+          </UFormField>
+          <UFormField name="epochLimit" label="Epoch limit">
+            <UInput type="number" v-model.number="epochLimit" />
+          </UFormField>
+        </div>
         <span class="hint">{{ filtered.length }} / {{ store.hyperopt.length }} runs</span>
       </div>
 
@@ -249,6 +251,10 @@ function resetFilters() {
   sorting.value = [{ id: 'epochs', desc: true }]
 }
 
+function debugFilter() {
+  console.log('Filter q:', q.value, 'filtered count:', filtered.value.length)
+}
+
 function refreshData() {
   store.fetchAll(true)
 }
@@ -260,7 +266,7 @@ async function drill(source: string) {
   selectedFile.value = source
   try {
     const { data } = await api.get('/api/hyperopt', { params: { source, limit: Number(epochLimit.value) || 200 } })
-    if (data.error) { detail.value = null; toast.add({ title: 'Hyperopt detail failed', description: String(data.error), color: 'error', duration: 3000 }); return }
+    if (data.error) { detail.value = null; return }
     const hoRow = store.hyperopt.find((x: any) => x.source === data.source)
     let paramsText = ''
     if (hoRow && hoRow.best_params) {
@@ -269,7 +275,6 @@ async function drill(source: string) {
     detail.value = Object.assign({}, data, { paramsText, loss_function: hoRow?.loss_function || '', best_loss: hoRow?.best_loss })
   } catch (e) {
     detail.value = null
-    toast.add({ title: 'Hyperopt detail failed', description: 'Could not load run detail.', color: 'error', duration: 3000 })
   }
 }
 function shortLoss(s: string) { return (s || '').replace('HyperOptLoss', '') }
@@ -306,6 +311,8 @@ onMounted(async () => {
 
 <style scoped>
 .filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.filters-inline { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; width: 100%; }
+.filters-inline > .filter-label { flex: 1; min-width: 180px; }
 .filter-input {
   flex: 1; min-width: 180px;
   background: var(--bg);

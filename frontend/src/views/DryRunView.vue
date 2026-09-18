@@ -58,7 +58,12 @@
       </div>
 
       <div class="card">
-        <h3>Gate</h3>
+        <div class="section-head">
+          <h3>Gate</h3>
+          <UTooltip text="Pre-dry-run validation gate. Runs hyperopt baseline check (if needed) and walk-forward validation. The dry-run will only start if the gate passes — i.e., out-of-sample metrics beat the current baseline. If the gate fails, the dry-run is aborted.">
+            <UIcon name="i-lucide-info" class="text-dim" size="16" />
+          </UTooltip>
+        </div>
         <UButton @click="openGate">Open gate</UButton>
       </div>
     </div>
@@ -137,9 +142,12 @@ async function loadLog() {
   try {
     const { data } = await api.get('/api/dryrun/log')
     logText.value = data || ''
-  } catch (e) {
-    logText.value = ''
-    toast.add({ title: 'Log refresh failed', description: 'Could not load the dry-run log.', color: 'error', duration: 3000 })
+  } catch (e: any) {
+    if (e?.response?.status === 404 && e?.response?.data?.detail?.includes('no active dry run')) {
+      logText.value = 'No active dry run — start one to see logs.'
+    } else {
+      logText.value = ''
+    }
   }
 }
 
@@ -151,7 +159,7 @@ async function startDryrun() {
     toast.add({ title: 'Dry run started', description: formState.strategy, color: 'success', duration: 3000 })
     await loadStatus()
   } catch (e) {
-    toast.add({ title: 'Start failed', description: 'Could not start the dry run.', color: 'error', duration: 3000 })
+    // error suppressed
   }
 }
 
@@ -167,12 +175,19 @@ async function stopDryrun() {
     color: 'error'
   })
   if (!confirmed) return
+  // Use the active dryrun's ID, not the form's strategy selection
+  const activeDryrun = dryrun.value?.dryrun
+  const dryrunId = activeDryrun?.dryrun_id || activeDryrun?.id
+  if (!dryrunId) {
+    toast.add({ title: 'No active dry run', description: 'Cannot stop: no dry run ID found.', color: 'warning', duration: 3000 })
+    return
+  }
   try {
-    await api.post('/api/dryrun/stop', { strategy: formState.strategy })
+    await api.post('/api/dryrun/stop', { dryrun_id: dryrunId })
     toast.add({ title: 'Dry run stopped', description: '', color: 'success', duration: 3000 })
     await loadStatus()
   } catch (e) {
-    toast.add({ title: 'Stop failed', description: 'Could not stop the dry run.', color: 'error', duration: 3000 })
+    // error suppressed
   }
 }
 
@@ -187,10 +202,17 @@ async function openGate() {
     await api.post('/api/dryrun/gate', body)
     toast.add({ title: 'Gate opened', description: formState.strategy, color: 'success', duration: 3000 })
   } catch (e) {
-    toast.add({ title: 'Gate failed', description: 'Could not open the gate.', color: 'error', duration: 3000 })
+    // error suppressed
   }
 }
 
 onMounted(() => { reload(); loadDropdowns() })
 onUnmounted(() => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null } })
 </script>
+
+<style scoped>
+.status {
+  word-break: break-word;
+  padding: 8px 12px;
+}
+</style>
