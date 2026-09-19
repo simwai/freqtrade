@@ -688,6 +688,17 @@ class Arguments:
         webserver_cmd.set_defaults(func=start_webserver)
         self._build_args(optionlist=ARGS_WEBSERVER, parser=webserver_cmd)
 
+        # Add lab subcommand (freqtrade-local package required)
+        try:
+            from freqtrade_local.commands.lab import start_lab
+            lab_cmd = subparsers.add_parser(
+                "lab", help="Lab mode (SSE log stream).", parents=[_common_parser]
+            )
+            lab_cmd.add_argument("--port", type=int, default=None, help="Port for the SSE log stream")
+            lab_cmd.set_defaults(func=start_lab)
+        except ImportError:
+            pass
+
         # Add strategy_updater subcommand
         strategy_updater_cmd = subparsers.add_parser(
             "strategy-updater",
