@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <InlineStatus v-if="drillStatus" :type="drillStatus.type" :title="drillStatus.title" :message="drillStatus.message" duration="5000" />
+    <InlineStatus v-if="drillStatus" :type="drillStatus.type" :title="drillStatus.title" :message="drillStatus.message" :duration="5000" />
 
     <div v-if="store.loading" class="card">
       <div class="flex items-center justify-center py-12">
@@ -125,7 +125,7 @@ import { BarChart, LineChart, ScatterChart, CandlestickChart } from 'echarts/cha
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent } from 'echarts/components'
 
 echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategiesStore } from '../stores/strategies'
 import { api } from '../api/client'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
@@ -134,7 +134,7 @@ import { useUrlState } from '../composables/useUrlState'
 import InlineStatus from '../components/InlineStatus.vue'
 const router = useRouter()
 
-const store = useDashboardStore()
+const store = useStrategiesStore()
 
 // Inline status state (replaces toast)
 const drillStatus = ref<{ type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string } | null>(null)
@@ -225,7 +225,7 @@ function resetFilters() {
 }
 
 function refreshData() {
-  store.fetchAll(true)
+  store.fetchFullData()
 }
 
 async function drill(source: string) {
@@ -274,7 +274,7 @@ const comboOption = computed((): ECOption => ({
 }))
 
 onMounted(async () => {
-  await store.fetchAll()
+  await store.fetchFullData()
 })
 </script>
 

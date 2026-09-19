@@ -4,7 +4,7 @@
       <h2>Recursive Analysis</h2>
     </div>
 
-    <InlineStatus v-if="analysisStatus" :type="analysisStatus.type" :title="analysisStatus.title" :message="analysisStatus.message" duration="5000" />
+    <InlineStatus v-if="analysisStatus" :type="analysisStatus.type" :title="analysisStatus.title" :message="analysisStatus.message" :duration="5000" />
 
     <div v-if="loadingStrategies" class="card">
       <div class="flex items-center justify-center py-12">

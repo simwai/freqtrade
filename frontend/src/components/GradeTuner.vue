@@ -38,27 +38,20 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useStrategiesStore } from '../stores/strategies'
-import { useStrategyDetailStore } from '../stores/strategyDetail'
 import { activeGradeFactors, saveGradeFactors, scoreRowTuned } from '../utils/grades'
-defineProps<{ minProfit: number, minTrades: number, scorecard?: Record<string, any>, canonical?: any[], backtests?: any[], benchmarks?: any[] }>()
+defineProps<{ minProfit: number, minTrades: number }>()
 const emit = defineEmits<{ (e: 'update:minProfit', v: number): void, (e: 'update:minTrades', v: number): void, (e: 'retune'): void }>()
-const strategiesStore = useStrategiesStore()
-const strategyDetailStore = useStrategyDetailStore()
+const store = useStrategiesStore()
 const factors = ref<Record<string, any>>({})
 const err = ref('')
 const open = ref(true)
 
 function loadFactors() {
-  const sc = props.scorecard || strategiesStore.scorecard || strategyDetailStore.scorecard || {}
-  factors.value = activeGradeFactors(sc)
+  factors.value = activeGradeFactors(store.scorecard || {})
 }
 function retune() {
-  const sc = activeGradeFactors(props.scorecard || strategiesStore.scorecard || strategyDetailStore.scorecard || {})
-  const canonical = props.canonical || strategiesStore.items || []
-  const backtests = props.backtests || strategyDetailStore.backtests || []
-  const benchmarks = props.benchmarks || strategyDetailStore.benchmarks || []
-  canonical.concat(backtests).concat(benchmarks).forEach((r: any) => { r.score = scoreRowTuned(r, sc) })
-  emit('retune')
+  const sc = activeGradeFactors(store.scorecard || {})
+  store.items.concat(store.backtests).concat(store.benchmarks).forEach((r: any) => { r.score = scoreRowTuned(r, sc) })
 }
 function apply() {
   for (const k of Object.keys(factors.value)) {
@@ -79,9 +72,6 @@ function resetFactors() {
   retune()
 }
 onMounted(loadFactors)
-watch(() => props.scorecard, loadFactors, { immediate: false })
-watch(() => strategiesStore.scorecard, loadFactors, { immediate: false })
-watch(() => strategyDetailStore.scorecard, loadFactors, { immediate: false })
 </script>
 
 <style scoped>

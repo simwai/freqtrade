@@ -61,13 +61,13 @@ Stop-PortUser -port $RpcPort -label 'RPC server'
 Write-Status "Starting analysis API server on port $ApiPort ..."
 Launch-ServiceWindow -title 'Analysis API' -command "pdm run python user_data/scripts/api_server.py --port $ApiPort"
 
-# --- Backend 2: freqtrade RPC/webserver ---
-Write-Status "Starting RPC server on port $RpcPort ..."
-$rpcCommand = @"
+# --- Backend 2: RPC server (via api_server.py) ---
+    Write-Status "Starting RPC server on port $RpcPort ..."
+    $rpcCommand = @"
 try {
-    pdm run python -m freqtrade webserver --port $RpcPort
+    pdm run python user_data/scripts/api_server.py --port $RpcPort
 } catch {
-    Write-Host "[open-lab] 'pdm run python -m freqtrade webserver' failed." -ForegroundColor Red
+    Write-Host "[open-lab] 'pdm run python user_data/scripts/api_server.py' failed." -ForegroundColor Red
     Write-Host `$_
 }
 "@

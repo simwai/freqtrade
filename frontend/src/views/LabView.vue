@@ -35,10 +35,10 @@
           <label class="flex flex-col gap-1.5 text-text-dim text-sm"><UTooltip text="Out-of-sample test window length in days for each step."><span class="tip">Test d</span></UTooltip> <input v-model="benchTest" type="number" class="input-field" /></label>
           <label class="flex flex-col gap-1.5 text-text-dim text-sm"><UTooltip text="Step size in days between consecutive windows."><span class="tip">Step d</span></UTooltip> <input v-model="benchStep" type="number" class="input-field" /></label>
         </template>
-        <UButton color="primary" @click="startBench" class="btn-primary">Run benchmark</UButton>
+        <UButton variant="primary" @click="startBench" class="btn-primary">Run benchmark</UButton>
       </div>
       <div v-if="benchMsg" class="message text-lavender text-sm mt-2" role="status">{{ benchMsg }}</div>
-      <InlineStatus v-if="benchStatus" :type="benchStatus.type" :title="benchStatus.title" :message="benchStatus.message" duration="5000" />
+      <InlineStatus v-if="benchStatus" :type="benchStatus.type" :title="benchStatus.title" :message="benchStatus.message" :duration="5000" />
     </div>
 
     <div class="card p-4.5">
@@ -91,11 +91,11 @@
           <label class="check flex items-center gap-1.5 text-text-dim text-sm"><input v-model="printAll" type="checkbox" /> <UTooltip text="Print every epoch result instead of only improvements."><span class="tip">print all</span></UTooltip></label>
         </template>
         <label class="check flex items-center gap-1.5 text-text-dim text-sm"><input v-model="verbose" type="checkbox" /> <UTooltip text="Verbose backend logging for this run."><span class="tip">verbose</span></UTooltip></label>
-        <UButton color="primary" @click="startRun" class="btn-primary">Run</UButton>
+        <UButton variant="primary" @click="startRun" class="btn-primary">Run</UButton>
       </div>
       <div v-if="formError" class="edit-msg text-bad text-sm mt-2" role="alert">{{ formError }}</div>
       <pre v-if="configPreview" class="code-block">{{ configPreview }}</pre>
-      <InlineStatus v-if="runStatus" :type="runStatus.type" :title="runStatus.title" :message="runStatus.message" duration="5000" />
+      <InlineStatus v-if="runStatus" :type="runStatus.type" :title="runStatus.title" :message="runStatus.message" :duration="5000" />
     </div>
 
 <div class="card p-4.5">
@@ -187,12 +187,12 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import * as z from 'zod'
 import { sortableHeader } from '../utils/table'
 import { api } from '../api/client'
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategiesStore } from '../stores/strategies'
 import { useConfirmDialog } from '../composables/useConfirmDialog'
 import { useJobLogStream } from '../composables/useEventSource'
 import InlineStatus from '../components/InlineStatus.vue'
 
-const store = useDashboardStore()
+const store = useStrategiesStore()
 
 const timerangeSchema = z.string().regex(/^\d{8}-\d{8}$/, 'Use a full timerange like 20220101-20240101.')
 const benchSchema = z.object({
@@ -513,7 +513,7 @@ function onKey(e: KeyboardEvent) {
 }
 
 async function defaultRunRange() {
-  await store.fetchAll()
+  await store.fetchFullData()
   let min = '20220101'
   let max = '20240101'
   store.backtests.forEach((r: any) => {
