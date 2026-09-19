@@ -1,16 +1,47 @@
 import { defineStore } from 'pinia'
 import { api } from '../api/client'
 
+interface StrategyDetail {
+  strategy: string
+  status: string
+  score?: { grade: string }
+  profit_total?: number
+  sortino?: number
+  calmar?: number
+  profit_factor?: number
+  max_drawdown_account?: number
+  prop_firms?: Record<string, unknown>
+  basis: string
+  timerange: string
+  run_time: string
+  source?: string
+  notes?: string
+}
+
+interface StrategyDetailState {
+  canonical: StrategyDetail | null
+  backtests: unknown[]
+  benchmarks: unknown[]
+  hyperopt: unknown[]
+  walkforward: unknown[]
+  tradeRuns: unknown[]
+  scorecard: Record<string, unknown>
+  propSpec: Record<string, unknown>
+  loading: boolean
+  error: string | null
+  currentName: string
+}
+
 export const useStrategyDetailStore = defineStore('strategyDetail', {
-  state: () => ({
-    canonical: null as any | null,
-    backtests: [] as any[],
-    benchmarks: [] as any[],
-    hyperopt: [] as any[],
-    walkforward: [] as any[],
-    tradeRuns: [] as any[],
-    scorecard: {} as Record<string, any>,
-    propSpec: {} as Record<string, any>,
+  state: (): StrategyDetailState => ({
+    canonical: null,
+    backtests: [] as unknown[],
+    benchmarks: [] as unknown[],
+    hyperopt: [] as unknown[],
+    walkforward: [] as unknown[],
+    tradeRuns: [] as unknown[],
+    scorecard: {} as Record<string, unknown>,
+    propSpec: {} as Record<string, unknown>,
     loading: false,
     error: null as string | null,
     currentName: '' as string,
@@ -27,14 +58,15 @@ export const useStrategyDetailStore = defineStore('strategyDetail', {
       this.currentName = name
       try {
         const { data } = await api.get(`/api/strategy/${encodeURIComponent(name)}/detail`)
-        this.canonical = data.canonical || null
-        this.backtests = data.backtests || []
-        this.benchmarks = data.benchmarks || []
-        this.hyperopt = data.hyperopt || []
-        this.walkforward = data.walkforward || []
-        this.tradeRuns = data.trade_runs || []
-        this.scorecard = data.scorecard || {}
-        this.propSpec = data.prop_firms_spec || {}
+        const d = data as { canonical?: StrategyDetail; backtests?: unknown[]; benchmarks?: unknown[]; hyperopt?: unknown[]; walkforward?: unknown[]; trade_runs?: unknown[]; scorecard?: Record<string, unknown>; prop_firms_spec?: Record<string, unknown> }
+        this.canonical = d.canonical || null
+        this.backtests = d.backtests || []
+        this.benchmarks = d.benchmarks || []
+        this.hyperopt = d.hyperopt || []
+        this.walkforward = d.walkforward || []
+        this.tradeRuns = d.trade_runs || []
+        this.scorecard = d.scorecard || {}
+        this.propSpec = d.prop_firms_spec || {}
       } catch (e) {
         this.error = String(e)
         this.canonical = null

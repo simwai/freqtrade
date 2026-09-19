@@ -23,10 +23,11 @@ export const useTradesStore = defineStore('trades', {
         const { data } = await api.get(`/api/trades/${encodeURIComponent(key)}`, {
           params: { limit, offset }
         })
-        this.items = data.trades || []
-        this.total = data.total || 0
-        this.limit = data.limit || limit
-        this.offset = data.offset || offset
+        const d = data as { trades: CompactTrade[]; total: number; limit: number; offset: number }
+        this.items = d.trades || []
+        this.total = d.total || 0
+        this.limit = d.limit || limit
+        this.offset = d.offset || offset
       } catch (e) {
         this.error = String(e)
         this.items = []

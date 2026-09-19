@@ -70,9 +70,11 @@ const tabs = [
 async function refreshFresh() {
   try {
     const d = await checkFreshness()
-    stale.value = !!(d && d.stale)
-    builtAt.value = (d && d.built) || ''
-  } catch (e) {}
+    stale.value = !!(d && (d as { stale?: boolean }).stale)
+    builtAt.value = (d && (d as { built?: string }).built) as string || ''
+  } catch (e) {
+    console.error('Refresh error:', e)
+  }
 }
 
 async function manualRefresh() {
@@ -80,7 +82,7 @@ async function manualRefresh() {
     await triggerRefresh()
     await refreshFresh()
   } catch (e) {
-    // error suppressed
+    console.error('Manual refresh error:', e)
   }
 }
 

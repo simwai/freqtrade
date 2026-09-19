@@ -44,7 +44,8 @@
   "lint-staged": {
     "*.{js,ts,vue}": [
       "biome format --write",
-      "biome check --write"
+      "biome check --write",
+      "vue-tsc --noEmit"
     ],
     "*.{py}": [
       "ruff format",

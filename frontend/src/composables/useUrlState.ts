@@ -6,13 +6,13 @@ export interface UseUrlStateOptions<T> {
   defaultValue: T
   parse: (value: string | null) => T
   serialize: (value: T) => string
-  replace?: boolean
+  mode?: 'replace' | 'push'
 }
 
 export function useUrlState<T>(options: UseUrlStateOptions<T>): Ref<T> {
   const route = useRoute()
   const router = useRouter()
-  const replace = options.replace ?? true
+  const mode = options.mode ?? 'replace'
 
   const initialValue = options.parse((route.query[options.key] as string | undefined) ?? null)
   const value = ref<T>(initialValue)
@@ -22,7 +22,7 @@ export function useUrlState<T>(options: UseUrlStateOptions<T>): Ref<T> {
     (v) => {
       const serialized = options.serialize(v)
       if (route.query[options.key] === serialized) return
-      if (replace) {
+      if (mode === 'replace') {
         router.replace({ query: { ...route.query, [options.key]: serialized } })
       } else {
         router.push({ query: { ...route.query, [options.key]: serialized } })

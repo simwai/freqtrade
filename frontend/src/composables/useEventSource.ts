@@ -1,5 +1,5 @@
 import { ref, onUnmounted, type Ref } from 'vue'
-import type { SseEvent, JobProgressTask } from './schemas'
+import type { SseEvent, JobProgressTask } from '../api/schemas'
 
 interface UseEventSourceOptions {
   url: string
@@ -43,7 +43,6 @@ export function useEventSource(options: UseEventSourceOptions): UseEventSourceRe
       eventSource.close()
     }
 
-    // Add auth token if available
     const token = import.meta.env.VITE_RPC_API_TOKEN || localStorage.getItem('rpc_api_token')
     let fullUrl = url
     if (token) {
@@ -108,10 +107,8 @@ export function useEventSource(options: UseEventSourceOptions): UseEventSourceRe
     connect()
   }
 
-  // Initial connection
   connect()
 
-  // Cleanup on unmount
   onUnmounted(() => {
     close()
   })
@@ -126,7 +123,6 @@ export function useEventSource(options: UseEventSourceOptions): UseEventSourceRe
   }
 }
 
-// Specialized hook for job log streaming
 export function useJobLogStream(jobIdRef: Ref<string>, baseUrl: string = '/api/jobs') {
   const logLines = ref<string[]>([])
   const isStreaming = ref(false)
@@ -150,7 +146,6 @@ export function useJobLogStream(jobIdRef: Ref<string>, baseUrl: string = '/api/j
       onMessage: (event) => {
         if (event.type === 'log') {
           logLines.value.push(event.data)
-          // Keep last 10000 lines
           if (logLines.value.length > 10000) {
             logLines.value = logLines.value.slice(-10000)
           }

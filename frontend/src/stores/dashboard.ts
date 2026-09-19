@@ -1,25 +1,64 @@
 import { defineStore } from 'pinia'
 import { api } from '../api/client'
 
+export interface StrategyRow {
+  strategy: string
+  status: string
+  score?: { grade: string; grades?: Record<string, string> }
+  profit_total: number
+  total_trades: number
+  sortino: number
+  calmar: number
+  profit_factor: number
+  max_drawdown_account: number
+  prop_firms?: Record<string, unknown>
+  propPass?: number
+  winrate: number
+  basis: string
+  timerange: string
+  run_time: string
+  source?: string
+}
+
+interface DataResponse {
+  canonical: StrategyRow[]
+  backtests: unknown[]
+  benchmarks: unknown[]
+  hyperopt: unknown[]
+  walkforward: unknown[]
+  strategies: StrategyRow[]
+  trade_runs: unknown[]
+  history: Record<string, unknown>
+  scorecard: Record<string, unknown>
+  prop_firms_spec?: Record<string, unknown>
+  configs: Record<string, unknown>
+  current_code?: Record<string, unknown>
+  current_code_set?: Record<string, unknown>
+  snapshot_paths?: Record<string, unknown>
+  snapshot_combined?: Record<string, unknown>
+  snapshot_files?: Record<string, unknown>
+  backtest_configs?: Record<string, unknown>
+}
+
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
-    canonical: [] as any[],
-    backtests: [] as any[],
-    benchmarks: [] as any[],
-    hyperopt: [] as any[],
-    walkforward: [] as any[],
-    strategies: [] as any[],
-    trade_runs: [] as any[],
-    history: {} as Record<string, any>,
-    scorecard: {} as Record<string, any>,
-    propSpec: {} as Record<string, any>,
-    configs: {} as Record<string, any>,
-    currentCode: {} as Record<string, any>,
-    currentCodeSet: {} as Record<string, any>,
-    snapshotPaths: {} as Record<string, any>,
-    snapshotCombined: {} as Record<string, any>,
-    snapshotFiles: {} as Record<string, any>,
-    backtestConfigs: {} as Record<string, any>,
+    canonical: [] as StrategyRow[],
+    backtests: [] as unknown[],
+    benchmarks: [] as unknown[],
+    hyperopt: [] as unknown[],
+    walkforward: [] as unknown[],
+    strategies: [] as StrategyRow[],
+    trade_runs: [] as unknown[],
+    history: {} as Record<string, unknown>,
+    scorecard: {} as Record<string, unknown>,
+    propSpec: {} as Record<string, unknown>,
+    configs: {} as Record<string, unknown>,
+    currentCode: {} as Record<string, unknown>,
+    currentCodeSet: {} as Record<string, unknown>,
+    snapshotPaths: {} as Record<string, unknown>,
+    snapshotCombined: {} as Record<string, unknown>,
+    snapshotFiles: {} as Record<string, unknown>,
+    backtestConfigs: {} as Record<string, unknown>,
     loading: false,
     error: null as string | null
   }),
@@ -30,27 +69,31 @@ export const useDashboardStore = defineStore('dashboard', {
         this.error = null
         return
       }
+      await this.fetchFullData()
+    },
+    async fetchFullData() {
       this.loading = true
       this.error = null
       try {
         const { data } = await api.get('/api/data')
-        this.canonical = data.canonical || []
-        this.backtests = data.backtests || []
-        this.benchmarks = data.benchmarks || []
-        this.hyperopt = data.hyperopt || []
-        this.walkforward = data.walkforward || []
-        this.history = data.history || {}
-        this.strategies = data.strategies || []
-        this.trade_runs = data.trade_runs || []
-        this.scorecard = data.scorecard || {}
-        this.propSpec = data.prop_firms_spec || {}
-        this.configs = data.configs || {}
-        this.currentCode = data.current_code || {}
-        this.currentCodeSet = data.current_code_set || {}
-        this.snapshotPaths = data.snapshot_paths || {}
-        this.snapshotCombined = data.snapshot_combined || {}
-        this.snapshotFiles = data.snapshot_files || {}
-        this.backtestConfigs = data.backtest_configs || {}
+        const d = data as DataResponse
+        this.canonical = d.canonical || []
+        this.backtests = d.backtests || []
+        this.benchmarks = d.benchmarks || []
+        this.hyperopt = d.hyperopt || []
+        this.walkforward = d.walkforward || []
+        this.strategies = d.strategies || []
+        this.trade_runs = d.trade_runs || []
+        this.history = d.history || {}
+        this.scorecard = d.scorecard || {}
+        this.propSpec = d.prop_firms_spec || {}
+        this.configs = d.configs || {}
+        this.currentCode = d.current_code || {}
+        this.currentCodeSet = d.current_code_set || {}
+        this.snapshotPaths = d.snapshot_paths || {}
+        this.snapshotCombined = d.snapshot_combined || {}
+        this.snapshotFiles = d.snapshot_files || {}
+        this.backtestConfigs = d.backtest_configs || {}
       } catch (e) {
         this.error = String(e)
       } finally {

@@ -25,8 +25,8 @@ export function useTableState<T>(options: UseTableStateOptions<T>) {
   const filteredData = computed(() => {
     const q = globalFilter.value.trim().toLowerCase()
     if (!q) return options.data.value
-    return options.data.value.filter((item: any) => {
-      return Object.values(item).some((v) => {
+    return options.data.value.filter((item) => {
+      return Object.values(item as Record<string, unknown>).some((v) => {
         if (v === null || v === undefined || v === '') return false
         return String(v).toLowerCase().includes(q)
       })
@@ -37,7 +37,7 @@ export function useTableState<T>(options: UseTableStateOptions<T>) {
     rowSelection,
     (newSelection) => {
       if (options.onRowSelect) {
-        const selected = options.data.value.filter((_item: any, idx: number) => newSelection[idx])
+        const selected = options.data.value.filter((_item, idx: number) => newSelection[idx])
         options.onRowSelect(selected)
       }
     },

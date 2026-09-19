@@ -86,3 +86,9 @@ repos:
         entry: biome check --write
         language: system
         files: ^frontend/
+      - id: vue-tsc
+        name: vue-tsc type check (frontend)
+        entry: npx vue-tsc --noEmit
+        language: system
+        files: ^frontend/
+        pass_filenames: false
