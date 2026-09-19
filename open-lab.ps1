@@ -4,18 +4,7 @@ param(
     [string]$FrontendUrl = 'http://127.0.0.1:15000'
 )
 
-# --- Self-elevate to admin ---
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    try {
-        Start-Process -FilePath 'powershell' -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" -ApiPort $ApiPort -RpcPort $RpcPort -FrontendUrl `"$FrontendUrl`"" -Verb RunAs
-        exit
-    } catch {
-        Write-Host "[open-lab] Admin elevation failed. Restart the script as Administrator." -ForegroundColor Red
-        exit 1
-    }
-}
-
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 function Write-Status($msg) {
@@ -26,30 +15,19 @@ function Stop-PortUser([int]$port, [string]$label) {
     $conns = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
     if (-not $conns) { return }
     foreach ($c in $conns) {
-        $pid = $c.OwningProcess
-        if (-not $pid) { continue }
-        $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
+        $connPid = $c.OwningProcess
+        if (-not $connPid) { continue }
+        $proc = Get-Process -Id $connPid -ErrorAction SilentlyContinue
         if (-not $proc) { continue }
-        Write-Status "Stopping stale $label (PID $pid, $($proc.ProcessName)) on port $port ..."
-        Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+        Write-Status "Stopping stale $label (PID $connPid, $($proc.ProcessName)) on port $port ..."
+        Stop-Process -Id $connPid -Force -ErrorAction SilentlyContinue
     }
     Start-Sleep -Seconds 1
 }
 
 function Launch-ServiceWindow([string]$title, [string]$command) {
-    $psCmd = @"
-`$ErrorActionPreference = 'Stop'
-Write-Host "[open-lab] $title window started" -ForegroundColor Cyan
-try {
-    $command
-} catch {
-    Write-Host "[open-lab] $title error: `$_" -ForegroundColor Red
-} finally {
-    Write-Host ""
-    Write-Host "[open-lab] $title stopped. Close this window to dismiss." -ForegroundColor Yellow
-    `$null = `$Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-}
-"@
+    $escapedCmd = $command -replace '"', '`"'
+    $psCmd = "Write-Host '[open-lab] $title window started' -ForegroundColor Cyan; & $escapedCmd; Write-Host ''; Write-Host '[open-lab] $title stopped. Close this window to dismiss.' -ForegroundColor Yellow; Read-Host 'Press Enter to close'"
     Start-Process -FilePath 'powershell' -ArgumentList "-NoExit -NoProfile -Command $psCmd" -WorkingDirectory $Root
 }
 
@@ -61,17 +39,9 @@ Stop-PortUser -port $RpcPort -label 'RPC server'
 Write-Status "Starting analysis API server on port $ApiPort ..."
 Launch-ServiceWindow -title 'Analysis API' -command "pdm run python user_data/scripts/api_server.py --port $ApiPort"
 
-# --- Backend 2: freqtrade RPC/webserver ---
+# --- Backend 2: RPC server (via api_server.py) ---
 Write-Status "Starting RPC server on port $RpcPort ..."
-$rpcCommand = @"
-try {
-    pdm run python -m freqtrade webserver --port $RpcPort
-} catch {
-    Write-Host "[open-lab] 'pdm run python -m freqtrade webserver' failed." -ForegroundColor Red
-    Write-Host `$_
-}
-"@
-Launch-ServiceWindow -title 'RPC Server' -command $rpcCommand
+Launch-ServiceWindow -title 'RPC Server' -command "pdm run python user_data/scripts/api_server.py --port $RpcPort"
 
 # --- Wait for API ---
 Write-Status "Waiting for analysis API ..."

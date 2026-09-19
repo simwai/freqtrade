@@ -20,15 +20,162 @@ export interface StrategyRow {
   source?: string
 }
 
+export interface BacktestRow {
+  strategy: string
+  status: string
+  score?: { grade: string; grades?: Record<string, string> }
+  profit_total: number
+  total_trades: number
+  sortino: number
+  calmar: number
+  profit_factor: number
+  max_drawdown_account: number
+  prop_firms?: Record<string, unknown>
+  propPass?: number
+  winrate: number
+  basis: string
+  timerange: string
+  run_time: string
+  source?: string
+  loss_function?: string
+  spaces?: string
+  train_days?: number
+  test_days?: number
+  step_days?: number
+  n_windows?: number
+  profitable_windows?: number
+  epochs?: number
+  config_hash?: string
+  config_json?: string
+  code_hash?: string
+  trading_mode?: string
+  timeframe?: string
+  [key: string]: unknown
+}
+
+export interface BenchmarkRow {
+  strategy: string
+  status: string
+  score?: { grade: string; grades?: Record<string, string> }
+  profit_total: number
+  total_trades: number
+  sortino: number
+  calmar: number
+  profit_factor: number
+  max_drawdown_account: number
+  prop_firms?: Record<string, unknown>
+  propPass?: number
+  winrate: number
+  basis: string
+  timerange: string
+  run_time: string
+  source?: string
+  loss_function?: string
+  spaces?: string
+  epochs?: number
+  config_hash?: string
+  config_json?: string
+  code_hash?: string
+  trading_mode?: string
+  timeframe?: string
+  [key: string]: unknown
+}
+
+export interface HyperoptRow {
+  strategy: string
+  status: string
+  score?: { grade: string; grades?: Record<string, string> }
+  profit_total: number
+  total_trades: number
+  sortino: number
+  calmar: number
+  profit_factor: number
+  max_drawdown_account: number
+  prop_firms?: Record<string, unknown>
+  propPass?: number
+  winrate: number
+  basis: string
+  timerange: string
+  run_time: string
+  source?: string
+  loss_function?: string
+  spaces?: string
+  epochs?: number
+  config_hash?: string
+  config_json?: string
+  code_hash?: string
+  trading_mode?: string
+  timeframe?: string
+  best_loss?: number
+  random_state?: number
+  jobs?: number
+  min_trades?: number
+  [key: string]: unknown
+}
+
+export interface WalkforwardRow {
+  strategy: string
+  status: string
+  score?: { grade: string; grades?: Record<string, string> }
+  profit_total: number
+  total_trades: number
+  sortino: number
+  calmar: number
+  profit_factor: number
+  max_drawdown_account: number
+  prop_firms?: Record<string, unknown>
+  propPass?: number
+  winrate: number
+  basis: string
+  timerange: string
+  run_time: string
+  source?: string
+  loss_function?: string
+  spaces?: string
+  epochs?: number
+  train_days?: number
+  test_days?: number
+  step_days?: number
+  n_windows?: number
+  profitable_windows?: number
+  config_hash?: string
+  config_json?: string
+  code_hash?: string
+  trading_mode?: string
+  timeframe?: string
+  [key: string]: unknown
+}
+
+export interface TradeRunRow {
+  key: string
+  strategy: string
+  source: string
+  n_trades: number
+  run_time: string
+  [key: string]: unknown
+}
+
+export interface HistoryData {
+  dates: string[]
+  profit: number[]
+  sortino: number[]
+  calmar: number[]
+  profit_factor: number[]
+  max_drawdown: number[]
+  winrate: number[]
+  trades: number[]
+  [key: string]: unknown
+}
+
 interface DataResponse {
   canonical: StrategyRow[]
-  backtests: unknown[]
-  benchmarks: unknown[]
-  hyperopt: unknown[]
-  walkforward: unknown[]
+  backtests: BacktestRow[]
+  benchmarks: BenchmarkRow[]
+  hyperopt: HyperoptRow[]
+  walkforward: WalkforwardRow[]
   strategies: StrategyRow[]
-  trade_runs: unknown[]
-  history: Record<string, unknown>
+  trade_runs: TradeRunRow[]
+  history: Record<string, HistoryData>
   scorecard: Record<string, unknown>
   prop_firms_spec?: Record<string, unknown>
   configs: Record<string, unknown>
@@ -43,13 +190,13 @@ interface DataResponse {
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
     canonical: [] as StrategyRow[],
-    backtests: [] as unknown[],
-    benchmarks: [] as unknown[],
-    hyperopt: [] as unknown[],
-    walkforward: [] as unknown[],
+    backtests: [] as BacktestRow[],
+    benchmarks: [] as BenchmarkRow[],
+    hyperopt: [] as HyperoptRow[],
+    walkforward: [] as WalkforwardRow[],
     strategies: [] as StrategyRow[],
-    trade_runs: [] as unknown[],
-    history: {} as Record<string, unknown>,
+    trade_runs: [] as TradeRunRow[],
+    history: {} as Record<string, HistoryData>,
     scorecard: {} as Record<string, unknown>,
     propSpec: {} as Record<string, unknown>,
     configs: {} as Record<string, unknown>,

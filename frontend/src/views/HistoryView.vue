@@ -72,12 +72,12 @@ import { BarChart, LineChart, ScatterChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent } from 'echarts/components'
 
 echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent])
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategiesStore } from '../stores/strategies'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 import { useUrlState } from '../composables/useUrlState'
 
-const store = useDashboardStore()
+const store = useStrategiesStore()
 const selected = useUrlState<string[]>({ key: 'sel', defaultValue: [], parse: (v) => (v ? v.split(',') : []), serialize: (v) => v.join(',') })
 const useLog = ref(false)
 const strategySearch = ref('')
@@ -126,7 +126,7 @@ function toggleName(name: string, checked: boolean) {
 const picked = computed(() => selected.value.filter((v) => !v.startsWith('__')))
 
 function refreshData() {
-  store.fetchAll(true)
+  store.fetchFullData()
   historyRefreshKey.value++
 }
 
@@ -195,7 +195,7 @@ function selectTop() { selected.value = names.value.slice(0, 8) }
 function clearAll() { selected.value = [] }
 
 onMounted(async () => {
-  await store.fetchAll()
+  await store.fetchFullData()
   historyRefreshKey.value++
   if (!selected.value.length && names.value.length) selected.value = [names.value[0]]
 })

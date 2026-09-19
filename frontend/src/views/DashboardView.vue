@@ -8,7 +8,7 @@ import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZ
 
 echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
 
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategiesStore } from '../stores/strategies'
 import GradeTuner from '../components/GradeTuner.vue'
 import StrategyDrawer from '../components/StrategyDrawer.vue'
 import type { ECOption } from '../utils/echarts'
@@ -16,9 +16,8 @@ import '../utils/echarts'
 import { useUrlState } from '../composables/useUrlState'
 import { sortableHeader } from '../utils/table'
 import { useStrategyFormat } from '../composables/useStrategyFormat'
-import type { StrategyRow } from '../stores/dashboard'
 
-const store = useDashboardStore()
+const store = useStrategiesStore()
 const format = useStrategyFormat()
 const minProfit = ref(0)
 const minTrades = ref(0)

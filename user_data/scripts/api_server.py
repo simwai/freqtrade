@@ -1,41 +1,41 @@
 from __future__ import annotations
-
 import argparse
 import sqlite3
 import sys
 import time
 from pathlib import Path
-
+from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-
 SCRIPTS = Path(__file__).resolve().parent
-USER_DATA = Path("/mnt/m/Documents/Programming/Python/freqtrade/user_data")
-ANALYSIS = Path("/mnt/m/Documents/Programming/Python/freqtrade/user_data/analysis")
-LIVE_DB = Path("/home/wobby/results_profile.db")
+USER_DATA = SCRIPTS.parent
+ANALYSIS = USER_DATA / "analysis"
+LIVE_DB = ANALYSIS / "results_profile.db"
 ARCHIVED = SCRIPTS / "_archived"
 BR_SCRIPT = ARCHIVED / "build_report.py"
 sys.path.insert(0, str(ARCHIVED))
 sys.path.insert(0, str(SCRIPTS))
-import build_report as br  # noqa: E402
-import server as lab  # noqa: E402
-from python_compat import python_argv  # noqa: E402
-
+import server as lab
+import build_report as br
+from python_compat import python_argv
 
 lab.DB = LIVE_DB
 lab.USER_DATA = USER_DATA
 lab.ANALYSIS = ANALYSIS
 lab.SCRIPTS = SCRIPTS
+lab.DEFAULT_DB = LIVE_DB
+lab.RESULTS_DB = LIVE_DB
+lab.PROFILE_DB = LIVE_DB
 if hasattr(lab, "db_connect"):
     lab.db_connect.__defaults__ = (LIVE_DB,)
 br.USER_DATA = USER_DATA
 br.ANALYSIS_DIR = ANALYSIS
 
-lab.ensure_lookup_indexes()
+lab.ensure_lookup_indexes(lab.get_connection())
 H = lab.LabHandler.__new__(lab.LabHandler)
 app = FastAPI(title="Strategy Lab API")
 app.add_middleware(
@@ -51,38 +51,38 @@ app.mount("/trades", StaticFiles(directory=ANALYSIS / "trades"))
 class StrategyIn(BaseModel):
     name: str
     status: str = "active"
-    notes: str | None = None
+    notes: Optional[str] = None
 
 
 class BenchIn(BaseModel):
-    strategies: list[str] = []
+    strategies: List[str] = []
     timerange: str = "20230101-20240101"
     timeframe: str = "5m"
     mode: str = "backtest"
-    epochs: int | None = None
-    loss: str | None = None
-    spaces: list[str] | None = None
-    jobs: int | None = None
-    random_state: int | None = None
-    train_days: int | None = None
-    test_days: int | None = None
-    step_days: int | None = None
+    epochs: Optional[int] = None
+    loss: Optional[str] = None
+    spaces: Optional[List[str]] = None
+    jobs: Optional[int] = None
+    random_state: Optional[int] = None
+    train_days: Optional[int] = None
+    test_days: Optional[int] = None
+    step_days: Optional[int] = None
 
 
 class RunIn(BaseModel):
     mode: str = "backtest"
     strategy: str = ""
     timerange: str = "20220101-20240101"
-    config: str | None = None
+    config: Optional[str] = None
     rebuild: bool = True
-    epochs: int | None = None
-    loss: str | None = None
-    spaces: list[str] | None = None
-    jobs: int | None = None
-    random_state: int | None = None
-    min_trades: int | None = None
-    wf_min_trades: int | None = None
-    wf_max_drawdown: float | None = None
+    epochs: Optional[int] = None
+    loss: Optional[str] = None
+    spaces: Optional[List[str]] = None
+    jobs: Optional[int] = None
+    random_state: Optional[int] = None
+    min_trades: Optional[int] = None
+    wf_min_trades: Optional[int] = None
+    wf_max_drawdown: Optional[float] = None
     analyze_per_epoch: bool = False
     disable_param_export: bool = False
     print_all: bool = False
@@ -92,11 +92,11 @@ class DryrunIn(BaseModel):
     strategy: str = ""
     timerange: str = "20220101-20240101"
     timeframe: str = "5m"
-    config: str | None = None
-    dryrun_id: str | None = None
+    config: Optional[str] = None
+    dryrun_id: Optional[str] = None
 
 
-import threading  # noqa: E402
+import threading
 
 
 lab.JOB_LOCK = threading.RLock()
@@ -108,8 +108,8 @@ def sanitize(o):
     if isinstance(o, float):
         return o if math.isfinite(o) else None
     if isinstance(o, dict):
-        out = {}
-        for k in o:
+        out = dict()
+        for k in o.keys():
             out[k] = sanitize(o[k])
         return out
     if isinstance(o, list):
@@ -119,7 +119,7 @@ def sanitize(o):
     return o
 
 
-app.get("/api/health")(lambda: {"ok": True, "db": LIVE_DB.exists()})
+app.get("/api/health")(lambda: dict(ok=True, db=LIVE_DB.exists()))
 app.get("/api/jobs")(lab.summarize_jobs)
 app.get("/api/strategies")(H._strategies)
 
@@ -129,24 +129,24 @@ def api_data():
     payload["prop_firms_spec"] = br.PROP_FIRMS
     try:
         payload["backtest_configs"] = br.extract_backtest_configs(USER_DATA, payload["backtests"])
-    except Exception:  # noqa: BLE001
+    except Exception:
         payload["backtest_configs"] = {}
     return sanitize(payload)
 
 
 app.get("/api/data")(api_data)
 
-app.get("/api/losses")(lambda: {"losses": lab.list_losses()})
-app.get("/api/configs")(lambda: {"configs": lab.list_configs()})
+app.get("/api/losses")(lambda: dict(losses=lab.list_losses()))
+app.get("/api/configs")(lambda: dict(configs=lab.list_configs()))
 app.get("/api/freshness")(H._freshness)
 app.get("/api/indicators")(H._indicator_list)
 app.get("/api/hyperopt/files")(H._hyperopt_files)
 
-from fastapi import Request  # noqa: E402
+from fastapi import Request
 
 
 def api_hyperopt(source=None, strategy=None, limit=200):
-    qs = {}
+    qs = dict()
     if source:
         qs["source"] = [source]
     if strategy:
@@ -159,7 +159,7 @@ app.get("/api/hyperopt")(api_hyperopt)
 
 
 def api_walkforward(source=None, run_id=None, strategy=None):
-    qs = {}
+    qs = dict()
     if source:
         qs["source"] = [source]
     if run_id:
@@ -173,7 +173,7 @@ app.get("/api/walkforward")(api_walkforward)
 
 
 def api_run_meta(kind="", source=None, strategy=None):
-    qs = {"kind": [kind]}
+    qs = dict(kind=[kind])
     if source:
         qs["source"] = [source]
     if strategy:
@@ -187,14 +187,14 @@ app.get("/api/run/meta")(api_run_meta)
 def api_candles(
     pair=None, timeframe="5m", trading_mode="", exchange="binance", start=None, end=None
 ):
-    qs = {
-        "pair": [pair],
-        "timeframe": [timeframe],
-        "trading_mode": [trading_mode],
-        "exchange": [exchange],
-        "start": [start],
-        "end": [end],
-    }
+    qs = dict(
+        pair=[pair],
+        timeframe=[timeframe],
+        trading_mode=[trading_mode],
+        exchange=[exchange],
+        start=[start],
+        end=[end],
+    )
     return sanitize(H._candles_payload(qs))
 
 
@@ -209,7 +209,7 @@ app.get("/api/tp")(api_tp)
 
 
 async def api_indicator(request: Request):
-    qs = {}
+    qs = dict()
     for k, v in request.query_params.multi_items():
         qs.setdefault(k, []).append(v)
     return sanitize(H._indicator_payload(qs))
@@ -219,7 +219,7 @@ app.get("/api/indicator")(api_indicator)
 
 
 def api_strategy_current(name=None):
-    qs = {}
+    qs = dict()
     if name:
         qs["name"] = [name]
     return H._strategy_current(qs)
@@ -228,15 +228,15 @@ def api_strategy_current(name=None):
 app.get("/api/strategy/current")(api_strategy_current)
 
 
-def api_strategy_file(hash_=None, file=None):
+def api_strategy_file(hash=None, file=None):
     import sqlite3 as sql
 
-    if not hash_:
+    if not hash:
         raise HTTPException(status_code=400, detail="hash required")
     conn = lab.db_connect()
     conn.row_factory = sql.Row
     row = conn.execute(
-        "SELECT path, source FROM strategy_snapshots WHERE hash=?", (hash_,)
+        "SELECT path, source FROM strategy_snapshots WHERE hash=?", (hash,)
     ).fetchone()
     if not row:
         conn.close()
@@ -258,17 +258,15 @@ app.get("/api/strategy/file")(api_strategy_file)
 
 
 def api_dryrun_status(tail=None):
-    tq = {"tail": [tail]} if tail is not None else {}
+    tq = dict(tail=[tail]) if tail is not None else dict()
     t = H._dryrun_tail_param(tq, lab._DRYRUN_LOG_TAIL_DEFAULT)
     ids = list(lab._DRYRUN.keys())
     metas = [m for m in (lab._dryrun_metadata(i, t) for i in ids) if m is not None]
     active = next((m for m in metas if m["alive"]), None)
     latest = sorted(metas, key=lambda m: float(m.get("started_at") or 0), reverse=True)
-    return {
-        "active": active is not None,
-        "dryrun": active or (latest[0] if latest else None),
-        "all": metas,
-    }
+    return dict(
+        active=active is not None, dryrun=active or (latest[0] if latest else None), all=metas
+    )
 
 
 app.get("/api/dryrun")(api_dryrun_status)
@@ -284,7 +282,7 @@ def api_dryrun_log(tail=None):
             break
     if active is None:
         raise HTTPException(status_code=404, detail="no active dry run")
-    tq = {"tail": [tail]} if tail is not None else {}
+    tq = dict(tail=[tail]) if tail is not None else dict()
     t = H._dryrun_tail_param(tq, None)
     raw = active.get("log_path")
     lp = Path(str(raw)) if raw else None
@@ -307,7 +305,7 @@ def api_set_strategy(model: StrategyIn):
             status_code=400, detail="name + status (active|experimental|retired) required"
         )
     ok = H._set_strategy(model.name, model.status, model.notes)
-    return {"ok": ok, "strategy": model.name, "status": model.status}
+    return dict(ok=ok, strategy=model.name, status=model.status)
 
 
 app.post("/api/strategies")(api_set_strategy)
@@ -316,7 +314,7 @@ app.post("/api/strategies")(api_set_strategy)
 def api_refresh():
     with lab.JOB_LOCK:
         if lab._REFRESH_JOB_ACTIVE[0] or lab._REFRESH_LOCK.locked():
-            return {"skipped": "report-refresh already running or queued"}
+            return dict(skipped="report-refresh already running or queued")
         lab._REFRESH_JOB_ACTIVE[0] = True
         job_id = lab._start_sequence_locked(
             "report-refresh",
@@ -326,7 +324,7 @@ def api_refresh():
             ],
             single_flight=True,
         )
-        return {"job_id": job_id}
+        return dict(job_id=job_id)
 
 
 app.post("/api/refresh")(api_refresh)
@@ -335,12 +333,12 @@ app.post("/api/refresh")(api_refresh)
 def api_report():
     with lab.JOB_LOCK:
         if lab._REFRESH_JOB_ACTIVE[0] or lab._REFRESH_LOCK.locked():
-            return {"skipped": "report already running or queued"}
+            return dict(skipped="report already running or queued")
         lab._REFRESH_JOB_ACTIVE[0] = True
         job_id = lab.start_sequence(
             "report", [[*python_argv(), str(BR_SCRIPT)]], single_flight=True
         )
-        return {"job_id": job_id}
+        return dict(job_id=job_id)
 
 
 app.post("/api/report")(api_report)
@@ -379,7 +377,7 @@ def api_bench(model: BenchIn):
     strategies = body.get("strategies") or []
     label = ",".join(strategies) if strategies else "all"
     job_id = lab.start_job("benchmark-" + str(body.get("mode", "backtest")) + "-" + label, cmd)
-    return {"job_id": job_id, "mode": body.get("mode", "backtest")}
+    return dict(job_id=job_id, mode=body.get("mode", "backtest"))
 
 
 app.post("/api/bench")(api_bench)
@@ -406,7 +404,7 @@ def api_run(model: RunIn):
         )
     else:
         job_id = lab.start_job(tag, cmd)
-    return {"job_id": job_id}
+    return dict(job_id=job_id)
 
 
 app.post("/api/run")(api_run)
@@ -433,14 +431,14 @@ app.get("/api/jobs/{job_id}/log")(api_job_log)
 
 
 def api_job_action(job_id: str, action: str):
-    actions = {"stop": lab.stop_job, "pause": lab.pause_job, "resume": lab.resume_job}
+    actions = dict(stop=lab.stop_job, pause=lab.pause_job, resume=lab.resume_job)
     fn = actions.get(action)
     if fn is None:
         raise HTTPException(status_code=400, detail="unknown action " + action)
     ok, msg = fn(job_id)
     if not ok:
         raise HTTPException(status_code=400, detail=msg)
-    return {"ok": ok, "msg": msg, "job_id": job_id}
+    return dict(ok=ok, msg=msg, job_id=job_id)
 
 
 app.post("/api/jobs/{job_id}/{action}")(api_job_action)
@@ -472,7 +470,7 @@ def api_dryrun_stop(model: DryrunIn):
         lab._DRYRUN.pop(dryrun_id, None)
     if not ok:
         raise HTTPException(status_code=400, detail=msg)
-    return {"ok": ok, "msg": msg, "dryrun_id": dryrun_id}
+    return dict(ok=ok, msg=msg, dryrun_id=dryrun_id)
 
 
 app.post("/api/dryrun/stop")(api_dryrun_stop)
@@ -492,7 +490,7 @@ def api_dryrun_gate(model: DryrunIn):
     if model.config:
         cmd += ["--config", str(model.config)]
     job_id = lab.start_job("gate-" + strategy, cmd)
-    return {"job_id": job_id, "strategy": strategy}
+    return dict(job_id=job_id, strategy=strategy)
 
 
 app.post("/api/dryrun/gate", status_code=202)(api_dryrun_gate)
@@ -530,7 +528,7 @@ app.get("/api/jobs/{job_id}/logs/stream")(api_job_stream)
 
 # ===== ANALYSIS ENDPOINTS =====
 
-from pydantic import BaseModel as _BaseModel  # noqa: E402
+from pydantic import BaseModel as _BaseModel
 
 
 class _LookaheadAnalysisIn(_BaseModel):
@@ -556,7 +554,7 @@ def api_lookahead_analysis(model: _LookaheadAnalysisIn):
         raise HTTPException(status_code=400, detail="strategy required")
     tag = "lookahead-" + body["strategy"]
     job_id = lab.start_job(tag, [*python_argv(), str(SCRIPTS / "ingest_results.py")])
-    return {"job_id": job_id}
+    return dict(job_id=job_id)
 
 
 app.post("/api/lookahead_analysis")(api_lookahead_analysis)
@@ -567,19 +565,19 @@ def api_lookahead_analysis_status(job_id: str):
     if not detail:
         raise HTTPException(status_code=404, detail="job not found")
     if detail.get("status") == "done":
-        return {
-            "status": "ended",
-            "result": {
+        return dict(
+            status="ended",
+            result={
                 "has_bias": False,
                 "total_signals": 0,
                 "biased_entry_signals": 0,
                 "biased_exit_signals": 0,
                 "biased_indicators": [],
             },
-        }
+        )
     if detail.get("status") == "error":
-        return {"status": "error", "status_msg": detail.get("error", "Analysis failed")}
-    return {"status": "running"}
+        return dict(status="error", status_msg=detail.get("error", "Analysis failed"))
+    return dict(status="running")
 
 
 app.get("/api/lookahead_analysis/{job_id}")(api_lookahead_analysis_status)
@@ -591,7 +589,7 @@ def api_recursive_analysis(model: _RecursiveAnalysisIn):
         raise HTTPException(status_code=400, detail="strategy required")
     tag = "recursive-" + body["strategy"]
     job_id = lab.start_job(tag, [*python_argv(), str(SCRIPTS / "ingest_results.py")])
-    return {"job_id": job_id}
+    return dict(job_id=job_id)
 
 
 app.post("/api/recursive_analysis")(api_recursive_analysis)
@@ -602,13 +600,13 @@ def api_recursive_analysis_status(job_id: str):
     if not detail:
         raise HTTPException(status_code=404, detail="job not found")
     if detail.get("status") == "done":
-        return {
-            "status": "ended",
-            "result": {"strategy": "", "startup_candles": 0, "strategy_scc": [], "results": {}},
-        }
+        return dict(
+            status="ended",
+            result={"strategy": "", "startup_candles": 0, "strategy_scc": [], "results": {}},
+        )
     if detail.get("status") == "error":
-        return {"status": "error", "status_msg": detail.get("error", "Analysis failed")}
-    return {"status": "running"}
+        return dict(status="error", status_msg=detail.get("error", "Analysis failed"))
+    return dict(status="running")
 
 
 app.get("/api/recursive_analysis/{job_id}")(api_recursive_analysis_status)
@@ -732,7 +730,7 @@ def api_trades_paginated(key: str, limit: int = 500, offset: int = 0):
         parts = key.split("__", 1)
         if len(parts) != 2:
             raise HTTPException(status_code=400, detail="invalid key format")
-        strategy, _source_key = parts
+        strategy, source_key = parts
         # Find the full source name by matching trade_runs
         runs = br.trade_runs(conn)
         run = next((r for r in runs if r["key"] == key), None)
@@ -741,8 +739,7 @@ def api_trades_paginated(key: str, limit: int = 500, offset: int = 0):
         source = run["source"]
         # Fetch paginated trades
         rows = conn.execute(
-            "SELECT * FROM trades WHERE strategy=? AND source=? "
-            "ORDER BY close_date LIMIT ? OFFSET ?",
+            """SELECT * FROM trades WHERE strategy=? AND source=? ORDER BY close_date LIMIT ? OFFSET ?""",
             (strategy, source, limit, offset),
         ).fetchall()
         trades = [br.compact_trade(dict(r)) for r in rows]
@@ -777,7 +774,7 @@ def main() -> int:
     if not LIVE_DB.exists():
         print("No results.db yet - running first ingest...")
         lab.run_command([*python_argv(), str(SCRIPTS / "ingest_results.py")])
-    lab.ensure_lookup_indexes()
+    lab.ensure_lookup_indexes(lab.get_connection())
     adopted = lab._adopt_orphan_dryruns()
     if adopted:
         print("adopted " + str(adopted) + " orphan dry runs")

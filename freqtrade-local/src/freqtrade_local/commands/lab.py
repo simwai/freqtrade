@@ -1,18 +1,32 @@
 """Lab SSE log stream command wrapper."""
 
+import argparse
 import asyncio
 import logging
 import signal
-
-from freqtrade.commands.optimize_commands import start_lab as _start_lab  # noqa: F401
+import sys
 
 logger = logging.getLogger(__name__)
 
 
-def start_lab(args: dict) -> None:
+def start_lab(args: list[str] | None = None) -> None:
     """
     Start SSE log stream server (lab mode).
     """
+    parser = argparse.ArgumentParser(description="Freqtrade Lab mode (SSE log stream)")
+    parser.add_argument("--port", type=int, default=None, help="Port for the SSE log stream")
+
+    # Handle being called via freqtrade CLI (args may be a Namespace)
+    if args is not None and not isinstance(args, list):
+        # args is a Namespace object from freqtrade's argument parser
+        port = getattr(args, "port", None)
+        if port is not None:
+            args = [f"--port={port}"]
+        else:
+            args = None
+
+    cli_args = parser.parse_args(args)
+
     try:
         from freqtrade.configuration import setup_utils_configuration
         from freqtrade.enums import RunMode
@@ -23,7 +37,9 @@ def start_lab(args: dict) -> None:
             setup_sse_logging,
         )
 
-        config = setup_utils_configuration(args, RunMode.UTIL_NO_EXCHANGE)
+        config = setup_utils_configuration({}, RunMode.UTIL_NO_EXCHANGE)
+        if cli_args.port is not None:
+            config["lab_port"] = cli_args.port
 
         logger.info("Starting freqtrade in Lab mode (SSE log stream)")
 
@@ -64,3 +80,7 @@ def start_lab(args: dict) -> None:
     except Exception as e:
         logger.error("Lab mode failed: %s", e)
         raise
+
+
+if __name__ == "__main__":
+    start_lab()

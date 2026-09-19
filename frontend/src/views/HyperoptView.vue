@@ -158,7 +158,7 @@ import { BarChart, LineChart, ScatterChart, CandlestickChart } from 'echarts/cha
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent } from 'echarts/components'
 
 echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategiesStore } from '../stores/strategies'
 import { api } from '../api/client'
 const router = useRouter()
 import type { ECScatterOption } from '../utils/echarts'
@@ -166,7 +166,7 @@ import { corrClass } from '../utils/pills'
 import '../utils/echarts'
 import { useUrlState } from '../composables/useUrlState'
 
-const store = useDashboardStore()
+const store = useStrategiesStore()
 const q = useUrlState({ key: 'q', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const minTrades = ref(0)
 const epochLimit = ref(200)
@@ -255,7 +255,7 @@ function debugFilter() {
 }
 
 function refreshData() {
-  store.fetchAll(true)
+  store.fetchFullData()
 }
 
 function fileKey(f: any) { return typeof f === 'string' ? f : (f.source || f.name || f.path || JSON.stringify(f)) }
@@ -302,7 +302,7 @@ const scatterOption = computed((): ECScatterOption => ({
 }))
 
 onMounted(async () => {
-  await store.fetchAll()
+  await store.fetchFullData()
   const { data } = await api.get('/api/hyperopt/files')
   files.value = data
 })

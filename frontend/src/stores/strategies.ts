@@ -4,16 +4,16 @@ import { api } from '../api/client'
 export interface StrategyRow {
   strategy: string
   status: string
-  score?: { grade: string }
+  score?: { grade: string; grades?: Record<string, string> }
   profit_total: number
-  profit_factor?: number
-  sortino?: number
-  calmar?: number
-  max_drawdown_account?: number
+  total_trades: number
+  sortino: number
+  calmar: number
+  profit_factor: number
+  max_drawdown_account: number
   prop_firms?: Record<string, unknown>
   propPass?: number
-  n_backtests?: number
-  n_trades?: number
+  winrate: number
   basis: string
   timerange: string
   run_time: string
@@ -21,10 +21,71 @@ export interface StrategyRow {
   notes?: string
 }
 
+export interface BacktestRow {
+  strategy: string
+  status: string
+  score?: { grade: string; grades?: Record<string, string> }
+  profit_total: number
+  total_trades: number
+  sortino: number
+  calmar: number
+  profit_factor: number
+  max_drawdown_account: number
+  prop_firms?: Record<string, unknown>
+  propPass?: number
+  winrate: number
+  basis: string
+  timerange: string
+  run_time: string
+  source?: string
+  loss_function?: string
+  spaces?: string
+  train_days?: number
+  test_days?: number
+  step_days?: number
+  n_windows?: number
+  profitable_windows?: number
+  epochs?: number
+  config_hash?: string
+  config_json?: string
+  code_hash?: string
+  trading_mode?: string
+  timeframe?: string
+  [key: string]: unknown
+}
+
+export interface BenchmarkRow {
+  strategy: string
+  status: string
+  score?: { grade: string; grades?: Record<string, string> }
+  profit_total: number
+  total_trades: number
+  sortino: number
+  calmar: number
+  profit_factor: number
+  max_drawdown_account: number
+  prop_firms?: Record<string, unknown>
+  propPass?: number
+  winrate: number
+  basis: string
+  timerange: string
+  run_time: string
+  source?: string
+  loss_function?: string
+  spaces?: string
+  epochs?: number
+  config_hash?: string
+  config_json?: string
+  code_hash?: string
+  trading_mode?: string
+  timeframe?: string
+  [key: string]: unknown
+}
+
 interface StrategiesState {
   items: StrategyRow[]
-  backtests: unknown[]
-  benchmarks: unknown[]
+  backtests: any[]
+  benchmarks: any[]
   loading: boolean
   error: string | null
   scorecard: Record<string, unknown>
@@ -34,8 +95,8 @@ interface StrategiesState {
 export const useStrategiesStore = defineStore('strategies', {
   state: (): StrategiesState => ({
     items: [] as StrategyRow[],
-    backtests: [] as unknown[],
-    benchmarks: [] as unknown[],
+    backtests: [] as any[],
+    benchmarks: [] as any[],
     loading: false,
     error: null as string | null,
     scorecard: {} as Record<string, unknown>,
@@ -73,7 +134,7 @@ export const useStrategiesStore = defineStore('strategies', {
       this.error = null
       try {
         const { data } = await api.get('/api/data')
-        const d = data as { backtests?: unknown[]; benchmarks?: unknown[]; canonical?: StrategyRow[]; scorecard?: Record<string, unknown>; prop_firms?: Record<string, unknown> }
+        const d = data as { backtests?: any[]; benchmarks?: any[]; canonical?: any[]; scorecard?: Record<string, unknown>; prop_firms?: Record<string, unknown> }
         this.backtests = d.backtests || []
         this.benchmarks = d.benchmarks || []
         this.items = d.canonical || []
