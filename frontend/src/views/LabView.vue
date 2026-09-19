@@ -38,6 +38,7 @@
         <UButton color="primary" @click="startBench" class="btn-primary">Run benchmark</UButton>
       </div>
       <div v-if="benchMsg" class="message text-lavender text-sm mt-2" role="status">{{ benchMsg }}</div>
+      <InlineStatus v-if="benchStatus" :type="benchStatus.type" :title="benchStatus.title" :message="benchStatus.message" duration="5000" />
     </div>
 
     <div class="card p-4.5">
@@ -94,6 +95,7 @@
       </div>
       <div v-if="formError" class="edit-msg text-bad text-sm mt-2" role="alert">{{ formError }}</div>
       <pre v-if="configPreview" class="code-block">{{ configPreview }}</pre>
+      <InlineStatus v-if="runStatus" :type="runStatus.type" :title="runStatus.title" :message="runStatus.message" duration="5000" />
     </div>
 
 <div class="card p-4.5">
@@ -188,6 +190,7 @@ import { api } from '../api/client'
 import { useDashboardStore } from '../stores/dashboard'
 import { useConfirmDialog } from '../composables/useConfirmDialog'
 import { useJobLogStream } from '../composables/useEventSource'
+import InlineStatus from '../components/InlineStatus.vue'
 
 const store = useDashboardStore()
 
@@ -210,8 +213,22 @@ const runSchema = z.object({
   test_days: z.number().int().min(1, 'Test days must be at least 1.').optional(),
   step_days: z.number().int().min(1, 'Step days must be at least 1.').optional()
 }).passthrough()
-const toast = useToast()
+
 const { confirm } = useConfirmDialog()
+
+// Inline status state (replaces toast)
+const benchStatus = ref<{ type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string } | null>(null)
+const runStatus = ref<{ type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string } | null>(null)
+
+function showBenchStatus(type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) {
+  benchStatus.value = { type, title, message }
+  setTimeout(() => { benchStatus.value = null }, 5000)
+}
+
+function showRunStatus(type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) {
+  runStatus.value = { type, title, message }
+  setTimeout(() => { runStatus.value = null }, 5000)
+}
 
 const benchStrategies = ref('')
 const timerange = ref('20230101-20240101')
@@ -298,7 +315,7 @@ async function startBench() {
     const { data } = await api.post('/api/bench', body)
     benchMsg.value = 'job ' + data.job_id
     message.value = ''
-    toast.add({ title: 'Benchmark started', description: 'job ' + data.job_id, color: 'success', duration: 3000 })
+    showBenchStatus('success', 'Benchmark started', 'job ' + data.job_id)
     await loadJobs()
   } catch (e) {
     benchMsg.value = 'Could not start the benchmark.'

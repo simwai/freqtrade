@@ -167,7 +167,6 @@ import '../utils/echarts'
 import { useUrlState } from '../composables/useUrlState'
 
 const store = useDashboardStore()
-const toast = useToast()
 const q = useUrlState({ key: 'q', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const minTrades = ref(0)
 const epochLimit = ref(200)

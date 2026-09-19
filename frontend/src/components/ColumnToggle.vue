@@ -8,7 +8,7 @@
       <UCheckbox
         v-for="c in toggleable"
         :key="c.accessorKey"
-        :label="c.header"
+        :label="toggleLabel(c)"
         :model-value="visibility[c.accessorKey] !== false"
         @update:model-value="set(c.accessorKey, $event === true)"
       />
@@ -21,7 +21,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 
 interface ToggleColumn {
   accessorKey: string
-  header: string
+  header: string | ((ctx: any) => unknown)
   enableHiding?: boolean
 }
 
@@ -31,6 +31,11 @@ const emit = defineEmits<{ 'update:visibility': [v: Record<string, boolean>] }>(
 const root = ref<HTMLElement | null>(null)
 
 const toggleable = computed(() => props.columns.filter((c) => c.accessorKey !== 'actions' && c.enableHiding !== false))
+
+function toggleLabel(c: ToggleColumn): string {
+  if (typeof c.header === 'string') return c.header
+  return (c.header as any).toggleLabel || c.accessorKey
+}
 
 function set(key: string, visible: boolean) {
   emit('update:visibility', { ...props.visibility, [key]: visible })

@@ -4,6 +4,8 @@
       <h2>Recursive Analysis</h2>
     </div>
 
+    <InlineStatus v-if="analysisStatus" :type="analysisStatus.type" :title="analysisStatus.title" :message="analysisStatus.message" duration="5000" />
+
     <div v-if="loadingStrategies" class="card">
       <div class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
@@ -98,10 +100,17 @@ import SccGraph from '../components/SccGraph.vue'
 import StartupCandleTable from '../components/StartupCandleTable.vue'
 import { sortableHeader } from '../utils/table'
 import type { RecursiveAnalysisResult, SccGraphData } from '../api/schemas'
+import InlineStatus from '../components/InlineStatus.vue'
 
 const router = useRouter()
 
-const toast = useToast()
+// Inline status state (replaces toast)
+const analysisStatus = ref<{ type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string } | null>(null)
+
+function showAnalysisStatus(type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) {
+  analysisStatus.value = { type, title, message }
+  setTimeout(() => { analysisStatus.value = null }, 5000)
+}
 
 const loadingStrategies = ref(true)
 const strategyOptions = ref<{ label: string; value: string }[]>([])
@@ -140,7 +149,7 @@ async function loadStrategies() {
     const { data } = await api.get('/api/strategies')
     strategyOptions.value = (Array.isArray(data) ? data : []).map((s: any) => ({ label: s.name, value: s.name }))
   } catch (e) {
-    toast.add({ title: 'Failed to load strategies', color: 'error' })
+    showAnalysisStatus('error', 'Failed to load strategies')
   } finally {
     loadingStrategies.value = false
   }
@@ -152,7 +161,6 @@ async function runAnalysis() {
   jobId.value = ''
   try {
     const body = { ...formState.value }
-    // Clean up empty optional fields
     Object.keys(body).forEach(key => {
       if (body[key as keyof FormState] === '' || body[key as keyof FormState] === undefined) {
         delete body[key as keyof FormState]
@@ -160,19 +168,18 @@ async function runAnalysis() {
     })
     const { data } = await rpcApi.post('/api/recursive_analysis', body)
     jobId.value = data.job_id
-    toast.add({ title: 'Analysis started', description: 'Job ' + data.job_id, color: 'success' })
-    // Poll for result
+    showAnalysisStatus('success', 'Analysis started', 'Job ' + data.job_id)
     await pollJob(data.job_id)
   } catch (e: any) {
     formError.value = e.message || 'Failed to start analysis'
-    toast.add({ title: 'Analysis failed', color: 'error' })
+    showAnalysisStatus('error', 'Analysis failed')
   } finally {
     runningJob.value = false
   }
 }
 
 async function pollJob(id: string) {
-  for (let i = 0; i < 300; i++) { // 5 minutes max
+  for (let i = 0; i < 300; i++) {
     await new Promise(r => setTimeout(r, 1000))
     try {
       const { data } = await rpcApi.get('/api/recursive_analysis/' + id)
@@ -181,20 +188,19 @@ async function pollJob(id: string) {
         buildGraphData()
         buildIndicatorDetails()
         buildDiffRows()
-        toast.add({ title: 'Analysis complete', color: 'success' })
+        showAnalysisStatus('success', 'Analysis complete')
         return
       }
       if (data.status === 'error') {
         formError.value = data.status_msg || 'Analysis failed'
-        toast.add({ title: 'Analysis failed', description: data.status_msg, color: 'error' })
+        showAnalysisStatus('error', 'Analysis failed', data.status_msg)
         return
       }
     } catch (e) {
-      // Continue polling
     }
   }
   formError.value = 'Polling timeout'
-  toast.add({ title: 'Polling timeout', color: 'error' })
+  showAnalysisStatus('error', 'Polling timeout')
 }
 
 function navigateToJob() {

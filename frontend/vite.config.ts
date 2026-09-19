@@ -4,7 +4,18 @@ import tailwindcss from '@tailwindcss/vite'
 import nuxtUI from '@nuxt/ui/vite'
 
 export default defineConfig({
-  plugins: [nuxtUI(), vue(), tailwindcss()],
+  plugins: [
+    nuxtUI({
+      ui: {
+        colors: {
+          primary: 'purple',
+          neutral: 'slate'
+        }
+      }
+    }),
+    vue(),
+    tailwindcss()
+  ],
   build: { rollupOptions: { output: { manualChunks: { echarts: ['echarts/core', 'vue-echarts'], vue: ['vue', 'vue-router', 'pinia'] } } } },
   server: {
     host: '127.0.0.1',
@@ -24,6 +35,15 @@ export default defineConfig({
       '/trades': {
         target: 'http://localhost:8088',
         changeOrigin: true
+      },
+      // RPC API Server (live trading + analysis endpoints)
+      '/api/rpc': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/api\/rpc/, ''),
+        timeout: 120000,
+        proxyTimeout: 120000
       }
     }
   }

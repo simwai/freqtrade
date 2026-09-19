@@ -14,6 +14,8 @@
       </div>
     </div>
 
+    <InlineStatus v-if="drillStatus" :type="drillStatus.type" :title="drillStatus.title" :message="drillStatus.message" duration="5000" />
+
     <div v-if="store.loading" class="card">
       <div class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
@@ -129,10 +131,18 @@ import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 import { ratioClass } from '../utils/pills'
 import { useUrlState } from '../composables/useUrlState'
+import InlineStatus from '../components/InlineStatus.vue'
 const router = useRouter()
 
 const store = useDashboardStore()
-const toast = useToast()
+
+// Inline status state (replaces toast)
+const drillStatus = ref<{ type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string } | null>(null)
+
+function showDrillStatus(type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) {
+  drillStatus.value = { type, title, message }
+  setTimeout(() => { drillStatus.value = null }, 5000)
+}
 const q = useUrlState({ key: 'q', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const selected = ref('')
 const detail = ref(null as any)
@@ -230,7 +240,7 @@ async function drill(source: string) {
     }
     const { data } = await api.get('/api/walkforward', { params: { source: source } })
     const wrows = data.rows || []
-    if (!wrows.length) { detail.value = null; toast.add({ title: 'Walk-forward detail empty', description: 'No windows returned for this run.', color: 'warning', duration: 3000 }); return }
+    if (!wrows.length) { detail.value = null; showDrillStatus('warning', 'Walk-forward detail empty', 'No windows returned for this run.'); return }
     detail.value = { r: wrows[0], wins: wrows[0].windows || [] }
   } catch (e) {
     detail.value = null

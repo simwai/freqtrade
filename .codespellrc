@@ -1,0 +1,3 @@
+﻿[main]
+skip = build/, .playwright-mcp/, package-lock.json, pnpm-lock.yaml
+ignore-words = BenchIn, addInd

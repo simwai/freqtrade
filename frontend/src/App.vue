@@ -9,7 +9,6 @@
         </div>
         <span v-if="stale" class="text-text-faint text-xs">Stale</span>
         <span v-else-if="builtAt" class="text-text-faint text-xs">built {{ builtAt }}</span>
-        <JobsModal />
         <UButton color="neutral" variant="ghost" size="sm" @click="manualRefresh">Refresh</UButton>
       </header>
 
@@ -33,6 +32,9 @@
           <component :is="Component" />
         </router-view>
       </main>
+
+      <!-- Jobs Modal Trigger (fixed top-right via component CSS) -->
+      <JobsModal />
     </div>
   </UApp>
 </template>

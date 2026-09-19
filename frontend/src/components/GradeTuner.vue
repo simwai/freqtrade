@@ -36,23 +36,29 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useDashboardStore } from '../stores/dashboard'
+import { ref, onMounted, watch } from 'vue'
+import { useStrategiesStore } from '../stores/strategies'
+import { useStrategyDetailStore } from '../stores/strategyDetail'
 import { activeGradeFactors, saveGradeFactors, scoreRowTuned } from '../utils/grades'
-defineProps<{ minProfit: number, minTrades: number }>()
-const emit = defineEmits<{ (e: 'update:minProfit', v: number): void, (e: 'update:minTrades', v: number): void }>()
-const store = useDashboardStore()
+defineProps<{ minProfit: number, minTrades: number, scorecard?: Record<string, any>, canonical?: any[], backtests?: any[], benchmarks?: any[] }>()
+const emit = defineEmits<{ (e: 'update:minProfit', v: number): void, (e: 'update:minTrades', v: number): void, (e: 'retune'): void }>()
+const strategiesStore = useStrategiesStore()
+const strategyDetailStore = useStrategyDetailStore()
 const factors = ref<Record<string, any>>({})
 const err = ref('')
 const open = ref(true)
 
 function loadFactors() {
-  factors.value = activeGradeFactors(store.scorecard || {})
+  const sc = props.scorecard || strategiesStore.scorecard || strategyDetailStore.scorecard || {}
+  factors.value = activeGradeFactors(sc)
 }
 function retune() {
-  const sc = activeGradeFactors(store.scorecard || {})
-  store.backtests.concat(store.benchmarks).forEach((r: any) => { r.score = scoreRowTuned(r, sc) })
-  store.canonical.forEach((r: any) => { r.score = scoreRowTuned(r, sc) })
+  const sc = activeGradeFactors(props.scorecard || strategiesStore.scorecard || strategyDetailStore.scorecard || {})
+  const canonical = props.canonical || strategiesStore.items || []
+  const backtests = props.backtests || strategyDetailStore.backtests || []
+  const benchmarks = props.benchmarks || strategyDetailStore.benchmarks || []
+  canonical.concat(backtests).concat(benchmarks).forEach((r: any) => { r.score = scoreRowTuned(r, sc) })
+  emit('retune')
 }
 function apply() {
   for (const k of Object.keys(factors.value)) {
@@ -73,6 +79,9 @@ function resetFactors() {
   retune()
 }
 onMounted(loadFactors)
+watch(() => props.scorecard, loadFactors, { immediate: false })
+watch(() => strategiesStore.scorecard, loadFactors, { immediate: false })
+watch(() => strategyDetailStore.scorecard, loadFactors, { immediate: false })
 </script>
 
 <style scoped>

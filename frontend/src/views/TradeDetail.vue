@@ -93,10 +93,15 @@
 
       <div class="card">
         <div class="section-head">
-          <h3>Trades {{ trades.length }}</h3>
+          <h3>Trades {{ tradesStore.total }}</h3>
           <div class="controls">
             <UInput v-model="tradeFilter" placeholder="Filter trades..." size="sm" class="filter-input" />
             <ColumnToggle :columns="tradeColumns" :visibility="tradeVisibility" @update:visibility="tradeVisibility = $event" />
+            <div class="pagination flex gap-2 ml-auto">
+              <UButton size="sm" variant="outline" :disabled="tradesStore.offset === 0" @click="tradesStore.prevPage">Previous</UButton>
+              <span class="text-text-dim text-sm self-center">Page {{ Math.floor(tradesStore.offset / tradesStore.limit) + 1 }} of {{ Math.ceil(tradesStore.total / tradesStore.limit) }}</span>
+              <UButton size="sm" variant="outline" :disabled="tradesStore.offset + tradesStore.limit >= tradesStore.total" @click="tradesStore.nextPage">Next</UButton>
+            </div>
           </div>
         </div>
         <UTable
@@ -156,7 +161,8 @@ import { BarChart, LineChart, ScatterChart, CandlestickChart, CustomChart } from
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent } from 'echarts/components'
 
 echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, CustomChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategyDetailStore } from '../stores/strategyDetail'
+import { useTradesStore } from '../stores/trades'
 import { api } from '../api/client'
 import type { ECOption2 } from '../utils/echarts'
 import '../utils/echarts'
@@ -169,13 +175,14 @@ import {
 import type { CompactTrade } from '../utils/trades'
 
 const route = useRoute()
-const store = useDashboardStore()
+const store = useStrategyDetailStore()
+const tradesStore = useTradesStore()
 const key = route.params.key as string
 const loading = ref(true)
 const error = ref('')
 const strategy = ref('')
 const source = ref('')
-const trades = ref([] as CompactTrade[])
+// trades now comes from tradesStore
 const pair = ref('')
 const reason = ref('all')
 const tf = ref('5m')
@@ -255,13 +262,13 @@ const mapHeight = computed(() => 420 + paneInds.value.length * 120)
 
 const pairs = computed(() => {
   const m: Record<string, number> = {}
-  trades.value.forEach((t) => { m[t.p] = (m[t.p] || 0) + 1 })
+  tradesStore.items.forEach((t: any) => { m[t.p] = (m[t.p] || 0) + 1 })
   return Object.keys(m).sort((a, b) => m[b] - m[a])
 })
 
-const reasons = computed(() => Array.from(new Set(trades.value.filter((t) => !pair.value || t.p === pair.value).map((t) => t.e || 'unknown'))))
+const reasons = computed(() => Array.from(new Set(tradesStore.items.filter((t) => !pair.value || t.p === pair.value).map((t) => t.e || 'unknown'))))
 
-const shown = computed(() => trades.value.filter((t) => {
+const shown = computed(() => tradesStore.items.filter((t) => {
   if (pair.value && t.p !== pair.value) return false
   if (reason.value !== 'all' && (t.e || 'unknown') !== reason.value) return false
   return t.o && t.c && t.or != null && t.cr != null
@@ -283,14 +290,24 @@ function chartInst(): any {
 async function load() {
   loading.value = true
   try {
-    await store.fetchAll()
-    const { data } = await api.get('/trades/' + key + '.json')
-    strategy.value = data.strategy || ''
-    source.value = data.source || ''
-    trades.value = data.trades || []
+    // First load the trade run to get strategy name
+    await tradesStore.load(key)
+    strategy.value = tradesStore.key.split('__')[0] || ''
+
+    // Load strategy detail for backtests/benchmarks
+    await store.load(strategy.value)
+
+    // Get trades from the store
+    const tradesData = tradesStore.items
+
+    // Find runRow for timeframe/mode
     const runRow = store.backtests.find((r: any) => r.strategy === strategy.value) || store.benchmarks.find((r: any) => r.strategy === strategy.value)
     if (runRow) { tf.value = runRow.timeframe || '5m'; mode.value = runRow.trading_mode || '' }
-    if (!pair.value && pairs.value.length) pair.value = pairs.value[0]
+
+    // Set pair
+    const pairsData = [...new Set(tradesData.map((t: any) => t.p))]
+    if (!pair.value && pairsData.length) pair.value = pairsData[0]
+
     dropAllInds()
     await loadCandles()
     await loadRoi()
@@ -792,9 +809,9 @@ const tlOption = computed((): any => {
 })
 
 const equityOption = computed((): ECOption2 => {
-  const chrono = trades.value.filter((t) => t && t.c).sort((a, b) => String(a.c).localeCompare(String(b.c)))
+  const chrono = tradesStore.items.filter((t: any) => t && t.c).sort((a, b) => String(a.c).localeCompare(String(b.c)))
   let cum = 0
-  const points = chrono.map((t) => { cum += (t.pa || 0); return [t.c, Math.round(cum * 100) / 100] })
+  const points = chrono.map((t: any) => { cum += (t.pa || 0); return [t.c, Math.round(cum * 100) / 100] })
   return {
     grid: { left: 70, right: 20, top: 30, bottom: 40 },
     xAxis: { type: 'category', axisLabel: { color: '#a89fc4' }, axisLine: { lineStyle: { color: '#2f2745' } } },
@@ -805,14 +822,14 @@ const equityOption = computed((): ECOption2 => {
 })
 
 const histOption = computed((): ECOption2 => {
-  const profits = trades.value.map((t) => t.pr).filter((v) => v !== null && v !== undefined)
+  const profits = tradesStore.items.map((t: any) => t.pr).filter((v: any) => v !== null && v !== undefined)
   if (!profits.length) return { series: [] }
   const min = Math.min(...profits)
   const max = Math.max(...profits)
   const bins = 40
   const width = (max - min) || 1
   const counts = new Array(bins).fill(0)
-  profits.forEach((v) => { let i = Math.floor((v - min) / width * bins); if (i === bins) i = bins - 1; counts[i]++ })
+  profits.forEach((v: any) => { let i = Math.floor((v - min) / width * bins); if (i === bins) i = bins - 1; counts[i]++ })
   const labels = counts.map((_, i) => { const lo = min + i * width / bins, hi = lo + width / bins; return (((lo + hi) / 2 * 100).toFixed(1) + '%') })
   return {
     grid: { left: 50, right: 16, top: 30, bottom: 40 },
@@ -873,4 +890,3 @@ onUnmounted(() => {
 .empty-banner { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 12px; margin-bottom: 8px; }
 .empty-banner code { font-family: monospace; }
 </style>
-

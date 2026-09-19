@@ -16,15 +16,15 @@
         <span class="ml-3 text-muted">Loading strategy...</span>
       </div>
     </div>
-    <div v-else-if="store.error" class="card" style="color: var(--bad);">
-      <div class="flex items-center gap-3">
-        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
-        <div>
-          <p class="font-medium">{{ store.error }}</p>
-          <UButton size="sm" variant="outline" @click="store.fetchAll(true)">Retry</UButton>
-        </div>
-      </div>
+<div v-else-if="store.error" class="card" style="color: var(--bad);">
+  <div class="flex items-center gap-3">
+    <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+    <div>
+      <p class="font-medium">{{ store.error }}</p>
+      <UButton size="sm" variant="outline" @click="store.load(name)">Retry</UButton>
     </div>
+  </div>
+</div>
     <div v-else-if="!strategy.strategy" class="card">Unknown strategy {{ name }}</div>
     <div v-else>
       <div class="card">
@@ -236,6 +236,8 @@
         <h3>Code</h3>
         <div class="code-header">
           <button v-on:click="loadCode" class="btn-secondary">Load code</button>
+          <router-link :to="'/analysis/recursive'"><UButton variant="outline" size="sm">Run Recursive Analysis</UButton></router-link>
+          <router-link :to="'/analysis/lookahead'"><UButton variant="outline" size="sm">Run Lookahead Analysis</UButton></router-link>
         </div>
         <pre class="code-block">{{ codeText || 'Click Load code to fetch strategy source' }}</pre>
       </div>
@@ -279,7 +281,8 @@ import { BarChart, LineChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, GridComponent } from 'echarts/components'
 
 echarts.use([CanvasRenderer, BarChart, LineChart, TitleComponent, TooltipComponent, GridComponent])
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategyDetailStore } from '../stores/strategyDetail'
+import { useTradesStore } from '../stores/trades'
 import { api } from '../api/client'
 import StrategyDrawer from '../components/StrategyDrawer.vue'
 import type { ECOption } from '../utils/echarts'
@@ -288,7 +291,8 @@ import { useUrlState } from '../composables/useUrlState'
 import type { CompactTrade } from '../utils/trades'
 
 const route = useRoute()
-const store = useDashboardStore()
+const store = useStrategyDetailStore()
+const tradesStore = useTradesStore()
 const name = route.params.name as string
 const codeText = ref('')
 const trades = ref([] as CompactTrade[])
@@ -311,7 +315,7 @@ onMounted(() => {
   }
 })
 
-const strategy = computed(() => store.canonical.find((s: any) => s.strategy === name) || { strategy: name, score: { grade: '?', grades: {} } })
+const strategy = computed(() => store.canonical || { strategy: name, score: { grade: '?', grades: {} } })
 const runs = computed(() => store.backtests.filter((b: any) => b.strategy === name).sort((a: any, b: any) => (b.run_time || '').localeCompare(a.run_time || '')))
 const runsFilter = useUrlState({ key: 'runs', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const runsSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'run_time', desc: true }])
@@ -565,12 +569,12 @@ function codeBadgeTitle() {
 }
 
 onMounted(async () => {
-  await store.fetchAll()
-  const first = store.trade_runs.find((r: any) => r.strategy === name)
+  await store.load(name)
+  const first = store.tradeRuns.find((r: any) => r.strategy === name)
   if (first) {
     try {
-      const { data } = await api.get('/trades/' + first.key + '.json')
-      trades.value = data.trades || []
+      await tradesStore.load(first.key)
+      trades.value = tradesStore.items
     } catch (e) { trades.value = [] }
   }
 })
@@ -594,4 +598,3 @@ onMounted(async () => {
 .rec-row { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
 .code-block { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; overflow: auto; max-height: 300px; font-size: 11px; white-space: pre-wrap; }
 </style>
-

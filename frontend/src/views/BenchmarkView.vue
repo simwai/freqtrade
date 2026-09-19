@@ -22,13 +22,13 @@
     <div v-else class="card">
       <div class="controls">
         <UFormField name="metric" label="Metric">
-          <USelect v-model="metric" :options="metricOptions" />
+          <USelect v-model="metric" :options="metricOptions" teleport-to="body" />
         </UFormField>
         <UFormField name="sourceMode" label="Source">
-          <USelect v-model="sourceMode" :options="sourceOptions" />
+          <USelect v-model="sourceMode" :options="sourceOptions" teleport-to="body" />
         </UFormField>
         <UFormField name="sortMode" label="Sort by">
-          <USelect v-model="sortMode" :options="sortOptions" />
+          <USelect v-model="sortMode" :options="sortOptions" teleport-to="body" />
         </UFormField>
         <UCheckbox v-model="useLog" label="Log scale" />
         <UCheckbox v-model="showPoints" label="Show every run" />

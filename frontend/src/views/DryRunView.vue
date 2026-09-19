@@ -4,6 +4,8 @@
       <h2>Dry Run</h2>
     </div>
 
+    <InlineStatus v-if="dryrunStatus" :type="dryrunStatus.type" :title="dryrunStatus.title" :message="dryrunStatus.message" :duration="5000" />
+
     <div v-if="loading" class="card">
       <div class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
@@ -74,9 +76,17 @@ import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
 import * as z from 'zod'
 import { api } from '../api/client'
 import { useConfirmDialog } from '../composables/useConfirmDialog'
+import InlineStatus from '../components/InlineStatus.vue'
 
-const toast = useToast()
 const { confirm } = useConfirmDialog()
+
+// Inline status state (replaces toast)
+const dryrunStatus = ref<{ type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string } | null>(null)
+
+function showDryrunStatus(type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) {
+  dryrunStatus.value = { type, title, message }
+  setTimeout(() => { dryrunStatus.value = null }, 5000)
+}
 const loading = ref(true)
 const loadError = ref('')
 const dryrun = ref<any>({ active: false, dryrun: null, all: [] })
@@ -156,15 +166,15 @@ async function startDryrun() {
   if (formState.dryrunConfig) body.config = formState.dryrunConfig
   try {
     await api.post('/api/dryrun', body)
-    toast.add({ title: 'Dry run started', description: formState.strategy, color: 'success', duration: 3000 })
+    showDryrunStatus('success', 'Dry run started', formState.strategy)
     await loadStatus()
   } catch (e) {
-    // error suppressed
+    showDryrunStatus('error', 'Failed to start dry run')
   }
 }
 
 function onDryrunError() {
-  toast.add({ title: 'Check the form', description: 'Fix the highlighted fields and try again.', color: 'warning', duration: 3000 })
+  showDryrunStatus('warning', 'Check the form', 'Fix the highlighted fields and try again.')
 }
 
 async function stopDryrun() {
@@ -175,34 +185,33 @@ async function stopDryrun() {
     color: 'error'
   })
   if (!confirmed) return
-  // Use the active dryrun's ID, not the form's strategy selection
   const activeDryrun = dryrun.value?.dryrun
   const dryrunId = activeDryrun?.dryrun_id || activeDryrun?.id
   if (!dryrunId) {
-    toast.add({ title: 'No active dry run', description: 'Cannot stop: no dry run ID found.', color: 'warning', duration: 3000 })
+    showDryrunStatus('warning', 'No active dry run', 'Cannot stop: no dry run ID found.')
     return
   }
   try {
     await api.post('/api/dryrun/stop', { dryrun_id: dryrunId })
-    toast.add({ title: 'Dry run stopped', description: '', color: 'success', duration: 3000 })
+    showDryrunStatus('success', 'Dry run stopped')
     await loadStatus()
   } catch (e) {
-    // error suppressed
+    showDryrunStatus('error', 'Failed to stop dry run')
   }
 }
 
 async function openGate() {
   if (!formState.strategy) {
-    toast.add({ title: 'Pick a strategy first', description: '', color: 'warning', duration: 3000 })
+    showDryrunStatus('warning', 'Pick a strategy first')
     return
   }
   const body: any = { strategy: formState.strategy, timerange: formState.timerange, timeframe: formState.timeframe }
   if (formState.dryrunConfig) body.config = formState.dryrunConfig
   try {
     await api.post('/api/dryrun/gate', body)
-    toast.add({ title: 'Gate opened', description: formState.strategy, color: 'success', duration: 3000 })
+    showDryrunStatus('success', 'Gate opened', formState.strategy)
   } catch (e) {
-    // error suppressed
+    showDryrunStatus('error', 'Failed to open gate')
   }
 }
 

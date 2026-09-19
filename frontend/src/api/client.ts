@@ -1,5 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8088'
-const TIMEOUT_MS = 120000
+const TIMEOUT_MS = 300000
 async function request(path: string, init: any = {}): Promise<any> {
   const params = init.params || {}
   let url = path

@@ -1,18 +1,18 @@
 <template>
-  <section>
-    <div class="section-head">
-      <h2>History</h2>
+  <section class="flex flex-col gap-4 min-w-0">
+    <div class="section-head flex items-baseline justify-between gap-3 flex-wrap">
+      <h2 class="text-lg font-semibold text-lavender">History</h2>
     </div>
 
-    <div v-if="store.loading" class="card">
+    <div v-if="store.loading" class="card p-4.5">
       <div class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
-        <span class="ml-3 text-muted">Loading history...</span>
+        <span class="ml-3 text-text-dim">Loading history...</span>
       </div>
     </div>
-    <div v-else-if="store.error" class="card" style="color: var(--bad);">
+    <div v-else-if="store.error" class="card p-4.5" style="color: var(--color-bad);">
       <div class="flex items-center gap-3">
-        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+        <UIcon name="i-lucide-alert-circle" class="text-bad" size="20" />
         <div>
           <p class="font-medium">{{ store.error }}</p>
           <UButton size="sm" variant="outline" @click="refreshData">Retry</UButton>
@@ -20,16 +20,16 @@
       </div>
     </div>
     <div v-else>
-      <div class="card filters">
-        <div class="strategy-picker">
-          <span class="filter-label">Strategies</span>
-          <UInput v-model="strategySearch" placeholder="Search strategies..." size="sm" class="picker-search" />
-          <div class="btn-row">
+      <div class="card filters p-4">
+        <div class="strategy-picker flex flex-col gap-2 min-w-[240px] max-w-[340px]">
+          <span class="filter-label text-text-dim text-sm">Strategies</span>
+          <UInput v-model="strategySearch" placeholder="Search strategies..." size="sm" class="w-full" />
+          <div class="btn-row flex gap-2">
             <UButton size="xs" variant="ghost" @click="selectAll">Select all</UButton>
             <UButton size="xs" variant="ghost" @click="selectTop">Top 8</UButton>
             <UButton size="xs" variant="ghost" @click="clearAll">Clear</UButton>
           </div>
-          <div class="picker-list">
+          <div class="picker-list flex flex-col gap-1.5 max-h-[220px] overflow-y-auto p-1">
             <UCheckbox
               v-for="name in visibleNames"
               :key="name"
@@ -37,24 +37,27 @@
               :model-value="selected.includes(name)"
               @update:model-value="toggleName(name, $event === true)"
             />
-            <p v-if="!visibleNames.length" class="hint">No strategies match the search.</p>
+            <p v-if="!visibleNames.length" class="hint text-text-faint text-sm">No strategies match the search.</p>
           </div>
-          <span class="hint">{{ selected.length }} selected</span>
+          <span class="hint text-text-faint text-sm">{{ selected.length }} selected</span>
         </div>
-        <UFormField name="metric2" label="Second metric">
-          <USelect v-model="metric2" :options="metric2Options" @change="persistMetric2" class="filter-select" />
+        <UFormField name="metric2" label="Second metric" class="flex-1 min-w-[200px]">
+          <USelect v-model="metric2" :options="metric2Options" @update:model-value="persistMetric2" class="w-full" />
         </UFormField>
         <UCheckbox v-model="useLog" label="Log scale" />
       </div>
 
-      <p v-if="!picked.length" class="hint">No history to chart. Strategies need at least two backtest runs.</p>
-      <div class="hist-grid">
+      <p v-if="!picked.length" class="hint text-text-faint text-sm">No history to chart. Strategies need at least two backtest runs.</p>
+      <div class="hist-grid grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));">
         <div v-for="name in picked" :key="name" class="chart-box">
-          <div class="section-head" style="margin-bottom:4px">
+          <div class="section-head flex items-baseline justify-between gap-2 mb-1">
             <b>{{ name }}</b>
-            <span class="hint">{{ seriesOf(name).dates.length }} runs</span>
+            <span class="hint text-text-faint text-sm">{{ seriesOf(name).dates.length }} runs</span>
           </div>
-          <VChart :option="optionFor(name)" autoresize class="chart" style="height: 260px" />
+          <div v-if="seriesOf(name).dates.length">
+            <VChart :option="optionFor(name)" :key="historyRefreshKey" autoresize class="chart" style="aspect-ratio: 16/9; min-height: 200px;" />
+          </div>
+          <div v-else class="hint text-text-faint text-sm" style="padding: 20px; text-align: center;">No history data for this strategy</div>
         </div>
       </div>
     </div>
@@ -78,6 +81,7 @@ const store = useDashboardStore()
 const selected = useUrlState<string[]>({ key: 'sel', defaultValue: [], parse: (v) => (v ? v.split(',') : []), serialize: (v) => v.join(',') })
 const useLog = ref(false)
 const strategySearch = ref('')
+const historyRefreshKey = ref(0)
 
 const metrics2: Record<string, { label: string, pct: boolean }> = {
   sortino: { label: 'Sortino', pct: false },
@@ -123,6 +127,7 @@ const picked = computed(() => selected.value.filter((v) => !v.startsWith('__')))
 
 function refreshData() {
   store.fetchAll(true)
+  historyRefreshKey.value++
 }
 
 function seriesOf(name: string) {
@@ -141,6 +146,16 @@ function fmtM2(v: number) {
 
 function optionFor(name: string): ECOption {
   const h = seriesOf(name)
+  // Return minimal valid option if no data
+  if (!h.dates.length) {
+    return {
+      backgroundColor: 'transparent',
+      title: { text: 'No data', left: 'center', textStyle: { color: '#a89fc4' } },
+      xAxis: { type: 'time', axisLabel: { color: '#a89fc4' } },
+      yAxis: { type: 'value', axisLabel: { color: '#a89fc4' } },
+      series: [{ type: 'line', data: [] }]
+    }
+  }
   const m = metrics2[metric2.value]
   const byD = (p: any[], q: any[]) => String(p[0]).localeCompare(String(q[0]))
   const profit = h.dates.map((d: string, j: number) => {
@@ -181,36 +196,45 @@ function clearAll() { selected.value = [] }
 
 onMounted(async () => {
   await store.fetchAll()
+  historyRefreshKey.value++
   if (!selected.value.length && names.value.length) selected.value = [names.value[0]]
 })
 </script>
 
 <style scoped>
-.strategy-picker { display: flex; flex-direction: column; gap: 8px; min-width: 240px; max-width: 340px; }
-.picker-search { width: 100%; }
-.picker-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; padding: 4px 2px; }
-.filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
-.filter-label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-dim); }
+.strategy-picker { min-width: 15rem; max-width: 21.25rem; }
+.filters { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem; }
+.filter-label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.75rem; color: var(--color-text-dim); }
 .filter-select {
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 6px 10px;
-  color: var(--text);
+  color: var(--color-text);
   font-size: 13px;
-  min-width: 200px;
+  min-width: 12.5rem;
 }
 .filter-input {
-  flex: 1; min-width: 180px;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  flex: 1; min-width: 11.25rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 6px 10px;
-  color: var(--text);
+  color: var(--color-text);
   font-size: 13px;
 }
-.btn-row { display: flex; gap: 8px; }
-.check { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-dim); }
-.hint { color: var(--text-faint); font-size: 12px; }
-.hist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; }
+.btn-row { display: flex; gap: 0.5rem; }
+.check { display: flex; gap: 0.375rem; align-items: center; font-size: 0.75rem; color: var(--color-text-dim); }
+.hint { color: var(--color-text-faint); font-size: 0.75rem; }
+.hist-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(26.25rem, 1fr)); }
+
+@media (max-width: 768px) {
+  .hist-grid { grid-template-columns: 1fr; }
+  .strategy-picker { max-width: 100%; min-width: 0; }
+  .filter-select { min-width: 100%; }
+  .filter-input { min-width: 100%; }
+}
+@media (max-width: 480px) {
+  .picker-list { max-height: 11.25rem; }
+}
 </style>

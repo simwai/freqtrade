@@ -14,7 +14,15 @@
       </div>
     </div>
 
-    <GradeTuner v-model:min-profit="minProfit" v-model:min-trades="minTrades" />
+    <GradeTuner
+  v-model:min-profit="minProfit"
+  v-model:min-trades="minTrades"
+  :scorecard="store.scorecard"
+  :canonical="store.items"
+  :backtests="store.backtests"
+  :benchmarks="store.benchmarks"
+  @retune="refreshData"
+/>
 
     <div v-if="store.loading" class="card">
       <div class="flex items-center justify-center py-12">
@@ -50,23 +58,23 @@
         <template #strategy-cell="{ row }">
           <div class="flex items-center gap-2">
             <span>{{ (row.original as any).strategy }}</span>
-            <span :class="statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
+            <span :class="format.statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
           </div>
         </template>
         <template #["score.grade-cell"]="{ row }">
-          <span :class="gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade || '?' }}</span>
+          <span :class="format.gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade || '?' }}</span>
         </template>
         <template #profit_total-cell="{ row }">
-          <span class="num" :class="profitClass((row.original as any).profit_total)">{{ fmtProfitPct((row.original as any).profit_total) }}</span>
+          <span class="num" :class="format.profitClass((row.original as any).profit_total)">{{ format.fmtProfitPct((row.original as any).profit_total) }}</span>
         </template>
         <template #propPass-cell="{ row }">
-          <span class="num"><span :class="propClass(row.original)" :title="propTitle(row.original)">{{ propText(row.original) }}</span></span>
+          <span class="num"><span :class="format.propClass(row.original)" :title="format.propTitle(row.original, store.propSpec)">{{ format.propText(row.original) }}</span></span>
         </template>
         <template #basis-cell="{ row }">
-          <span :title="basisTooltip(row.original)">{{ basisLabel(row.original) }}</span>
+          <span :title="format.basisTooltip(row.original)">{{ format.basisLabel(row.original) }}</span>
         </template>
         <template #timerange-cell="{ row }">
-          <span style="font-size:12px;color:var(--text-dim)">{{ fmtRange((row.original as any).timerange) }}</span>
+          <span style="font-size:12px;color:var(--text-dim)">{{ format.fmtRange((row.original as any).timerange) }}</span>
         </template>
         <template #run_time-cell="{ row }">
           <span>{{ ((row.original as any).run_time || '').slice(0, 10) }}</span>
@@ -81,11 +89,11 @@
 
     <div class="charts">
       <div class="chart-box">
-        <VChart :option="profitOption" autoresize class="chart" style="height: 300px" />
+        <VChart :option="profitOption" autoresize class="chart" style="aspect-ratio: 16/9; min-height: 200px;" />
       </div>
       <div class="chart-box">
         <USelect v-model="metric2" :options="metric2Options" class="metric-select" />
-        <VChart :option="metric2Option" autoresize class="chart" style="height: 300px" />
+        <VChart :option="metric2Option" autoresize class="chart" style="aspect-ratio: 16/9; min-height: 200px;" />
       </div>
     </div>
 
@@ -108,7 +116,7 @@
           empty="No data"
         >
           <template #profit_total-cell="{ row }">
-            <span class="num">{{ fmtNum((row.original as any).profit_total) }}</span>
+            <span class="num">{{ format.fmt((row.original as any).profit_total, 2) }}</span>
           </template>
         </UTable>
       </div>
@@ -123,7 +131,7 @@
           empty="No data"
         >
           <template #profit_total-cell="{ row }">
-            <span class="num">{{ fmtNum((row.original as any).profit_total) }}</span>
+            <span class="num">{{ format.fmt((row.original as any).profit_total, 2) }}</span>
           </template>
         </UTable>
       </div>
@@ -132,6 +140,7 @@
     <StrategyDrawer v-if="selected" :name="selected" @close="selected = ''" />
   </section>
 </template>
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
@@ -141,6 +150,7 @@ import { BarChart, LineChart, ScatterChart, CandlestickChart } from 'echarts/cha
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent } from 'echarts/components'
 
 echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
+
 import { useDashboardStore } from '../stores/dashboard'
 import GradeTuner from '../components/GradeTuner.vue'
 import StrategyDrawer from '../components/StrategyDrawer.vue'
@@ -148,8 +158,10 @@ import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 import { useUrlState } from '../composables/useUrlState'
 import { sortableHeader } from '../utils/table'
+import { useStrategyFormat } from '../composables/useStrategyFormat'
 
 const store = useDashboardStore()
+const format = useStrategyFormat()
 const minProfit = ref(0)
 const minTrades = ref(0)
 const selected = ref('')
@@ -169,7 +181,7 @@ const columns = [
   { accessorKey: 'calmar', header: sortableHeader('Calmar'), size: 90 },
   { accessorKey: 'profit_factor', header: sortableHeader('PF'), size: 90 },
   { accessorKey: 'max_drawdown_account', header: sortableHeader('MaxDD'), size: 90 },
-  { accessorKey: 'propPass', accessorFn: (r: any) => propPassCount(r), header: sortableHeader('Prop'), size: 90 },
+  { accessorKey: 'propPass', accessorFn: (r: any) => format.propPassCount(r), header: sortableHeader('Prop'), size: 90 },
   { accessorKey: 'winrate', header: sortableHeader('Win%'), size: 90 },
   { accessorKey: 'total_trades', header: sortableHeader('Trades'), size: 90 },
   { accessorKey: 'basis', header: sortableHeader('Basis'), size: 120 },
@@ -239,82 +251,13 @@ const improveNext = computed(() => {
 })
 
 function openStrategy(name: string) { selected.value = name }
-function gradePill(g: string) {
-  if (!g || g === '—') return 'pill gna'
-  if (g === 'A') return 'pill gA'
-  if (g === 'B') return 'pill gB'
-  if (g === 'C') return 'pill gC'
-  if (g === 'D') return 'pill gD'
-  if (g === 'F') return 'pill gF'
-  return 'pill gna'
-}
-function profitClass(v: number) { if (!v) return ''; return v > 0 ? 'good' : v < 0 ? 'bad' : '' }
-function fmt(v: any, d = 3) {
-  if (v === null || v === undefined || v === '') return '—'
-  const n = Number(v)
-  if (!isFinite(n)) return '—'
-  return n.toLocaleString('en-US', { maximumFractionDigits: d })
-}
-function fmtNum(v: number) { return fmt(v, 2) }
-function fmtProfitPct(v: number) { return v === null || v === undefined ? '—' : ((v || 0) * 100).toFixed(1) + '%' }
-function statusClass(s: string) {
-  if (!s) return 'status'
-  const sl = s.toLowerCase()
-  if (sl === 'active') return 'status active'
-  if (sl === 'experimental') return 'status experimental'
-  if (sl === 'retired') return 'status retired'
-  return 'status'
-}
-function fmtRange(tr: string) {
-  if (!tr) return '—'
-  const p = String(tr).split('-')
-  const d = (s: string) => (s && s.length === 8) ? s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8) : (s || '?')
-  return d(p[0]) + ' → ' + (p[1] ? d(p[1]) : 'live')
-}
-function basisLabel(r: any) {
-  if (r.basis === 'registry') return 'no runs yet'
-  return r.basis === 'benchmark' ? 'benchmark (fallback)' : 'last backtest'
-}
-function basisTooltip(r: any) {
-  if (r.basis === 'registry') return 'registered in the strategies table; no backtest or benchmark ingested yet'
-  return 'metrics from ' + (r.basis === 'benchmark' ? 'benchmark' : 'backtest') + ' run ' + (r.source || '?') + ' · ' + (r.run_time || '?')
-}
-function propPassCount(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return -1
-  const vals = Object.values(pf) as any[]
-  if (vals.every((p: any) => p.verdict === 'na')) return -1
-  return vals.filter((p: any) => p.verdict === 'pass').length
-}
-function propText(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return '—'
-  const keys = Object.keys(pf)
-  if (!keys.some((k) => (pf as any)[k].verdict !== 'na')) return '—'
-  return keys.filter((k) => (pf as any)[k].verdict === 'pass').length + '/' + keys.length
-}
-function propTitle(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return ''
-  const keys = Object.keys(pf)
-  const failed = keys.filter((k) => (pf as any)[k].verdict === 'fail').map((k) => store.propSpec[k]?.label || k)
-  return failed.length ? 'failed: ' + failed.join(', ') : 'all programs pass'
-}
-function propClass(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return 'pill gna'
-  const keys = Object.keys(pf)
-  if (!keys.some((k) => (pf as any)[k].verdict !== 'na')) return 'pill gna'
-  const passed = keys.filter((k) => (pf as any)[k].verdict === 'pass').length
-  return passed === keys.length ? 'pill gA' : passed > 0 ? 'pill gC' : 'pill gF'
-}
 
 function refreshData() {
-  store.fetchAll(true)
+  store.fetchFullData()
 }
 
 onMounted(async () => {
-  await store.fetchAll()
+  await store.fetchFullData()
 })
 </script>
 
@@ -334,4 +277,10 @@ onMounted(async () => {
 .mini-table td.num { text-align: right; }
 .mini-table tbody tr:hover { background: var(--card-hover); cursor: pointer; }
 .mini-table tbody tr:hover td { color: var(--accent); }
+
+@media (max-width: 768px) {
+  .charts { flex-direction: column; }
+  .chart-box { width: 100%; }
+  .chart { aspect-ratio: 16/9; min-height: 200px; }
+}
 </style>

@@ -3,7 +3,7 @@
     <template #body>
       <div class="drawer-sub">
         <span v-if="runKind" class="grade-pill" :class="kindPill(runKind)">{{ runKind }}</span>
-        <span v-else class="grade-pill" :class="gradePill(strategy.score?.grade)">{{ strategy.score?.grade || '?' }}</span>
+        <span v-else class="grade-pill" :class="format.gradePill(strategy.score?.grade)">{{ strategy.score?.grade || '?' }}</span>
       </div>
       <div class="drawer-tabs">
         <button :class="{ active: tab === 'overview' }" v-on:click="tab = 'overview'">Overview</button>
@@ -30,7 +30,7 @@
         <ul class="runs-list">
           <li v-for="r in runs" :key="r.source">
             <span>{{ r.source }}</span>
-            <span class="num" :class="profitClass(r.profit_total)">{{ fmtNum(r.profit_total) }}</span>
+            <span class="num" :class="format.profitClass(r.profit_total)">{{ format.fmtNum(r.profit_total) }}</span>
           </li>
         </ul>
       </template>
@@ -90,12 +90,38 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategyDetailStore } from '../stores/strategyDetail'
 import { api } from '../api/client'
+import { useStrategyFormat } from '../composables/useStrategyFormat'
 
 const props = defineProps<{ name: string, runKind?: string, runSource?: string }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
-const store = useDashboardStore()
+const store = useStrategyDetailStore()
+const format = useStrategyFormat()
+
+// Local state for extra data fetched on demand
+const extraData = ref({
+  configs: {} as Record<string, any>,
+  snapshotFiles: {} as Record<string, any[]>,
+  snapshotCombined: {} as Record<string, string>,
+  currentCode: {} as Record<string, string>,
+  currentCodeSet: {} as Record<string, string>,
+  snapshotPaths: {} as Record<string, any>,
+})
+
+async function loadExtraData() {
+  try {
+    const { data } = await api.get('/api/data')
+    extraData.value.configs = data.configs || {}
+    extraData.value.snapshotFiles = data.snapshot_files || {}
+    extraData.value.snapshotCombined = data.snapshot_combined || {}
+    extraData.value.currentCode = data.current_code || {}
+    extraData.value.currentCodeSet = data.current_code_set || {}
+    extraData.value.snapshotPaths = data.snapshot_paths || {}
+  } catch (e) {
+    console.warn('Failed to load extra data:', e)
+  }
+}
 const tab = ref('overview')
 const codeText = ref('')
 const codeFileIdx = ref(0)
@@ -140,7 +166,7 @@ const runOverview = computed(() => {
     { k: 'Trading mode', v: r.trading_mode || '—' },
     { k: 'Profit total', v: r.profit_total != null ? (r.profit_total * 100).toFixed(1) + '%' : '—' },
     { k: 'Trades / winrate', v: (r.total_trades || 0) + ' / ' + (r.winrate != null ? (r.winrate * 100).toFixed(1) + '%' : '—') },
-    { k: 'Sortino / Calmar', v: fmt3(r.sortino) + ' / ' + fmt3(r.calmar) },
+    { k: 'Sortino / Calmar', v: format.fmt3(r.sortino) + ' / ' + format.fmt3(r.calmar) },
     { k: 'Max drawdown', v: r.max_drawdown_account != null ? (r.max_drawdown_account * 100).toFixed(1) + '%' : '—' }
   ]
   if (r.loss_function) rows.push({ k: 'Loss function', v: r.loss_function })
@@ -163,7 +189,7 @@ const configRows = computed(() => {
 const linkedConfig = computed(() => {
   const r: any = run.value
   const hash = r?.config_hash
-  const obj = hash ? store.configs[hash] : null
+  const obj = hash ? extraData.value.configs[hash] : null
   if (!hash || !obj) return null
   return { hash: hash, text: JSON.stringify(obj, null, 2) }
 })
@@ -192,7 +218,7 @@ const codeFiles = computed((): any[] => {
   const r: any = run.value || strategy.value
   const hash = r?.code_hash
   if (!hash) return []
-  return store.snapshotFiles[hash] || []
+  return extraData.value.snapshotFiles[hash] || []
 })
 
 function shortName(p: string) { return (p || '').split(/[\\/]/).pop() || p }
@@ -218,10 +244,10 @@ function codeBadgeText() {
   const r: any = run.value || strategy.value
   const hash = r?.code_hash
   if (!hash) return 'code unknown'
-  const setSnap = store.snapshotCombined[hash]
-  const setCur = store.currentCodeSet[props.name]
+  const setSnap = extraData.value.snapshotCombined[hash]
+  const setCur = extraData.value.currentCodeSet[props.name]
   if (setSnap && setCur) return setSnap === setCur ? 'code current' : 'code changed since run'
-  const cur = store.currentCode[props.name]
+  const cur = extraData.value.currentCode[props.name]
   if (!cur) return 'no .py on disk'
   return cur === hash ? 'code current' : 'code changed since run'
 }
@@ -256,18 +282,10 @@ const paramsText = computed(() => {
 onMounted(() => {
   syncSide()
   window.addEventListener('resize', syncSide)
+  loadExtraData()
 })
 onUnmounted(() => { window.removeEventListener('resize', syncSide) })
 function kindPill(k: string) { return k === 'benchmark' ? 'pill gA' : 'pill gna' }
-function gradePill(g: string) {
-  if (!g || g === '—') return 'pill gna'
-  if (g === 'A') return 'pill gA'
-  if (g === 'B') return 'pill gB'
-  if (g === 'C') return 'pill gC'
-  if (g === 'D') return 'pill gD'
-  if (g === 'F') return 'pill gF'
-  return 'pill gna'
-}
 function verdictClass(v: string) {
   if (!v) return 'status'
   const vl = v.toLowerCase()
@@ -275,21 +293,16 @@ function verdictClass(v: string) {
   if (vl.includes('fail')) return 'status retired'
   return 'status'
 }
-function fmt3(v: any) {
-  if (v === null || v === undefined || v === '') return '—'
-  return Number(v).toLocaleString('en-US', { maximumFractionDigits: 3 })
-}
-function profitClass(v: number) { if (!v) return ''; return v > 0 ? 'good' : v < 0 ? 'bad' : '' }
-function fmtNum(v: number) { return v ? v.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '—' }
 </script>
 
 <style scoped>
 .drawer-sub { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .grade-pill { font-size: 12px; font-weight: 600; }
-.drawer-tabs { display: flex; gap: 4px; padding: 8px 0; margin-bottom: 4px; }
-.drawer-tabs button { background: transparent; border: 1px solid transparent; color: var(--text-dim); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; }
+.drawer-tabs { display: flex; gap: 4px; padding: 8px 0; margin-bottom: 4px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.drawer-tabs button { background: transparent; border: 1px solid transparent; color: var(--text-dim); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; white-space: nowrap; scroll-snap-align: start; }
 .drawer-tabs button:hover { color: var(--lavender); background: var(--card-hover); }
 .drawer-tabs button.active { background: var(--lavender-ink); color: #fff; }
+.drawer-tabs::-webkit-scrollbar { display: none; }
 .drawer-content { flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .drawer-table { width: 100%; font-size: 12px; border-collapse: collapse; }
 .drawer-table td { padding: 6px 8px; border-top: 1px solid var(--border); }
@@ -312,4 +325,18 @@ function fmtNum(v: number) { return v ? v.toLocaleString(undefined, { maximumFra
 .prop-row span:first-child { color: var(--text-dim); font-size: 12px; }
 .empty-state { color: var(--text-faint); font-size: 12px; }
 .hint { color: var(--text-faint); font-size: 12px; }
+
+@media (max-width: 768px) {
+  .drawer-tabs { padding: 4px 0; }
+  .drawer-tabs button { padding: 6px 10px; font-size: 11px; }
+  .drawer-content { padding: 12px 14px; gap: 12px; }
+  .kv-row { flex-direction: column; gap: 4px; }
+  .kv-row .v { text-align: left; }
+  .code-block { max-height: 200px; font-size: 10px; }
+}
+@media (max-width: 480px) {
+  .drawer-tabs button { padding: 5px 8px; font-size: 10px; }
+  .drawer-content { padding: 10px 12px; }
+  .code-block { max-height: 180px; }
+}
 </style>

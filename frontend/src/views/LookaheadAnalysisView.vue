@@ -4,6 +4,8 @@
       <h2>Lookahead Analysis</h2>
     </div>
 
+    <InlineStatus v-if="lookaheadStatus" :type="lookaheadStatus.type" :title="lookaheadStatus.title" :message="lookaheadStatus.message" :duration="5000" />
+
     <div v-if="loadingStrategies" class="card">
       <div class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
@@ -88,10 +90,17 @@ import { api } from '../api/client'
 import { rpcApi } from '../api/rpcClient'
 import { sortableHeader } from '../utils/table'
 import type { LookaheadAnalysisResult } from '../api/schemas'
+import InlineStatus from '../components/InlineStatus.vue'
 
 const router = useRouter()
 
-const toast = useToast()
+// Inline status state (replaces toast)
+const lookaheadStatus = ref<{ type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string } | null>(null)
+
+function showLookaheadStatus(type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) {
+  lookaheadStatus.value = { type, title, message }
+  setTimeout(() => { lookaheadStatus.value = null }, 5000)
+}
 
 const loadingStrategies = ref(true)
 const strategyOptions = ref<{ label: string; value: string }[]>([])
@@ -137,7 +146,7 @@ async function loadStrategies() {
     const { data } = await api.get('/api/strategies')
     strategyOptions.value = (Array.isArray(data) ? data : []).map((s: any) => ({ label: s.name, value: s.name }))
   } catch (e) {
-    toast.add({ title: 'Failed to load strategies', color: 'error' })
+    showLookaheadStatus('error', 'Failed to load strategies')
   } finally {
     loadingStrategies.value = false
   }
@@ -156,11 +165,11 @@ async function runAnalysis() {
     })
     const { data } = await rpcApi.post('/api/lookahead_analysis', body)
     jobId.value = data.job_id
-    toast.add({ title: 'Analysis started', description: 'Job ' + data.job_id, color: 'success' })
+    showLookaheadStatus('success', 'Analysis started', 'Job ' + data.job_id)
     await pollJob(data.job_id)
   } catch (e: any) {
     formError.value = e.message || 'Failed to start analysis'
-    toast.add({ title: 'Analysis failed', color: 'error' })
+    showLookaheadStatus('error', 'Analysis failed')
   } finally {
     runningJob.value = false
   }
@@ -173,12 +182,12 @@ async function pollJob(id: string) {
       const { data } = await rpcApi.get('/api/lookahead_analysis/' + id)
       if (data.status === 'ended') {
         result.value = data.result
-        toast.add({ title: 'Analysis complete', color: 'success' })
+        showLookaheadStatus('success', 'Analysis complete')
         return
       }
       if (data.status === 'error') {
         formError.value = data.status_msg || 'Analysis failed'
-        toast.add({ title: 'Analysis failed', description: data.status_msg, color: 'error' })
+        showLookaheadStatus('error', 'Analysis failed', data.status_msg)
         return
       }
     } catch (e) {
@@ -186,7 +195,7 @@ async function pollJob(id: string) {
     }
   }
   formError.value = 'Polling timeout'
-  toast.add({ title: 'Polling timeout', color: 'error' })
+  showLookaheadStatus('error', 'Polling timeout')
 }
 
 function navigateToJob() {

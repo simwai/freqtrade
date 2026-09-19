@@ -1,10 +1,10 @@
 <template>
-  <section>
-    <div class="section-head">
-      <h2>Strategies</h2>
-      <div class="controls">
-        <UInput v-model="query" placeholder="Filter strategies..." class="filter-input" />
-        <USelect v-model="statusFilter" :options="statusOptions" class="filter-select" />
+  <section class="flex flex-col gap-4 min-w-0">
+    <div class="section-head flex items-baseline justify-between gap-3 flex-wrap">
+      <h2 class="text-lg font-semibold text-lavender">Strategies</h2>
+      <div class="controls flex gap-2.5 flex-wrap items-center">
+        <UInput v-model="query" placeholder="Filter strategies..." class="w-64" />
+        <USelect v-model="statusFilter" :options="statusOptions" class="w-40" />
         <UButton variant="ghost" size="sm" @click="resetFilters" :disabled="!query && statusFilter === 'all' && !Object.keys(columnVisibility).length">
           <template #leading>
             <UIcon name="i-lucide-rotate-ccw" />
@@ -15,15 +15,15 @@
       </div>
     </div>
 
-    <div v-if="store.loading" class="card">
+    <div v-if="store.loading" class="card p-4.5">
       <div class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
-        <span class="ml-3 text-muted">Loading strategies...</span>
+        <span class="ml-3 text-text-dim">Loading strategies...</span>
       </div>
     </div>
-    <div v-else-if="store.error" class="card" style="color: var(--bad);">
+    <div v-else-if="store.error" class="card p-4.5" style="color: var(--color-bad);">
       <div class="flex items-center gap-3">
-        <UIcon name="i-lucide-alert-circle" class="text-error" size="20" />
+        <UIcon name="i-lucide-alert-circle" class="text-bad" size="20" />
         <div>
           <p class="font-medium">{{ store.error }}</p>
           <UButton size="sm" variant="outline" @click="refreshData">Retry</UButton>
@@ -48,25 +48,25 @@
           <span>{{ (row.original as any).strategy }}</span>
         </template>
         <template #status-cell="{ row }">
-          <span :class="statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
+          <span :class="format.statusClass((row.original as any).status)">{{ (row.original as any).status }}</span>
         </template>
         <template #["score.grade-cell"]="{ row }">
-          <span :class="gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade || '?' }}</span>
+          <span :class="format.gradePill((row.original as any).score?.grade)">{{ (row.original as any).score?.grade || '?' }}</span>
         </template>
         <template #profit_total-cell="{ row }">
-          <span class="num" :class="profitClass((row.original as any).profit_total)">{{ fmtProfitPct((row.original as any).profit_total) }}</span>
+          <span class="num" :class="format.profitClass((row.original as any).profit_total)">{{ format.fmtProfitPct((row.original as any).profit_total) }}</span>
         </template>
         <template #profit_factor-cell="{ row }">
-          <span class="num">{{ pfFmt((row.original as any).profit_factor) }}</span>
+          <span class="num">{{ format.pfFmt((row.original as any).profit_factor) }}</span>
         </template>
         <template #sortino-cell="{ row }">
-          <span class="num">{{ fmt3((row.original as any).sortino) }}</span>
+          <span class="num">{{ format.fmt3((row.original as any).sortino) }}</span>
         </template>
         <template #calmar-cell="{ row }">
-          <span class="num">{{ fmt3((row.original as any).calmar) }}</span>
+          <span class="num">{{ format.fmt3((row.original as any).calmar) }}</span>
         </template>
         <template #max_drawdown_account-cell="{ row }">
-          <span class="num">{{ fmtPct((row.original as any).max_drawdown_account) }}</span>
+          <span class="num">{{ format.fmtPct((row.original as any).max_drawdown_account) }}</span>
         </template>
         <template #n_backtests-cell="{ row }">
           <span class="num">{{ (row.original as any).n_backtests }}</span>
@@ -75,13 +75,13 @@
           <span class="num">{{ (row.original as any).n_trades }}</span>
         </template>
         <template #propPass-cell="{ row }">
-          <span class="num"><span :class="propClass(row.original)" :title="propTitle(row.original)">{{ propText(row.original) }}</span></span>
+          <span class="num"><span :class="format.propClass(row.original)" :title="format.propTitle(row.original, store.propSpec)">{{ format.propText(row.original) }}</span></span>
         </template>
         <template #basis-cell="{ row }">
-          <span :title="basisTooltip(row.original)">{{ basisLabel(row.original) }}</span>
+          <span :title="format.basisTooltip(row.original)">{{ format.basisLabel(row.original) }}</span>
         </template>
         <template #timerange-cell="{ row }">
-          <span style="font-size:12px;color:var(--text-dim)">{{ fmtRange((row.original as any).timerange) }}</span>
+          <span class="text-xs text-text-dim">{{ format.fmtRange((row.original as any).timerange) }}</span>
         </template>
         <template #run_time-cell="{ row }">
           <span>{{ ((row.original as any).run_time || '').slice(0, 10) }}</span>
@@ -99,19 +99,19 @@
       </UTable>
     </div>
 
-    <div v-if="editName" class="card edit-panel">
-      <h3>Edit {{ editName }}</h3>
+    <div v-if="editName" class="card p-4 mt-4">
+      <h3 class="text-base font-semibold mb-3">Edit {{ editName }}</h3>
       <UFormField name="status" label="Status">
         <USelect v-model="editStatus" :options="statusOptions" />
       </UFormField>
-      <UFormField name="notes" label="Notes">
+      <UFormField name="notes" label="Notes" class="mt-3">
         <UInput v-model="editNotes" placeholder="notes" />
       </UFormField>
-      <div class="edit-actions">
+      <div class="edit-actions flex gap-2 mt-4">
         <UButton @click="saveEdit">Save</UButton>
         <UButton variant="outline" @click="cancelEdit">Cancel</UButton>
       </div>
-      <div v-if="editMsg" class="edit-msg">{{ editMsg }}</div>
+      <div v-if="editMsg" class="edit-msg text-good text-sm mt-2">{{ editMsg }}</div>
     </div>
 
     <StrategyDrawer v-if="selected" :name="selected" :run-kind="drawerKind" :run-source="drawerSource" @close="selected = ''" />
@@ -120,12 +120,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { sortableHeader } from '../utils/table'
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategiesStore } from '../stores/strategies'
 import { api } from '../api/client'
 import StrategyDrawer from '../components/StrategyDrawer.vue'
 import { useUrlState } from '../composables/useUrlState'
+import { useStrategyFormat } from '../composables/useStrategyFormat'
 
-const store = useDashboardStore()
+const store = useStrategiesStore()
+const format = useStrategyFormat()
+const registry = ref([] as any[])
 const selected = ref('')
 const drawerKind = ref('')
 const drawerSource = ref('')
@@ -147,8 +150,8 @@ const statusOptions = [
   { label: 'retired', value: 'retired' },
 ]
 
-const baseRows = computed(() => store.canonical.map((c: any) => {
-  const reg = store.strategies.find((r: any) => r.name === c.strategy)
+const baseRows = computed(() => store.items.map((c: any) => {
+  const reg = registry.value.find((r: any) => r.name === c.strategy)
   let nb = 0
   let nt = 0
   if (reg) {
@@ -176,7 +179,7 @@ const columns = [
   { accessorKey: 'sortino', header: sortableHeader('Sortino') },
   { accessorKey: 'calmar', header: sortableHeader('Calmar') },
   { accessorKey: 'max_drawdown_account', header: sortableHeader('MaxDD') },
-  { accessorKey: 'propPass', accessorFn: (r: any) => propPassCount(r), header: sortableHeader('Prop') },
+  { accessorKey: 'propPass', accessorFn: (r: any) => format.propPassCount(r), header: sortableHeader('Prop') },
   { accessorKey: 'n_backtests', header: sortableHeader('Backtests') },
   { accessorKey: 'n_trades', header: sortableHeader('Trades') },
   { accessorKey: 'basis', header: sortableHeader('Basis') },
@@ -205,82 +208,6 @@ function startEdit(s: any) {
   editMsg.value = ''
 }
 
-function statusClass(s: string) {
-  if (!s) return 'status'
-  const sl = s.toLowerCase()
-  if (sl === 'active') return 'status active'
-  if (sl === 'experimental') return 'status experimental'
-  if (sl === 'retired') return 'status retired'
-  return 'status'
-}
-function gradePill(g: string) {
-  if (!g || g === '—') return 'pill gna'
-  if (g === 'A') return 'pill gA'
-  if (g === 'B') return 'pill gB'
-  if (g === 'C') return 'pill gC'
-  if (g === 'D') return 'pill gD'
-  if (g === 'F') return 'pill gF'
-  return 'pill gna'
-}
-function fmt3(v: any) {
-  if (v === null || v === undefined || v === '') return '—'
-  const n = Number(v)
-  if (!isFinite(n)) return '—'
-  return n.toLocaleString('en-US', { maximumFractionDigits: 3 })
-}
-function pfFmt(v: any) {
-  if (v === null || v === undefined || v === '') return '—'
-  const n = Number(v)
-  if (n === Infinity) return '∞'
-  if (!isFinite(n)) return '—'
-  return n.toLocaleString('en-US', { maximumFractionDigits: 3 })
-}
-function fmtPct(v: number) { return v ? (v * 100).toFixed(1) + '%' : '—' }
-function fmtProfitPct(v: number) { return v === null || v === undefined ? '—' : ((v || 0) * 100).toFixed(1) + '%' }
-function basisLabel(r: any) {
-  if (r.basis === 'registry') return 'no runs yet'
-  return r.basis === 'benchmark' ? 'benchmark (fallback)' : 'last backtest'
-}
-function basisTooltip(r: any) {
-  if (r.basis === 'registry') return 'registered in the strategies table; no backtest or benchmark ingested yet'
-  return 'metrics from ' + (r.basis === 'benchmark' ? 'benchmark' : 'backtest') + ' run ' + (r.source || '?') + ' · ' + (r.run_time || '?')
-}
-function propPassCount(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return -1
-  const vals = Object.values(pf) as any[]
-  if (vals.every((p: any) => p.verdict === 'na')) return -1
-  return vals.filter((p: any) => p.verdict === 'pass').length
-}
-function propText(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return '—'
-  const keys = Object.keys(pf)
-  if (!keys.some((k) => (pf as any)[k].verdict !== 'na')) return '—'
-  return keys.filter((k) => (pf as any)[k].verdict === 'pass').length + '/' + keys.length
-}
-function propTitle(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return ''
-  const keys = Object.keys(pf)
-  const failed = keys.filter((k) => (pf as any)[k].verdict === 'fail').map((k) => store.propSpec[k]?.label || k)
-  return failed.length ? 'failed: ' + failed.join(', ') : 'all programs pass'
-}
-function propClass(r: any) {
-  const pf = r.prop_firms
-  if (!pf) return 'pill gna'
-  const keys = Object.keys(pf)
-  if (!keys.some((k) => (pf as any)[k].verdict !== 'na')) return 'pill gna'
-  const passed = keys.filter((k) => (pf as any)[k].verdict === 'pass').length
-  return passed === keys.length ? 'pill gA' : passed > 0 ? 'pill gC' : 'pill gF'
-}
-function profitClass(v: number) { if (!v) return ''; return v > 0 ? 'good' : v < 0 ? 'bad' : '' }
-function fmtRange(tr: string) {
-  if (!tr) return '—'
-  const p = String(tr).split('-')
-  const d = (s: string) => (s && s.length === 8) ? s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8) : (s || '?')
-  return d(p[0]) + ' → ' + (p[1] ? d(p[1]) : 'live')
-}
 function cancelEdit() { editName.value = '' }
 async function saveEdit() {
   await api.post('/api/strategies', { name: editName.value, status: editStatus.value, notes: editNotes.value })
@@ -289,23 +216,32 @@ async function saveEdit() {
 }
 function refreshData() {
   store.fetchAll(true)
+  loadRegistry()
 }
 
-onMounted(() => { store.fetchAll() })
+async function loadRegistry() {
+  const { data } = await api.get('/api/strategies')
+  registry.value = data || []
+}
+
+onMounted(() => {
+  store.fetchAll()
+  loadRegistry()
+})
 </script>
 
 <style scoped>
-.edit-panel { margin-top: 16px; padding: 16px; }
-.edit-panel h3 { margin: 0 0 12px; font-size: 14px; }
-.edit-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-dim); margin-bottom: 12px; }
+.edit-panel { margin-top: 1rem; padding: 1rem; }
+.edit-panel h3 { margin: 0 0 0.75rem; font-size: 0.875rem; }
+.edit-field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.75rem; color: var(--color-text-dim); margin-bottom: 0.75rem; }
 .edit-field select, .edit-field input {
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 6px 10px;
-  color: var(--text);
+  color: var(--color-text);
   font-size: 13px;
 }
-.edit-actions { display: flex; gap: 8px; margin-top: 8px; }
-.edit-msg { color: var(--good); font-size: 12px; margin-top: 8px; }
+.edit-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.edit-msg { color: var(--color-good); font-size: 12px; margin-top: 0.5rem; }
 </style>
