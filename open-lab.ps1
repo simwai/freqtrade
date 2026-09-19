@@ -49,7 +49,7 @@ $apiReady = $false
 for ($i = 0; $i -lt 30; $i++) {
     Start-Sleep -Seconds 1
     try {
-        $r = Invoke-WebRequest -Uri "http://127.0.0.1:$ApiPort" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+        $r = Invoke-WebRequest -Uri "http://127.0.0.1:$ApiPort/api/health" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
         if ($r.StatusCode -eq 200) { $apiReady = $true; break }
     } catch {}
 }
@@ -64,7 +64,7 @@ $rpcReady = $false
 for ($i = 0; $i -lt 30; $i++) {
     Start-Sleep -Seconds 1
     try {
-        $r = Invoke-WebRequest -Uri "http://127.0.0.1:$RpcPort" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+        $r = Invoke-WebRequest -Uri "http://127.0.0.1:$RpcPort/api/health" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
         if ($r.StatusCode -eq 200) { $rpcReady = $true; break }
     } catch {}
 }
