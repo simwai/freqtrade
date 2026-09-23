@@ -160,8 +160,8 @@ The best method for combining hyperopt and FreqAI is to focus on hyperopting ent
 A good example of a hyperoptable parameter in FreqAI is a threshold for the [Dissimilarity Index (DI)](freqai-feature-engineering.md#identifying-outliers-with-the-dissimilarity-index-di) `DI_values` beyond which we consider data points as outliers:
 
 ```python
-di_max = IntParameter(low=1, high=20, default=10, space='buy', optimize=True, load=True)
-dataframe['outlier'] = np.where(dataframe['DI_values'] > self.di_max.value/10, 1, 0)
+di_max = IntParameter(low=1, high=20, default=10, space="buy", optimize=True, load=True)
+dataframe["outlier"] = np.where(dataframe["DI_values"] > self.di_max.value / 10, 1, 0)
 ```
 
 This specific hyperopt would help you understand the appropriate `DI_values` for your particular parameter space.

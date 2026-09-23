@@ -1,4 +1,5 @@
 """Edge command wrapper."""
+
 import logging
 
 logger = logging.getLogger(__name__)

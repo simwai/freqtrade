@@ -40,109 +40,114 @@ A full example config is available in `config_examples/config_freqai.example.jso
 The FreqAI strategy requires including the following lines of code in the standard [Freqtrade strategy](strategy-customization.md):
 
 ```python
-    # user should define the maximum startup candle count (the largest number of candles
-    # passed to any single indicator)
-    startup_candle_count: int = 20
+# user should define the maximum startup candle count (the largest number of candles
+# passed to any single indicator)
+startup_candle_count: int = 20
 
-    def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
 
-        # the model will return all labels created by user in `set_freqai_targets()`
-        # (& appended targets), an indication of whether or not the prediction should be accepted,
-        # the target mean/std values for each of the labels created by user in
-        # `set_freqai_targets()` for each training period.
+def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
 
-        dataframe = self.freqai.start(dataframe, metadata, self)
+    # the model will return all labels created by user in `set_freqai_targets()`
+    # (& appended targets), an indication of whether or not the prediction should be accepted,
+    # the target mean/std values for each of the labels created by user in
+    # `set_freqai_targets()` for each training period.
 
-        return dataframe
+    dataframe = self.freqai.start(dataframe, metadata, self)
 
-    def feature_engineering_expand_all(self, dataframe: DataFrame, period, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        This function will automatically expand the defined features on the config defined
-        `indicator_periods_candles`, `include_timeframes`, `include_shifted_candles`, and
-        `include_corr_pairs`. In other words, a single feature defined in this function
-        will automatically expand to a total of
-        `indicator_periods_candles` * `include_timeframes` * `include_shifted_candles` *
-        `include_corr_pairs` numbers of features added to the model.
+    return dataframe
 
-        All features must be prepended with `%` to be recognized by FreqAI internals.
 
-        :param df: strategy dataframe which will receive the features
-        :param period: period of the indicator - usage example:
-        dataframe["%-ema-period"] = ta.EMA(dataframe, timeperiod=period)
-        """
+def feature_engineering_expand_all(self, dataframe: DataFrame, period, **kwargs) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    This function will automatically expand the defined features on the config defined
+    `indicator_periods_candles`, `include_timeframes`, `include_shifted_candles`, and
+    `include_corr_pairs`. In other words, a single feature defined in this function
+    will automatically expand to a total of
+    `indicator_periods_candles` * `include_timeframes` * `include_shifted_candles` *
+    `include_corr_pairs` numbers of features added to the model.
 
-        dataframe["%-rsi-period"] = ta.RSI(dataframe, timeperiod=period)
-        dataframe["%-mfi-period"] = ta.MFI(dataframe, timeperiod=period)
-        dataframe["%-adx-period"] = ta.ADX(dataframe, timeperiod=period)
-        dataframe["%-sma-period"] = ta.SMA(dataframe, timeperiod=period)
-        dataframe["%-ema-period"] = ta.EMA(dataframe, timeperiod=period)
+    All features must be prepended with `%` to be recognized by FreqAI internals.
 
-        return dataframe
+    :param df: strategy dataframe which will receive the features
+    :param period: period of the indicator - usage example:
+    dataframe["%-ema-period"] = ta.EMA(dataframe, timeperiod=period)
+    """
 
-    def feature_engineering_expand_basic(self, dataframe: DataFrame, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        This function will automatically expand the defined features on the config defined
-        `include_timeframes`, `include_shifted_candles`, and `include_corr_pairs`.
-        In other words, a single feature defined in this function
-        will automatically expand to a total of
-        `include_timeframes` * `include_shifted_candles` * `include_corr_pairs`
-        numbers of features added to the model.
+    dataframe["%-rsi-period"] = ta.RSI(dataframe, timeperiod=period)
+    dataframe["%-mfi-period"] = ta.MFI(dataframe, timeperiod=period)
+    dataframe["%-adx-period"] = ta.ADX(dataframe, timeperiod=period)
+    dataframe["%-sma-period"] = ta.SMA(dataframe, timeperiod=period)
+    dataframe["%-ema-period"] = ta.EMA(dataframe, timeperiod=period)
 
-        Features defined here will *not* be automatically duplicated on user defined
-        `indicator_periods_candles`
+    return dataframe
 
-        All features must be prepended with `%` to be recognized by FreqAI internals.
 
-        :param df: strategy dataframe which will receive the features
-        dataframe["%-pct-change"] = dataframe["close"].pct_change()
-        dataframe["%-ema-200"] = ta.EMA(dataframe, timeperiod=200)
-        """
-        dataframe["%-pct-change"] = dataframe["close"].pct_change()
-        dataframe["%-raw_volume"] = dataframe["volume"]
-        dataframe["%-raw_price"] = dataframe["close"]
-        return dataframe
+def feature_engineering_expand_basic(self, dataframe: DataFrame, **kwargs) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    This function will automatically expand the defined features on the config defined
+    `include_timeframes`, `include_shifted_candles`, and `include_corr_pairs`.
+    In other words, a single feature defined in this function
+    will automatically expand to a total of
+    `include_timeframes` * `include_shifted_candles` * `include_corr_pairs`
+    numbers of features added to the model.
 
-    def feature_engineering_standard(self, dataframe: DataFrame, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        This optional function will be called once with the dataframe of the base timeframe.
-        This is the final function to be called, which means that the dataframe entering this
-        function will contain all the features and columns created by all other
-        freqai_feature_engineering_* functions.
+    Features defined here will *not* be automatically duplicated on user defined
+    `indicator_periods_candles`
 
-        This function is a good place to do custom exotic feature extractions (e.g. tsfresh).
-        This function is a good place for any feature that should not be auto-expanded upon
-        (e.g. day of the week).
+    All features must be prepended with `%` to be recognized by FreqAI internals.
 
-        All features must be prepended with `%` to be recognized by FreqAI internals.
+    :param df: strategy dataframe which will receive the features
+    dataframe["%-pct-change"] = dataframe["close"].pct_change()
+    dataframe["%-ema-200"] = ta.EMA(dataframe, timeperiod=200)
+    """
+    dataframe["%-pct-change"] = dataframe["close"].pct_change()
+    dataframe["%-raw_volume"] = dataframe["volume"]
+    dataframe["%-raw_price"] = dataframe["close"]
+    return dataframe
 
-        :param df: strategy dataframe which will receive the features
-        usage example: dataframe["%-day_of_week"] = (dataframe["date"].dt.dayofweek + 1) / 7
-        """
-        dataframe["%-day_of_week"] = (dataframe["date"].dt.dayofweek + 1) / 7
-        dataframe["%-hour_of_day"] = (dataframe["date"].dt.hour + 1) / 25
-        return dataframe
 
-    def set_freqai_targets(self, dataframe: DataFrame, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        Required function to set the targets for the model.
-        All targets must be prepended with `&` to be recognized by the FreqAI internals.
+def feature_engineering_standard(self, dataframe: DataFrame, **kwargs) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    This optional function will be called once with the dataframe of the base timeframe.
+    This is the final function to be called, which means that the dataframe entering this
+    function will contain all the features and columns created by all other
+    freqai_feature_engineering_* functions.
 
-        :param df: strategy dataframe which will receive the targets
-        usage example: dataframe["&-target"] = dataframe["close"].shift(-1) / dataframe["close"]
-        """
-        dataframe["&-s_close"] = (
-            dataframe["close"]
-            .shift(-self.freqai_info["feature_parameters"]["label_period_candles"])
-            .rolling(self.freqai_info["feature_parameters"]["label_period_candles"])
-            .mean()
-            / dataframe["close"]
-            - 1
-            )
-        return dataframe
+    This function is a good place to do custom exotic feature extractions (e.g. tsfresh).
+    This function is a good place for any feature that should not be auto-expanded upon
+    (e.g. day of the week).
+
+    All features must be prepended with `%` to be recognized by FreqAI internals.
+
+    :param df: strategy dataframe which will receive the features
+    usage example: dataframe["%-day_of_week"] = (dataframe["date"].dt.dayofweek + 1) / 7
+    """
+    dataframe["%-day_of_week"] = (dataframe["date"].dt.dayofweek + 1) / 7
+    dataframe["%-hour_of_day"] = (dataframe["date"].dt.hour + 1) / 25
+    return dataframe
+
+
+def set_freqai_targets(self, dataframe: DataFrame, **kwargs) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    Required function to set the targets for the model.
+    All targets must be prepended with `&` to be recognized by the FreqAI internals.
+
+    :param df: strategy dataframe which will receive the targets
+    usage example: dataframe["&-target"] = dataframe["close"].shift(-1) / dataframe["close"]
+    """
+    dataframe["&-s_close"] = (
+        dataframe["close"]
+        .shift(-self.freqai_info["feature_parameters"]["label_period_candles"])
+        .rolling(self.freqai_info["feature_parameters"]["label_period_candles"])
+        .mean()
+        / dataframe["close"]
+        - 1
+    )
+    return dataframe
 ```
 
 Notice how the `feature_engineering_*()` is where [features](freqai-feature-engineering.md#feature-engineering) are added. Meanwhile `set_freqai_targets()` adds the labels/targets. A full example strategy is available in `templates/FreqaiExampleStrategy.py`.
@@ -222,7 +227,7 @@ Make sure to use unique names to avoid overriding built-in models.
 If you are using a regressor, you need to specify a target that has continuous values. FreqAI includes a variety of regressors, such as the `LightGBMRegressor`via the flag `--freqaimodel LightGBMRegressor`. An example of how you could set a regression target for predicting the price 100 candles into the future would be
 
 ```python
-df['&s-close_price'] = df['close'].shift(-100)
+df["&s-close_price"] = df["close"].shift(-100)
 ```
 
 If you want to predict multiple targets, you need to define multiple labels using the same syntax as shown above.
@@ -232,14 +237,14 @@ If you want to predict multiple targets, you need to define multiple labels usin
 If you are using a classifier, you need to specify a target that has discrete values. FreqAI includes a variety of classifiers, such as the `LightGBMClassifier` via the flag `--freqaimodel LightGBMClassifier`. If you elects to use a classifier, the classes need to be set using strings. For example, if you want to predict if the price 100 candles into the future goes up or down you would set
 
 ```python
-df['&s-up_or_down'] = np.where( df["close"].shift(-100) > df["close"], 'up', 'down')
+df["&s-up_or_down"] = np.where(df["close"].shift(-100) > df["close"], "up", "down")
 ```
 
 If you want to predict multiple targets you must specify all labels in the same label column. You could, for example, add the label `same` to define where the price was unchanged by setting
 
 ```python
-df['&s-up_or_down'] = np.where( df["close"].shift(-100) > df["close"], 'up', 'down')
-df['&s-up_or_down'] = np.where( df["close"].shift(-100) == df["close"], 'same', df['&s-up_or_down'])
+df["&s-up_or_down"] = np.where(df["close"].shift(-100) > df["close"], "up", "down")
+df["&s-up_or_down"] = np.where(df["close"].shift(-100) == df["close"], "same", df["&s-up_or_down"])
 ```
 
 ## PyTorch Module
@@ -271,7 +276,6 @@ freqtrade trade --config config_examples/config_freqai.example.json --strategy F
 You can construct your own Neural Network architecture in PyTorch by simply defining your `nn.Module` class inside your custom [`IFreqaiModel` file](#using-different-prediction-models) and then using that class in your `def train()` function. Here is an example of logistic regression model implementation using PyTorch (should be used with nn.BCELoss criterion) for classification tasks.
 
 ```python
-
 class LogisticRegression(nn.Module):
     def __init__(self, input_size: int):
         super().__init__()
@@ -285,9 +289,10 @@ class LogisticRegression(nn.Module):
         out = self.activation(out)
         return out
 
+
 class MyCoolPyTorchClassifier(BasePyTorchClassifier):
     """
-    This is a custom IFreqaiModel showing how a user might setup their own 
+    This is a custom IFreqaiModel showing how a user might setup their own
     custom Neural Network architecture for their training.
     """
 
@@ -298,9 +303,9 @@ class MyCoolPyTorchClassifier(BasePyTorchClassifier):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         config = self.freqai_info.get("model_training_parameters", {})
-        self.learning_rate: float = config.get("learning_rate",  3e-4)
-        self.model_kwargs: dict[str, Any] = config.get("model_kwargs",  {})
-        self.trainer_kwargs: dict[str, Any] = config.get("trainer_kwargs",  {})
+        self.learning_rate: float = config.get("learning_rate", 3e-4)
+        self.model_kwargs: dict[str, Any] = config.get("model_kwargs", {})
+        self.trainer_kwargs: dict[str, Any] = config.get("trainer_kwargs", {})
 
     def fit(self, data_dictionary: dict, dk: FreqaiDataKitchen, **kwargs) -> Any:
         """
@@ -313,9 +318,7 @@ class MyCoolPyTorchClassifier(BasePyTorchClassifier):
         class_names = self.get_class_names()
         self.convert_label_column_to_int(data_dictionary, dk, class_names)
         n_features = data_dictionary["train_features"].shape[-1]
-        model = LogisticRegression(
-            input_dim=n_features
-        )
+        model = LogisticRegression(input_dim=n_features)
         model.to(self.device)
         optimizer = torch.optim.AdamW(model.parameters(), lr=self.learning_rate)
         criterion = torch.nn.CrossEntropyLoss()
@@ -332,7 +335,6 @@ class MyCoolPyTorchClassifier(BasePyTorchClassifier):
         )
         trainer.fit(data_dictionary, self.splits)
         return trainer
-
 ```
 
 #### Trainer
@@ -364,17 +366,13 @@ class PyTorchMLPRegressor(BasePyTorchRegressor):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         config = self.freqai_info.get("model_training_parameters", {})
-        self.learning_rate: float = config.get("learning_rate",  3e-4)
-        self.model_kwargs: dict[str, Any] = config.get("model_kwargs",  {})
-        self.trainer_kwargs: dict[str, Any] = config.get("trainer_kwargs",  {})
+        self.learning_rate: float = config.get("learning_rate", 3e-4)
+        self.model_kwargs: dict[str, Any] = config.get("model_kwargs", {})
+        self.trainer_kwargs: dict[str, Any] = config.get("trainer_kwargs", {})
 
     def fit(self, data_dictionary: dict, dk: FreqaiDataKitchen, **kwargs) -> Any:
         n_features = data_dictionary["train_features"].shape[-1]
-        model = PyTorchMLPModel(
-            input_dim=n_features,
-            output_dim=1,
-            **self.model_kwargs
-        )
+        model = PyTorchMLPModel(input_dim=n_features, output_dim=1, **self.model_kwargs)
         model.to(self.device)
         optimizer = torch.optim.AdamW(model.parameters(), lr=self.learning_rate)
         criterion = torch.nn.MSELoss()
@@ -401,9 +399,10 @@ Here we create a `PyTorchMLPRegressor` class that implements the `fit` method. T
     ```python
     def set_freqai_targets(self, dataframe: DataFrame, metadata: dict, **kwargs) -> DataFrame:
         self.freqai.class_names = ["down", "up"]
-        dataframe['&s-up_or_down'] = np.where(dataframe["close"].shift(-100) >
-                                                  dataframe["close"], 'up', 'down')
-    
+        dataframe["&s-up_or_down"] = np.where(
+            dataframe["close"].shift(-100) > dataframe["close"], "up", "down"
+        )
+
         return dataframe
     ```
     To see a full example, you can refer to the [classifier test strategy class](https://github.com/freqtrade/freqtrade/blob/develop/tests/strategy/strats/freqai_test_classifier.py).
@@ -415,13 +414,9 @@ Torch provides a `torch.compile()` method that can be used to improve performanc
 
 
 ```python
-        model = PyTorchMLPModel(
-            input_dim=n_features,
-            output_dim=1,
-            **self.model_kwargs
-        )
-        model.to(self.device)
-        model = torch.compile(model)
+model = PyTorchMLPModel(input_dim=n_features, output_dim=1, **self.model_kwargs)
+model.to(self.device)
+model = torch.compile(model)
 ```
 
 Then proceed to use the model as normal. Keep in mind that doing this will remove eager execution, which means errors and tracebacks will not be informative.

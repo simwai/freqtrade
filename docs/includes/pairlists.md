@@ -479,11 +479,10 @@ To get the correct field - you can use the following code snippet to print the m
 ``` python
 import ccxt
 from pprint import pprint
-exchange = ccxt.binance({
-    'options': {'defaultType': 'swap'} 
-    })
+
+exchange = ccxt.binance({"options": {"defaultType": "swap"}})
 lm = exchange.load_markets()
-pprint(lm['XAU/USDT:USDT'])
+pprint(lm["XAU/USDT:USDT"])
 ```
 
 ``` json hl_lines="13 16"

@@ -221,9 +221,7 @@ class FibonacciStepping:
                 new_low = dim.low
                 new_high = dim.high
 
-            new_dim = SKDecimal(
-                new_low, new_high, decimals=decimals, name=param_name
-            )
+            new_dim = SKDecimal(new_low, new_high, decimals=decimals, name=param_name)
             logger.debug(
                 f"  {param_name}: [{dim.low}, {dim.high}] -> "
                 f"[{new_low:.4f}, {new_high:.4f}]"
@@ -247,8 +245,7 @@ class FibonacciStepping:
 
             new_dim = Integer(new_low, new_high, name=param_name)
             logger.debug(
-                f"  {param_name}: [{dim.low}, {dim.high}] -> "
-                f"[{new_low}, {new_high}]"
+                f"  {param_name}: [{dim.low}, {dim.high}] -> [{new_low}, {new_high}]"
             )
             return new_dim
 
@@ -265,9 +262,7 @@ class FibonacciStepping:
                 new_low = dim.low
                 new_high = dim.high
 
-            new_dim = Real(
-                new_low, new_high, name=param_name, prior=dim.prior
-            )
+            new_dim = Real(new_low, new_high, name=param_name, prior=dim.prior)
             logger.debug(
                 f"  {param_name}: [{dim.low}, {dim.high}] -> "
                 f"[{new_low:.4f}, {new_high:.4f}]"
@@ -277,8 +272,7 @@ class FibonacciStepping:
         else:
             # Unknown dimension type, keep as-is
             logger.warning(
-                f"Unknown dimension type {type(dim)} for "
-                f"{param_name}, keeping original"
+                f"Unknown dimension type {type(dim)} for {param_name}, keeping original"
             )
             return dim
 
@@ -376,17 +370,14 @@ class FibonacciStepping:
                 "name": "Stage 1 (Full Space)",
                 "trials": budgets["stage1_full"],
                 "space": "full",
-                "description": (
-                    f"Bayesian optimization on full space (F_n={fn})"
-                ),
+                "description": (f"Bayesian optimization on full space (F_n={fn})"),
             },
             "stage2_reduced": {
                 "name": "Stage 2 (Reduced Space)",
                 "trials": budgets["stage2_reduced"],
                 "space": "reduced",
                 "description": (
-                    f"Bayesian optimization on reduced space "
-                    f"(F_{{n-1}}={fn_minus_1})"
+                    f"Bayesian optimization on reduced space (F_{{n-1}}={fn_minus_1})"
                 ),
             },
             "stage3_refined": {

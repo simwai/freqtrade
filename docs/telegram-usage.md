@@ -162,9 +162,9 @@ The default custom keyboard looks like this.
 
 ```python
 [
-    ["/daily", "/profit", "/balance"], # row 1, 3 commands
-    ["/status", "/status table", "/performance"], # row 2, 3 commands
-    ["/count", "/start", "/stop", "/help"] # row 3, 4 commands
+    ["/daily", "/profit", "/balance"],  # row 1, 3 commands
+    ["/status", "/status table", "/performance"],  # row 2, 3 commands
+    ["/count", "/start", "/stop", "/help"],  # row 3, 4 commands
 ]
 ```
 

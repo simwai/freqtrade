@@ -99,8 +99,9 @@ from freqtrade.persistence import Trade
 from datetime import timedelta
 
 # ...
-trade_hist = Trade.get_trades_proxy(pair='ETH/USDT', is_open=False, open_date=current_date - timedelta(days=2))
-
+trade_hist = Trade.get_trades_proxy(
+    pair="ETH/USDT", is_open=False, open_date=current_date - timedelta(days=2)
+)
 ```
 
 `get_trades_proxy()` supports the following keyword arguments. All arguments are optional - calling `get_trades_proxy()` without arguments will return a list of all trades in the database.
@@ -116,6 +117,7 @@ Get the number of currently open trades
 
 ``` python
 from freqtrade.persistence import Trade
+
 # ...
 open_trades = Trade.get_open_trade_count()
 ```
@@ -155,7 +157,7 @@ Retrieve the overall performance - similar to the `/performance` telegram comman
 from freqtrade.persistence import Trade
 
 # ...
-if self.config['runmode'].value in ('live', 'dry_run'):
+if self.config["runmode"].value in ("live", "dry_run"):
     performance = Trade.get_overall_performance()
 ```
 

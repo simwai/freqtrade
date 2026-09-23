@@ -58,7 +58,7 @@ def protections(self):
             "stop_duration_candles": 4,
             "required_profit": 0.0,
             "only_per_pair": False,
-            "only_per_side": False
+            "only_per_side": False,
         }
     ]
 ```
@@ -86,14 +86,14 @@ The below sample stops trading for 12 candles if max-drawdown is > 20% consideri
 ``` python
 @property
 def protections(self):
-    return  [
+    return [
         {
             "method": "MaxDrawdown",
             "calculation_mode": "equity",
             "lookback_period_candles": 48,
             "trade_limit": 20,
             "stop_duration_candles": 12,
-            "max_allowed_drawdown": 0.2
+            "max_allowed_drawdown": 0.2,
         },
     ]
 ```
@@ -131,12 +131,7 @@ The below example will stop trading a pair for 2 candles after closing a trade, 
 ``` python
 @property
 def protections(self):
-    return  [
-        {
-            "method": "CooldownPeriod",
-            "stop_duration_candles": 2
-        }
-    ]
+    return [{"method": "CooldownPeriod", "stop_duration_candles": 2}]
 ```
 
 !!! Note

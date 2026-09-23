@@ -293,21 +293,21 @@ async function load() {
     // First load the trade run to get strategy name
     await tradesStore.load(key)
     strategy.value = tradesStore.key.split('__')[0] || ''
-    
+
     // Load strategy detail for backtests/benchmarks
     await store.load(strategy.value)
-    
+
     // Get trades from the store
     const tradesData = tradesStore.items
-    
+
     // Find runRow for timeframe/mode
     const runRow = store.backtests.find((r: any) => r.strategy === strategy.value) || store.benchmarks.find((r: any) => r.strategy === strategy.value)
     if (runRow) { tf.value = runRow.timeframe || '5m'; mode.value = runRow.trading_mode || '' }
-    
+
     // Set pair
     const pairsData = [...new Set(tradesData.map((t: any) => t.p))]
     if (!pair.value && pairsData.length) pair.value = pairsData[0]
-    
+
     dropAllInds()
     await loadCandles()
     await loadRoi()
@@ -890,4 +890,3 @@ onUnmounted(() => {
 .empty-banner { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 12px; margin-bottom: 8px; }
 .empty-banner code { font-family: monospace; }
 </style>
-

@@ -16,136 +16,136 @@ Meanwhile, high level feature engineering is handled within `"feature_parameters
 It is advisable to start from the template `feature_engineering_*` functions in the source provided example strategy (found in `templates/FreqaiExampleStrategy.py`) to ensure that the feature definitions are following the correct conventions. Here is an example of how to set the indicators and labels in the strategy:
 
 ```python
-    def feature_engineering_expand_all(self, dataframe: DataFrame, period, metadata, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        This function will automatically expand the defined features on the config defined
-        `indicator_periods_candles`, `include_timeframes`, `include_shifted_candles`, and
-        `include_corr_pairs`. In other words, a single feature defined in this function
-        will automatically expand to a total of
-        `indicator_periods_candles` * `include_timeframes` * `include_shifted_candles` *
-        `include_corr_pairs` numbers of features added to the model.
+def feature_engineering_expand_all(
+    self, dataframe: DataFrame, period, metadata, **kwargs
+) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    This function will automatically expand the defined features on the config defined
+    `indicator_periods_candles`, `include_timeframes`, `include_shifted_candles`, and
+    `include_corr_pairs`. In other words, a single feature defined in this function
+    will automatically expand to a total of
+    `indicator_periods_candles` * `include_timeframes` * `include_shifted_candles` *
+    `include_corr_pairs` numbers of features added to the model.
 
-        All features must be prepended with `%` to be recognized by FreqAI internals.
+    All features must be prepended with `%` to be recognized by FreqAI internals.
 
-        Access metadata such as the current pair/timeframe/period with:
+    Access metadata such as the current pair/timeframe/period with:
 
-        `metadata["pair"]` `metadata["tf"]`  `metadata["period"]`
+    `metadata["pair"]` `metadata["tf"]`  `metadata["period"]`
 
-        :param df: strategy dataframe which will receive the features
-        :param period: period of the indicator - usage example:
-        :param metadata: metadata of current pair
-        dataframe["%-ema-period"] = ta.EMA(dataframe, timeperiod=period)
-        """
+    :param df: strategy dataframe which will receive the features
+    :param period: period of the indicator - usage example:
+    :param metadata: metadata of current pair
+    dataframe["%-ema-period"] = ta.EMA(dataframe, timeperiod=period)
+    """
 
-        dataframe["%-rsi-period"] = ta.RSI(dataframe, timeperiod=period)
-        dataframe["%-mfi-period"] = ta.MFI(dataframe, timeperiod=period)
-        dataframe["%-adx-period"] = ta.ADX(dataframe, timeperiod=period)
-        dataframe["%-sma-period"] = ta.SMA(dataframe, timeperiod=period)
-        dataframe["%-ema-period"] = ta.EMA(dataframe, timeperiod=period)
+    dataframe["%-rsi-period"] = ta.RSI(dataframe, timeperiod=period)
+    dataframe["%-mfi-period"] = ta.MFI(dataframe, timeperiod=period)
+    dataframe["%-adx-period"] = ta.ADX(dataframe, timeperiod=period)
+    dataframe["%-sma-period"] = ta.SMA(dataframe, timeperiod=period)
+    dataframe["%-ema-period"] = ta.EMA(dataframe, timeperiod=period)
 
-        bollinger = qtpylib.bollinger_bands(
-            qtpylib.typical_price(dataframe), window=period, stds=2.2
-        )
-        dataframe["bb_lowerband-period"] = bollinger["lower"]
-        dataframe["bb_middleband-period"] = bollinger["mid"]
-        dataframe["bb_upperband-period"] = bollinger["upper"]
+    bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=period, stds=2.2)
+    dataframe["bb_lowerband-period"] = bollinger["lower"]
+    dataframe["bb_middleband-period"] = bollinger["mid"]
+    dataframe["bb_upperband-period"] = bollinger["upper"]
 
-        dataframe["%-bb_width-period"] = (
-            dataframe["bb_upperband-period"]
-            - dataframe["bb_lowerband-period"]
-        ) / dataframe["bb_middleband-period"]
-        dataframe["%-close-bb_lower-period"] = (
-            dataframe["close"] / dataframe["bb_lowerband-period"]
-        )
+    dataframe["%-bb_width-period"] = (
+        dataframe["bb_upperband-period"] - dataframe["bb_lowerband-period"]
+    ) / dataframe["bb_middleband-period"]
+    dataframe["%-close-bb_lower-period"] = dataframe["close"] / dataframe["bb_lowerband-period"]
 
-        dataframe["%-roc-period"] = ta.ROC(dataframe, timeperiod=period)
+    dataframe["%-roc-period"] = ta.ROC(dataframe, timeperiod=period)
 
-        dataframe["%-relative_volume-period"] = (
-            dataframe["volume"] / dataframe["volume"].rolling(period).mean()
-        )
+    dataframe["%-relative_volume-period"] = (
+        dataframe["volume"] / dataframe["volume"].rolling(period).mean()
+    )
 
-        return dataframe
+    return dataframe
 
-    def feature_engineering_expand_basic(self, dataframe: DataFrame, metadata, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        This function will automatically expand the defined features on the config defined
-        `include_timeframes`, `include_shifted_candles`, and `include_corr_pairs`.
-        In other words, a single feature defined in this function
-        will automatically expand to a total of
-        `include_timeframes` * `include_shifted_candles` * `include_corr_pairs`
-        numbers of features added to the model.
 
-        Features defined here will *not* be automatically duplicated on user defined
-        `indicator_periods_candles`
+def feature_engineering_expand_basic(self, dataframe: DataFrame, metadata, **kwargs) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    This function will automatically expand the defined features on the config defined
+    `include_timeframes`, `include_shifted_candles`, and `include_corr_pairs`.
+    In other words, a single feature defined in this function
+    will automatically expand to a total of
+    `include_timeframes` * `include_shifted_candles` * `include_corr_pairs`
+    numbers of features added to the model.
 
-        Access metadata such as the current pair/timeframe with:
+    Features defined here will *not* be automatically duplicated on user defined
+    `indicator_periods_candles`
 
-        `metadata["pair"]` `metadata["tf"]`
+    Access metadata such as the current pair/timeframe with:
 
-        All features must be prepended with `%` to be recognized by FreqAI internals.
+    `metadata["pair"]` `metadata["tf"]`
 
-        :param df: strategy dataframe which will receive the features
-        :param metadata: metadata of current pair
-        dataframe["%-pct-change"] = dataframe["close"].pct_change()
-        dataframe["%-ema-200"] = ta.EMA(dataframe, timeperiod=200)
-        """
-        dataframe["%-pct-change"] = dataframe["close"].pct_change()
-        dataframe["%-raw_volume"] = dataframe["volume"]
-        dataframe["%-raw_price"] = dataframe["close"]
-        return dataframe
+    All features must be prepended with `%` to be recognized by FreqAI internals.
 
-    def feature_engineering_standard(self, dataframe: DataFrame, metadata, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        This optional function will be called once with the dataframe of the base timeframe.
-        This is the final function to be called, which means that the dataframe entering this
-        function will contain all the features and columns created by all other
-        freqai_feature_engineering_* functions.
+    :param df: strategy dataframe which will receive the features
+    :param metadata: metadata of current pair
+    dataframe["%-pct-change"] = dataframe["close"].pct_change()
+    dataframe["%-ema-200"] = ta.EMA(dataframe, timeperiod=200)
+    """
+    dataframe["%-pct-change"] = dataframe["close"].pct_change()
+    dataframe["%-raw_volume"] = dataframe["volume"]
+    dataframe["%-raw_price"] = dataframe["close"]
+    return dataframe
 
-        This function is a good place to do custom exotic feature extractions (e.g. tsfresh).
-        This function is a good place for any feature that should not be auto-expanded upon
-        (e.g. day of the week).
 
-        Access metadata such as the current pair with:
+def feature_engineering_standard(self, dataframe: DataFrame, metadata, **kwargs) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    This optional function will be called once with the dataframe of the base timeframe.
+    This is the final function to be called, which means that the dataframe entering this
+    function will contain all the features and columns created by all other
+    freqai_feature_engineering_* functions.
 
-        `metadata["pair"]`
+    This function is a good place to do custom exotic feature extractions (e.g. tsfresh).
+    This function is a good place for any feature that should not be auto-expanded upon
+    (e.g. day of the week).
 
-        All features must be prepended with `%` to be recognized by FreqAI internals.
+    Access metadata such as the current pair with:
 
-        :param df: strategy dataframe which will receive the features
-        :param metadata: metadata of current pair
-        usage example: dataframe["%-day_of_week"] = (dataframe["date"].dt.dayofweek + 1) / 7
-        """
-        dataframe["%-day_of_week"] = (dataframe["date"].dt.dayofweek + 1) / 7
-        dataframe["%-hour_of_day"] = (dataframe["date"].dt.hour + 1) / 25
-        return dataframe
+    `metadata["pair"]`
 
-    def set_freqai_targets(self, dataframe: DataFrame, metadata, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        Required function to set the targets for the model.
-        All targets must be prepended with `&` to be recognized by the FreqAI internals.
+    All features must be prepended with `%` to be recognized by FreqAI internals.
 
-        Access metadata such as the current pair with:
+    :param df: strategy dataframe which will receive the features
+    :param metadata: metadata of current pair
+    usage example: dataframe["%-day_of_week"] = (dataframe["date"].dt.dayofweek + 1) / 7
+    """
+    dataframe["%-day_of_week"] = (dataframe["date"].dt.dayofweek + 1) / 7
+    dataframe["%-hour_of_day"] = (dataframe["date"].dt.hour + 1) / 25
+    return dataframe
 
-        `metadata["pair"]`
 
-        :param df: strategy dataframe which will receive the targets
-        :param metadata: metadata of current pair
-        usage example: dataframe["&-target"] = dataframe["close"].shift(-1) / dataframe["close"]
-        """
-        dataframe["&-s_close"] = (
-            dataframe["close"]
-            .shift(-self.freqai_info["feature_parameters"]["label_period_candles"])
-            .rolling(self.freqai_info["feature_parameters"]["label_period_candles"])
-            .mean()
-            / dataframe["close"]
-            - 1
-            )
-        
-        return dataframe
+def set_freqai_targets(self, dataframe: DataFrame, metadata, **kwargs) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    Required function to set the targets for the model.
+    All targets must be prepended with `&` to be recognized by the FreqAI internals.
+
+    Access metadata such as the current pair with:
+
+    `metadata["pair"]`
+
+    :param df: strategy dataframe which will receive the targets
+    :param metadata: metadata of current pair
+    usage example: dataframe["&-target"] = dataframe["close"].shift(-1) / dataframe["close"]
+    """
+    dataframe["&-s_close"] = (
+        dataframe["close"]
+        .shift(-self.freqai_info["feature_parameters"]["label_period_candles"])
+        .rolling(self.freqai_info["feature_parameters"]["label_period_candles"])
+        .mean()
+        / dataframe["close"]
+        - 1
+    )
+
+    return dataframe
 ```
 
 In the presented example, the user does not wish to pass the `bb_lowerband` as a feature to the model,
@@ -189,7 +189,9 @@ In total, the number of features the user of the presented example strategy has 
 All `feature_engineering_*` and `set_freqai_targets()` functions are passed a `metadata` dictionary which contains information about the `pair`, `tf` (timeframe), and `period` that FreqAI is automating for feature building. As such, a user can use `metadata` inside `feature_engineering_*` functions as criteria for blocking/reserving features for certain timeframes, periods, pairs etc.
 
 ```python
-def feature_engineering_expand_all(self, dataframe: DataFrame, period, metadata, **kwargs) -> DataFrame:
+def feature_engineering_expand_all(
+    self, dataframe: DataFrame, period, metadata, **kwargs
+) -> DataFrame:
     if metadata["tf"] == "1h":
         dataframe["%-roc-period"] = ta.ROC(dataframe, timeperiod=period)
 ```
@@ -248,6 +250,7 @@ class MyFreqaiModel(BaseRegressionModel):
     """
     Some cool custom model
     """
+
     def fit(self, data_dictionary: Dict, dk: FreqaiDataKitchen, **kwargs) -> Any:
         """
         My custom fit function
@@ -259,20 +262,24 @@ class MyFreqaiModel(BaseRegressionModel):
         """
         User defines their custom feature pipeline here (if they wish)
         """
-        feature_pipeline = Pipeline([
-            ('qt', SKLearnWrapper(QuantileTransformer(output_distribution='normal'))),
-            ('di', ds.DissimilarityIndex(di_threshold=1))
-        ])
+        feature_pipeline = Pipeline(
+            [
+                ("qt", SKLearnWrapper(QuantileTransformer(output_distribution="normal"))),
+                ("di", ds.DissimilarityIndex(di_threshold=1)),
+            ]
+        )
 
         return feature_pipeline
-    
+
     def define_label_pipeline(self) -> Pipeline:
         """
         User defines their custom label pipeline here (if they wish)
         """
-        label_pipeline = Pipeline([
-            ('qt', SKLearnWrapper(StandardScaler())),
-        ])
+        label_pipeline = Pipeline(
+            [
+                ("qt", SKLearnWrapper(StandardScaler())),
+            ]
+        )
 
         return label_pipeline
 ```
@@ -285,16 +292,18 @@ You can easily add your own transformation by creating a class that inherits fro
 from datasieve.transforms.base_transform import BaseTransform
 # import whatever else you need
 
+
 class MyCoolTransform(BaseTransform):
     def __init__(self, **kwargs):
-        self.param1 = kwargs.get('param1', 1)
+        self.param1 = kwargs.get("param1", 1)
 
     def fit(self, X, y=None, sample_weight=None, feature_list=None, **kwargs):
         # do something with X, y, sample_weight, or/and feature_list
         return X, y, sample_weight, feature_list
 
-    def transform(self, X, y=None, sample_weight=None,
-                  feature_list=None, outlier_check=False, **kwargs):
+    def transform(
+        self, X, y=None, sample_weight=None, feature_list=None, outlier_check=False, **kwargs
+    ):
         # do something with X, y, sample_weight, or/and feature_list
         return X, y, sample_weight, feature_list
 

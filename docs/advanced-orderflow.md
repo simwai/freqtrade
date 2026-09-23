@@ -60,18 +60,21 @@ freqtrade download-data -p BTC/USDT:USDT --timerange 20230101- --trading-mode fu
 Once activated, several new columns become available in your dataframe:
 
 ``` python
-
-dataframe["trades"] # Contains information about each individual trade.
-dataframe["orderflow"] # Represents a footprint chart dict (see below)
-dataframe["imbalances"] # Contains information about imbalances in the order flow.
-dataframe["bid"] # Total bid volume 
-dataframe["ask"] # Total ask volume
-dataframe["delta"] # Difference between ask and bid volume.
-dataframe["min_delta"] # Minimum delta within the candle
-dataframe["max_delta"] # Maximum delta within the candle
-dataframe["total_trades"] # Total number of trades
-dataframe["stacked_imbalances_bid"] # List of price levels of stacked bid imbalance range beginnings
-dataframe["stacked_imbalances_ask"] # List of price levels of stacked ask imbalance range beginnings
+dataframe["trades"]  # Contains information about each individual trade.
+dataframe["orderflow"]  # Represents a footprint chart dict (see below)
+dataframe["imbalances"]  # Contains information about imbalances in the order flow.
+dataframe["bid"]  # Total bid volume
+dataframe["ask"]  # Total ask volume
+dataframe["delta"]  # Difference between ask and bid volume.
+dataframe["min_delta"]  # Minimum delta within the candle
+dataframe["max_delta"]  # Maximum delta within the candle
+dataframe["total_trades"]  # Total number of trades
+dataframe[
+    "stacked_imbalances_bid"
+]  # List of price levels of stacked bid imbalance range beginnings
+dataframe[
+    "stacked_imbalances_ask"
+]  # List of price levels of stacked ask imbalance range beginnings
 ```
 
 You can access these columns in your strategy code for further analysis. Here's an example:
@@ -84,10 +87,10 @@ def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame
     total_trades = dataframe["total_trades"]
     ...
 
+
 def cumulative_delta(delta: Series):
     cumdelta = delta.cumsum()
     return cumdelta
-
 ```
 
 ### Footprint chart (`dataframe["orderflow"]`)

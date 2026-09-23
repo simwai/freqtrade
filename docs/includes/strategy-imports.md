@@ -18,7 +18,7 @@ from typing import Dict, Optional, Union, Tuple
 
 from freqtrade.strategy import (
     IStrategy,
-    Trade, 
+    Trade,
     Order,
     PairLocks,
     informative,  # @informative decorator

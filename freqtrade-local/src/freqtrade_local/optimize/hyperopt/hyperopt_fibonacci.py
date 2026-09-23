@@ -400,17 +400,13 @@ class FibonacciHyperopt:
             return
 
         # Reduce space
-        logger.info(
-            f"Reducing search space for next stage based on top {k} results"
-        )
+        logger.info(f"Reducing search space for next stage based on top {k} results")
         new_dimensions = self.fib_stepping.reduce_space(
             self.hyperopter.dimensions, sorted_results, k
         )
 
         # Reset optimizer with new dimensions
-        logger.info(
-            f"Resetting optimizer with {len(new_dimensions)} dimensions"
-        )
+        logger.info(f"Resetting optimizer with {len(new_dimensions)} dimensions")
         # Note: HyperOptimizer does not have reset_optimizer;
         # dimensions are updated in-place below
 
@@ -430,20 +426,14 @@ class FibonacciHyperopt:
         self.random_state = self._set_random_state(
             self.config.get("hyperopt_random_state")
         )
-        logger.info(
-            f"Using optimizer random state: {self.random_state}"
-        )
+        logger.info(f"Using optimizer random state: {self.random_state}")
         self.hyperopt_table_header = -1
         self.hyperopter.prepare_hyperopt()
 
         cpus = cpu_count()
-        logger.info(
-            f"Found {cpus} CPU cores. Let's make them scream!"
-        )
+        logger.info(f"Found {cpus} CPU cores. Let's make them scream!")
         config_jobs = self.config.get("hyperopt_jobs", -1)
-        logger.info(
-            f"Number of parallel jobs set as: {config_jobs}"
-        )
+        logger.info(f"Number of parallel jobs set as: {config_jobs}")
 
         # Create initial optimizer
         self.opt = self.hyperopter.get_optimizer(
@@ -454,9 +444,7 @@ class FibonacciHyperopt:
         try:
             with Parallel(n_jobs=config_jobs) as parallel:
                 jobs = parallel._effective_n_jobs()
-                logger.info(
-                    f"Effective number of parallel workers used: {jobs}"
-                )
+                logger.info(f"Effective number of parallel workers used: {jobs}")
 
                 # Stage 0: Initialization (random trials)
                 if self.stage_budgets["init"] > 0:

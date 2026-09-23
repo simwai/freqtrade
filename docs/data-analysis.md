@@ -81,14 +81,14 @@ from pathlib import Path
 # Modify this cell to insure that the output shows the correct path.
 # Define all paths relative to the project root shown in the cell output
 project_root = "somedir/freqtrade"
-i=0
+i = 0
 try:
     os.chdir(project_root)
-    assert Path('LICENSE').is_file()
+    assert Path("LICENSE").is_file()
 except:
-    while i<4 and (not Path('LICENSE').is_file()):
-        os.chdir(Path(Path.cwd(), '../'))
-        i+=1
+    while i < 4 and (not Path("LICENSE").is_file()):
+        os.chdir(Path(Path.cwd(), "../"))
+        i += 1
     project_root = Path.cwd()
 print(Path.cwd())
 ```
@@ -106,7 +106,7 @@ from freqtrade.configuration import Configuration
 config = Configuration.from_files(["config1.json", "config2.json"])
 
 # Show the config in memory
-print(json.dumps(config['original_config'], indent=2))
+print(json.dumps(config["original_config"], indent=2))
 ```
 
 For Interactive environments, have an additional configuration specifying `user_data_dir` and pass this in last, so you don't have to change directories while running the bot.

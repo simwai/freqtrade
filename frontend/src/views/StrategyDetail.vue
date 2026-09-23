@@ -575,4 +575,3 @@ onMounted(async () => {
 .rec-row { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
 .code-block { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; overflow: auto; max-height: 300px; font-size: 11px; white-space: pre-wrap; }
 </style>
-

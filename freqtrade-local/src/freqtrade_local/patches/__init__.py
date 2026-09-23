@@ -92,12 +92,9 @@ def apply_config_schema_patch() -> None:
     try:
         from freqtrade.config_schema.config_schema import CONF_SCHEMA
 
-        CONF_SCHEMA.setdefault("properties", {})[
-            "backtest_heartbeat_interval"
-        ] = {
+        CONF_SCHEMA.setdefault("properties", {})["backtest_heartbeat_interval"] = {
             "description": (
-                "Log backtest progress every N seconds. "
-                "0 disables heartbeat logging."
+                "Log backtest progress every N seconds. 0 disables heartbeat logging."
             ),
             "type": "integer",
             "minimum": 0,

@@ -48,6 +48,7 @@ To generate a secure password, best use a password manager, or use the below cod
 
 ``` python
 import secrets
+
 secrets.token_hex()
 ```
 
@@ -133,7 +134,7 @@ This method will work for all arguments - check the "show" command for a list of
 
     ``` python
     from freqtrade_client import FtRestClient
-    
+
 
     client = FtRestClient(server_url, username, password)
 
@@ -145,7 +146,7 @@ This method will work for all arguments - check the "show" command for a list of
     client.blacklist("BTC/USDT", "ETH/USDT")
     # Add pairs to blacklist by supplying a list
     client.blacklist(*listPairs)
-    # ... 
+    # ...
     ```
 
     For a full list of available commands, please refer to the list below.

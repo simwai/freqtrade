@@ -24,6 +24,7 @@ TARGET_TRADES = 600
 EXPECTED_MAX_PROFIT = 3.0
 MAX_ACCEPTED_TRADE_DURATION = 300
 
+
 class SuperDuperHyperOptLoss(IHyperOptLoss):
     """
     Defines the default loss function for hyperopt
@@ -50,10 +51,10 @@ class SuperDuperHyperOptLoss(IHyperOptLoss):
         * 0.25: Avoiding trade loss
         * 1.0 to total profit, compared to the expected value (`EXPECTED_MAX_PROFIT`) defined above
         """
-        total_profit = results['profit_ratio'].sum()
-        trade_duration = results['trade_duration'].mean()
+        total_profit = results["profit_ratio"].sum()
+        trade_duration = results["trade_duration"].mean()
 
-        trade_loss = 1 - 0.25 * exp(-(trade_count - TARGET_TRADES) ** 2 / 10 ** 5.8)
+        trade_loss = 1 - 0.25 * exp(-((trade_count - TARGET_TRADES) ** 2) / 10**5.8)
         profit_loss = max(0, 1 - total_profit / EXPECTED_MAX_PROFIT)
         duration_loss = 0.4 * min(trade_duration / MAX_ACCEPTED_TRADE_DURATION, 1)
         result = trade_loss + profit_loss + duration_loss
@@ -88,30 +89,31 @@ To override a pre-defined space (`roi_space`, `generate_roi_table`, `stoploss_sp
 ```python
 from freqtrade.optimize.space import Categorical, Dimension, Integer, SKDecimal
 
+
 class MyAwesomeStrategy(IStrategy):
     class HyperOpt:
         # Define a custom stoploss space.
         def stoploss_space():
-            return [SKDecimal(-0.05, -0.01, decimals=3, name='stoploss')]
+            return [SKDecimal(-0.05, -0.01, decimals=3, name="stoploss")]
 
         # Define custom ROI space
         def roi_space() -> List[Dimension]:
             return [
-                Integer(10, 120, name='roi_t1'),
-                Integer(10, 60, name='roi_t2'),
-                Integer(10, 40, name='roi_t3'),
-                SKDecimal(0.01, 0.04, decimals=3, name='roi_p1'),
-                SKDecimal(0.01, 0.07, decimals=3, name='roi_p2'),
-                SKDecimal(0.01, 0.20, decimals=3, name='roi_p3'),
+                Integer(10, 120, name="roi_t1"),
+                Integer(10, 60, name="roi_t2"),
+                Integer(10, 40, name="roi_t3"),
+                SKDecimal(0.01, 0.04, decimals=3, name="roi_p1"),
+                SKDecimal(0.01, 0.07, decimals=3, name="roi_p2"),
+                SKDecimal(0.01, 0.20, decimals=3, name="roi_p3"),
             ]
 
         def generate_roi_table(params: Dict) -> dict[int, float]:
 
             roi_table = {}
-            roi_table[0] = params['roi_p1'] + params['roi_p2'] + params['roi_p3']
-            roi_table[params['roi_t3']] = params['roi_p1'] + params['roi_p2']
-            roi_table[params['roi_t3'] + params['roi_t2']] = params['roi_p1']
-            roi_table[params['roi_t3'] + params['roi_t2'] + params['roi_t1']] = 0
+            roi_table[0] = params["roi_p1"] + params["roi_p2"] + params["roi_p3"]
+            roi_table[params["roi_t3"]] = params["roi_p1"] + params["roi_p2"]
+            roi_table[params["roi_t3"] + params["roi_t2"]] = params["roi_p1"]
+            roi_table[params["roi_t3"] + params["roi_t2"] + params["roi_t1"]] = 0
 
             return roi_table
 
@@ -119,23 +121,21 @@ class MyAwesomeStrategy(IStrategy):
             # All parameters here are mandatory, you can only modify their type or the range.
             return [
                 # Fixed to true, if optimizing trailing_stop we assume to use trailing stop at all times.
-                Categorical([True], name='trailing_stop'),
-
-                SKDecimal(0.01, 0.35, decimals=3, name='trailing_stop_positive'),
+                Categorical([True], name="trailing_stop"),
+                SKDecimal(0.01, 0.35, decimals=3, name="trailing_stop_positive"),
                 # 'trailing_stop_positive_offset' should be greater than 'trailing_stop_positive',
                 # so this intermediate parameter is used as the value of the difference between
                 # them. The value of the 'trailing_stop_positive_offset' is constructed in the
                 # generate_trailing_params() method.
                 # This is similar to the hyperspace dimensions used for constructing the ROI tables.
-                SKDecimal(0.001, 0.1, decimals=3, name='trailing_stop_positive_offset_p1'),
-
-                Categorical([True, False], name='trailing_only_offset_is_reached'),
-        ]
+                SKDecimal(0.001, 0.1, decimals=3, name="trailing_stop_positive_offset_p1"),
+                Categorical([True, False], name="trailing_only_offset_is_reached"),
+            ]
 
         # Define a custom max_open_trades space
         def max_open_trades_space() -> List[Dimension]:
             return [
-                Integer(-1, 10, name='max_open_trades'),
+                Integer(-1, 10, name="max_open_trades"),
             ]
 ```
 
@@ -147,9 +147,7 @@ class MyAwesomeStrategy(IStrategy):
 Parameters can also be defined dynamically, but must be available to the instance once the [`bot_start()` callback](strategy-callbacks.md#bot-start) has been called.
 
 ``` python
-
 class MyAwesomeStrategy(IStrategy):
-
     def bot_start(self, **kwargs) -> None:
         self.buy_adx = IntParameter(20, 30, default=30, optimize=True)
 
@@ -166,9 +164,8 @@ You can define your own optuna sampler for Hyperopt by implementing `generate_es
 ```python
 class MyAwesomeStrategy(IStrategy):
     class HyperOpt:
-        def generate_estimator(dimensions: List['Dimension'], **kwargs):
+        def generate_estimator(dimensions: List["Dimension"], **kwargs):
             return "NSGAIIISampler"
-
 ```
 
 Possible values are either one of "NSGAIISampler", "TPESampler", "GPSampler", "CmaEsSampler", "NSGAIIISampler", "QMCSampler" (Details can be found in the [optuna-samplers documentation](https://optuna.readthedocs.io/en/stable/reference/samplers/index.html)), or "an instance of a class that inherits from `optuna.samplers.BaseSampler`".
@@ -194,16 +191,18 @@ Some research will be necessary to find additional Samplers (from optunahub) for
     from freqtrade.strategy.interface import IStrategy
     from typing import List
     import optunahub
-    # ... 
+    # ...
+
 
     class my_strategy(IStrategy):
         class HyperOpt:
             def generate_estimator(dimensions: List["Dimension"], **kwargs):
                 if "random_state" in kwargs.keys():
-                    return optunahub.load_module("samplers/auto_sampler").AutoSampler(seed=kwargs["random_state"])
+                    return optunahub.load_module("samplers/auto_sampler").AutoSampler(
+                        seed=kwargs["random_state"]
+                    )
                 else:
                     return optunahub.load_module("samplers/auto_sampler").AutoSampler()
-
     ```
 
     Obviously the same approach will work for all other Samplers optuna supports.

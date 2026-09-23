@@ -68,4 +68,3 @@ actions:
 monitor:
 - waiter: Get-Process -Id 35920
 - results: user_data\walk_forward\newstrategy53\<runid>\walk_forward.json; ingest via scripts/ingest_results.py, visible in lab Walk-Forward tab
-

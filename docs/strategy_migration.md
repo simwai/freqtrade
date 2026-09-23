@@ -86,12 +86,13 @@ In `populate_buy_trend()` - you will want to change the columns you assign from 
 def populate_buy_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
     dataframe.loc[
         (
-            (qtpylib.crossed_above(dataframe['rsi'], 30)) &  # Signal: RSI crosses above 30
-            (dataframe['tema'] <= dataframe['bb_middleband']) &  # Guard
-            (dataframe['tema'] > dataframe['tema'].shift(1)) &  # Guard
-            (dataframe['volume'] > 0)  # Make sure Volume is not 0
+            (qtpylib.crossed_above(dataframe["rsi"], 30))  # Signal: RSI crosses above 30
+            & (dataframe["tema"] <= dataframe["bb_middleband"])  # Guard
+            & (dataframe["tema"] > dataframe["tema"].shift(1))  # Guard
+            & (dataframe["volume"] > 0)  # Make sure Volume is not 0
         ),
-        ['buy', 'buy_tag']] = (1, 'rsi_cross')
+        ["buy", "buy_tag"],
+    ] = (1, "rsi_cross")
 
     return dataframe
 ```
@@ -102,12 +103,13 @@ After:
 def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
     dataframe.loc[
         (
-            (qtpylib.crossed_above(dataframe['rsi'], 30)) &  # Signal: RSI crosses above 30
-            (dataframe['tema'] <= dataframe['bb_middleband']) &  # Guard
-            (dataframe['tema'] > dataframe['tema'].shift(1)) &  # Guard
-            (dataframe['volume'] > 0)  # Make sure Volume is not 0
+            (qtpylib.crossed_above(dataframe["rsi"], 30))  # Signal: RSI crosses above 30
+            & (dataframe["tema"] <= dataframe["bb_middleband"])  # Guard
+            & (dataframe["tema"] > dataframe["tema"].shift(1))  # Guard
+            & (dataframe["volume"] > 0)  # Make sure Volume is not 0
         ),
-        ['enter_long', 'enter_tag']] = (1, 'rsi_cross')
+        ["enter_long", "enter_tag"],
+    ] = (1, "rsi_cross")
 
     return dataframe
 ```
@@ -123,12 +125,13 @@ We'll also change the column from `'sell'` to `'exit_long'`.
 def populate_sell_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
     dataframe.loc[
         (
-            (qtpylib.crossed_above(dataframe['rsi'], 70)) &  # Signal: RSI crosses above 70
-            (dataframe['tema'] > dataframe['bb_middleband']) &  # Guard
-            (dataframe['tema'] < dataframe['tema'].shift(1)) &  # Guard
-            (dataframe['volume'] > 0)  # Make sure Volume is not 0
+            (qtpylib.crossed_above(dataframe["rsi"], 70))  # Signal: RSI crosses above 70
+            & (dataframe["tema"] > dataframe["bb_middleband"])  # Guard
+            & (dataframe["tema"] < dataframe["tema"].shift(1))  # Guard
+            & (dataframe["volume"] > 0)  # Make sure Volume is not 0
         ),
-        ['sell', 'exit_tag']] = (1, 'some_exit_tag')
+        ["sell", "exit_tag"],
+    ] = (1, "some_exit_tag")
     return dataframe
 ```
 
@@ -138,12 +141,13 @@ After
 def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
     dataframe.loc[
         (
-            (qtpylib.crossed_above(dataframe['rsi'], 70)) &  # Signal: RSI crosses above 70
-            (dataframe['tema'] > dataframe['bb_middleband']) &  # Guard
-            (dataframe['tema'] < dataframe['tema'].shift(1)) &  # Guard
-            (dataframe['volume'] > 0)  # Make sure Volume is not 0
+            (qtpylib.crossed_above(dataframe["rsi"], 70))  # Signal: RSI crosses above 70
+            & (dataframe["tema"] > dataframe["bb_middleband"])  # Guard
+            & (dataframe["tema"] < dataframe["tema"].shift(1))  # Guard
+            & (dataframe["volume"] > 0)  # Make sure Volume is not 0
         ),
-        ['exit_long', 'exit_tag']] = (1, 'some_exit_tag')
+        ["exit_long", "exit_tag"],
+    ] = (1, "some_exit_tag")
     return dataframe
 ```
 
@@ -156,8 +160,15 @@ It's now also being called for every iteration, independent of current profit an
 
 ``` python hl_lines="2"
 class AwesomeStrategy(IStrategy):
-    def custom_sell(self, pair: str, trade: 'Trade', current_time: 'datetime', current_rate: float,
-                    current_profit: float, **kwargs):
+    def custom_sell(
+        self,
+        pair: str,
+        trade: "Trade",
+        current_time: "datetime",
+        current_rate: float,
+        current_profit: float,
+        **kwargs,
+    ):
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         last_candle = dataframe.iloc[-1].squeeze()
         # ...
@@ -165,8 +176,15 @@ class AwesomeStrategy(IStrategy):
 
 ``` python hl_lines="2"
 class AwesomeStrategy(IStrategy):
-    def custom_exit(self, pair: str, trade: 'Trade', current_time: 'datetime', current_rate: float,
-                    current_profit: float, **kwargs):
+    def custom_exit(
+        self,
+        pair: str,
+        trade: "Trade",
+        current_time: "datetime",
+        current_rate: float,
+        current_profit: float,
+        **kwargs,
+    ):
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         last_candle = dataframe.iloc[-1].squeeze()
         # ...
@@ -178,24 +196,28 @@ class AwesomeStrategy(IStrategy):
 
 ``` python hl_lines="2 6"
 class AwesomeStrategy(IStrategy):
-    def check_buy_timeout(self, pair: str, trade: 'Trade', order: dict, 
-                            current_time: datetime, **kwargs) -> bool:
+    def check_buy_timeout(
+        self, pair: str, trade: "Trade", order: dict, current_time: datetime, **kwargs
+    ) -> bool:
         return False
 
-    def check_sell_timeout(self, pair: str, trade: 'Trade', order: dict, 
-                            current_time: datetime, **kwargs) -> bool:
-        return False 
+    def check_sell_timeout(
+        self, pair: str, trade: "Trade", order: dict, current_time: datetime, **kwargs
+    ) -> bool:
+        return False
 ```
 
 ``` python hl_lines="2 6"
 class AwesomeStrategy(IStrategy):
-    def check_entry_timeout(self, pair: str, trade: 'Trade', order: 'Order', 
-                            current_time: datetime, **kwargs) -> bool:
+    def check_entry_timeout(
+        self, pair: str, trade: "Trade", order: "Order", current_time: datetime, **kwargs
+    ) -> bool:
         return False
 
-    def check_exit_timeout(self, pair: str, trade: 'Trade', order: 'Order', 
-                            current_time: datetime, **kwargs) -> bool:
-        return False 
+    def check_exit_timeout(
+        self, pair: str, trade: "Trade", order: "Order", current_time: datetime, **kwargs
+    ) -> bool:
+        return False
 ```
 
 ### `custom_stake_amount`
@@ -204,19 +226,36 @@ New string argument `side` - which can be either `"long"` or `"short"`.
 
 ``` python hl_lines="4"
 class AwesomeStrategy(IStrategy):
-    def custom_stake_amount(self, pair: str, current_time: datetime, current_rate: float,
-                            proposed_stake: float, min_stake: Optional[float], max_stake: float,
-                            entry_tag: Optional[str], **kwargs) -> float:
-        # ... 
+    def custom_stake_amount(
+        self,
+        pair: str,
+        current_time: datetime,
+        current_rate: float,
+        proposed_stake: float,
+        min_stake: Optional[float],
+        max_stake: float,
+        entry_tag: Optional[str],
+        **kwargs,
+    ) -> float:
+        # ...
         return proposed_stake
 ```
 
 ``` python hl_lines="4"
 class AwesomeStrategy(IStrategy):
-    def custom_stake_amount(self, pair: str, current_time: datetime, current_rate: float,
-                            proposed_stake: float, min_stake: float | None, max_stake: float,
-                            entry_tag: str | None, side: str, **kwargs) -> float:
-        # ... 
+    def custom_stake_amount(
+        self,
+        pair: str,
+        current_time: datetime,
+        current_rate: float,
+        proposed_stake: float,
+        min_stake: float | None,
+        max_stake: float,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float:
+        # ...
         return proposed_stake
 ```
 
@@ -226,20 +265,37 @@ New string argument `side` - which can be either `"long"` or `"short"`.
 
 ``` python hl_lines="4"
 class AwesomeStrategy(IStrategy):
-    def confirm_trade_entry(self, pair: str, order_type: str, amount: float, rate: float,
-                            time_in_force: str, current_time: datetime, entry_tag: Optional[str], 
-                            **kwargs) -> bool:
-      return True
+    def confirm_trade_entry(
+        self,
+        pair: str,
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        current_time: datetime,
+        entry_tag: Optional[str],
+        **kwargs,
+    ) -> bool:
+        return True
 ```
 
 After: 
 
 ``` python hl_lines="4"
 class AwesomeStrategy(IStrategy):
-    def confirm_trade_entry(self, pair: str, order_type: str, amount: float, rate: float,
-                            time_in_force: str, current_time: datetime, entry_tag: str | None, 
-                            side: str, **kwargs) -> bool:
-      return True
+    def confirm_trade_entry(
+        self,
+        pair: str,
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        current_time: datetime,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> bool:
+        return True
 ```
 
 ### `confirm_trade_exit`
@@ -271,18 +327,32 @@ New string argument `side` - which can be either `"long"` or `"short"`.
 
 ``` python hl_lines="3"
 class AwesomeStrategy(IStrategy):
-    def custom_entry_price(self, pair: str, current_time: datetime, proposed_rate: float,
-                           entry_tag: Optional[str], **kwargs) -> float:
-      return proposed_rate
+    def custom_entry_price(
+        self,
+        pair: str,
+        current_time: datetime,
+        proposed_rate: float,
+        entry_tag: Optional[str],
+        **kwargs,
+    ) -> float:
+        return proposed_rate
 ```
 
 After:
 
 ``` python hl_lines="3"
 class AwesomeStrategy(IStrategy):
-    def custom_entry_price(self, pair: str, trade: Trade | None, current_time: datetime, proposed_rate: float,
-                           entry_tag: str | None, side: str, **kwargs) -> float:
-      return proposed_rate
+    def custom_entry_price(
+        self,
+        pair: str,
+        trade: Trade | None,
+        current_time: datetime,
+        proposed_rate: float,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float:
+        return proposed_rate
 ```
 
 ### Adjust trade position changes
@@ -295,31 +365,47 @@ Added argument "is_short" to `stoploss_from_open` and `stoploss_from_absolute`.
 This should be given the value of `trade.is_short`.
 
 ``` python hl_lines="5 7"
-    def custom_stoploss(self, pair: str, trade: 'Trade', current_time: datetime,
-                        current_rate: float, current_profit: float, **kwargs) -> float:
-        # once the profit has risen above 10%, keep the stoploss at 7% above the open price
-        if current_profit > 0.10:
-            return stoploss_from_open(0.07, current_profit)
+def custom_stoploss(
+    self,
+    pair: str,
+    trade: "Trade",
+    current_time: datetime,
+    current_rate: float,
+    current_profit: float,
+    **kwargs,
+) -> float:
+    # once the profit has risen above 10%, keep the stoploss at 7% above the open price
+    if current_profit > 0.10:
+        return stoploss_from_open(0.07, current_profit)
 
-        return stoploss_from_absolute(current_rate - (candle['atr'] * 2), current_rate)
+    return stoploss_from_absolute(current_rate - (candle["atr"] * 2), current_rate)
 
-        return 1
-
+    return 1
 ```
 
 After:
 
 ``` python hl_lines="5 7"
-    def custom_stoploss(self, pair: str, trade: 'Trade', current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool, 
-                        **kwargs) -> float | None:
-        # once the profit has risen above 10%, keep the stoploss at 7% above the open price
-        if current_profit > 0.10:
-            return stoploss_from_open(0.07, current_profit, is_short=trade.is_short)
+def custom_stoploss(
+    self,
+    pair: str,
+    trade: "Trade",
+    current_time: datetime,
+    current_rate: float,
+    current_profit: float,
+    after_fill: bool,
+    **kwargs,
+) -> float | None:
+    # once the profit has risen above 10%, keep the stoploss at 7% above the open price
+    if current_profit > 0.10:
+        return stoploss_from_open(0.07, current_profit, is_short=trade.is_short)
 
-        return stoploss_from_absolute(current_rate - (candle['atr'] * 2), current_rate, is_short=trade.is_short, leverage=trade.leverage)
-
-
+    return stoploss_from_absolute(
+        current_rate - (candle["atr"] * 2),
+        current_rate,
+        is_short=trade.is_short,
+        leverage=trade.leverage,
+    )
 ```
 
 ### Strategy/Configuration settings
@@ -350,31 +436,31 @@ After:
 And two words are joined with `_`. 
 
 ``` python hl_lines="2-6"
-    order_types = {
-        "buy": "limit",
-        "sell": "limit",
-        "emergencysell": "market",
-        "forcesell": "market",
-        "forcebuy": "market",
-        "stoploss": "market",
-        "stoploss_on_exchange": false,
-        "stoploss_on_exchange_interval": 60
-    }
+order_types = {
+    "buy": "limit",
+    "sell": "limit",
+    "emergencysell": "market",
+    "forcesell": "market",
+    "forcebuy": "market",
+    "stoploss": "market",
+    "stoploss_on_exchange": false,
+    "stoploss_on_exchange_interval": 60,
+}
 ```
 
 After:
 
 ``` python hl_lines="2-6"
-    order_types = {
-        "entry": "limit",
-        "exit": "limit",
-        "emergency_exit": "market",
-        "force_exit": "market",
-        "force_entry": "market",
-        "stoploss": "market",
-        "stoploss_on_exchange": false,
-        "stoploss_on_exchange_interval": 60
-    }
+order_types = {
+    "entry": "limit",
+    "exit": "limit",
+    "emergency_exit": "market",
+    "force_exit": "market",
+    "force_entry": "market",
+    "stoploss": "market",
+    "stoploss_on_exchange": false,
+    "stoploss_on_exchange_interval": 60,
+}
 ```
 
 #### Strategy level settings
@@ -407,23 +493,13 @@ After:
 `unfilledtimeout` have changed all wordings from `buy` to `entry` - and `sell` to `exit`.
 
 ``` python hl_lines="2-3"
-unfilledtimeout = {
-        "buy": 10,
-        "sell": 10,
-        "exit_timeout_count": 0,
-        "unit": "minutes"
-    }
+unfilledtimeout = {"buy": 10, "sell": 10, "exit_timeout_count": 0, "unit": "minutes"}
 ```
 
 After:
 
 ``` python hl_lines="2-3"
-unfilledtimeout = {
-        "entry": 10,
-        "exit": 10,
-        "exit_timeout_count": 0,
-        "unit": "minutes"
-    }
+unfilledtimeout = {"entry": 10, "exit": 10, "exit_timeout_count": 0, "unit": "minutes"}
 ```
 
 #### `order pricing`
@@ -489,84 +565,76 @@ As such, the definition of features becomes much simpler with the new logic.
 For a full explanation of each method, please go to the corresponding [freqAI documentation page](freqai-feature-engineering.md#defining-the-features)
 
 ``` python linenums="1" hl_lines="12-37 39-42 63-65 67-75"
+def populate_any_indicators(self, pair, df, tf, informative=None, set_generalized_indicators=False):
 
-def populate_any_indicators(
-        self, pair, df, tf, informative=None, set_generalized_indicators=False
-    ):
+    if informative is None:
+        informative = self.dp.get_pair_dataframe(pair, tf)
 
-        if informative is None:
-            informative = self.dp.get_pair_dataframe(pair, tf)
+    # first loop is automatically duplicating indicators for time periods
+    for t in self.freqai_info["feature_parameters"]["indicator_periods_candles"]:
+        t = int(t)
+        informative[f"%-{pair}rsi-period_{t}"] = ta.RSI(informative, timeperiod=t)
+        informative[f"%-{pair}mfi-period_{t}"] = ta.MFI(informative, timeperiod=t)
+        informative[f"%-{pair}adx-period_{t}"] = ta.ADX(informative, timeperiod=t)
+        informative[f"%-{pair}sma-period_{t}"] = ta.SMA(informative, timeperiod=t)
+        informative[f"%-{pair}ema-period_{t}"] = ta.EMA(informative, timeperiod=t)
 
-        # first loop is automatically duplicating indicators for time periods
-        for t in self.freqai_info["feature_parameters"]["indicator_periods_candles"]:
+        bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(informative), window=t, stds=2.2)
+        informative[f"{pair}bb_lowerband-period_{t}"] = bollinger["lower"]
+        informative[f"{pair}bb_middleband-period_{t}"] = bollinger["mid"]
+        informative[f"{pair}bb_upperband-period_{t}"] = bollinger["upper"]
 
-            t = int(t)
-            informative[f"%-{pair}rsi-period_{t}"] = ta.RSI(informative, timeperiod=t)
-            informative[f"%-{pair}mfi-period_{t}"] = ta.MFI(informative, timeperiod=t)
-            informative[f"%-{pair}adx-period_{t}"] = ta.ADX(informative, timeperiod=t)
-            informative[f"%-{pair}sma-period_{t}"] = ta.SMA(informative, timeperiod=t)
-            informative[f"%-{pair}ema-period_{t}"] = ta.EMA(informative, timeperiod=t)
+        informative[f"%-{pair}bb_width-period_{t}"] = (
+            informative[f"{pair}bb_upperband-period_{t}"]
+            - informative[f"{pair}bb_lowerband-period_{t}"]
+        ) / informative[f"{pair}bb_middleband-period_{t}"]
+        informative[f"%-{pair}close-bb_lower-period_{t}"] = (
+            informative["close"] / informative[f"{pair}bb_lowerband-period_{t}"]
+        )
 
-            bollinger = qtpylib.bollinger_bands(
-                qtpylib.typical_price(informative), window=t, stds=2.2
-            )
-            informative[f"{pair}bb_lowerband-period_{t}"] = bollinger["lower"]
-            informative[f"{pair}bb_middleband-period_{t}"] = bollinger["mid"]
-            informative[f"{pair}bb_upperband-period_{t}"] = bollinger["upper"]
+        informative[f"%-{pair}roc-period_{t}"] = ta.ROC(informative, timeperiod=t)
 
-            informative[f"%-{pair}bb_width-period_{t}"] = (
-                informative[f"{pair}bb_upperband-period_{t}"]
-                - informative[f"{pair}bb_lowerband-period_{t}"]
-            ) / informative[f"{pair}bb_middleband-period_{t}"]
-            informative[f"%-{pair}close-bb_lower-period_{t}"] = (
-                informative["close"] / informative[f"{pair}bb_lowerband-period_{t}"]
-            )
+        informative[f"%-{pair}relative_volume-period_{t}"] = (
+            informative["volume"] / informative["volume"].rolling(t).mean()
+        )  # (1)
 
-            informative[f"%-{pair}roc-period_{t}"] = ta.ROC(informative, timeperiod=t)
+    informative[f"%-{pair}pct-change"] = informative["close"].pct_change()
+    informative[f"%-{pair}raw_volume"] = informative["volume"]
+    informative[f"%-{pair}raw_price"] = informative["close"]
+    # (2)
 
-            informative[f"%-{pair}relative_volume-period_{t}"] = (
-                informative["volume"] / informative["volume"].rolling(t).mean()
-            ) # (1)
+    indicators = [col for col in informative if col.startswith("%")]
+    # This loop duplicates and shifts all indicators to add a sense of recency to data
+    for n in range(self.freqai_info["feature_parameters"]["include_shifted_candles"] + 1):
+        if n == 0:
+            continue
+        informative_shift = informative[indicators].shift(n)
+        informative_shift = informative_shift.add_suffix("_shift-" + str(n))
+        informative = pd.concat((informative, informative_shift), axis=1)
 
-        informative[f"%-{pair}pct-change"] = informative["close"].pct_change()
-        informative[f"%-{pair}raw_volume"] = informative["volume"]
-        informative[f"%-{pair}raw_price"] = informative["close"]
-        # (2)
+    df = merge_informative_pair(df, informative, self.config["timeframe"], tf, ffill=True)
+    skip_columns = [(s + "_" + tf) for s in ["date", "open", "high", "low", "close", "volume"]]
+    df = df.drop(columns=skip_columns)
 
-        indicators = [col for col in informative if col.startswith("%")]
-        # This loop duplicates and shifts all indicators to add a sense of recency to data
-        for n in range(self.freqai_info["feature_parameters"]["include_shifted_candles"] + 1):
-            if n == 0:
-                continue
-            informative_shift = informative[indicators].shift(n)
-            informative_shift = informative_shift.add_suffix("_shift-" + str(n))
-            informative = pd.concat((informative, informative_shift), axis=1)
+    # Add generalized indicators here (because in live, it will call this
+    # function to populate indicators during training). Notice how we ensure not to
+    # add them multiple times
+    if set_generalized_indicators:
+        df["%-day_of_week"] = (df["date"].dt.dayofweek + 1) / 7
+        df["%-hour_of_day"] = (df["date"].dt.hour + 1) / 25
+        # (3)
 
-        df = merge_informative_pair(df, informative, self.config["timeframe"], tf, ffill=True)
-        skip_columns = [
-            (s + "_" + tf) for s in ["date", "open", "high", "low", "close", "volume"]
-        ]
-        df = df.drop(columns=skip_columns)
+        # user adds targets here by prepending them with &- (see convention below)
+        df["&-s_close"] = (
+            df["close"]
+            .shift(-self.freqai_info["feature_parameters"]["label_period_candles"])
+            .rolling(self.freqai_info["feature_parameters"]["label_period_candles"])
+            .mean()
+            / df["close"]
+            - 1
+        )  # (4)
 
-        # Add generalized indicators here (because in live, it will call this
-        # function to populate indicators during training). Notice how we ensure not to
-        # add them multiple times
-        if set_generalized_indicators:
-            df["%-day_of_week"] = (df["date"].dt.dayofweek + 1) / 7
-            df["%-hour_of_day"] = (df["date"].dt.hour + 1) / 25
-            # (3)
-
-            # user adds targets here by prepending them with &- (see convention below)
-            df["&-s_close"] = (
-                df["close"]
-                .shift(-self.freqai_info["feature_parameters"]["label_period_candles"])
-                .rolling(self.freqai_info["feature_parameters"]["label_period_candles"])
-                .mean()
-                / df["close"]
-                - 1
-            )  # (4)
-
-        return df
+    return df
 ```
 
 1. Features - Move to `feature_engineering_expand_all`
@@ -705,29 +773,29 @@ Basic features. Make sure to remove the `{pair}` part from your features.
 Targets now get their own, dedicated method.
 
 ``` python linenums="1"
-    def set_freqai_targets(self, dataframe: DataFrame, **kwargs) -> DataFrame:
-        """
-        *Only functional with FreqAI enabled strategies*
-        Required function to set the targets for the model.
-        All targets must be prepended with `&` to be recognized by the FreqAI internals.
+def set_freqai_targets(self, dataframe: DataFrame, **kwargs) -> DataFrame:
+    """
+    *Only functional with FreqAI enabled strategies*
+    Required function to set the targets for the model.
+    All targets must be prepended with `&` to be recognized by the FreqAI internals.
 
-        More details about feature engineering available:
+    More details about feature engineering available:
 
-        https://www.freqtrade.io/en/stable/freqai-feature-engineering
+    https://www.freqtrade.io/en/stable/freqai-feature-engineering
 
-        :param df: strategy dataframe which will receive the targets
-        usage example: dataframe["&-target"] = dataframe["close"].shift(-1) / dataframe["close"]
-        """
-        dataframe["&-s_close"] = (
-            dataframe["close"]
-            .shift(-self.freqai_info["feature_parameters"]["label_period_candles"])
-            .rolling(self.freqai_info["feature_parameters"]["label_period_candles"])
-            .mean()
-            / dataframe["close"]
-            - 1
-            )
+    :param df: strategy dataframe which will receive the targets
+    usage example: dataframe["&-target"] = dataframe["close"].shift(-1) / dataframe["close"]
+    """
+    dataframe["&-s_close"] = (
+        dataframe["close"]
+        .shift(-self.freqai_info["feature_parameters"]["label_period_candles"])
+        .rolling(self.freqai_info["feature_parameters"]["label_period_candles"])
+        .mean()
+        / dataframe["close"]
+        - 1
+    )
 
-        return dataframe
+    return dataframe
 ```
 
 ### FreqAI - New data Pipeline
@@ -741,9 +809,8 @@ class MyCoolFreqaiModel(BaseRegressionModel):
     """
     Some cool custom IFreqaiModel you made before Freqtrade version 2023.6
     """
-    def train(
-        self, unfiltered_df: DataFrame, pair: str, dk: FreqaiDataKitchen, **kwargs
-    ) -> Any:
+
+    def train(self, unfiltered_df: DataFrame, pair: str, dk: FreqaiDataKitchen, **kwargs) -> Any:
 
         # ... your custom stuff
 
@@ -758,17 +825,17 @@ class MyCoolFreqaiModel(BaseRegressionModel):
         dk.feature_pipeline = self.define_data_pipeline(threads=dk.thread_count)
         dk.label_pipeline = self.define_label_pipeline(threads=dk.thread_count)
 
-        (dd["train_features"],
-         dd["train_labels"],
-         dd["train_weights"]) = dk.feature_pipeline.fit_transform(dd["train_features"],
-                                                                  dd["train_labels"],
-                                                                  dd["train_weights"])
+        (dd["train_features"], dd["train_labels"], dd["train_weights"]) = (
+            dk.feature_pipeline.fit_transform(
+                dd["train_features"], dd["train_labels"], dd["train_weights"]
+            )
+        )
 
-        (dd["test_features"],
-         dd["test_labels"],
-         dd["test_weights"]) = dk.feature_pipeline.transform(dd["test_features"],
-                                                             dd["test_labels"],
-                                                             dd["test_weights"])
+        (dd["test_features"], dd["test_labels"], dd["test_weights"]) = (
+            dk.feature_pipeline.transform(
+                dd["test_features"], dd["test_labels"], dd["test_weights"]
+            )
+        )
 
         dd["train_labels"], _, _ = dk.label_pipeline.fit_transform(dd["train_labels"])
         dd["test_labels"], _, _ = dk.label_pipeline.transform(dd["test_labels"])
@@ -789,7 +856,8 @@ class MyCoolFreqaiModel(BaseRegressionModel):
 
         # Add these lines:
         dk.data_dictionary["prediction_features"], outliers, _ = dk.feature_pipeline.transform(
-            dk.data_dictionary["prediction_features"], outlier_check=True)
+            dk.data_dictionary["prediction_features"], outlier_check=True
+        )
 
         # Remove this line
         # pred_df = dk.denormalize_labels_from_metadata(pred_df)

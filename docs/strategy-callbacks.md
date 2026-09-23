@@ -38,8 +38,8 @@ This can be used to perform actions that must only be performed once and runs af
 ``` python
 import requests
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     def bot_start(self, **kwargs) -> None:
@@ -51,7 +51,6 @@ class AwesomeStrategy(IStrategy):
             # Assign this to the class by using self.*
             # can then be used by populate_* methods
             self.custom_remote_data = requests.get("https://some_remote_source.example.com")
-
 ```
 
 During hyperopt, this runs only once at startup.
@@ -66,8 +65,8 @@ This can be used to perform calculations which are pair independent (apply to al
 # Default imports
 import requests
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     def bot_loop_start(self, current_time: datetime, **kwargs) -> None:
@@ -82,7 +81,6 @@ class AwesomeStrategy(IStrategy):
             # Assign this to the class by using self.*
             # can then be used by populate_* methods
             self.remote_data = requests.get("https://some_remote_source.example.com")
-
 ```
 
 ## Stake size management
@@ -92,11 +90,21 @@ Called before entering a trade, makes it possible to manage your position size w
 ```python
 # Default imports
 
+
 class AwesomeStrategy(IStrategy):
-    def custom_stake_amount(self, pair: str, current_time: datetime, current_rate: float,
-                            proposed_stake: float, min_stake: float | None, max_stake: float,
-                            leverage: float, entry_tag: str | None, side: str,
-                            **kwargs) -> float:
+    def custom_stake_amount(
+        self,
+        pair: str,
+        current_time: datetime,
+        current_rate: float,
+        proposed_stake: float,
+        min_stake: float | None,
+        max_stake: float,
+        leverage: float,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float:
 
         dataframe, _ = self.dp.get_analyzed_dataframe(pair=pair, timeframe=self.timeframe)
         current_candle = dataframe.iloc[-1].squeeze()
@@ -140,9 +148,17 @@ An example of how we can use different indicators depending on the current profi
 ``` python
 # Default imports
 
+
 class AwesomeStrategy(IStrategy):
-    def custom_exit(self, pair: str, trade: Trade, current_time: datetime, current_rate: float,
-                    current_profit: float, **kwargs):
+    def custom_exit(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        **kwargs,
+    ):
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         last_candle = dataframe.iloc[-1].squeeze()
 
@@ -211,15 +227,22 @@ To simulate a regular trailing stoploss of 4% (trailing 4% behind the maximum re
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     use_custom_stoploss = True
 
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool, 
-                        **kwargs) -> float | None:
+    def custom_stoploss(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        after_fill: bool,
+        **kwargs,
+    ) -> float | None:
         """
         Custom stoploss logic, returning the new distance relative to current_rate (as ratio).
         e.g. returning -0.05 would create a stoploss 5% below current_rate.
@@ -249,15 +272,22 @@ Use the initial stoploss for the first 60 minutes, after this change to 10% trai
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     use_custom_stoploss = True
 
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool, 
-                        **kwargs) -> float | None:
+    def custom_stoploss(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        after_fill: bool,
+        **kwargs,
+    ) -> float | None:
 
         # Make sure you have the longest interval first - these conditions are evaluated from top to bottom.
         if current_time - timedelta(minutes=120) > trade.open_date_utc:
@@ -275,19 +305,28 @@ If an additional order fills, set stoploss to -10% below the new `open_rate` ([A
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     use_custom_stoploss = True
 
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool, 
-                        **kwargs) -> float | None:
+    def custom_stoploss(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        after_fill: bool,
+        **kwargs,
+    ) -> float | None:
 
-        if after_fill: 
+        if after_fill:
             # After an additional order, start with a stoploss of 10% below the new open rate
-            return stoploss_from_open(0.10, current_profit, is_short=trade.is_short, leverage=trade.leverage)
+            return stoploss_from_open(
+                0.10, current_profit, is_short=trade.is_short, leverage=trade.leverage
+            )
         # Make sure you have the longest interval first - these conditions are evaluated from top to bottom.
         if current_time - timedelta(minutes=120) > trade.open_date_utc:
             return -0.05 * trade.leverage
@@ -304,15 +343,22 @@ In this example, we'll trail the highest price with 10% trailing stoploss for `E
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     use_custom_stoploss = True
 
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool,
-                        **kwargs) -> float | None:
+    def custom_stoploss(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        after_fill: bool,
+        **kwargs,
+    ) -> float | None:
 
         if pair in ("ETH/BTC", "XRP/BTC"):
             return -0.10 * trade.leverage
@@ -330,18 +376,25 @@ Please note that the stoploss can only increase, values lower than the current s
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     use_custom_stoploss = True
 
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool,
-                        **kwargs) -> float | None:
+    def custom_stoploss(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        after_fill: bool,
+        **kwargs,
+    ) -> float | None:
 
         if current_profit < 0.04:
-            return None # return None to keep using the initial stoploss
+            return None  # return None to keep using the initial stoploss
 
         # After reaching the desired offset, allow the stoploss to trail by half the profit
         desired_stoploss = current_profit / 2
@@ -362,23 +415,36 @@ Instead of continuously trailing behind the current price, this example sets fix
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     use_custom_stoploss = True
 
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool,
-                        **kwargs) -> float | None:
+    def custom_stoploss(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        after_fill: bool,
+        **kwargs,
+    ) -> float | None:
 
         # evaluate highest to lowest, so that highest possible stop is used
         if current_profit > 0.40:
-            return stoploss_from_open(0.25, current_profit, is_short=trade.is_short, leverage=trade.leverage)
+            return stoploss_from_open(
+                0.25, current_profit, is_short=trade.is_short, leverage=trade.leverage
+            )
         elif current_profit > 0.25:
-            return stoploss_from_open(0.15, current_profit, is_short=trade.is_short, leverage=trade.leverage)
+            return stoploss_from_open(
+                0.15, current_profit, is_short=trade.is_short, leverage=trade.leverage
+            )
         elif current_profit > 0.20:
-            return stoploss_from_open(0.07, current_profit, is_short=trade.is_short, leverage=trade.leverage)
+            return stoploss_from_open(
+                0.07, current_profit, is_short=trade.is_short, leverage=trade.leverage
+            )
 
         # return maximum stoploss value, keeping current stoploss price unchanged
         return None
@@ -391,17 +457,24 @@ Absolute stoploss value may be derived from indicators stored in dataframe. Exam
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # <...>
         dataframe["sar"] = ta.SAR(dataframe)
 
     use_custom_stoploss = True
 
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool,
-                        **kwargs) -> float | None:
+    def custom_stoploss(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        after_fill: bool,
+        **kwargs,
+    ) -> float | None:
 
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         last_candle = dataframe.iloc[-1].squeeze()
@@ -438,22 +511,30 @@ Stoploss values returned from `custom_stoploss()` must specify a percentage rela
     ``` python
     # Default imports
 
-    class AwesomeStrategy(IStrategy):
 
+    class AwesomeStrategy(IStrategy):
         # ... populate_* methods
 
         use_custom_stoploss = True
 
-        def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                            current_rate: float, current_profit: float, after_fill: bool,
-                            **kwargs) -> float | None:
+        def custom_stoploss(
+            self,
+            pair: str,
+            trade: Trade,
+            current_time: datetime,
+            current_rate: float,
+            current_profit: float,
+            after_fill: bool,
+            **kwargs,
+        ) -> float | None:
 
             # once the profit has risen above 10%, keep the stoploss at 7% above the open price
             if current_profit > 0.10:
-                return stoploss_from_open(0.07, current_profit, is_short=trade.is_short, leverage=trade.leverage)
+                return stoploss_from_open(
+                    0.07, current_profit, is_short=trade.is_short, leverage=trade.leverage
+                )
 
             return 1
-
     ```
 
     Full examples can be found in the [Custom stoploss](strategy-callbacks.md#custom-stoploss) section of the Documentation.
@@ -479,26 +560,34 @@ The helper function `stoploss_from_absolute()` can be used to convert from an ab
     ``` python
     # Default imports
 
-    class AwesomeStrategy(IStrategy):
 
+    class AwesomeStrategy(IStrategy):
         use_custom_stoploss = True
 
         def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
             dataframe["atr"] = ta.ATR(dataframe, timeperiod=14)
             return dataframe
 
-        def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                            current_rate: float, current_profit: float, after_fill: bool,
-                            **kwargs) -> float | None:
+        def custom_stoploss(
+            self,
+            pair: str,
+            trade: Trade,
+            current_time: datetime,
+            current_rate: float,
+            current_profit: float,
+            after_fill: bool,
+            **kwargs,
+        ) -> float | None:
             dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
             trade_date = timeframe_to_prev_date(self.timeframe, trade.open_date_utc)
             candle = dataframe.iloc[-1].squeeze()
             side = 1 if trade.is_short else -1
-            return stoploss_from_absolute(current_rate + (side * candle["atr"] * 2), 
-                                          current_rate=current_rate, 
-                                          is_short=trade.is_short,
-                                          leverage=trade.leverage)
-
+            return stoploss_from_absolute(
+                current_rate + (side * candle["atr"] * 2),
+                current_rate=current_rate,
+                is_short=trade.is_short,
+                leverage=trade.leverage,
+            )
     ```
 
 ---
@@ -524,14 +613,22 @@ Use different ROI thresholds depending on the `side`. In this example, 5% for lo
 ```python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     use_custom_roi = True
 
     # ... populate_* methods
 
-    def custom_roi(self, pair: str, trade: Trade, current_time: datetime, trade_duration: int,
-                   entry_tag: str | None, side: str, **kwargs) -> float | None:
+    def custom_roi(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        trade_duration: int,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float | None:
         """
         Custom ROI logic, returns a new minimum ROI threshold (as a ratio, e.g., 0.05 for +5%).
         Only called when use_custom_roi is set to True.
@@ -559,23 +656,31 @@ Use different ROI thresholds depending on the `pair`.
 ```python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     use_custom_roi = True
 
     # ... populate_* methods
 
-    def custom_roi(self, pair: str, trade: Trade, current_time: datetime, trade_duration: int,
-                   entry_tag: str | None, side: str, **kwargs) -> float | None:
+    def custom_roi(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        trade_duration: int,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float | None:
 
         stake = trade.stake_currency
         roi_map = {
-            f"BTC/{stake}": 0.02, # 2% for BTC
-            f"ETH/{stake}": 0.03, # 3% for ETH
-            f"XRP/{stake}": 0.04, # 4% for XRP
+            f"BTC/{stake}": 0.02,  # 2% for BTC
+            f"ETH/{stake}": 0.03,  # 3% for ETH
+            f"XRP/{stake}": 0.04,  # 4% for XRP
         }
 
-        return roi_map.get(pair, 0.01) # 1% for any other pair
+        return roi_map.get(pair, 0.01)  # 1% for any other pair
 ```
 
 #### Custom ROI per entry tag
@@ -585,19 +690,27 @@ Use different ROI thresholds depending on the `entry_tag` provided with the buy 
 ```python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     use_custom_roi = True
 
     # ... populate_* methods
 
-    def custom_roi(self, pair: str, trade: Trade, current_time: datetime, trade_duration: int,
-                   entry_tag: str | None, side: str, **kwargs) -> float | None:
+    def custom_roi(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        trade_duration: int,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float | None:
 
         roi_by_tag = {
-            "breakout": 0.08,       # 8% if tag is "breakout"
-            "rsi_overbought": 0.05, # 5% if tag is "rsi_overbought"
-            "mean_reversion": 0.03, # 3% if tag is "mean_reversion"
+            "breakout": 0.08,  # 8% if tag is "breakout"
+            "rsi_overbought": 0.05,  # 5% if tag is "rsi_overbought"
+            "mean_reversion": 0.03,  # 3% if tag is "mean_reversion"
         }
 
         return roi_by_tag.get(entry_tag, 0.01)  # 1% if tag is unknown
@@ -612,22 +725,30 @@ ROI value may be derived from indicators stored in dataframe. This example uses 
 # <...>
 import talib.abstract as ta
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     use_custom_roi = True
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # <...>
         dataframe["atr"] = ta.ATR(dataframe, timeperiod=10)
 
-    def custom_roi(self, pair: str, trade: Trade, current_time: datetime, trade_duration: int,
-                   entry_tag: str | None, side: str, **kwargs) -> float | None:
+    def custom_roi(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        trade_duration: int,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float | None:
 
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         last_candle = dataframe.iloc[-1].squeeze()
         atr_ratio = last_candle["atr"] / last_candle["close"]
 
-        return atr_ratio # Returns the ATR value as ratio
+        return atr_ratio  # Returns the ATR value as ratio
 ```
 
 ---
@@ -651,29 +772,45 @@ Each of these methods are called right before placing an order on the exchange.
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
-    def custom_entry_price(self, pair: str, trade: Trade | None, current_time: datetime, proposed_rate: float,
-                           entry_tag: str | None, side: str, **kwargs) -> float:
+    def custom_entry_price(
+        self,
+        pair: str,
+        trade: Trade | None,
+        current_time: datetime,
+        proposed_rate: float,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float:
 
-        dataframe, last_updated = self.dp.get_analyzed_dataframe(pair=pair,
-                                                                timeframe=self.timeframe)
+        dataframe, last_updated = self.dp.get_analyzed_dataframe(
+            pair=pair, timeframe=self.timeframe
+        )
         new_entryprice = dataframe["bollinger_10_lowerband"].iat[-1]
 
         return new_entryprice
 
-    def custom_exit_price(self, pair: str, trade: Trade,
-                          current_time: datetime, proposed_rate: float,
-                          current_profit: float, exit_tag: str | None, **kwargs) -> float:
+    def custom_exit_price(
+        self,
+        pair: str,
+        trade: Trade,
+        current_time: datetime,
+        proposed_rate: float,
+        current_profit: float,
+        exit_tag: str | None,
+        **kwargs,
+    ) -> float:
 
-        dataframe, last_updated = self.dp.get_analyzed_dataframe(pair=pair,
-                                                                timeframe=self.timeframe)
+        dataframe, last_updated = self.dp.get_analyzed_dataframe(
+            pair=pair, timeframe=self.timeframe
+        )
         new_exitprice = dataframe["bollinger_10_upperband"].iat[-1]
 
         return new_exitprice
-
 ```
 
 !!! Warning
@@ -710,37 +847,35 @@ It applies a tight timeout for higher priced assets, while allowing more time to
 The function must return either `True` (cancel order) or `False` (keep order alive).
 
 ``` python
-    # Default imports
+# Default imports
+
 
 class AwesomeStrategy(IStrategy):
-
     # ... populate_* methods
 
     # Set unfilledtimeout to 25 hours, since the maximum timeout from below is 24 hours.
-    unfilledtimeout = {
-        "entry": 60 * 25,
-        "exit": 60 * 25
-    }
+    unfilledtimeout = {"entry": 60 * 25, "exit": 60 * 25}
 
-    def check_entry_timeout(self, pair: str, trade: Trade, order: Order,
-                            current_time: datetime, **kwargs) -> bool:
+    def check_entry_timeout(
+        self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs
+    ) -> bool:
         if trade.open_rate > 100 and trade.open_date_utc < current_time - timedelta(minutes=5):
             return True
         elif trade.open_rate > 10 and trade.open_date_utc < current_time - timedelta(minutes=3):
             return True
         elif trade.open_rate < 1 and trade.open_date_utc < current_time - timedelta(hours=24):
-           return True
+            return True
         return False
 
-
-    def check_exit_timeout(self, pair: str, trade: Trade, order: Order,
-                           current_time: datetime, **kwargs) -> bool:
+    def check_exit_timeout(
+        self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs
+    ) -> bool:
         if trade.open_rate > 100 and trade.open_date_utc < current_time - timedelta(minutes=5):
             return True
         elif trade.open_rate > 10 and trade.open_date_utc < current_time - timedelta(minutes=3):
             return True
         elif trade.open_rate < 1 and trade.open_date_utc < current_time - timedelta(hours=24):
-           return True
+            return True
         return False
 ```
 
@@ -750,20 +885,18 @@ class AwesomeStrategy(IStrategy):
 ### Custom order timeout example (using additional data)
 
 ``` python
-    # Default imports
+# Default imports
+
 
 class AwesomeStrategy(IStrategy):
-
     # ... populate_* methods
 
     # Set unfilledtimeout to 25 hours, since the maximum timeout from below is 24 hours.
-    unfilledtimeout = {
-        "entry": 60 * 25,
-        "exit": 60 * 25
-    }
+    unfilledtimeout = {"entry": 60 * 25, "exit": 60 * 25}
 
-    def check_entry_timeout(self, pair: str, trade: Trade, order: Order,
-                            current_time: datetime, **kwargs) -> bool:
+    def check_entry_timeout(
+        self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs
+    ) -> bool:
         ob = self.dp.orderbook(pair, 1)
         current_price = ob["bids"][0][0]
         # Cancel buy order if price is more than 2% above the order.
@@ -771,9 +904,9 @@ class AwesomeStrategy(IStrategy):
             return True
         return False
 
-
-    def check_exit_timeout(self, pair: str, trade: Trade, order: Order,
-                           current_time: datetime, **kwargs) -> bool:
+    def check_exit_timeout(
+        self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs
+    ) -> bool:
         ob = self.dp.orderbook(pair, 1)
         current_price = ob["asks"][0][0]
         # Cancel sell order if price is more than 2% below the order.
@@ -796,13 +929,22 @@ This are the last methods that will be called before an order is placed.
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
-    def confirm_trade_entry(self, pair: str, order_type: str, amount: float, rate: float,
-                            time_in_force: str, current_time: datetime, entry_tag: str | None,
-                            side: str, **kwargs) -> bool:
+    def confirm_trade_entry(
+        self,
+        pair: str,
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        current_time: datetime,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> bool:
         """
         Called right before placing a entry order.
         Timing for this function is critical, so avoid doing heavy computations or
@@ -815,7 +957,7 @@ class AwesomeStrategy(IStrategy):
         :param pair: Pair that's about to be bought/shorted.
         :param order_type: Order type (as configured in order_types). usually limit or market.
         :param amount: Amount in target (base) currency that's going to be traded.
-        :param rate: Rate that's going to be used when using limit orders 
+        :param rate: Rate that's going to be used when using limit orders
                      or current rate for market orders.
         :param time_in_force: Time in force. Defaults to GTC (Good-til-cancelled).
         :param current_time: datetime object, containing the current datetime
@@ -826,7 +968,6 @@ class AwesomeStrategy(IStrategy):
             False aborts the process
         """
         return True
-
 ```
 
 ### Trade exit (sell order) confirmation
@@ -844,13 +985,22 @@ The exit-reasons (if applicable) will be in the following sequence:
 ``` python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
-    def confirm_trade_exit(self, pair: str, trade: Trade, order_type: str, amount: float,
-                           rate: float, time_in_force: str, exit_reason: str,
-                           current_time: datetime, **kwargs) -> bool:
+    def confirm_trade_exit(
+        self,
+        pair: str,
+        trade: Trade,
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        exit_reason: str,
+        current_time: datetime,
+        **kwargs,
+    ) -> bool:
         """
         Called right before placing a regular exit order.
         Timing for this function is critical, so avoid doing heavy computations or
@@ -881,7 +1031,6 @@ class AwesomeStrategy(IStrategy):
             # (this does not necessarily make sense, assuming you know when you're force-selling)
             return False
         return True
-
 ```
 
 !!! Warning
@@ -957,8 +1106,8 @@ Back to the example above, since current rate is 200, the current USDT value of 
 ``` python
 # Default imports
 
-class DigDeeperStrategy(IStrategy):
 
+class DigDeeperStrategy(IStrategy):
     position_adjustment_enable = True
 
     # Attempts to handle large drops with DCA. High stoploss is required.
@@ -972,22 +1121,38 @@ class DigDeeperStrategy(IStrategy):
     max_dca_multiplier = 5.5
 
     # This is called when placing the initial order (opening trade)
-    def custom_stake_amount(self, pair: str, current_time: datetime, current_rate: float,
-                            proposed_stake: float, min_stake: float | None, max_stake: float,
-                            leverage: float, entry_tag: str | None, side: str,
-                            **kwargs) -> float:
+    def custom_stake_amount(
+        self,
+        pair: str,
+        current_time: datetime,
+        current_rate: float,
+        proposed_stake: float,
+        min_stake: float | None,
+        max_stake: float,
+        leverage: float,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float:
 
         # We need to leave most of the funds for possible further DCA orders
         # This also applies to fixed stakes
         return proposed_stake / self.max_dca_multiplier
 
-    def adjust_trade_position(self, trade: Trade, current_time: datetime,
-                              current_rate: float, current_profit: float,
-                              min_stake: float | None, max_stake: float,
-                              current_entry_rate: float, current_exit_rate: float,
-                              current_entry_profit: float, current_exit_profit: float,
-                              **kwargs
-                              ) -> float | None | tuple[float | None, str | None]:
+    def adjust_trade_position(
+        self,
+        trade: Trade,
+        current_time: datetime,
+        current_rate: float,
+        current_profit: float,
+        min_stake: float | None,
+        max_stake: float,
+        current_entry_rate: float,
+        current_exit_rate: float,
+        current_entry_profit: float,
+        current_exit_profit: float,
+        **kwargs,
+    ) -> float | None | tuple[float | None, str | None]:
         """
         Custom trade adjustment logic, returning the stake amount that a trade should be
         increased or decreased.
@@ -1001,7 +1166,7 @@ class DigDeeperStrategy(IStrategy):
         :param trade: trade object.
         :param current_time: datetime object, containing the current datetime
         :param current_rate: Current entry rate (same as current_entry_profit)
-        :param current_profit: Current profit (as ratio), calculated based on current_rate 
+        :param current_profit: Current profit (as ratio), calculated based on current_rate
                                (same as current_entry_profit).
         :param min_stake: Minimal stake size allowed by exchange (for both entries and exits)
         :param max_stake: Maximum stake allowed (either through balance, or by exchange limits).
@@ -1054,7 +1219,6 @@ class DigDeeperStrategy(IStrategy):
             return None
 
         return None
-
 ```
 
 ### Position adjust calculations
@@ -1099,8 +1263,8 @@ If the order has been partially filled, the order will not be replaced. You can 
 ```python
 # Default imports
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     # ... populate_* methods
 
     def adjust_order_price(
@@ -1143,9 +1307,9 @@ class AwesomeStrategy(IStrategy):
         # Limit entry orders to use and follow SMA200 as price target for the first 10 minutes since entry trigger for BTC/USDT pair.
         if (
             is_entry
-            and pair == "BTC/USDT" 
-            and entry_tag == "long_sma200" 
-            and side == "long" 
+            and pair == "BTC/USDT"
+            and entry_tag == "long_sma200"
+            and side == "long"
             and (current_time - timedelta(minutes=10)) <= trade.open_date_utc
         ):
             # just cancel the order if it has been filled more than half of the amount
@@ -1192,10 +1356,19 @@ For markets / exchanges that don't support leverage, this method is ignored.
 ``` python
 # Default imports
 
+
 class AwesomeStrategy(IStrategy):
-    def leverage(self, pair: str, current_time: datetime, current_rate: float,
-                 proposed_leverage: float, max_leverage: float, entry_tag: str | None, side: str,
-                 **kwargs) -> float:
+    def leverage(
+        self,
+        pair: str,
+        current_time: datetime,
+        current_rate: float,
+        proposed_leverage: float,
+        max_leverage: float,
+        entry_tag: str | None,
+        side: str,
+        **kwargs,
+    ) -> float:
         """
         Customize leverage for each new trade. This method is only called in futures mode.
 
@@ -1224,10 +1397,13 @@ Assuming that your strategy needs to store the high value of the candle at trade
 ``` python
 # Default imports
 
+
 class AwesomeStrategy(IStrategy):
-    def order_filled(self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs) -> None:
+    def order_filled(
+        self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs
+    ) -> None:
         """
-        Called right after an order fills. 
+        Called right after an order fills.
         Will be called for all order types (entry, exit, stoploss, position adjustment).
         :param pair: Pair for trade
         :param trade: trade object.
@@ -1238,12 +1414,11 @@ class AwesomeStrategy(IStrategy):
         # Obtain pair dataframe (just to show how to access it)
         dataframe, _ = self.dp.get_analyzed_dataframe(trade.pair, self.timeframe)
         last_candle = dataframe.iloc[-1].squeeze()
-        
+
         if (trade.nr_of_successful_entries == 1) and (order.ft_order_side == trade.entry_side):
             trade.set_custom_data(key="entry_candle_high", value=last_candle["high"])
 
         return None
-
 ```
 
 !!! Tip "Learn more about storing data"
@@ -1318,6 +1493,7 @@ This is obviously a very basic example.
 ``` python
 # Default imports
 
+
 class AwesomeStrategy(IStrategy):
     def plot_annotations(
         self, pair: str, start_date: datetime, end_date: datetime, dataframe: DataFrame, **kwargs
@@ -1351,7 +1527,6 @@ class AwesomeStrategy(IStrategy):
                 )
 
         return annotations
-
 ```
 
 Entries will be validated, and won't be passed to the UI if they don't correspond to the expected schema and will log an error if they don't.

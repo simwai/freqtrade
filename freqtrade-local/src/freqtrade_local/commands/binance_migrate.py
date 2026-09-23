@@ -1,4 +1,5 @@
 """Binance futures migration command wrapper."""
+
 import logging
 
 from freqtrade_local.util.migrations.binance_mig import (

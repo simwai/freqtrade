@@ -65,17 +65,17 @@ A simple strategy with multiple indicators. No special considerations are requir
 
 ```py
 class ProducerStrategy(IStrategy):
-    #...
+    # ...
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
         Calculate indicators in the standard freqtrade way which can then be broadcast to other instances
         """
-        dataframe['rsi'] = ta.RSI(dataframe)
+        dataframe["rsi"] = ta.RSI(dataframe)
         bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
-        dataframe['bb_lowerband'] = bollinger['lower']
-        dataframe['bb_middleband'] = bollinger['mid']
-        dataframe['bb_upperband'] = bollinger['upper']
-        dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
+        dataframe["bb_lowerband"] = bollinger["lower"]
+        dataframe["bb_middleband"] = bollinger["mid"]
+        dataframe["bb_upperband"] = bollinger["upper"]
+        dataframe["tema"] = ta.TEMA(dataframe, timeperiod=9)
 
         return dataframe
 
@@ -85,12 +85,13 @@ class ProducerStrategy(IStrategy):
         """
         dataframe.loc[
             (
-                (qtpylib.crossed_above(dataframe['rsi'], self.buy_rsi.value)) &
-                (dataframe['tema'] <= dataframe['bb_middleband']) &
-                (dataframe['tema'] > dataframe['tema'].shift(1)) &
-                (dataframe['volume'] > 0)
+                (qtpylib.crossed_above(dataframe["rsi"], self.buy_rsi.value))
+                & (dataframe["tema"] <= dataframe["bb_middleband"])
+                & (dataframe["tema"] > dataframe["tema"].shift(1))
+                & (dataframe["volume"] > 0)
             ),
-            'enter_long'] = 1
+            "enter_long",
+        ] = 1
 
         return dataframe
 ```
@@ -105,17 +106,17 @@ A logically equivalent strategy which calculates no indicators itself, but will 
 
 ```py
 class ConsumerStrategy(IStrategy):
-    #...
-    process_only_new_candles = False # required for consumers
+    # ...
+    process_only_new_candles = False  # required for consumers
 
-    _columns_to_expect = ['rsi_default', 'tema_default', 'bb_middleband_default']
+    _columns_to_expect = ["rsi_default", "tema_default", "bb_middleband_default"]
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
         Use the websocket api to get pre-populated indicators from another freqtrade instance.
         Use `self.dp.get_producer_df(pair)` to get the dataframe
         """
-        pair = metadata['pair']
+        pair = metadata["pair"]
         timeframe = self.timeframe
 
         producer_pairs = self.dp.get_producer_pairs()
@@ -135,10 +136,14 @@ class ConsumerStrategy(IStrategy):
         if not producer_dataframe.empty:
             # If you plan on passing the producer's entry/exit signal directly,
             # specify ffill=False or it will have unintended results
-            merged_dataframe = merge_informative_pair(dataframe, producer_dataframe,
-                                                      timeframe, timeframe,
-                                                      append_timeframe=False,
-                                                      suffix="default")
+            merged_dataframe = merge_informative_pair(
+                dataframe,
+                producer_dataframe,
+                timeframe,
+                timeframe,
+                append_timeframe=False,
+                suffix="default",
+            )
             return merged_dataframe
         else:
             dataframe[self._columns_to_expect] = 0
@@ -152,12 +157,13 @@ class ConsumerStrategy(IStrategy):
         # Use the dataframe columns as if we calculated them ourselves
         dataframe.loc[
             (
-                (qtpylib.crossed_above(dataframe['rsi_default'], self.buy_rsi.value)) &
-                (dataframe['tema_default'] <= dataframe['bb_middleband_default']) &
-                (dataframe['tema_default'] > dataframe['tema_default'].shift(1)) &
-                (dataframe['volume'] > 0)
+                (qtpylib.crossed_above(dataframe["rsi_default"], self.buy_rsi.value))
+                & (dataframe["tema_default"] <= dataframe["bb_middleband_default"])
+                & (dataframe["tema_default"] > dataframe["tema_default"].shift(1))
+                & (dataframe["volume"] > 0)
             ),
-            'enter_long'] = 1
+            "enter_long",
+        ] = 1
 
         return dataframe
 ```

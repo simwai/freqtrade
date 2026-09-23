@@ -335,12 +335,8 @@ class WalkForwardHistoricalRunner:
         aggregate_content = cast(BacktestContentType, dict(content))
         aggregate_content["config"] = aggregate_config
         aggregate_content["results"] = aggregate_results
-        aggregate_content["backtest_start_time"] = int(
-            datetime.now(UTC).timestamp()
-        )
-        aggregate_content["backtest_end_time"] = int(
-            datetime.now(UTC).timestamp()
-        )
+        aggregate_content["backtest_start_time"] = int(datetime.now(UTC).timestamp())
+        aggregate_content["backtest_end_time"] = int(datetime.now(UTC).timestamp())
         overall_start = self.overall_timerange.startdt
         overall_stop = self.overall_timerange.stopdt
         if overall_start is None or overall_stop is None:

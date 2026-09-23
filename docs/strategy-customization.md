@@ -130,8 +130,8 @@ If we were to look at the first few rows of the main dataframe using the pandas 
 A dataframe is a table where columns are not single values, but a series of data values. As such, simple python comparisons like the following will not work:
 
 ``` python
-    if dataframe['rsi'] > 30:
-        dataframe['enter_long'] = 1
+if dataframe["rsi"] > 30:
+    dataframe["enter_long"] = 1
 ```
 
 The above section will fail with `The truth value of a Series is ambiguous [...]`.
@@ -139,9 +139,7 @@ The above section will fail with `The truth value of a Series is ambiguous [...]
 This must instead be written in a pandas-compatible way, so the operation is performed across the whole dataframe, i.e. `vectorisation`.
 
 ``` python
-    dataframe.loc[
-        (dataframe['rsi'] > 30)
-    , 'enter_long'] = 1
+dataframe.loc[(dataframe["rsi"] > 30), "enter_long"] = 1
 ```
 
 With this section, you have a new column in your dataframe, which has `1` assigned whenever RSI is above 30.
@@ -193,32 +191,32 @@ def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame
     :param metadata: Additional information, like the currently traded pair
     :return: a Dataframe with all mandatory indicators for the strategies
     """
-    dataframe['sar'] = ta.SAR(dataframe)
-    dataframe['adx'] = ta.ADX(dataframe)
+    dataframe["sar"] = ta.SAR(dataframe)
+    dataframe["adx"] = ta.ADX(dataframe)
     stoch = ta.STOCHF(dataframe)
-    dataframe['fastd'] = stoch['fastd']
-    dataframe['fastk'] = stoch['fastk']
-    dataframe['bb_lower'] = ta.BBANDS(dataframe, nbdevup=2, nbdevdn=2)['lowerband']
-    dataframe['sma'] = ta.SMA(dataframe, timeperiod=40)
-    dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
-    dataframe['mfi'] = ta.MFI(dataframe)
-    dataframe['rsi'] = ta.RSI(dataframe)
-    dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
-    dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
-    dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
-    dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)
-    dataframe['ao'] = awesome_oscillator(dataframe)
+    dataframe["fastd"] = stoch["fastd"]
+    dataframe["fastk"] = stoch["fastk"]
+    dataframe["bb_lower"] = ta.BBANDS(dataframe, nbdevup=2, nbdevdn=2)["lowerband"]
+    dataframe["sma"] = ta.SMA(dataframe, timeperiod=40)
+    dataframe["tema"] = ta.TEMA(dataframe, timeperiod=9)
+    dataframe["mfi"] = ta.MFI(dataframe)
+    dataframe["rsi"] = ta.RSI(dataframe)
+    dataframe["ema5"] = ta.EMA(dataframe, timeperiod=5)
+    dataframe["ema10"] = ta.EMA(dataframe, timeperiod=10)
+    dataframe["ema50"] = ta.EMA(dataframe, timeperiod=50)
+    dataframe["ema100"] = ta.EMA(dataframe, timeperiod=100)
+    dataframe["ao"] = awesome_oscillator(dataframe)
     macd = ta.MACD(dataframe)
-    dataframe['macd'] = macd['macd']
-    dataframe['macdsignal'] = macd['macdsignal']
-    dataframe['macdhist'] = macd['macdhist']
+    dataframe["macd"] = macd["macd"]
+    dataframe["macdsignal"] = macd["macdsignal"]
+    dataframe["macdhist"] = macd["macdhist"]
     hilbert = ta.HT_SINE(dataframe)
-    dataframe['htsine'] = hilbert['sine']
-    dataframe['htleadsine'] = hilbert['leadsine']
-    dataframe['plus_dm'] = ta.PLUS_DM(dataframe)
-    dataframe['plus_di'] = ta.PLUS_DI(dataframe)
-    dataframe['minus_dm'] = ta.MINUS_DM(dataframe)
-    dataframe['minus_di'] = ta.MINUS_DI(dataframe)
+    dataframe["htsine"] = hilbert["sine"]
+    dataframe["htleadsine"] = hilbert["leadsine"]
+    dataframe["plus_dm"] = ta.PLUS_DM(dataframe)
+    dataframe["plus_di"] = ta.PLUS_DI(dataframe)
+    dataframe["minus_dm"] = ta.MINUS_DM(dataframe)
+    dataframe["minus_di"] = ta.MINUS_DI(dataframe)
 
     # remember to always return the dataframe
     return dataframe
@@ -251,7 +249,7 @@ You can use [recursive-analysis](recursive-analysis.md) to check and find the co
 In this example strategy, this should be set to 400 (`startup_candle_count = 400`), since the minimum needed history for ema100 calculation to make sure the value is correct is 400 candles.
 
 ``` python
-    dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)
+dataframe["ema100"] = ta.EMA(dataframe, timeperiod=100)
 ```
 
 By letting the bot know how much history is needed, backtest trades can start at the specified timerange during backtesting and hyperopt.
@@ -302,12 +300,13 @@ def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFram
     """
     dataframe.loc[
         (
-            (qtpylib.crossed_above(dataframe['rsi'], 30)) &  # Signal: RSI crosses above 30
-            (dataframe['tema'] <= dataframe['bb_middleband']) &  # Guard
-            (dataframe['tema'] > dataframe['tema'].shift(1)) &  # Guard
-            (dataframe['volume'] > 0)  # Make sure Volume is not 0
+            (qtpylib.crossed_above(dataframe["rsi"], 30))  # Signal: RSI crosses above 30
+            & (dataframe["tema"] <= dataframe["bb_middleband"])  # Guard
+            & (dataframe["tema"] > dataframe["tema"].shift(1))  # Guard
+            & (dataframe["volume"] > 0)  # Make sure Volume is not 0
         ),
-        ['enter_long', 'enter_tag']] = (1, 'rsi_cross')
+        ["enter_long", "enter_tag"],
+    ] = (1, "rsi_cross")
 
     return dataframe
 ```
@@ -322,24 +321,27 @@ def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFram
     # allow both long and short trades
     can_short = True
 
+
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dataframe.loc[
             (
-                (qtpylib.crossed_above(dataframe['rsi'], 30)) &  # Signal: RSI crosses above 30
-                (dataframe['tema'] <= dataframe['bb_middleband']) &  # Guard
-                (dataframe['tema'] > dataframe['tema'].shift(1)) &  # Guard
-                (dataframe['volume'] > 0)  # Make sure Volume is not 0
+                (qtpylib.crossed_above(dataframe["rsi"], 30))  # Signal: RSI crosses above 30
+                & (dataframe["tema"] <= dataframe["bb_middleband"])  # Guard
+                & (dataframe["tema"] > dataframe["tema"].shift(1))  # Guard
+                & (dataframe["volume"] > 0)  # Make sure Volume is not 0
             ),
-            ['enter_long', 'enter_tag']] = (1, 'rsi_cross')
+            ["enter_long", "enter_tag"],
+        ] = (1, "rsi_cross")
 
         dataframe.loc[
             (
-                (qtpylib.crossed_below(dataframe['rsi'], 70)) &  # Signal: RSI crosses below 70
-                (dataframe['tema'] > dataframe['bb_middleband']) &  # Guard
-                (dataframe['tema'] < dataframe['tema'].shift(1)) &  # Guard
-                (dataframe['volume'] > 0)  # Make sure Volume is not 0
+                (qtpylib.crossed_below(dataframe["rsi"], 70))  # Signal: RSI crosses below 70
+                & (dataframe["tema"] > dataframe["bb_middleband"])  # Guard
+                & (dataframe["tema"] < dataframe["tema"].shift(1))  # Guard
+                & (dataframe["volume"] > 0)  # Make sure Volume is not 0
             ),
-            ['enter_short', 'enter_tag']] = (1, 'rsi_cross')
+            ["enter_short", "enter_tag"],
+        ] = (1, "rsi_cross")
 
         return dataframe
     ```
@@ -373,12 +375,13 @@ def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame
     """
     dataframe.loc[
         (
-            (qtpylib.crossed_above(dataframe['rsi'], 70)) &  # Signal: RSI crosses above 70
-            (dataframe['tema'] > dataframe['bb_middleband']) &  # Guard
-            (dataframe['tema'] < dataframe['tema'].shift(1)) &  # Guard
-            (dataframe['volume'] > 0)  # Make sure Volume is not 0
+            (qtpylib.crossed_above(dataframe["rsi"], 70))  # Signal: RSI crosses above 70
+            & (dataframe["tema"] > dataframe["bb_middleband"])  # Guard
+            & (dataframe["tema"] < dataframe["tema"].shift(1))  # Guard
+            & (dataframe["volume"] > 0)  # Make sure Volume is not 0
         ),
-        ['exit_long', 'exit_tag']] = (1, 'rsi_too_high')
+        ["exit_long", "exit_tag"],
+    ] = (1, "rsi_too_high")
     return dataframe
 ```
 
@@ -392,23 +395,26 @@ def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame
     # allow both long and short trades
     can_short = True
 
+
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dataframe.loc[
             (
-                (qtpylib.crossed_above(dataframe['rsi'], 70)) &  # Signal: RSI crosses above 70
-                (dataframe['tema'] > dataframe['bb_middleband']) &  # Guard
-                (dataframe['tema'] < dataframe['tema'].shift(1)) &  # Guard
-                (dataframe['volume'] > 0)  # Make sure Volume is not 0
+                (qtpylib.crossed_above(dataframe["rsi"], 70))  # Signal: RSI crosses above 70
+                & (dataframe["tema"] > dataframe["bb_middleband"])  # Guard
+                & (dataframe["tema"] < dataframe["tema"].shift(1))  # Guard
+                & (dataframe["volume"] > 0)  # Make sure Volume is not 0
             ),
-            ['exit_long', 'exit_tag']] = (1, 'rsi_too_high')
+            ["exit_long", "exit_tag"],
+        ] = (1, "rsi_too_high")
         dataframe.loc[
             (
-                (qtpylib.crossed_below(dataframe['rsi'], 30)) &  # Signal: RSI crosses below 30
-                (dataframe['tema'] < dataframe['bb_middleband']) &  # Guard
-                (dataframe['tema'] > dataframe['tema'].shift(1)) &  # Guard
-                (dataframe['volume'] > 0)  # Make sure Volume is not 0
+                (qtpylib.crossed_below(dataframe["rsi"], 30))  # Signal: RSI crosses below 30
+                & (dataframe["tema"] < dataframe["bb_middleband"])  # Guard
+                & (dataframe["tema"] > dataframe["tema"].shift(1))  # Guard
+                & (dataframe["volume"] > 0)  # Make sure Volume is not 0
             ),
-            ['exit_short', 'exit_tag']] = (1, 'rsi_too_low')
+            ["exit_short", "exit_tag"],
+        ] = (1, "rsi_too_low")
         return dataframe
     ```
 
@@ -419,12 +425,7 @@ The `minimal_roi` strategy variable defines the minimal Return On Investment (RO
 It is of the following format, i.e. a python `dict`, with the dict key (left side of the colon) being the minutes passed since the trade opened, and the value (right side of the colon) being the percentage.
 
 ```python
-minimal_roi = {
-    "40": 0.0,
-    "30": 0.01,
-    "20": 0.02,
-    "0": 0.04
-}
+minimal_roi = {"40": 0.0, "30": 0.01, "20": 0.02, "0": 0.04}
 ```
 
 The above configuration would therefore mean:
@@ -453,12 +454,12 @@ This will allow you to change the timeframe for the strategy, but the minimal RO
 ``` python
 from freqtrade.exchange import timeframe_to_minutes
 
-class AwesomeStrategy(IStrategy):
 
+class AwesomeStrategy(IStrategy):
     timeframe = "1d"
     timeframe_mins = timeframe_to_minutes(timeframe)
     minimal_roi = {
-        "0": 0.05,                      # 5% for the first 3 candles
+        "0": 0.05,  # 5% for the first 3 candles
         str(timeframe_mins * 3): 0.02,  # 2% after 3 candles
         str(timeframe_mins * 6): 0.01,  # 1% After 6 candles
     }
@@ -544,9 +545,10 @@ Sample:
 
 ``` python
 def informative_pairs(self):
-    return [("ETH/USDT", "5m"),
-            ("BTC/TUSD", "15m"),
-            ]
+    return [
+        ("ETH/USDT", "5m"),
+        ("BTC/TUSD", "15m"),
+    ]
 ```
 
 A full sample can be found [in the DataProvider section](#complete-dataprovider-sample).
@@ -566,9 +568,17 @@ A full sample can be found [in the DataProvider section](#complete-dataprovider-
     ``` python
     def informative_pairs(self):
         return [
-            ("ETH/USDT", "5m", ""),   # Uses default candletype, depends on trading_mode (recommended)
-            ("ETH/USDT", "5m", "spot"),   # Forces usage of spot candles (only valid for bots running on spot markets).
-            ("BTC/TUSD", "15m", "futures"),  # Uses futures candles (only bots with `trading_mode=futures`)
+            ("ETH/USDT", "5m", ""),  # Uses default candletype, depends on trading_mode (recommended)
+            (
+                "ETH/USDT",
+                "5m",
+                "spot",
+            ),  # Forces usage of spot candles (only valid for bots running on spot markets).
+            (
+                "BTC/TUSD",
+                "15m",
+                "futures",
+            ),  # Uses futures candles (only bots with `trading_mode=futures`)
             ("BTC/TUSD", "15m", "mark"),  # Uses mark candles (only bots with `trading_mode=futures`)
         ]
     ```
@@ -652,55 +662,53 @@ be returned by informative callbacks or column formatters, or exist in the base 
     Most of the time we do not need power and flexibility offered by `merge_informative_pair()`, therefore we can use a decorator to quickly define informative pairs.
 
     ``` python
-
     from datetime import datetime
     from freqtrade.persistence import Trade
     from freqtrade.strategy import IStrategy, informative
 
+
     class AwesomeStrategy(IStrategy):
-        
-        # This method is not required. 
+        # This method is not required.
         # def informative_pairs(self): ...
 
-        # Define informative upper timeframe for each pair. Decorators can be stacked on same 
+        # Define informative upper timeframe for each pair. Decorators can be stacked on same
         # method. Available in populate_indicators as 'rsi_30m' and 'rsi_1h'.
-        @informative('30m')
-        @informative('1h')
+        @informative("30m")
+        @informative("1h")
         def populate_indicators_1h(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-            dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+            dataframe["rsi"] = ta.RSI(dataframe, timeperiod=14)
             return dataframe
 
         # Define BTC/STAKE informative pair. Available in populate_indicators and other methods as
-        # 'btc_rsi_1h'. Current stake currency should be specified as {stake} format variable 
-        # instead of hard-coding actual stake currency. Available in populate_indicators and other 
+        # 'btc_rsi_1h'. Current stake currency should be specified as {stake} format variable
+        # instead of hard-coding actual stake currency. Available in populate_indicators and other
         # methods as 'btc_usdt_rsi_1h' (when stake currency is USDT).
-        @informative('1h', 'BTC/{stake}')
+        @informative("1h", "BTC/{stake}")
         def populate_indicators_btc_1h(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-            dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+            dataframe["rsi"] = ta.RSI(dataframe, timeperiod=14)
             return dataframe
 
         # Define BTC/ETH informative pair. You must specify quote currency if it is different from
         # stake currency. Available in populate_indicators and other methods as 'eth_btc_rsi_1h'.
-        @informative('1h', 'ETH/BTC')
+        @informative("1h", "ETH/BTC")
         def populate_indicators_eth_btc_1h(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-            dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+            dataframe["rsi"] = ta.RSI(dataframe, timeperiod=14)
             return dataframe
-    
+
         # Define BTC/STAKE informative pair. A custom formatter may be specified for formatting
         # column names. A callable `fmt(**kwargs) -> str` may be specified, to implement custom
         # formatting. Available in populate_indicators and other methods as 'rsi_upper_1h'.
-        @informative('1h', 'BTC/{stake}', '{column}_{timeframe}')
+        @informative("1h", "BTC/{stake}", "{column}_{timeframe}")
         def populate_indicators_btc_1h_2(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-            dataframe['rsi_upper'] = ta.RSI(dataframe, timeperiod=14)
-            return dataframe
-    
-        def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-            # Strategy timeframe indicators for current pair.
-            dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
-            # Informative pairs are available in this method.
-            dataframe['rsi_less'] = dataframe['rsi'] < dataframe['rsi_1h']
+            dataframe["rsi_upper"] = ta.RSI(dataframe, timeperiod=14)
             return dataframe
 
+        def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+            # Strategy timeframe indicators for current pair.
+            dataframe["rsi"] = ta.RSI(dataframe, timeperiod=14)
+            # Informative pairs are available in this method.
+            dataframe["rsi_less"] = dataframe["rsi"] < dataframe["rsi_1h"]
+            return dataframe
     ```
 
 !!! Note
@@ -708,15 +716,12 @@ be returned by informative callbacks or column formatters, or exist in the base 
 
     ``` python
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        stake = self.config['stake_currency']
+        stake = self.config["stake_currency"]
         dataframe.loc[
-            (
-                (dataframe[f'btc_{stake}_rsi_1h'] < 35)
-                &
-                (dataframe['volume'] > 0)
-            ),
-            ['enter_long', 'enter_tag']] = (1, 'buy_signal_rsi')
-    
+            ((dataframe[f"btc_{stake}_rsi_1h"] < 35) & (dataframe["volume"] > 0)),
+            ["enter_long", "enter_tag"],
+        ] = (1, "buy_signal_rsi")
+
         return dataframe
     ```
 
@@ -743,29 +748,28 @@ All columns of the informative dataframe will be available on the returning data
     Assuming `inf_tf = '1d'` the resulting columns will be:
 
     ``` python
-    'date', 'open', 'high', 'low', 'close', 'rsi'                     # from the original dataframe
-    'date_1d', 'open_1d', 'high_1d', 'low_1d', 'close_1d', 'rsi_1d'   # from the informative dataframe
+    "date", "open", "high", "low", "close", "rsi"  # from the original dataframe
+    "date_1d", "open_1d", "high_1d", "low_1d", "close_1d", "rsi_1d"  # from the informative dataframe
     ```
 
 ??? Example "Column renaming - 1h"
     Assuming `inf_tf = '1h'` the resulting columns will be:
 
     ``` python
-    'date', 'open', 'high', 'low', 'close', 'rsi'                     # from the original dataframe
-    'date_1h', 'open_1h', 'high_1h', 'low_1h', 'close_1h', 'rsi_1h'   # from the informative dataframe
+    "date", "open", "high", "low", "close", "rsi"  # from the original dataframe
+    "date_1h", "open_1h", "high_1h", "low_1h", "close_1h", "rsi_1h"  # from the informative dataframe
     ```
 
 ??? Example "Custom implementation"
     A custom implementation for this is possible, and can be done as follows:
 
     ``` python
-
     # Shift date by 1 candle
     # This is necessary since the data is always the "open date"
     # and a 15m candle starting at 12:15 should not know the close of the 1h candle from 12:00 to 13:00
     minutes = timeframe_to_minutes(inf_tf)
     # Only do this if the timeframes are different:
-    informative['date_merge'] = informative["date"] + pd.to_timedelta(minutes, 'm')
+    informative["date_merge"] = informative["date"] + pd.to_timedelta(minutes, "m")
 
     # Rename columns to be unique
     informative.columns = [f"{col}_{inf_tf}" for col in informative.columns]
@@ -774,11 +778,12 @@ All columns of the informative dataframe will be available on the returning data
 
     # Combine the 2 dataframes
     # all indicators on the informative sample MUST be calculated before this point
-    dataframe = pd.merge(dataframe, informative, left_on='date', right_on=f'date_merge_{inf_tf}', how='left')
+    dataframe = pd.merge(
+        dataframe, informative, left_on="date", right_on=f"date_merge_{inf_tf}", how="left"
+    )
     # FFill to have the 1d value available in every row throughout the day.
     # Without this, comparisons would only work once per day.
     dataframe = dataframe.ffill()
-
     ```
 
 !!! Warning "Informative timeframe < timeframe"
@@ -836,13 +841,13 @@ Since we can't resample the data we will have to use an informative pair, and si
 This is where calling `self.dp.current_whitelist()` comes in handy to retrieve only those pairs in the whitelist.
 
 ```python
-    def informative_pairs(self):
+def informative_pairs(self):
 
-        # get access to all pairs available in whitelist.
-        pairs = self.dp.current_whitelist()
-        # Assign timeframe to each pair so they can be downloaded and cached for strategy.
-        informative_pairs = [(pair, '1d') for pair in pairs]
-        return informative_pairs
+    # get access to all pairs available in whitelist.
+    pairs = self.dp.current_whitelist()
+    # Assign timeframe to each pair so they can be downloaded and cached for strategy.
+    informative_pairs = [(pair, "1d") for pair in pairs]
+    return informative_pairs
 ```
 
 ??? Note "Plotting with current_whitelist"
@@ -854,8 +859,7 @@ This is where calling `self.dp.current_whitelist()` comes in handy to retrieve o
 ``` python
 # fetch live / historical candle (OHLCV) data for the first informative pair
 inf_pair, inf_timeframe = self.informative_pairs()[0]
-informative = self.dp.get_pair_dataframe(pair=inf_pair,
-                                         timeframe=inf_timeframe)
+informative = self.dp.get_pair_dataframe(pair=inf_pair, timeframe=inf_timeframe)
 ```
 
 !!! Warning "Warning about backtesting"
@@ -870,8 +874,9 @@ It can also be used in specific callbacks to get the signal that caused the acti
 
 ``` python
 # fetch current dataframe
-dataframe, last_updated = self.dp.get_analyzed_dataframe(pair=metadata['pair'],
-                                                         timeframe=self.timeframe)
+dataframe, last_updated = self.dp.get_analyzed_dataframe(
+    pair=metadata["pair"], timeframe=self.timeframe
+)
 ```
 
 !!! Note "No data available"
@@ -884,10 +889,10 @@ dataframe, last_updated = self.dp.get_analyzed_dataframe(pair=metadata['pair'],
 Retrieve the current order book for a pair.
 
 ``` python
-if self.dp.runmode.value in ('live', 'dry_run'):
-    ob = self.dp.orderbook(metadata['pair'], 1)
-    dataframe['best_bid'] = ob['bids'][0][0]
-    dataframe['best_ask'] = ob['asks'][0][0]
+if self.dp.runmode.value in ("live", "dry_run"):
+    ob = self.dp.orderbook(metadata["pair"], 1)
+    dataframe["best_bid"] = ob["bids"][0][0]
+    dataframe["best_ask"] = ob["asks"][0][0]
 ```
 
 The orderbook structure is aligned with the order structure from [ccxt](https://github.com/ccxt/ccxt/wiki/Manual#order-book-structure), so the result will be formatted as follows:
@@ -916,11 +921,11 @@ Therefore, using `ob['bids'][0][0]` as demonstrated above will use the best bid 
 ### *ticker(pair)*
 
 ``` python
-if self.dp.runmode.value in ('live', 'dry_run'):
-    ticker = self.dp.ticker(metadata['pair'])
-    dataframe['last_price'] = ticker['last']
-    dataframe['volume24h'] = ticker['quoteVolume']
-    dataframe['vwap'] = ticker['vwap']
+if self.dp.runmode.value in ("live", "dry_run"):
+    ticker = self.dp.ticker(metadata["pair"])
+    dataframe["last_price"] = ticker["last"]
+    dataframe["volume24h"] = ticker["quoteVolume"]
+    dataframe["vwap"] = ticker["vwap"]
 ```
 
 !!! Warning
@@ -937,8 +942,16 @@ if self.dp.runmode.value in ('live', 'dry_run'):
 Return Datetime of the pair delisting schedule if any, otherwise return None
 
 ```python
-def custom_exit(self, pair: str, trade: Trade, current_time: datetime, current_rate: float, current_profit: float, **kwargs):
-    if self.dp.runmode.value in ('live', 'dry_run'):
+def custom_exit(
+    self,
+    pair: str,
+    trade: Trade,
+    current_time: datetime,
+    current_rate: float,
+    current_profit: float,
+    **kwargs,
+):
+    if self.dp.runmode.value in ("live", "dry_run"):
         delisting_dt = self.dp.check_delisting(pair)
         if delisting_dt is not None:
             return "delist"
@@ -955,11 +968,11 @@ def custom_exit(self, pair: str, trade: Trade, current_time: datetime, current_r
 Retrieves the current funding rate for the pair and only works for futures pairs in the format of `base/quote:settle` (e.g. `ETH/USDT:USDT`).
 
 ``` python
-if self.dp.runmode.value in ('live', 'dry_run'):
-    funding_rate = self.dp.funding_rate(metadata['pair'])
-    dataframe['current_funding_rate'] = funding_rate['fundingRate']
-    dataframe['next_funding_timestamp'] = funding_rate['fundingTimestamp']
-    dataframe['next_funding_datetime'] = funding_rate['fundingDatetime']
+if self.dp.runmode.value in ("live", "dry_run"):
+    funding_rate = self.dp.funding_rate(metadata["pair"])
+    dataframe["current_funding_rate"] = funding_rate["fundingRate"]
+    dataframe["next_funding_timestamp"] = funding_rate["fundingTimestamp"]
+    dataframe["next_funding_datetime"] = funding_rate["fundingDatetime"]
 ```
 
 The funding rate structure is aligned with the funding rate structure from [ccxt](https://github.com/ccxt/ccxt/wiki/Manual#funding-rate-structure), so the result will be formatted as follows:
@@ -967,7 +980,7 @@ The funding rate structure is aligned with the funding rate structure from [ccxt
 ``` python
 {
     "info": {
-        # ... 
+        # ...
     },
     "symbol": "BTC/USDT:USDT",
     "markPrice": 110730.7,
@@ -1005,12 +1018,10 @@ They must therefore be merged onto your dataframe by date - assigning the column
 from freqtrade.strategy import merge_informative_pair
 
 funding_rates = self.dp.get_pair_dataframe(
-    pair=metadata['pair'], timeframe='1h', candle_type="funding_rate"
+    pair=metadata["pair"], timeframe="1h", candle_type="funding_rate"
 )
 # Adds the column as "funding_rate_1h", forward-filled between funding events.
-dataframe = merge_informative_pair(
-    dataframe, funding_rates, self.timeframe, '1h', ffill=True
-)
+dataframe = merge_informative_pair(dataframe, funding_rates, self.timeframe, "1h", ffill=True)
 ```
 
 The same can be achieved with the [informative pairs decorator](#informative-pairs-decorator-informative), using `@informative('1h', candle_type='funding_rate')`.
@@ -1030,17 +1041,17 @@ The dataframe contains a `date`, an `open_interest_amount` (base currency) and a
 
 ``` python
 open_interest = self.dp.get_pair_dataframe(
-    pair=metadata['pair'], timeframe='1h', candle_type="open_interest"
+    pair=metadata["pair"], timeframe="1h", candle_type="open_interest"
 )
-dataframe['open_interest'] = open_interest['open_interest_amount']
+dataframe["open_interest"] = open_interest["open_interest_amount"]
 ```
 
 The same works via the [informative decorator](#informative-pairs-decorator-informative), which merges the data onto your dataframe for you:
 
 ``` python
-@informative('1h', candle_type='open_interest')
+@informative("1h", candle_type="open_interest")
 def populate_indicators_oi_1h(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-    dataframe['oi_change'] = dataframe['open_interest_amount'].pct_change()
+    dataframe["oi_change"] = dataframe["open_interest_amount"].pct_change()
     return dataframe
 ```
 
@@ -1076,10 +1087,11 @@ Notifications will only be sent in trading modes (Live/Dry-run) - so this method
 from freqtrade.strategy import IStrategy, merge_informative_pair
 from pandas import DataFrame
 
+
 class SampleStrategy(IStrategy):
     # strategy init stuff...
 
-    timeframe = '5m'
+    timeframe = "5m"
 
     # more strategy init stuff..
 
@@ -1088,11 +1100,12 @@ class SampleStrategy(IStrategy):
         # get access to all pairs available in whitelist.
         pairs = self.dp.current_whitelist()
         # Assign tf to each pair so they can be downloaded and cached for strategy.
-        informative_pairs = [(pair, '1d') for pair in pairs]
+        informative_pairs = [(pair, "1d") for pair in pairs]
         # Optionally Add additional "static" pairs
-        informative_pairs += [("ETH/USDT", "5m"),
-                              ("BTC/TUSD", "15m"),
-                            ]
+        informative_pairs += [
+            ("ETH/USDT", "5m"),
+            ("BTC/TUSD", "15m"),
+        ]
         return informative_pairs
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -1100,21 +1113,23 @@ class SampleStrategy(IStrategy):
             # Don't do anything if DataProvider is not available.
             return dataframe
 
-        inf_tf = '1d'
+        inf_tf = "1d"
         # Get the informative pair
-        informative = self.dp.get_pair_dataframe(pair=metadata['pair'], timeframe=inf_tf)
+        informative = self.dp.get_pair_dataframe(pair=metadata["pair"], timeframe=inf_tf)
         # Get the 14 day rsi
-        informative['rsi'] = ta.RSI(informative, timeperiod=14)
+        informative["rsi"] = ta.RSI(informative, timeperiod=14)
 
         # Use the helper function merge_informative_pair to safely merge the pair
         # Automatically renames the columns and merges a shorter timeframe dataframe and a longer timeframe informative pair
         # use ffill to have the 1d value available in every row throughout the day.
         # Without this, comparisons between columns of the original and the informative pair would only work once per day.
         # Full documentation of this method, see below
-        dataframe = merge_informative_pair(dataframe, informative, self.timeframe, inf_tf, ffill=True)
+        dataframe = merge_informative_pair(
+            dataframe, informative, self.timeframe, inf_tf, ffill=True
+        )
 
         # Calculate rsi of the original dataframe (5m timeframe)
-        dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+        dataframe["rsi"] = ta.RSI(dataframe, timeperiod=14)
 
         # Do other stuff
         # ...
@@ -1125,12 +1140,14 @@ class SampleStrategy(IStrategy):
 
         dataframe.loc[
             (
-                (qtpylib.crossed_above(dataframe['rsi'], 30)) &  # Signal: RSI crosses above 30
-                (dataframe['rsi_1d'] < 30) &                     # Ensure daily RSI is < 30
-                (dataframe['volume'] > 0)                        # Ensure this candle had volume (important for backtesting)
+                (qtpylib.crossed_above(dataframe["rsi"], 30))  # Signal: RSI crosses above 30
+                & (dataframe["rsi_1d"] < 30)  # Ensure daily RSI is < 30
+                & (
+                    dataframe["volume"] > 0
+                )  # Ensure this candle had volume (important for backtesting)
             ),
-            ['enter_long', 'enter_tag']] = (1, 'rsi_cross')
-
+            ["enter_long", "enter_tag"],
+        ] = (1, "rsi_cross")
 ```
 
 ***
@@ -1148,9 +1165,9 @@ Always check if `wallets` is available to avoid failures during backtesting.
 
 ``` python
 if self.wallets:
-    free_eth = self.wallets.get_free('ETH')
-    used_eth = self.wallets.get_used('ETH')
-    total_eth = self.wallets.get_total('ETH')
+    free_eth = self.wallets.get_free("ETH")
+    used_eth = self.wallets.get_used("ETH")
+    total_eth = self.wallets.get_total("ETH")
 ```
 
 ### Possible options for Wallets
@@ -1222,16 +1239,18 @@ from datetime import timedelta, datetime, timezone
 # --------
 
 # Within populate indicators (or populate_entry_trend):
-if self.config['runmode'].value in ('live', 'dry_run'):
+if self.config["runmode"].value in ("live", "dry_run"):
     # fetch closed trades for the last 2 days
     trades = Trade.get_trades_proxy(
-        pair=metadata['pair'], is_open=False, 
-        open_date=datetime.now(timezone.utc) - timedelta(days=2))
+        pair=metadata["pair"],
+        is_open=False,
+        open_date=datetime.now(timezone.utc) - timedelta(days=2),
+    )
     # Analyze the conditions you'd like to lock the pair .... will probably be different for every strategy
     sumprofit = sum(trade.close_profit for trade in trades)
     if sumprofit < 0:
         # Lock pair for 12 hours
-        self.lock_pair(metadata['pair'], until=datetime.now(timezone.utc) + timedelta(hours=12))
+        self.lock_pair(metadata["pair"], until=datetime.now(timezone.utc) + timedelta(hours=12))
 ```
 
 ## Print the main dataframe
@@ -1243,9 +1262,10 @@ You may also want to print the pair so it's clear what data is currently shown.
 def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
     dataframe.loc[
         (
-            #>> whatever condition<<<
+            # >> whatever condition<<<
         ),
-        ['enter_long', 'enter_tag']] = (1, 'somestring')
+        ["enter_long", "enter_tag"],
+    ] = (1, "somestring")
 
     # Print the Analyzed pair
     print(f"result for {metadata['pair']}")

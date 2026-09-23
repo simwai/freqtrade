@@ -122,41 +122,39 @@ Sample configuration with inline comments explaining the process:
 @property
 def plot_config(self):
     """
-        There are a lot of solutions how to build the return dictionary.
-        The only important point is the return value.
-        Example:
-            plot_config = {'main_plot': {}, 'subplots': {}}
+    There are a lot of solutions how to build the return dictionary.
+    The only important point is the return value.
+    Example:
+        plot_config = {'main_plot': {}, 'subplots': {}}
 
     """
     plot_config = {}
-    plot_config['main_plot'] = {
+    plot_config["main_plot"] = {
         # Configuration for main plot indicators.
         # Assumes 2 parameters, emashort and emalong to be specified.
-        f'ema_{self.emashort.value}': {'color': 'red'},
-        f'ema_{self.emalong.value}': {'color': '#CCCCCC'},
+        f"ema_{self.emashort.value}": {"color": "red"},
+        f"ema_{self.emalong.value}": {"color": "#CCCCCC"},
         # By omitting color, a random color is selected.
-        'sar': {},
+        "sar": {},
         # fill area between senkou_a and senkou_b
-        'senkou_a': {
-            'color': 'green', #optional
-            'fill_to': 'senkou_b',
-            'fill_label': 'Ichimoku Cloud', #optional
-            'fill_color': 'rgba(255,76,46,0.2)', #optional
+        "senkou_a": {
+            "color": "green",  # optional
+            "fill_to": "senkou_b",
+            "fill_label": "Ichimoku Cloud",  # optional
+            "fill_color": "rgba(255,76,46,0.2)",  # optional
         },
         # plot senkou_b, too. Not only the area to it.
-        'senkou_b': {}
+        "senkou_b": {},
     }
-    plot_config['subplots'] = {
-         # Create subplot MACD
+    plot_config["subplots"] = {
+        # Create subplot MACD
         "MACD": {
-            'macd': {'color': 'blue', 'fill_to': 'macdhist'},
-            'macdsignal': {'color': 'orange'},
-            'macdhist': {'type': 'bar', 'plotly': {'opacity': 0.9}}
+            "macd": {"color": "blue", "fill_to": "macdhist"},
+            "macdsignal": {"color": "orange"},
+            "macdhist": {"type": "bar", "plotly": {"opacity": 0.9}},
         },
         # Additional subplot RSI
-        "RSI": {
-            'rsi': {'color': 'red'}
-        }
+        "RSI": {"rsi": {"color": "red"}},
     }
 
     return plot_config
@@ -167,38 +165,35 @@ def plot_config(self):
     This has the disadvantage that strategy parameters are not available, preventing certain configurations from working.
 
     ``` python
-        plot_config = {
-            'main_plot': {
-                # Configuration for main plot indicators.
-                # Specifies `ema10` to be red, and `ema50` to be a shade of gray
-                'ema10': {'color': 'red'},
-                'ema50': {'color': '#CCCCCC'},
-                # By omitting color, a random color is selected.
-                'sar': {},
+    plot_config = {
+        "main_plot": {
+            # Configuration for main plot indicators.
+            # Specifies `ema10` to be red, and `ema50` to be a shade of gray
+            "ema10": {"color": "red"},
+            "ema50": {"color": "#CCCCCC"},
+            # By omitting color, a random color is selected.
+            "sar": {},
             # fill area between senkou_a and senkou_b
-            'senkou_a': {
-                'color': 'green', #optional
-                'fill_to': 'senkou_b',
-                'fill_label': 'Ichimoku Cloud', #optional
-                'fill_color': 'rgba(255,76,46,0.2)', #optional
+            "senkou_a": {
+                "color": "green",  # optional
+                "fill_to": "senkou_b",
+                "fill_label": "Ichimoku Cloud",  # optional
+                "fill_color": "rgba(255,76,46,0.2)",  # optional
             },
             # plot senkou_b, too. Not only the area to it.
-            'senkou_b': {}
+            "senkou_b": {},
+        },
+        "subplots": {
+            # Create subplot MACD
+            "MACD": {
+                "macd": {"color": "blue", "fill_to": "macdhist"},
+                "macdsignal": {"color": "orange"},
+                "macdhist": {"type": "bar", "plotly": {"opacity": 0.9}},
             },
-            'subplots': {
-                # Create subplot MACD
-                "MACD": {
-                    'macd': {'color': 'blue', 'fill_to': 'macdhist'},
-                    'macdsignal': {'color': 'orange'},
-                    'macdhist': {'type': 'bar', 'plotly': {'opacity': 0.9}}
-                },
-                # Additional subplot RSI
-                "RSI": {
-                    'rsi': {'color': 'red'}
-                }
-            }
-        }
-
+            # Additional subplot RSI
+            "RSI": {"rsi": {"color": "red"}},
+        },
+    }
     ```
 
 

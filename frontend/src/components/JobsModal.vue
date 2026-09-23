@@ -1,11 +1,11 @@
 <template>
   <div>
     <!-- Trigger Button - Fixed at top-right -->
-    <button 
-      v-if="!open" 
-      class="jobs-trigger-btn" 
-      @click="open = true" 
-      :title="activeCount ? activeCount + ' active job' + (activeCount > 1 ? 's' : '') : 'Background jobs'" 
+    <button
+      v-if="!open"
+      class="jobs-trigger-btn"
+      @click="open = true"
+      :title="activeCount ? activeCount + ' active job' + (activeCount > 1 ? 's' : '') : 'Background jobs'"
       aria-label="Background jobs"
       :class="{ 'has-active': activeCount > 0 }"
     >

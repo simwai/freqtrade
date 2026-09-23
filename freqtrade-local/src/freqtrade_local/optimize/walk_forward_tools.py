@@ -54,9 +54,7 @@ def walk_forward_settings(config: Config) -> dict[str, Any]:
 
 def _midnight(value: datetime | date) -> datetime:
     if isinstance(value, datetime):
-        return value.astimezone(UTC).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
+        return value.astimezone(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     return datetime.combine(value, time.min, tzinfo=UTC)
 
 

@@ -75,13 +75,13 @@ A sample check looks as follows:
 ``` python
 from tests.conftest import log_has, log_has_re
 
+
 def test_method_to_test(caplog):
     method_to_test()
 
     assert log_has("This event happened", caplog)
     # Check regex with trailing number ...
     assert log_has_re(r"This dynamic event happened and produced \d+", caplog)
-
 ```
 
 ### Debug configuration
@@ -360,6 +360,7 @@ To check how the new exchange behaves, you can use the following snippet:
 import ccxt
 from datetime import datetime, timezone
 from freqtrade.data.converter import ohlcv_to_dataframe
+
 ct = ccxt.binance()  # Use the exchange you're testing
 timeframe = "1d"
 pair = "BTC/USDT"  # Make sure to use a pair that exists on that exchange!
@@ -391,19 +392,16 @@ import ccxt
 import json
 from pathlib import Path
 
-exchange = ccxt.binance({
-    'apiKey': '<apikey>',
-    'secret': '<secret>',
-    'options': {'defaultType': 'swap'}
-    })
+exchange = ccxt.binance(
+    {"apiKey": "<apikey>", "secret": "<secret>", "options": {"defaultType": "swap"}}
+)
 _ = exchange.load_markets()
 
 lev_tiers = exchange.fetch_leverage_tiers()
 
 # Assumes this is running in the root of the repository.
-file = Path('freqtrade/exchange/binance_leverage_tiers.json')
-json.dump(dict(sorted(lev_tiers.items())), file.open('w'), indent=2)
-
+file = Path("freqtrade/exchange/binance_leverage_tiers.json")
+json.dump(dict(sorted(lev_tiers.items())), file.open("w"), indent=2)
 ```
 
 This file should then be contributed upstream, so others can benefit from this, too.

@@ -59,13 +59,15 @@ where `ReinforcementLearner` will use the templated `ReinforcementLearner` from 
 Most of the function remains the same as for typical Regressors, however, the function below shows how the strategy must pass the raw price data to the agent so that it has access to raw OHLCV in the training environment:
 
 ```python
-    def feature_engineering_standard(self, dataframe: DataFrame, **kwargs) -> DataFrame:
-        # The following features are necessary for RL models
-        dataframe[f"%-raw_close"] = dataframe["close"]
-        dataframe[f"%-raw_open"] = dataframe["open"]
-        dataframe[f"%-raw_high"] = dataframe["high"]
-        dataframe[f"%-raw_low"] = dataframe["low"]
-    return dataframe
+def feature_engineering_standard(self, dataframe: DataFrame, **kwargs) -> DataFrame:
+    # The following features are necessary for RL models
+    dataframe[f"%-raw_close"] = dataframe["close"]
+    dataframe[f"%-raw_open"] = dataframe["open"]
+    dataframe[f"%-raw_high"] = dataframe["high"]
+    dataframe[f"%-raw_low"] = dataframe["low"]
+
+
+return dataframe
 ```
 
 Finally, there is no explicit "label" to make - instead it is necessary to assign the `&-action` column which will contain the agent's actions when accessed in `populate_entry/exit_trends()`. In the present example, the neutral action to 0. This value should align with the environment used. FreqAI provides two environments, both use 0 as the neutral action.
@@ -73,34 +75,37 @@ Finally, there is no explicit "label" to make - instead it is necessary to assig
 After users realize there are no labels to set, they will soon understand that the agent is making its "own" entry and exit decisions. This makes strategy construction rather simple. The entry and exit signals come from the agent in the form of an integer - which are used directly to decide entries and exits in the strategy:
 
 ```python
-    def populate_entry_trend(self, df: DataFrame, metadata: dict) -> DataFrame:
+def populate_entry_trend(self, df: DataFrame, metadata: dict) -> DataFrame:
 
-        enter_long_conditions = [df["do_predict"] == 1, df["&-action"] == 1]
+    enter_long_conditions = [df["do_predict"] == 1, df["&-action"] == 1]
 
-        if enter_long_conditions:
-            df.loc[
-                reduce(lambda x, y: x & y, enter_long_conditions), ["enter_long", "enter_tag"]
-            ] = (1, "long")
+    if enter_long_conditions:
+        df.loc[reduce(lambda x, y: x & y, enter_long_conditions), ["enter_long", "enter_tag"]] = (
+            1,
+            "long",
+        )
 
-        enter_short_conditions = [df["do_predict"] == 1, df["&-action"] == 3]
+    enter_short_conditions = [df["do_predict"] == 1, df["&-action"] == 3]
 
-        if enter_short_conditions:
-            df.loc[
-                reduce(lambda x, y: x & y, enter_short_conditions), ["enter_short", "enter_tag"]
-            ] = (1, "short")
+    if enter_short_conditions:
+        df.loc[reduce(lambda x, y: x & y, enter_short_conditions), ["enter_short", "enter_tag"]] = (
+            1,
+            "short",
+        )
 
-        return df
+    return df
 
-    def populate_exit_trend(self, df: DataFrame, metadata: dict) -> DataFrame:
-        exit_long_conditions = [df["do_predict"] == 1, df["&-action"] == 2]
-        if exit_long_conditions:
-            df.loc[reduce(lambda x, y: x & y, exit_long_conditions), "exit_long"] = 1
 
-        exit_short_conditions = [df["do_predict"] == 1, df["&-action"] == 4]
-        if exit_short_conditions:
-            df.loc[reduce(lambda x, y: x & y, exit_short_conditions), "exit_short"] = 1
+def populate_exit_trend(self, df: DataFrame, metadata: dict) -> DataFrame:
+    exit_long_conditions = [df["do_predict"] == 1, df["&-action"] == 2]
+    if exit_long_conditions:
+        df.loc[reduce(lambda x, y: x & y, exit_long_conditions), "exit_long"] = 1
 
-        return df
+    exit_short_conditions = [df["do_predict"] == 1, df["&-action"] == 4]
+    if exit_short_conditions:
+        df.loc[reduce(lambda x, y: x & y, exit_short_conditions), "exit_short"] = 1
+
+    return df
 ```
 
 It is important to consider that `&-action` depends on which environment they choose to use. The example above shows 5 actions, where 0 is neutral, 1 is enter long, 2 is exit long, 3 is enter short and 4 is exit short.
@@ -171,6 +176,7 @@ class MyCoolRLModel(ReinforcementLearner):
     Another common override may be `def data_cleaning_predict()` where the user can
     take fine-tuned control over the data handling pipeline.
     """
+
     class MyRLEnv(Base5ActionRLEnv):
         """
         User made custom environment. This class inherits from BaseEnvironment and gym.Env.
@@ -182,6 +188,7 @@ class MyCoolRLModel(ReinforcementLearner):
         environment control features as possible. It is also designed to run quickly
         on small computers. This is a benchmark, it is *not* for live production.
         """
+
         def calculate_reward(self, action: int) -> float:
             # first, penalize if the action is not valid
             if not self._is_valid(action):
@@ -190,16 +197,19 @@ class MyCoolRLModel(ReinforcementLearner):
 
             factor = 100
 
-            pair = self.pair.replace(':', '')
+            pair = self.pair.replace(":", "")
 
             # you can use feature values from dataframe
             # Assumes the shifted RSI indicator has been generated in the strategy.
-            rsi_now = self.raw_features[f"%-rsi-period_10_shift-1_{pair}_"
-                            f"{self.config['timeframe']}"].iloc[self._current_tick]
+            rsi_now = self.raw_features[
+                f"%-rsi-period_10_shift-1_{pair}_{self.config['timeframe']}"
+            ].iloc[self._current_tick]
 
             # reward agent for entering trades
-            if (action in (Actions.Long_enter.value, Actions.Short_enter.value)
-                    and self._position == Positions.Neutral):
+            if (
+                action in (Actions.Long_enter.value, Actions.Short_enter.value)
+                and self._position == Positions.Neutral
+            ):
                 if rsi_now < 40:
                     factor = 40 / rsi_now
                 else:
@@ -209,27 +219,29 @@ class MyCoolRLModel(ReinforcementLearner):
             # discourage agent from not entering trades
             if action == Actions.Neutral.value and self._position == Positions.Neutral:
                 return -1
-            max_trade_duration = self.rl_config.get('max_trade_duration_candles', 300)
+            max_trade_duration = self.rl_config.get("max_trade_duration_candles", 300)
             trade_duration = self._current_tick - self._last_trade_tick
             if trade_duration <= max_trade_duration:
                 factor *= 1.5
             elif trade_duration > max_trade_duration:
                 factor *= 0.5
             # discourage sitting in position
-            if self._position in (Positions.Short, Positions.Long) and \
-            action == Actions.Neutral.value:
+            if (
+                self._position in (Positions.Short, Positions.Long)
+                and action == Actions.Neutral.value
+            ):
                 return -1 * trade_duration / max_trade_duration
             # close long
             if action == Actions.Long_exit.value and self._position == Positions.Long:
                 if pnl > self.profit_aim * self.rr:
-                    factor *= self.rl_config['model_reward_parameters'].get('win_reward_factor', 2)
+                    factor *= self.rl_config["model_reward_parameters"].get("win_reward_factor", 2)
                 return float(pnl * factor)
             # close short
             if action == Actions.Short_exit.value and self._position == Positions.Short:
                 if pnl > self.profit_aim * self.rr:
-                    factor *= self.rl_config['model_reward_parameters'].get('win_reward_factor', 2)
+                    factor *= self.rl_config["model_reward_parameters"].get("win_reward_factor", 2)
                 return float(pnl * factor)
-            return 0.
+            return 0.0
 ```
 
 ## Using Tensorboard
@@ -251,17 +263,17 @@ FreqAI also provides a built in episodic summary logger called `self.tensorboard
 `self.tensorboard_log` can also be used anywhere inside the environment, for example, it can be added to the `calculate_reward` function to collect more detailed information about how often various parts of the reward were called:
 
 ```python
-    class MyRLEnv(Base5ActionRLEnv):
-        """
-        User made custom environment. This class inherits from BaseEnvironment and gym.Env.
-        Users can override any functions from those parent classes. Here is an example
-        of a user customized `calculate_reward()` function.
-        """
-        def calculate_reward(self, action: int) -> float:
-            if not self._is_valid(action):
-                self.tensorboard_log("invalid")
-                return -2
+class MyRLEnv(Base5ActionRLEnv):
+    """
+    User made custom environment. This class inherits from BaseEnvironment and gym.Env.
+    Users can override any functions from those parent classes. Here is an example
+    of a user customized `calculate_reward()` function.
+    """
 
+    def calculate_reward(self, action: int) -> float:
+        if not self._is_valid(action):
+            self.tensorboard_log("invalid")
+            return -2
 ```
 
 !!! Note

@@ -43,7 +43,7 @@ Examples of common indicators include Relative Strength Index, Bollinger Bands, 
 Columns are added to the dataframe by calling technical analysis functions, e.g. ta-lib's RSI function `ta.RSI()`, and assigning them to a column name, e.g. `rsi`
 
 ```python
-dataframe['rsi'] = ta.RSI(dataframe)
+dataframe["rsi"] = ta.RSI(dataframe)
 ```
 
 ??? Hint "Technical Analysis libraries"
@@ -77,9 +77,9 @@ from freqtrade.strategy import IStrategy
 from pandas import DataFrame
 import talib.abstract as ta
 
-class MyStrategy(IStrategy):
 
-    timeframe = '15m'
+class MyStrategy(IStrategy):
+    timeframe = "15m"
 
     # set the initial stoploss to -10%
     stoploss = -0.10
@@ -89,23 +89,19 @@ class MyStrategy(IStrategy):
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # generate values for technical analysis indicators
-        dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+        dataframe["rsi"] = ta.RSI(dataframe, timeperiod=14)
 
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # generate entry signals based on indicator values
-        dataframe.loc[
-            (dataframe['rsi'] < 30),
-            'enter_long'] = 1
+        dataframe.loc[(dataframe["rsi"] < 30), "enter_long"] = 1
 
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # generate exit signals based on indicator values
-        dataframe.loc[
-            (dataframe['rsi'] > 70),
-            'exit_long'] = 1
+        dataframe.loc[(dataframe["rsi"] > 70), "exit_long"] = 1
 
         return dataframe
 ```

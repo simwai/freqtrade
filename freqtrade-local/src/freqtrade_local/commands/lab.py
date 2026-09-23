@@ -14,7 +14,9 @@ def start_lab(args: list[str] | None = None) -> None:
     Start SSE log stream server (lab mode).
     """
     parser = argparse.ArgumentParser(description="Freqtrade Lab mode (SSE log stream)")
-    parser.add_argument("--port", type=int, default=None, help="Port for the SSE log stream")
+    parser.add_argument(
+        "--port", type=int, default=None, help="Port for the SSE log stream"
+    )
 
     # Handle being called via freqtrade CLI (args may be a Namespace)
     if args is not None and not isinstance(args, list):

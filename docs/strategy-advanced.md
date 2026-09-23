@@ -142,23 +142,33 @@ You may access dataframe in various strategy functions by querying it from datap
 ``` python
 from freqtrade.exchange import timeframe_to_prev_date
 
+
 class AwesomeStrategy(IStrategy):
-    def confirm_trade_exit(self, pair: str, trade: 'Trade', order_type: str, amount: float,
-                           rate: float, time_in_force: str, exit_reason: str,
-                           current_time: 'datetime', **kwargs) -> bool:
+    def confirm_trade_exit(
+        self,
+        pair: str,
+        trade: "Trade",
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        exit_reason: str,
+        current_time: "datetime",
+        **kwargs,
+    ) -> bool:
         # Obtain pair dataframe.
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
 
-        # Obtain last available candle. Do not use current_time to look up latest candle, because 
+        # Obtain last available candle. Do not use current_time to look up latest candle, because
         # current_time points to current incomplete candle whose data is not available.
         last_candle = dataframe.iloc[-1].squeeze()
         # <...>
 
-        # In dry/live runs trade open date will not match candle open date therefore it must be 
+        # In dry/live runs trade open date will not match candle open date therefore it must be
         # rounded.
         trade_date = timeframe_to_prev_date(self.timeframe, trade.open_date_utc)
         # Look up trade candle.
-        trade_candle = dataframe.loc[dataframe['date'] == trade_date]
+        trade_candle = dataframe.loc[dataframe["date"] == trade_date]
         # trade_candle may be empty for trades that just opened as it is still incomplete.
         if not trade_candle.empty:
             trade_candle = trade_candle.squeeze()
@@ -180,35 +190,44 @@ Then you can access your entry signal on `custom_exit`
 ```python
 def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
     dataframe["enter_tag"] = ""
-    signal_rsi = (qtpylib.crossed_above(dataframe["rsi"], 35))
-    signal_bblower = (dataframe["bb_lowerband"] < dataframe["close"])
+    signal_rsi = qtpylib.crossed_above(dataframe["rsi"], 35)
+    signal_bblower = dataframe["bb_lowerband"] < dataframe["close"]
     # Additional conditions
     dataframe.loc[
         (
-            signal_rsi
-            | signal_bblower
+            signal_rsi | signal_bblower
             # ... additional signals to enter a long position
         )
-        & (dataframe["volume"] > 0)
-            , "enter_long"
-        ] = 1
+        & (dataframe["volume"] > 0),
+        "enter_long",
+    ] = 1
     # Concatenate the tags so all signals are kept
     dataframe.loc[signal_rsi, "enter_tag"] += "long_signal_rsi "
     dataframe.loc[signal_bblower, "enter_tag"] += "long_signal_bblower "
 
     return dataframe
 
-def custom_exit(self, pair: str, trade: Trade, current_time: datetime, current_rate: float,
-                current_profit: float, **kwargs):
+
+def custom_exit(
+    self,
+    pair: str,
+    trade: Trade,
+    current_time: datetime,
+    current_rate: float,
+    current_profit: float,
+    **kwargs,
+):
     dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
     last_candle = dataframe.iloc[-1].squeeze()
     if "long_signal_rsi" in trade.enter_tag and last_candle["rsi"] > 80:
         return "exit_signal_rsi"
-    if "long_signal_bblower" in trade.enter_tag and last_candle["high"] > last_candle["bb_upperband"]:
+    if (
+        "long_signal_bblower" in trade.enter_tag
+        and last_candle["high"] > last_candle["bb_upperband"]
+    ):
         return "exit_signal_bblower"
     # ...
     return None
-
 ```
 
 !!! Note
@@ -227,18 +246,17 @@ Similar to [Entry Tagging](#enter-tag), you can also specify an exit tag.
 ``` python
 def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
     dataframe["exit_tag"] = ""
-    rsi_exit_signal = (dataframe["rsi"] > 70)
-    ema_exit_signal  = (dataframe["ema20"] < dataframe["ema50"])
+    rsi_exit_signal = dataframe["rsi"] > 70
+    ema_exit_signal = dataframe["ema20"] < dataframe["ema50"]
     # Additional conditions
     dataframe.loc[
         (
-            rsi_exit_signal
-            | ema_exit_signal
+            rsi_exit_signal | ema_exit_signal
             # ... additional signals to exit a long position
-        ) &
-        (dataframe["volume"] > 0)
-        ,
-    "exit_long"] = 1
+        )
+        & (dataframe["volume"] > 0),
+        "exit_long",
+    ] = 1
     # Concatenate the tags so all signals are kept
     dataframe.loc[rsi_exit_signal, "exit_tag"] += "exit_signal_rsi "
     dataframe.loc[rsi_exit_signal2, "exit_tag"] += "exit_signal_rsi "
@@ -278,11 +296,12 @@ class MyAwesomeStrategy(IStrategy):
     # All other attributes and methods are here as they
     # should be in any custom strategy...
     ...
-
 ```
 
 ``` python title="user_data/strategies/MyAwesomeStrategy2.py"
 from myawesomestrategy import MyAwesomeStrategy
+
+
 class MyAwesomeStrategy2(MyAwesomeStrategy):
     # Override something
     stoploss = 0.08
@@ -309,9 +328,9 @@ This is a quick example, how to generate the BASE64 string in python
 ```python
 from base64 import urlsafe_b64encode
 
-with open(file, 'r') as f:
+with open(file, "r") as f:
     content = f.read()
-content = urlsafe_b64encode(content.encode('utf-8'))
+content = urlsafe_b64encode(content.encode("utf-8"))
 ```
 
 The variable 'content', will contain the strategy file in a BASE64 encoded form. Which can now be set in your configurations file as following
@@ -336,7 +355,7 @@ For example:
 
 ```python
 for val in self.buy_ema_short.range:
-    dataframe[f'ema_short_{val}'] = ta.EMA(dataframe, timeperiod=val)
+    dataframe[f"ema_short_{val}"] = ta.EMA(dataframe, timeperiod=val)
 ```
 
 should be rewritten to
@@ -344,9 +363,7 @@ should be rewritten to
 ```python
 frames = [dataframe]
 for val in self.buy_ema_short.range:
-    frames.append(DataFrame({
-        f'ema_short_{val}': ta.EMA(dataframe, timeperiod=val)
-    }))
+    frames.append(DataFrame({f"ema_short_{val}": ta.EMA(dataframe, timeperiod=val)}))
 
 # Combine all dataframes, and reassign the original dataframe column
 dataframe = pd.concat(frames, axis=1)
