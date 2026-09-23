@@ -35,7 +35,7 @@
           <label class="flex flex-col gap-1.5 text-text-dim text-sm"><UTooltip text="Out-of-sample test window length in days for each step."><span class="tip">Test d</span></UTooltip> <input v-model="benchTest" type="number" class="input-field" /></label>
           <label class="flex flex-col gap-1.5 text-text-dim text-sm"><UTooltip text="Step size in days between consecutive windows."><span class="tip">Step d</span></UTooltip> <input v-model="benchStep" type="number" class="input-field" /></label>
         </template>
-        <UButton variant="primary" @click="startBench" class="btn-primary">Run benchmark</UButton>
+        <UButton color="primary" @click="startBench" class="btn-primary">Run benchmark</UButton>
       </div>
       <div v-if="benchMsg" class="message text-lavender text-sm mt-2" role="status">{{ benchMsg }}</div>
       <InlineStatus v-if="benchStatus" :type="benchStatus.type" :title="benchStatus.title" :message="benchStatus.message" :duration="5000" />
@@ -91,7 +91,7 @@
           <label class="check flex items-center gap-1.5 text-text-dim text-sm"><input v-model="printAll" type="checkbox" /> <UTooltip text="Print every epoch result instead of only improvements."><span class="tip">print all</span></UTooltip></label>
         </template>
         <label class="check flex items-center gap-1.5 text-text-dim text-sm"><input v-model="verbose" type="checkbox" /> <UTooltip text="Verbose backend logging for this run."><span class="tip">verbose</span></UTooltip></label>
-        <UButton variant="primary" @click="startRun" class="btn-primary">Run</UButton>
+        <UButton color="primary" @click="startRun" class="btn-primary">Run</UButton>
       </div>
       <div v-if="formError" class="edit-msg text-bad text-sm mt-2" role="alert">{{ formError }}</div>
       <pre v-if="configPreview" class="code-block">{{ configPreview }}</pre>
@@ -225,11 +225,6 @@ function showBenchStatus(type: 'success' | 'error' | 'warning' | 'info', title: 
   setTimeout(() => { benchStatus.value = null }, 5000)
 }
 
-function showRunStatus(type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) {
-  runStatus.value = { type, title, message }
-  setTimeout(() => { runStatus.value = null }, 5000)
-}
-
 const benchStrategies = ref('')
 const timerange = ref('20230101-20240101')
 const timeframe = ref('5m')
@@ -272,7 +267,7 @@ const jobs = ref<Record<string, any>>({})
 const logJob = ref('')
 
 // SSE-based job log streaming
-const { logLines, isStreaming, jobStatus, progressTasks, start: startJobStream, stop: stopJobStream, getLogText } = useJobLogStream(logJob)
+const { isStreaming, jobStatus, progressTasks, start: startJobStream, stop: stopJobStream, getLogText } = useJobLogStream(logJob)
 
 const runMetaText = ref('')
 const runMetaLoading = ref(false)
@@ -283,7 +278,7 @@ const jobRows = computed(() => Object.entries(jobs.value || {}).map(([id, j]: [s
 
 const columnVisibility = ref<Record<string, boolean>>({})
 
-const jobsColumns = [
+const jobsColumns: any[] = [
   { accessorKey: 'id', header: sortableHeader('ID') },
   { accessorKey: 'name', header: sortableHeader('Name') },
   { accessorKey: 'status', header: sortableHeader('Status') },
@@ -312,7 +307,7 @@ async function startBench() {
     return
   }
   try {
-    const { data } = await api.post('/api/bench', body)
+    const { data } = await api.post<{ job_id: string }>('/api/bench', body)
     benchMsg.value = 'job ' + data.job_id
     message.value = ''
     showBenchStatus('success', 'Benchmark started', 'job ' + data.job_id)
@@ -340,7 +335,7 @@ async function startRun() {
     ? (checked.error.issues[0]?.message || 'Invalid run configuration.')
     : validateRun()
   if (formError.value) return
-  const { data } = await api.post('/api/run', buildRunBody())
+  const { data } = await api.post<{ job_id: string }>('/api/run', buildRunBody())
   message.value = 'job ' + data.job_id
   await loadJobs()
 }
@@ -379,11 +374,11 @@ watch([strategy, mode, timerange, timeframe, runConfig, epochs, loss, spaces, ru
 })
 async function loadDropdowns() {
   try {
-    const { data } = await api.get('/api/strategies')
+    const { data } = await api.get<any[]>('/api/strategies')
     strategyOptions.value = Array.isArray(data) ? data : []
   } catch (e) { strategyOptions.value = [] }
   try {
-    const { data } = await api.get('/api/configs')
+    const { data } = await api.get<{ configs: any[] }>('/api/configs')
     configOptions.value = (data && data.configs) || []
     configHint.value = configOptions.value.length
       ? 'Auto: user_data/config_<strategy>.json or config_benchmark.json, or pick one from the dropdown.'
@@ -392,7 +387,7 @@ async function loadDropdowns() {
     configHint.value = 'Auto config: user_data/config_<strategy>.json if it exists, else config_benchmark.json. Config dropdown needs the lab server.'
   }
   try {
-    const { data } = await api.get('/api/losses')
+    const { data } = await api.get<{ losses: string[] }>('/api/losses')
     const live = (data && data.losses) || []
     const seen = new Set(lossOptions.value)
     live.forEach((l: string) => { if (l && !seen.has(l)) { seen.add(l); lossOptions.value.push(l) } })
@@ -402,7 +397,7 @@ async function loadDropdowns() {
 }
 async function loadJobs() {
   try {
-    const { data } = await api.get('/api/jobs')
+    const { data } = await api.get<Record<string, any>>('/api/jobs')
     jobs.value = data
   } catch (e) {
     // error suppressed
@@ -457,8 +452,8 @@ async function loadBenchLog() {
   benchLogLoading.value = true
   benchLogText.value = 'Loading...'
   try {
-    const { data } = await api.get('/api/jobs')
-    const entries = Object.entries(data || {})
+    const { data: jobsData } = await api.get<Record<string, any>>('/api/jobs')
+    const entries = Object.entries(jobsData || {})
     // First, look for benchmark jobs by mode or name
     const benchEntries = entries.filter(([_, j]) => {
       const job = j as any
@@ -481,8 +476,8 @@ async function loadBenchLog() {
       })[0][0]
     }
     if (!bid) { benchLogText.value = 'No jobs found'; return }
-    const r = await api.get('/api/jobs/' + bid + '/log', { params: { tail: 6000 } })
-    benchLogText.value = r.data.log || 'Log is empty'
+    const { data: logData } = await api.get<{ log: string }>('/api/jobs/' + bid + '/log', { params: { tail: 6000 } })
+    benchLogText.value = logData.log || 'Log is empty'
   } catch (e) {
     benchLogText.value = 'Error loading benchmark log: ' + String(e)
   } finally {
@@ -513,7 +508,7 @@ function onKey(e: KeyboardEvent) {
 }
 
 async function defaultRunRange() {
-  await store.fetchFullData()
+  await store.fetchAll()
   let min = '20220101'
   let max = '20240101'
   store.backtests.forEach((r: any) => {

@@ -123,8 +123,8 @@ import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart, LineChart, ScatterChart, CandlestickChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent } from 'echarts/components'
-
-echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
+echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, 
+GridComponent, LegendComponent, DataZoomComponent])
 import { useStrategiesStore } from '../stores/strategies'
 import { api } from '../api/client'
 import type { ECOption } from '../utils/echarts'
@@ -163,7 +163,7 @@ const columns = [
   { accessorKey: 'avg_oos_profit_factor', header: sortableHeader('Avg PF') },
   { accessorKey: 'loss_function', header: sortableHeader('Loss') },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
-]
+] as any[]
 
 const detailColumns = [
   { accessorKey: '_idx', header: sortableHeader('#') },
@@ -174,7 +174,7 @@ const detailColumns = [
   { accessorKey: 'oos_sortino', header: sortableHeader('Sortino') },
   { accessorKey: 'oos_pf', header: sortableHeader('PF') },
   { accessorKey: 'oos_dd', header: sortableHeader('DD') },
-]
+] as any[]
 
 function profitableRatio(r: any) {
   if (!r.n_windows) return 0
@@ -225,7 +225,7 @@ function resetFilters() {
 }
 
 function refreshData() {
-  store.fetchFullData()
+  store.fetchAll()
 }
 
 async function drill(source: string) {
@@ -234,12 +234,12 @@ async function drill(source: string) {
     const local = store.walkforward.find((r: any) => r.source === source)
     if (local && local.windows_json) {
       try {
-        const wins = JSON.parse(local.windows_json)
+        const wins = JSON.parse(local.windows_json as string)
         if (wins && wins.length) { detail.value = { r: local, wins: wins }; return }
       } catch (e) {}
     }
-    const { data } = await api.get('/api/walkforward', { params: { source: source } })
-    const wrows = data.rows || []
+    const { data } = await api.get<any>('/api/walkforward', { params: { source: source } })
+    const wrows = (data as any).rows || []
     if (!wrows.length) { detail.value = null; showDrillStatus('warning', 'Walk-forward detail empty', 'No windows returned for this run.'); return }
     detail.value = { r: wrows[0], wins: wrows[0].windows || [] }
   } catch (e) {
@@ -274,7 +274,7 @@ const comboOption = computed((): ECOption => ({
 }))
 
 onMounted(async () => {
-  await store.fetchFullData()
+  await store.fetchAll()
 })
 </script>
 

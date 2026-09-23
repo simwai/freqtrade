@@ -2,6 +2,13 @@ import { defineStore } from 'pinia'
 import { api } from '../api/client'
 import type { CompactTrade } from '../utils/trades'
 
+interface TradesResponse {
+  trades: CompactTrade[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export const useTradesStore = defineStore('trades', {
   state: () => ({
     key: '' as string,
@@ -20,14 +27,13 @@ export const useTradesStore = defineStore('trades', {
       this.limit = limit
       this.offset = offset
       try {
-        const { data } = await api.get(`/api/trades/${encodeURIComponent(key)}`, {
+        const { data } = await api.get<TradesResponse>(`/api/trades/${encodeURIComponent(key)}`, {
           params: { limit, offset }
         })
-        const d = data as { trades: CompactTrade[]; total: number; limit: number; offset: number }
-        this.items = d.trades || []
-        this.total = d.total || 0
-        this.limit = d.limit || limit
-        this.offset = d.offset || offset
+        this.items = data.trades || []
+        this.total = data.total || 0
+        this.limit = data.limit || limit
+        this.offset = data.offset || offset
       } catch (e) {
         this.error = String(e)
         this.items = []

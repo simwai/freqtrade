@@ -167,12 +167,12 @@ import { api } from '../api/client'
 import type { ECOption2 } from '../utils/echarts'
 import '../utils/echarts'
 import { useUrlState } from '../composables/useUrlState'
+import type { CandlesResponse, TpResponse, IndicatorResponse, IndicatorListResponse } from '../types/trade'
 import {
   tradeMs, tlBisect, tmSuperSmoother, tpPriceForTrade, tlExitColor, markerItem,
   candleColors, markerColors, markMode, exitStyle, persistPreset,
   TL_CANDLE_PRESETS, TL_MARKER_PRESETS, tlTfMs
 } from '../utils/trades'
-import type { CompactTrade } from '../utils/trades'
 
 const route = useRoute()
 const store = useStrategyDetailStore()
@@ -203,7 +203,7 @@ const tradeFilter = useUrlState({ key: 'filter', defaultValue: '', parse: (v) =>
 const tradeSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'o', desc: false }])
 const tradeVisibility = ref<Record<string, boolean>>({})
 
-const tradeColumns = [
+const tradeColumns: any[] = [
   { accessorKey: 'p', header: sortableHeader('Pair') },
   { accessorKey: 's', header: sortableHeader('Side') },
   { accessorKey: 't', header: sortableHeader('Enter tag') },
@@ -293,26 +293,26 @@ async function load() {
     // First load the trade run to get strategy name
     await tradesStore.load(key)
     strategy.value = tradesStore.key.split('__')[0] || ''
-
+    
     // Load strategy detail for backtests/benchmarks
     await store.load(strategy.value)
-
+    
     // Get trades from the store
     const tradesData = tradesStore.items
-
+    
     // Find runRow for timeframe/mode
     const runRow = store.backtests.find((r: any) => r.strategy === strategy.value) || store.benchmarks.find((r: any) => r.strategy === strategy.value)
     if (runRow) { tf.value = runRow.timeframe || '5m'; mode.value = runRow.trading_mode || '' }
-
+    
     // Set pair
     const pairsData = [...new Set(tradesData.map((t: any) => t.p))]
     if (!pair.value && pairsData.length) pair.value = pairsData[0]
-
+    
     dropAllInds()
     await loadCandles()
     await loadRoi()
-    const { data: il } = await api.get('/api/indicators')
-    indList.value = il
+    const { data: il } = await api.get<IndicatorListResponse>('/api/indicators')
+    indList.value = il.indicators
   } catch (e) {
     error.value = String(e)
   } finally {
@@ -343,7 +343,7 @@ async function loadCandles() {
   }
   const mySeq = ++loadSeq.value
   try {
-    const { data } = await api.get('/api/candles', { params: { pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: t0, end: t1 } })
+    const { data } = await api.get<CandlesResponse>('/api/candles', { params: { pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: t0, end: t1 } })
     if (loadSeq.value !== mySeq) return
     if (data && data.candles && data.candles.length) {
       fetchCache.set(cacheKey, data.candles)
@@ -393,7 +393,7 @@ async function loadRoi() {
   if (!name) { roi.value = null; return }
   if (Object.prototype.hasOwnProperty.call(roiCache, name)) { roi.value = roiCache[name]; return }
   try {
-    const { data } = await api.get('/api/tp', { params: { strategy: name } })
+    const { data } = await api.get<TpResponse>('/api/tp', { params: { strategy: name } })
     roiCache[name] = (data && data.roi) || null
     roi.value = roiCache[name]
   } catch (e) { roiCache[name] = null; roi.value = null }
@@ -481,7 +481,7 @@ function zoomFetch() {
   if (fetchCache.size > 60) {
     for (const k of Array.from(fetchCache.keys())) { if (k !== cacheKey) fetchCache.delete(k) }
   }
-  api.get('/api/candles', { params: { pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: v0, end: v1 } })
+  api.get<CandlesResponse>('/api/candles', { params: { pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: v0, end: v1 } })
     .then(({ data }: any) => {
       if (zoomSeq.value !== mySeq) return
       if (data && data.candles && data.candles.length) {
@@ -536,7 +536,7 @@ async function addIndByName(name: string) {
     return
   }
   try {
-    const { data } = await api.get('/api/indicator', { params: { name: name, pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: t0, end: t1 } })
+    const { data } = await api.get<IndicatorResponse>('/api/indicator', { params: { name: name, pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: t0, end: t1 } })
     if (data.error || !data.series || !data.series.length) { indNote.value = name + ': no data for ' + pair.value + ' ' + tf.value + ' in this window'; return }
     if (inds.value.length >= 3) return
     indNote.value = ''
@@ -585,7 +585,7 @@ async function refreshInds() {
       e.cfg = indCache.get(cacheKey).cfg
       return
     }
-    api.get('/api/indicator', { params: { name: e.name, pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: t0, end: t1 } })
+      api.get<IndicatorResponse>('/api/indicator', { params: { name: e.name, pair: pair.value, timeframe: tf.value, trading_mode: mode.value, start: t0, end: t1 } })
       .then(({ data }: any) => {
         if (data.error || !data.series) return
         const cfg = data.series.map((s: any) => ({ data: indParse(s) }))
@@ -890,3 +890,4 @@ onUnmounted(() => {
 .empty-banner { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 12px; margin-bottom: 8px; }
 .empty-banner code { font-family: monospace; }
 </style>
+

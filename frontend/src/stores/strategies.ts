@@ -1,102 +1,16 @@
 import { defineStore } from 'pinia'
 import { api } from '../api/client'
-
-export interface StrategyRow {
-  strategy: string
-  status: string
-  score?: { grade: string; grades?: Record<string, string> }
-  profit_total: number
-  total_trades: number
-  sortino: number
-  calmar: number
-  profit_factor: number
-  max_drawdown_account: number
-  prop_firms?: Record<string, unknown>
-  propPass?: number
-  winrate: number
-  basis: string
-  timerange: string
-  run_time: string
-  source?: string
-  notes?: string
-}
-
-export interface BacktestRow {
-  strategy: string
-  status: string
-  score?: { grade: string; grades?: Record<string, string> }
-  profit_total: number
-  total_trades: number
-  sortino: number
-  calmar: number
-  profit_factor: number
-  max_drawdown_account: number
-  prop_firms?: Record<string, unknown>
-  propPass?: number
-  winrate: number
-  basis: string
-  timerange: string
-  run_time: string
-  source?: string
-  loss_function?: string
-  spaces?: string
-  train_days?: number
-  test_days?: number
-  step_days?: number
-  n_windows?: number
-  profitable_windows?: number
-  epochs?: number
-  config_hash?: string
-  config_json?: string
-  code_hash?: string
-  trading_mode?: string
-  timeframe?: string
-  [key: string]: unknown
-}
-
-export interface BenchmarkRow {
-  strategy: string
-  status: string
-  score?: { grade: string; grades?: Record<string, string> }
-  profit_total: number
-  total_trades: number
-  sortino: number
-  calmar: number
-  profit_factor: number
-  max_drawdown_account: number
-  prop_firms?: Record<string, unknown>
-  propPass?: number
-  winrate: number
-  basis: string
-  timerange: string
-  run_time: string
-  source?: string
-  loss_function?: string
-  spaces?: string
-  epochs?: number
-  config_hash?: string
-  config_json?: string
-  code_hash?: string
-  trading_mode?: string
-  timeframe?: string
-  [key: string]: unknown
-}
-
-interface StrategiesState {
-  items: StrategyRow[]
-  backtests: any[]
-  benchmarks: any[]
-  loading: boolean
-  error: string | null
-  scorecard: Record<string, unknown>
-  propSpec: Record<string, unknown>
-}
+import type { StrategyRow, BacktestRow, BenchmarkRow, HyperoptRow, WalkforwardRow, HistoryData } from '../types/trade'
 
 export const useStrategiesStore = defineStore('strategies', {
-  state: (): StrategiesState => ({
+  state: () => ({
     items: [] as StrategyRow[],
-    backtests: [] as any[],
-    benchmarks: [] as any[],
+    canonical: [] as StrategyRow[],
+    backtests: [] as BacktestRow[],
+    benchmarks: [] as BenchmarkRow[],
+    hyperopt: [] as HyperoptRow[],
+    walkforward: [] as WalkforwardRow[],
+    history: {} as Record<string, HistoryData>,
     loading: false,
     error: null as string | null,
     scorecard: {} as Record<string, unknown>,
@@ -115,13 +29,14 @@ export const useStrategiesStore = defineStore('strategies', {
       this.loading = true
       this.error = null
       try {
-        const { data } = await api.get('/api/strategies/summary')
-        this.items = (data as StrategyRow[]) || []
+        const { data } = await api.get<StrategyRow[]>('/api/strategies/summary')
+        this.items = data || []
+        this.canonical = data || []
         if (this.items.length && this.items[0].score) {
-          this.scorecard = this.items[0].score as Record<string, unknown>
+          this.scorecard = this.items[0].score
         }
         if (this.items.length && this.items[0].prop_firms) {
-          this.propSpec = this.items[0].prop_firms as Record<string, unknown>
+          this.propSpec = this.items[0].prop_firms
         }
       } catch (e) {
         this.error = String(e)
@@ -133,17 +48,21 @@ export const useStrategiesStore = defineStore('strategies', {
       this.loading = true
       this.error = null
       try {
-        const { data } = await api.get('/api/data')
-        const d = data as { backtests?: any[]; benchmarks?: any[]; canonical?: any[]; scorecard?: Record<string, unknown>; prop_firms?: Record<string, unknown> }
-        this.backtests = d.backtests || []
-        this.benchmarks = d.benchmarks || []
-        this.items = d.canonical || []
-        if (this.items.length && this.items[0].score) {
-          this.scorecard = this.items[0].score as Record<string, unknown>
+        const { data: summary } = await api.get<StrategyRow[]>('/api/strategies/summary')
+        this.canonical = summary || []
+        this.items = summary || []
+        if (summary?.length && summary[0].score) {
+          this.scorecard = summary[0].score
         }
-        if (this.items.length && this.items[0].prop_firms) {
-          this.propSpec = this.items[0].prop_firms as Record<string, unknown>
+        if (summary?.length && summary[0].prop_firms) {
+          this.propSpec = summary[0].prop_firms
         }
+        const [hyperoptRaw, walkforwardRaw] = await Promise.all([
+          api.get<HyperoptRow[]>('/api/hyperopt').catch(() => ({ data: [] })),
+          api.get<WalkforwardRow[]>('/api/walkforward').catch(() => ({ data: [] })),
+        ])
+        this.hyperopt = hyperoptRaw.data || []
+        this.walkforward = walkforwardRaw.data || []
       } catch (e) {
         this.error = String(e)
       } finally {
@@ -151,7 +70,7 @@ export const useStrategiesStore = defineStore('strategies', {
       }
     },
     async fetchOne(name: string) {
-      const { data } = await api.get(`/api/strategy/${encodeURIComponent(name)}/summary`)
+      const { data } = await api.get<StrategyRow>(`/api/strategy/${encodeURIComponent(name)}/summary`)
       return data
     },
   },

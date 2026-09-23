@@ -1,16 +1,10 @@
 import { defineStore } from 'pinia'
 import { api } from '../api/client'
-
-interface TradeRun {
-  name: string
-  status: string
-  strategy: string
-  [key: string]: unknown
-}
+import type { TradeRunRow, StrategyDetailResponse } from '../types/trade'
 
 export const useTradeRunsStore = defineStore('tradeRuns', {
   state: () => ({
-    items: [] as TradeRun[],
+    items: [] as TradeRunRow[],
     loading: false,
     error: null as string | null,
   }),
@@ -22,9 +16,9 @@ export const useTradeRunsStore = defineStore('tradeRuns', {
       this.loading = true
       this.error = null
       try {
-        const { data } = await api.get('/api/data')
-        const d = data as { trade_runs?: TradeRun[] }
-        this.items = d.trade_runs || []
+        // Trade runs are fetched per-strategy via fetchByStrategy
+        // fetchAll now just initializes the store
+        this.items = []
       } catch (e) {
         this.error = String(e)
       } finally {
@@ -32,8 +26,8 @@ export const useTradeRunsStore = defineStore('tradeRuns', {
       }
     },
     async fetchByStrategy(name: string) {
-      const { data } = await api.get(`/api/strategy/${encodeURIComponent(name)}/detail`)
-      this.items = (data as { trade_runs?: TradeRun[] }).trade_runs || []
+      const { data } = await api.get<StrategyDetailResponse>(`/api/strategy/${encodeURIComponent(name)}/detail`)
+      this.items = data.trade_runs || []
     },
   },
 })

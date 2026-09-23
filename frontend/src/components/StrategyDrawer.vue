@@ -92,6 +92,8 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useStrategyDetailStore } from '../stores/strategyDetail'
 import { api } from '../api/client'
+import type { StrategyRow } from '../types/trade'
+import type { StrategyConfigsResponse, SnapshotFilesResponse, SnapshotCombinedResponse, CurrentCodeResponse, CurrentCodeSetResponse, SnapshotPathsResponse } from '../types/trade'
 import { useStrategyFormat } from '../composables/useStrategyFormat'
 
 const props = defineProps<{ name: string, runKind?: string, runSource?: string }>()
@@ -104,20 +106,27 @@ const extraData = ref({
   configs: {} as Record<string, any>,
   snapshotFiles: {} as Record<string, any[]>,
   snapshotCombined: {} as Record<string, string>,
-  currentCode: {} as Record<string, string>,
-  currentCodeSet: {} as Record<string, string>,
+  currentCode: '' as string,
+  currentCodeSet: [] as string[],
   snapshotPaths: {} as Record<string, any>,
 })
 
 async function loadExtraData() {
   try {
-    const { data } = await api.get('/api/data')
-    extraData.value.configs = data.configs || {}
-    extraData.value.snapshotFiles = data.snapshot_files || {}
-    extraData.value.snapshotCombined = data.snapshot_combined || {}
-    extraData.value.currentCode = data.current_code || {}
-    extraData.value.currentCodeSet = data.current_code_set || {}
-    extraData.value.snapshotPaths = data.snapshot_paths || {}
+    const [configs, snapFiles, snapCombined, currentCode, currentCodeSet, snapPaths] = await Promise.all([
+      api.get<StrategyConfigsResponse>(`/api/strategy/${encodeURIComponent(props.name)}/configs`),
+      api.get<SnapshotFilesResponse>(`/api/strategy/${encodeURIComponent(props.name)}/snapshot-files`),
+      api.get<SnapshotCombinedResponse>(`/api/strategy/${encodeURIComponent(props.name)}/snapshot-combined`),
+      api.get<CurrentCodeResponse>(`/api/strategy/${encodeURIComponent(props.name)}/current-code`),
+      api.get<CurrentCodeSetResponse>(`/api/strategy/${encodeURIComponent(props.name)}/current-code-set`),
+      api.get<SnapshotPathsResponse>(`/api/strategy/${encodeURIComponent(props.name)}/snapshot-paths`),
+    ])
+    extraData.value.configs = configs.data?.items || {}
+    extraData.value.snapshotFiles = snapFiles.data?.items || {}
+    extraData.value.snapshotCombined = snapCombined.data?.combined || {}
+    extraData.value.currentCode = currentCode.data?.source || ''
+    extraData.value.currentCodeSet = currentCodeSet.data?.hashes || []
+    extraData.value.snapshotPaths = snapPaths.data?.items || []
   } catch (e) {
     console.warn('Failed to load extra data:', e)
   }
@@ -127,7 +136,7 @@ const codeText = ref('')
 const codeFileIdx = ref(0)
 const isOpen = ref(true)
 const side = ref<'right' | 'bottom'>('right')
-const strategy = computed(() => store.canonical.find((s: any) => s.strategy === props.name) || { strategy: props.name, score: { grade: '?', grades: {} } })
+const strategy = computed(() => (store.canonical as unknown as StrategyRow[]).find((s: any) => s.strategy === props.name) || { strategy: props.name, score: { grade: '?', grades: {} } })
 const runs = computed(() => store.backtests.filter((b: any) => b.strategy === props.name).slice(0, 10))
 
 const runKind = computed(() => props.runKind || '')
@@ -245,9 +254,9 @@ function codeBadgeText() {
   const hash = r?.code_hash
   if (!hash) return 'code unknown'
   const setSnap = extraData.value.snapshotCombined[hash]
-  const setCur = extraData.value.currentCodeSet[props.name]
-  if (setSnap && setCur) return setSnap === setCur ? 'code current' : 'code changed since run'
-  const cur = extraData.value.currentCode[props.name]
+  const setCur = extraData.value.currentCodeSet.includes(hash)
+  if (!!setSnap && setCur) return setSnap === hash ? 'code current' : 'code changed since run'
+  const cur = extraData.value.currentCode
   if (!cur) return 'no .py on disk'
   return cur === hash ? 'code current' : 'code changed since run'
 }
@@ -256,7 +265,7 @@ const propRows = computed(() => {
   const src: any = run.value && (run.value as any).prop_firms ? run.value : strategy.value
   const pf = (src as any).prop_firms
   if (!pf) return []
-  return Object.keys(pf).map((k) => ({ k: k, verdict: pf[k].verdict, label: (store.propSpec[k] && store.propSpec[k].label) || k }))
+  return Object.keys(pf).map((k) => ({ k: k, verdict: pf[k].verdict, label: (store.propSpec[k] as { label?: string })?.label || k }))
 })
 
 const paramsMeta = computed(() => {

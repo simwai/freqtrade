@@ -19,22 +19,16 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 
-interface ToggleColumn {
-  accessorKey: string
-  header: string | ((ctx: any) => unknown)
-  enableHiding?: boolean
-}
-
-const props = defineProps<{ columns: ToggleColumn[]; visibility: Record<string, boolean> }>()
+const props = defineProps<{ columns: any[]; visibility: Record<string, boolean> }>()
 const emit = defineEmits<{ 'update:visibility': [v: Record<string, boolean>] }>()
 
 const root = ref<HTMLElement | null>(null)
 
 const toggleable = computed(() => props.columns.filter((c) => c.accessorKey !== 'actions' && c.enableHiding !== false))
 
-function toggleLabel(c: ToggleColumn): string {
+function toggleLabel(c: any): string {
   if (typeof c.header === 'string') return c.header
-  return (c.header as any).toggleLabel || c.accessorKey
+  return c.header?.toggleLabel || c.accessorKey
 }
 
 function set(key: string, visible: boolean) {

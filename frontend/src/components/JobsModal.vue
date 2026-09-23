@@ -1,11 +1,11 @@
 <template>
   <div>
     <!-- Trigger Button - Fixed at top-right -->
-    <button
-      v-if="!open"
-      class="jobs-trigger-btn"
-      @click="open = true"
-      :title="activeCount ? activeCount + ' active job' + (activeCount > 1 ? 's' : '') : 'Background jobs'"
+    <button 
+      v-if="!open" 
+      class="jobs-trigger-btn" 
+      @click="open = true" 
+      :title="activeCount ? activeCount + ' active job' + (activeCount > 1 ? 's' : '') : 'Background jobs'" 
       aria-label="Background jobs"
       :class="{ 'has-active': activeCount > 0 }"
     >
@@ -182,7 +182,7 @@ async function jobAction(id: string, action: string) {
 async function viewLog(id: string) {
   logJob.value = id
   logText.value = 'Loading...'
-  const { data } = await api.get('/api/jobs/' + id + '/log', { params: { tail: 6000 } })
+  const { data } = await api.get<{ log: string }>('/api/jobs/' + id + '/log', { params: { tail: 6000 } })
   logText.value = data.log || ''
 }
 

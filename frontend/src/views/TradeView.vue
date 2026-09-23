@@ -78,7 +78,7 @@ const columns = [
   { accessorKey: 'n_trades', header: sortableHeader('Trades') },
   { accessorKey: 'file', header: 'File', enableSorting: false, enableGlobalFilter: false },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
-]
+] as any[]
 
 const filteredRuns = computed(() => {
   const ql = q.value.trim().toLowerCase()
@@ -107,7 +107,7 @@ function resetFilters() {
 }
 
 function refreshData() {
-  store.fetchAll(true)
+  store.fetchAll()
 }
 
 function openRun(r: any) {

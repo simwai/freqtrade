@@ -1,8 +1,44 @@
-import { request } from './shared'
-
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8088'
+const TIMEOUT_MS = 300000
+async function request<T = unknown>(path: string, init: any = {}): Promise<{ data: T }> {
+  const params = init.params || {}
+  let url = path
+  const keys = Object.keys(params)
+  if (keys.length) {
+    const qs = new URLSearchParams()
+    for (const k of keys) {
+      const v = params[k]
+      if (v !== undefined && v !== null) qs.append(k, String(v))
+    }
+    const s = qs.toString()
+    if (s) url += (url.includes('?') ? '&' : '?') + s
+  }
+  if (!import.meta.env.DEV && url.charAt(0) === '/') url = BASE_URL + url
+  const ctrl = new AbortController()
+  const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, { method: init.method || 'GET', headers: { 'Content-Type': 'application/json' }, body: init.body, signal: ctrl.signal })
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      // Silent abort - expected when component unmounts during navigation
+      throw e
+    }
+    console.error('API error:', e)
+    throw e
+  } finally {
+    clearTimeout(t)
+  }
+  if (!res.ok) {
+    const err = new Error('API error ' + res.status)
+    throw err
+  }
+  const data = await res.clone().json().catch(() => res.text())
+  return { data: data }
+}
 export const api = {
-  get: (url: string, config?: Record<string, unknown>) =>
-    request(url, { method: 'GET', params: (config?.params as Record<string, unknown>) || undefined }),
-  post: (url: string, body?: unknown) =>
-    request(url, { method: 'POST', body }),
+  get: <T = unknown>(url: string, config?: any) => request<T>(url, { method: 'GET', params: config ? config.params : undefined }),
+  post: <T = unknown>(url: string, body?: any) => request<T>(url, { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) }),
+  patch: <T = unknown>(url: string, body?: any) => request<T>(url, { method: 'PATCH', body: body === undefined ? undefined : JSON.stringify(body) }),
+  delete: <T = unknown>(url: string, config?: any) => request<T>(url, { method: 'DELETE', params: config ? config.params : undefined }),
 }

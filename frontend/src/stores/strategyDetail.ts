@@ -1,45 +1,15 @@
 import { defineStore } from 'pinia'
 import { api } from '../api/client'
-
-interface StrategyDetail {
-  strategy: string
-  status: string
-  score?: { grade: string }
-  profit_total?: number
-  sortino?: number
-  calmar?: number
-  profit_factor?: number
-  max_drawdown_account?: number
-  prop_firms?: Record<string, unknown>
-  basis: string
-  timerange: string
-  run_time: string
-  source?: string
-  notes?: string
-}
-
-interface StrategyDetailState {
-  canonical: StrategyDetail | null
-  backtests: unknown[]
-  benchmarks: unknown[]
-  hyperopt: unknown[]
-  walkforward: unknown[]
-  tradeRuns: unknown[]
-  scorecard: Record<string, unknown>
-  propSpec: Record<string, unknown>
-  loading: boolean
-  error: string | null
-  currentName: string
-}
+import type { StrategyRow, BacktestRow, BenchmarkRow, HyperoptRow, WalkforwardRow, TradeRunRow, StrategyDetailResponse } from '../types/trade'
 
 export const useStrategyDetailStore = defineStore('strategyDetail', {
-  state: (): StrategyDetailState => ({
-    canonical: null,
-    backtests: [] as unknown[],
-    benchmarks: [] as unknown[],
-    hyperopt: [] as unknown[],
-    walkforward: [] as unknown[],
-    tradeRuns: [] as unknown[],
+  state: () => ({
+    canonical: null as StrategyRow | null,
+    backtests: [] as BacktestRow[],
+    benchmarks: [] as BenchmarkRow[],
+    hyperopt: [] as HyperoptRow[],
+    walkforward: [] as WalkforwardRow[],
+    tradeRuns: [] as TradeRunRow[],
     scorecard: {} as Record<string, unknown>,
     propSpec: {} as Record<string, unknown>,
     loading: false,
@@ -57,16 +27,15 @@ export const useStrategyDetailStore = defineStore('strategyDetail', {
       this.error = null
       this.currentName = name
       try {
-        const { data } = await api.get(`/api/strategy/${encodeURIComponent(name)}/detail`)
-        const d = data as { canonical?: StrategyDetail; backtests?: unknown[]; benchmarks?: unknown[]; hyperopt?: unknown[]; walkforward?: unknown[]; trade_runs?: unknown[]; scorecard?: Record<string, unknown>; prop_firms_spec?: Record<string, unknown> }
-        this.canonical = d.canonical || null
-        this.backtests = d.backtests || []
-        this.benchmarks = d.benchmarks || []
-        this.hyperopt = d.hyperopt || []
-        this.walkforward = d.walkforward || []
-        this.tradeRuns = d.trade_runs || []
-        this.scorecard = d.scorecard || {}
-        this.propSpec = d.prop_firms_spec || {}
+        const { data } = await api.get<StrategyDetailResponse>(`/api/strategy/${encodeURIComponent(name)}/detail`)
+        this.canonical = data.canonical || null
+        this.backtests = (data.backtests || []) as BacktestRow[]
+        this.benchmarks = (data.benchmarks || []) as BenchmarkRow[]
+        this.hyperopt = (data.hyperopt || []) as HyperoptRow[]
+        this.walkforward = (data.walkforward || []) as WalkforwardRow[]
+        this.tradeRuns = (data.trade_runs || []) as TradeRunRow[]
+        this.scorecard = data.scorecard || {}
+        this.propSpec = data.prop_firms_spec || {}
       } catch (e) {
         this.error = String(e)
         this.canonical = null

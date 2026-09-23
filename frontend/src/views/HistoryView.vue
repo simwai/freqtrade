@@ -159,11 +159,11 @@ function optionFor(name: string): ECOption {
   const m = metrics2[metric2.value]
   const byD = (p: any[], q: any[]) => String(p[0]).localeCompare(String(q[0]))
   const profit = h.dates.map((d: string, j: number) => {
-    let v = h.profit[j]
-    if (useLog.value && v <= 0) v = null
+    let v: number | null = h.profit[j]
+    if (useLog.value && v !== null && v <= 0) v = null
     return [d, v]
   }).sort(byD)
-  const second = h.dates.map((d: string, j: number) => [d, h[metric2.value][j]]).sort(byD)
+  const second = h.dates.map((d: string, j: number) => [d, (h as any)[metric2.value][j]]).sort(byD)
   return {
     backgroundColor: 'transparent',
     tooltip: {

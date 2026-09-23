@@ -1,4 +1,5 @@
-import { h } from 'vue'
+import { h, type VNode } from 'vue'
+import type { Column } from '@tanstack/vue-table'
 
 // Shared TanStack column header renderer. Nuxt UI's UTable does not wire
 // header-click sorting itself, so every sortable column uses this helper to
@@ -9,8 +10,8 @@ export function sortArrow(state: 'asc' | 'desc' | false): string {
   return ''
 }
 
-export function sortableHeader(label: string) {
-  const render = (ctx: any) =>
+export function sortableHeader<T>(label: string) {
+  const render = (ctx: { column: Column<T> }): VNode =>
     h(
       'span',
       {

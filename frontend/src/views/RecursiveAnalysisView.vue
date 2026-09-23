@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import * as z from 'zod'
 import { api } from '../api/client'
@@ -99,7 +99,7 @@ import { rpcApi } from '../api/rpcClient'
 import SccGraph from '../components/SccGraph.vue'
 import StartupCandleTable from '../components/StartupCandleTable.vue'
 import { sortableHeader } from '../utils/table'
-import type { RecursiveAnalysisResult, SccGraphData } from '../api/schemas'
+import type { RecursiveAnalysisResult, RecursiveAnalysisResponse, SccGraphData } from '../api/schemas'
 import InlineStatus from '../components/InlineStatus.vue'
 
 const router = useRouter()
@@ -146,7 +146,7 @@ function onFormError(e: any) {
 async function loadStrategies() {
   loadingStrategies.value = true
   try {
-    const { data } = await api.get('/api/strategies')
+    const { data } = await api.get<any[]>('/api/strategies')
     strategyOptions.value = (Array.isArray(data) ? data : []).map((s: any) => ({ label: s.name, value: s.name }))
   } catch (e) {
     showAnalysisStatus('error', 'Failed to load strategies')
@@ -166,10 +166,10 @@ async function runAnalysis() {
         delete body[key as keyof FormState]
       }
     })
-    const { data } = await rpcApi.post('/api/recursive_analysis', body)
-    jobId.value = data.job_id
-    showAnalysisStatus('success', 'Analysis started', 'Job ' + data.job_id)
-    await pollJob(data.job_id)
+    const { data } = await rpcApi.post<RecursiveAnalysisResponse>('/api/recursive_analysis', body)
+    jobId.value = data.job_id!
+    showAnalysisStatus('success', 'Analysis started', 'Job ' + data.job_id!)
+    await pollJob(data.job_id!)
   } catch (e: any) {
     formError.value = e.message || 'Failed to start analysis'
     showAnalysisStatus('error', 'Analysis failed')
@@ -182,9 +182,9 @@ async function pollJob(id: string) {
   for (let i = 0; i < 300; i++) {
     await new Promise(r => setTimeout(r, 1000))
     try {
-      const { data } = await rpcApi.get('/api/recursive_analysis/' + id)
+      const { data } = await rpcApi.get<RecursiveAnalysisResponse>('/api/recursive_analysis/' + id)
       if (data.status === 'ended') {
-        result.value = data.result
+        result.value = data.result || null
         buildGraphData()
         buildIndicatorDetails()
         buildDiffRows()
@@ -222,10 +222,9 @@ const diffColumns = [
 function buildGraphData() {
   if (!result.value?.results) return
   const indicators = Object.keys(result.value.results)
-  const scc = result.value.strategy_scc || []
 
   // Create nodes for each indicator
-  graphNodes.value = indicators.map((name, idx) => ({
+  graphNodes.value = indicators.map((name, _idx) => ({
     id: name,
     label: name,
     startup_candles: 0, // Will be filled from indicatorDetails

@@ -15,7 +15,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const container = ref<HTMLElement | null>(null)
-let simulation: d3.Simulation<d3.SimulationNodeDatum, undefined> | null = null
+let simulation: any = null
 let svg: any = null
 
 function renderGraph() {
@@ -84,9 +84,7 @@ function renderGraph() {
   node.append('title')
     .text((d: any) => `${d.label}\nStartup candles: ${d.startup_candles}\nIndicators: ${d.indicators.join(', ')}`)
 
-  // Convert nodes to d3-compatible format
-  const simNodes = props.nodes.map(n => ({ ...n })) as d3.SimulationNodeDatum[]
-  simulation = d3.forceSimulation(simNodes)
+  simulation = d3.forceSimulation(props.nodes as any)
     .force('link', d3.forceLink(props.edges).id((d: any) => d.id).distance(80).strength(0.5))
     .force('charge', d3.forceManyBody().strength(-300))
     .force('center', d3.forceCenter(width / 2, height / 2))

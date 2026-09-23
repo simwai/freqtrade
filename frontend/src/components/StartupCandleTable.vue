@@ -27,13 +27,14 @@
     </UTable>
 
     <!-- Expanded details rows -->
-    <div v-for="indicator in indicators" :key="indicator.name" v-if="expanded.has(indicator.name)" class="detail-row">
+    <template v-for="ind in indicators" :key="ind.name">
+      <div v-if="expanded.has(ind.name)" class="detail-row">
       <div class="detail-header">
-        <span class="detail-title">Candle-by-candle diffs for {{ indicator.name }}</span>
-        <span class="detail-count">{{ indicator.diffs?.length || 0 }} candles</span>
+        <span class="detail-title">Candle-by-candle diffs for {{ ind.name }}</span>
+        <span class="detail-count">{{ ind.diffs?.length || 0 }} candles</span>
       </div>
       <UTable
-        :data="indicator.diffs"
+        :data="ind.diffs"
         :columns="detailColumns"
         :loading="false"
         :sticky="true"
@@ -47,26 +48,42 @@
         </template>
       </UTable>
     </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { sortableHeader } from '../utils/table'
-import type { SccNode } from '../api/schemas'
+
+interface IndicatorDetail {
+  name: string
+  startup_candles: number
+  num_candles: number
+  max_diff: number
+  diffs: Array<{ candle: number; diff: number }>
+}
 
 interface Props {
-  indicators: SccNode[]
+  indicators: IndicatorDetail[]
 }
 
 const props = defineProps<Props>()
 
 const expanded = ref<Set<string>>(new Set())
 
+const columns = [
+  { accessorKey: 'name', header: sortableHeader('Indicator') },
+  { accessorKey: 'startup_candles', header: sortableHeader('Startup Candles') },
+  { accessorKey: 'num_candles', header: sortableHeader('Num Candles') },
+  { accessorKey: 'max_diff', header: sortableHeader('Max Diff') },
+  { accessorKey: 'details', header: '', enableSorting: false, enableGlobalFilter: false },
+] as any[]
+
 const detailColumns = [
   { accessorKey: 'candle', header: sortableHeader('Candle'), size: 80 },
   { accessorKey: 'diff', header: sortableHeader('Diff'), size: 120, accessorFn: (r: any) => r.diff },
-]
+] as any[]
 
 function toggleDetails(name: string) {
   if (expanded.value.has(name)) {

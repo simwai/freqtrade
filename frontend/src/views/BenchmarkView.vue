@@ -51,11 +51,11 @@ import { BarChart, LineChart, ScatterChart, BoxplotChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent } from 'echarts/components'
 
 echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, BoxplotChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent])
-import { useDashboardStore } from '../stores/dashboard'
+import { useStrategiesStore } from '../stores/strategies'
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 
-const store = useDashboardStore()
+const store = useStrategiesStore()
 const metric = ref('sortino')
 const sourceMode = ref('auto')
 const sortMode = ref('median')
@@ -229,7 +229,7 @@ const benchOption = computed((): ECOption => {
   }
 })
 
-onMounted(() => { store.fetchAll() })
+onMounted(() => { store.fetchFullData() })
 </script>
 
 <style scoped>

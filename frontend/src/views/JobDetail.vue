@@ -3,7 +3,7 @@
     <div class="section-head">
       <router-link to="/lab" class="back-link">← Back to Lab</router-link>
       <h2>Job Detail {{ jobId }}</h2>
-      <span :class="statusClass(jobStatus)">{{ jobStatus || 'unknown' }}</span>
+      <span :class="statusClass(jobStatus || '')">{{ jobStatus || 'unknown' }}</span>
       <span v-if="isStreaming" class="status active ml-2">LIVE</span>
     </div>
 
@@ -112,14 +112,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { api } from '../api/client'
 import { useConfirmDialog } from '../composables/useConfirmDialog'
 import { useJobLogStream } from '../composables/useEventSource'
 import InlineStatus from '../components/InlineStatus.vue'
 
 const route = useRoute()
-const router = useRouter()
 const { confirm } = useConfirmDialog()
 
 // Inline status state (replaces toast)
@@ -137,7 +136,7 @@ const jobMeta = ref<any>({})
 const logText = ref('')
 
 // SSE-based job log streaming
-const { logLines, isStreaming, jobStatus, progressTasks, start: startStream, stop: stopStream, getLogText } = useJobLogStream(jobId)
+const { logLines, isStreaming, jobStatus, progressTasks, start: startStream, stop: stopStream } = useJobLogStream(jobId)
 
 const canReconnect = computed(() => jobStatus.value === 'running' && !isStreaming.value)
 
@@ -145,14 +144,14 @@ async function loadJob() {
   loading.value = true
   error.value = ''
   try {
-    const { data } = await api.get('/api/jobs/' + jobId)
+    const { data } = await api.get<{ status: string }>('/api/jobs/' + jobId)
     jobMeta.value = data
     // Start streaming if job is running
     if (data.status === 'running') {
       startStream()
     } else {
       // Load existing log for non-running jobs
-      const { data: logData } = await api.get('/api/jobs/' + jobId + '/log', { params: { tail: 6000 } })
+      const { data: logData } = await api.get<{ log: string }>('/api/jobs/' + jobId + '/log', { params: { tail: 6000 } })
       logText.value = logData.log || ''
     }
   } catch (e) {
@@ -164,7 +163,7 @@ async function loadJob() {
 
 async function loadFullLog() {
   try {
-    const { data } = await api.get('/api/jobs/' + jobId + '/log')
+    const { data } = await api.get<{ log: string }>('/api/jobs/' + jobId + '/log')
     logText.value = data.log || ''
   } catch (e) {
     showJobStatus('error', 'Failed to load full log')

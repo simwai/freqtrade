@@ -43,6 +43,7 @@ export function useEventSource(options: UseEventSourceOptions): UseEventSourceRe
       eventSource.close()
     }
 
+    // Add auth token if available
     const token = import.meta.env.VITE_RPC_API_TOKEN || localStorage.getItem('rpc_api_token')
     let fullUrl = url
     if (token) {
@@ -107,8 +108,10 @@ export function useEventSource(options: UseEventSourceOptions): UseEventSourceRe
     connect()
   }
 
+  // Initial connection
   connect()
 
+  // Cleanup on unmount
   onUnmounted(() => {
     close()
   })
@@ -123,16 +126,17 @@ export function useEventSource(options: UseEventSourceOptions): UseEventSourceRe
   }
 }
 
-export function useJobLogStream(jobIdRef: Ref<string>, baseUrl: string = '/api/jobs') {
+// Specialized hook for job log streaming
+export function useJobLogStream(jobIdRef: string | Ref<string>, baseUrl: string = '/api/jobs') {
   const logLines = ref<string[]>([])
   const isStreaming = ref(false)
-  const jobStatus = ref<'running' | 'done' | 'error' | null>(null)
+  const jobStatus = ref<'queued' | 'running' | 'paused' | 'done' | 'error' | null>(null)
   const progressTasks = ref<Record<string, JobProgressTask>>({})
 
   let eventSource: ReturnType<typeof useEventSource> | null = null
 
   const start = (jobId?: string) => {
-    const id = jobId || jobIdRef.value
+    const id = jobId || (typeof jobIdRef === 'string' ? jobIdRef : jobIdRef.value)
     if (!id) return
     logLines.value = []
     isStreaming.value = true
@@ -146,6 +150,7 @@ export function useJobLogStream(jobIdRef: Ref<string>, baseUrl: string = '/api/j
       onMessage: (event) => {
         if (event.type === 'log') {
           logLines.value.push(event.data)
+          // Keep last 10000 lines
           if (logLines.value.length > 10000) {
             logLines.value = logLines.value.slice(-10000)
           }

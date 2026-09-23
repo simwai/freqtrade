@@ -7,7 +7,7 @@ interface RequestOptions {
   headers?: Record<string, string>
 }
 
-async function request(path: string, init: RequestOptions = {}): Promise<{ data: unknown }> {
+async function request<T = unknown>(path: string, init: RequestOptions = {}): Promise<{ data: T }> {
   const { method = 'GET', params, body, headers = {} } = init
   let url = path
   const keys = Object.keys(params || {})

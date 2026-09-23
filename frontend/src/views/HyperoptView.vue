@@ -156,8 +156,8 @@ import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart, LineChart, ScatterChart, CandlestickChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent } from 'echarts/components'
-
-echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, DataZoomComponent])
+echarts.use([CanvasRenderer, BarChart, LineChart, ScatterChart, CandlestickChart, TitleComponent, TooltipComponent, 
+GridComponent, LegendComponent, DataZoomComponent])
 import { useStrategiesStore } from '../stores/strategies'
 import { api } from '../api/client'
 const router = useRouter()
@@ -192,7 +192,7 @@ const columns = [
   { accessorKey: 'spaces', header: sortableHeader('Spaces') },
   { accessorKey: 'run_time', header: sortableHeader('Run') },
   { accessorKey: 'actions', header: '', enableSorting: false, enableGlobalFilter: false },
-]
+] as any[]
 
 const detailColumns = [
   { accessorKey: 'epoch', header: sortableHeader('Epoch') },
@@ -207,7 +207,7 @@ const detailColumns = [
   { accessorKey: 'mae', header: sortableHeader('MAE%') },
   { accessorKey: 'exit_eff', header: sortableHeader('ExitEff') },
   { accessorKey: 'best', header: 'Best?', enableSorting: false },
-]
+] as any[]
 
 const filtered = computed(() => {
   const ql = q.value.toLowerCase()
@@ -255,7 +255,7 @@ function debugFilter() {
 }
 
 function refreshData() {
-  store.fetchFullData()
+  store.fetchAll(true)
 }
 
 function fileKey(f: any) { return typeof f === 'string' ? f : (f.source || f.name || f.path || JSON.stringify(f)) }
@@ -265,11 +265,11 @@ async function drill(source: string) {
   selectedFile.value = source
   try {
     const { data } = await api.get('/api/hyperopt', { params: { source, limit: Number(epochLimit.value) || 200 } })
-    if (data.error) { detail.value = null; return }
-    const hoRow = store.hyperopt.find((x: any) => x.source === data.source)
+    if ((data as any).error) { detail.value = null; return }
+    const hoRow = store.hyperopt.find((x: any) => x.source === (data as any).source)
     let paramsText = ''
     if (hoRow && hoRow.best_params) {
-      try { paramsText = JSON.stringify(JSON.parse(hoRow.best_params), null, 2) } catch (e) {}
+      try { paramsText = JSON.stringify(JSON.parse(hoRow.best_params as string), null, 2) } catch (e) {}
     }
     detail.value = Object.assign({}, data, { paramsText, loss_function: hoRow?.loss_function || '', best_loss: hoRow?.best_loss })
   } catch (e) {
@@ -302,9 +302,9 @@ const scatterOption = computed((): ECScatterOption => ({
 }))
 
 onMounted(async () => {
-  await store.fetchFullData()
+  await store.fetchAll()
   const { data } = await api.get('/api/hyperopt/files')
-  files.value = data
+  files.value = data as any[]
 })
 </script>
 

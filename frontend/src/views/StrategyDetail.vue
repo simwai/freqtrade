@@ -3,10 +3,9 @@
     <div class="section-head">
       <router-link to="/strategies" class="back-link">← Back to Strategies</router-link>
       <h2>{{ name }}</h2>
-      <span :class="gradePill(strategy?.score?.grade)">{{ strategy?.score?.grade || '?' }}</span>
+      <span :class="gradePill(strategy?.score?.grade || '')">{{ strategy?.score?.grade || '?' }}</span>
       <span :class="statusClass(strategy.status)">{{ strategy.status }}</span>
       <span class="basis-badge" :title="basisTooltip(strategy)">grade basis: {{ basisLabel(strategy) }} · {{ (strategy.run_time || '').slice(0, 16) }}</span>
-      <span :class="codeBadgeClass()" :title="codeBadgeTitle()">{{ codeBadgeText() }}</span>
     </div>
     <div v-if="strategy.notes || strategy.score" class="hint">{{ strategy.notes }}{{ strategy.notes ? ' · ' : '' }}{{ passWarnFail() }}</div>
 
@@ -189,7 +188,7 @@
                 <td>{{ (r.run_time || '').slice(0, 10) }}</td>
                 <td class="num">{{ fmt0(r.epochs) }}</td>
                 <td class="num">{{ fmt(r.best_loss, 4) }}</td>
-                <td class="num">{{ fmtPct1((r.best_profit_total || 0) * 100) }}</td>
+                <td class="num">{{ fmtPct1(((r.best_profit_total as number) || 0) * 100) }}</td>
                 <td class="num">{{ fmt(r.best_sortino) }}</td>
                 <td :title="r.timerange || ''">{{ fmtRange(r.timerange) }}</td>
               </tr>
@@ -208,7 +207,7 @@
             </thead>
             <tbody>
               <tr v-for="r in wfs" :key="r.source">
-                <td>{{ (r.run_id || '').slice(0, 16) }}</td>
+                <td>{{ ((r.run_id as string) || '').slice(0, 16) }}</td>
                 <td class="num">{{ fmt0(r.n_windows) }}</td>
                 <td class="num">{{ r.profitable_windows }}/{{ r.n_windows }}</td>
                 <td class="num">{{ fmt(r.oos_profit_abs) }}</td>
@@ -315,13 +314,13 @@ onMounted(() => {
   }
 })
 
-const strategy = computed(() => store.canonical || { strategy: name, score: { grade: '?', grades: {} } })
+const strategy = computed(() => store.canonical || { strategy: name, status: '', score: { grade: '?', grades: {} }, profit_total: 0, total_trades: 0, sortino: 0, calmar: 0, profit_factor: 0, max_drawdown_account: 0, winrate: 0, basis: '', timerange: '', run_time: '', notes: '' })
 const runs = computed(() => store.backtests.filter((b: any) => b.strategy === name).sort((a: any, b: any) => (b.run_time || '').localeCompare(a.run_time || '')))
 const runsFilter = useUrlState({ key: 'runs', defaultValue: '', parse: (v) => v ?? '', serialize: (v) => v })
 const runsSorting = ref<{ id: string; desc: boolean }[]>([{ id: 'run_time', desc: true }])
 const columnVisibility = ref<Record<string, boolean>>({})
 
-const runsColumns = [
+const runsColumns: any[] = [
   { accessorKey: 'run_time', header: sortableHeader('Run') },
   { accessorKey: 'grade', accessorFn: (r: any) => r.score?.grade, header: sortableHeader('Grade') },
   { accessorKey: 'profit_total', header: sortableHeader('Profit%') },
@@ -414,7 +413,7 @@ const propRows = computed(() => {
     return {
       k: k,
       label: p.label,
-      basis: sp.daily_dd_basis === 'trailing_intraday_high' ? 'trailing intraday high' : 'midnight balance',
+      basis: (sp as any).daily_dd_basis === 'trailing_intraday_high' ? 'trailing intraday high' : 'midnight balance',
       checks: (p.checks || []).map((c: any) => ({
         status: c.status,
         text: c.status === 'na' ? 'n/a' : fmtCheck(c) + ' / ' + fmtLim(c)
@@ -474,7 +473,7 @@ const histOption = computed((): ECOption => {
 async function loadCode() {
   const h = (strategy.value as any).code_hash
   if (!h) { codeText.value = 'no snapshot hash'; return }
-  const { data } = await api.get('/api/strategy/file', { params: { hash: h } })
+  const { data } = await api.get<string>('/api/strategy/file', { params: { hash: h } })
   codeText.value = typeof data === 'string' ? data : JSON.stringify(data)
 }
 
@@ -545,28 +544,6 @@ function passWarnFail() {
   if (!s) return ''
   return (s.pass_count || 0) + ' pass, ' + (s.warn_count || 0) + ' warn, ' + (s.fail_count || 0) + ' fail'
 }
-function codeBadgeText() {
-  const c: any = strategy.value
-  const hash = c.code_hash
-  if (!hash) return 'code unknown'
-  const setSnap = store.snapshotCombined[hash]
-  const setCur = store.currentCodeSet[name]
-  if (setSnap && setCur) return setSnap === setCur ? 'code current' : 'code changed since run'
-  const cur = store.currentCode[name]
-  if (!cur) return 'no .py on disk'
-  return cur === hash ? 'code current' : 'code changed since run'
-}
-function codeBadgeClass() {
-  const t = codeBadgeText()
-  if (t === 'code current') return 'pill gA'
-  if (t === 'code changed since run') return 'pill gF'
-  return 'pill gna'
-}
-function codeBadgeTitle() {
-  const c: any = strategy.value
-  const meta = store.snapshotPaths[c.code_hash]
-  return 'snapshot ' + (c.code_hash || '?').slice(0, 12) + (meta && meta.mtime ? ' · ' + meta.mtime : '')
-}
 
 onMounted(async () => {
   await store.load(name)
@@ -598,3 +575,4 @@ onMounted(async () => {
 .rec-row { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
 .code-block { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; overflow: auto; max-height: 300px; font-size: 11px; white-space: pre-wrap; }
 </style>
+

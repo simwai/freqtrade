@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <InlineStatus v-if="historyStatus" :type="historyStatus.type" :title="historyStatus.title" :message="historyStatus.message" duration="5000" />
+    <InlineStatus v-if="historyStatus" :type="historyStatus.type" :title="historyStatus.title" :message="historyStatus.message" :duration="5000" />
 
     <div v-if="loading" class="card">
       <div class="flex items-center justify-center py-12">
@@ -212,9 +212,9 @@
                     :sticky="true"
                     class="w-full"
                   >
-                    <template #date-cell="{ row }">{{ formatDate(row[marketData.columns.indexOf('date')]) }}</template>
-                    <template #close-cell="{ row }"><span class="num">{{ fmtNum(row[marketData.columns.indexOf('close')]) }}</span></template>
-                    <template #pct_change-cell="{ row }"><span class="num" :class="profitClass(row[marketData.columns.indexOf('pct_change')])">{{ fmtPct(row[marketData.columns.indexOf('pct_change')]) }}</span></template>
+                    <template #date-cell="{ row }">{{ formatDate((row as any).original[marketData.columns.indexOf('date')]) }}</template>
+                    <template #close-cell="{ row }"><span class="num">{{ fmtNum((row as any).original[marketData.columns.indexOf('close')]) }}</span></template>
+                    <template #pct_change-cell="{ row }"><span class="num" :class="profitClass((row as any).original[marketData.columns.indexOf('pct_change')])">{{ fmtPct((row as any).original[marketData.columns.indexOf('pct_change')]) }}</span></template>
                   </UTable>
                   <p class="hint mt-2">Showing first 100 rows of {{ marketData.length }} total</p>
                 </div>
@@ -235,8 +235,8 @@
                     :sticky="true"
                     class="w-full mt-4"
                   >
-                    <template #date-cell="{ row }">{{ formatDate(row[walletData.columns.indexOf('date')]) }}</template>
-                    <template #total_quote-cell="{ row }"><span class="num">{{ fmtNum(row[walletData.columns.indexOf('total_quote')]) }}</span></template>
+                    <template #date-cell="{ row }">{{ formatDate((row as any).original[walletData.columns.indexOf('date')]) }}</template>
+                    <template #total_quote-cell="{ row }"><span class="num">{{ fmtNum((row as any).original[walletData.columns.indexOf('total_quote')]) }}</span></template>
                   </UTable>
                   <p class="hint mt-2">Showing first 100 rows of {{ walletData.length }} total</p>
                 </div>
@@ -250,7 +250,7 @@
                 </UFormField>
                 <div class="drawer-actions">
                   <UButton @click="saveNotes" :disabled="savingNotes">{{ savingNotes ? 'Saving...' : 'Save Notes' }}</UButton>
-                  <UButton variant="outline" @click="drawerTab = 'metrics'">Cancel</UButton>
+                  <UButton variant="outline" @click="() => { drawerTab = 'metrics' }">Cancel</UButton>
                 </div>
               </div>
             </div>
@@ -281,7 +281,7 @@ echarts.use([CanvasRenderer, LineChart, TitleComponent, TooltipComponent, GridCo
 import type { ECOption } from '../utils/echarts'
 import '../utils/echarts'
 
-const { confirm } = useConfirmDialog()
+useConfirmDialog()
 
 // Inline status state (replaces toast)
 const historyStatus = ref<{ type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string } | null>(null)
@@ -321,7 +321,7 @@ const columns = [
   { accessorKey: 'profit_factor', header: 'PF', size: 80 },
   { accessorKey: 'notes', header: 'Notes', size: 150 },
   { accessorKey: 'actions', header: '', size: 100, enableSorting: false, enableGlobalFilter: false },
-]
+] as any[]
 
 const filteredHistory = computed(() => {
   let arr = [...history.value]
@@ -386,7 +386,7 @@ async function refreshHistory() {
   loading.value = true
   error.value = ''
   try {
-    const { data } = await api.get('/api/backtest/history')
+    const { data } = await api.get<BacktestHistoryEntry[]>('/api/backtest/history')
     history.value = Array.isArray(data) ? data : []
   } catch (e) {
     error.value = String(e)
@@ -460,7 +460,7 @@ async function loadResult(filename: string, strategy: string) {
   resultData.value = null
   resultTrades.value = []
   try {
-    const { data } = await api.get('/api/backtest/history/result', { params: { filename, strategy } })
+    const { data } = await api.get<{ backtest_result: any }>('/api/backtest/history/result', { params: { filename, strategy } })
     const btResult = data.backtest_result
     if (btResult?.strategy?.[strategy]) {
       const strat = btResult.strategy[strategy]
@@ -478,7 +478,6 @@ async function loadResult(filename: string, strategy: string) {
         avg_profit: strat.avg_profit,
         expectancy: strat.expectancy,
       }
-      // Extract trades if available
       if (btResult.strategy[strategy].trades) {
         resultTrades.value = btResult.strategy[strategy].trades
       }
@@ -494,7 +493,7 @@ async function loadMarketChange(filename: string) {
   loadingMarket.value = true
   marketData.value = null
   try {
-    const { data } = await api.get('/api/backtest/history/' + filename + '/market_change', { params: { strategy: selectedResult.value?.strategy } })
+    const { data } = await api.get<any>('/api/backtest/history/' + filename + '/market_change', { params: { strategy: selectedResult.value?.strategy } })
     marketData.value = data
   } catch (e) {
     // Silently fail - not all backtests have market change data
@@ -507,7 +506,7 @@ async function loadWalletHistory(filename: string, strategy: string) {
   loadingWallet.value = true
   walletData.value = null
   try {
-    const { data } = await api.get('/api/backtest/history/' + filename + '/' + strategy + '/wallet')
+    const { data } = await api.get<any>('/api/backtest/history/' + filename + '/' + strategy + '/wallet')
     walletData.value = data
   } catch (e) {
     // Silently fail

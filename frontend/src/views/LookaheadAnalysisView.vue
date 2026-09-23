@@ -89,7 +89,7 @@ import * as z from 'zod'
 import { api } from '../api/client'
 import { rpcApi } from '../api/rpcClient'
 import { sortableHeader } from '../utils/table'
-import type { LookaheadAnalysisResult } from '../api/schemas'
+import type { LookaheadAnalysisResult, LookaheadAnalysisResponse } from '../api/schemas'
 import InlineStatus from '../components/InlineStatus.vue'
 
 const router = useRouter()
@@ -136,14 +136,14 @@ const biasedIndicators = computed(() => {
   return result.value.biased_indicators.map((indicator: string) => ({ indicator }))
 })
 
-const biasColumns = [
+const biasColumns: any[] = [
   { accessorKey: 'indicator', header: sortableHeader('Indicator') },
 ]
 
 async function loadStrategies() {
   loadingStrategies.value = true
   try {
-    const { data } = await api.get('/api/strategies')
+    const { data } = await api.get<any[]>('/api/strategies')
     strategyOptions.value = (Array.isArray(data) ? data : []).map((s: any) => ({ label: s.name, value: s.name }))
   } catch (e) {
     showLookaheadStatus('error', 'Failed to load strategies')
@@ -163,10 +163,10 @@ async function runAnalysis() {
         delete body[key as keyof FormState]
       }
     })
-    const { data } = await rpcApi.post('/api/lookahead_analysis', body)
-    jobId.value = data.job_id
-    showLookaheadStatus('success', 'Analysis started', 'Job ' + data.job_id)
-    await pollJob(data.job_id)
+    const { data } = await rpcApi.post<LookaheadAnalysisResponse>('/api/lookahead_analysis', body)
+    jobId.value = data.job_id!
+    showLookaheadStatus('success', 'Analysis started', 'Job ' + data.job_id!)
+    await pollJob(data.job_id!)
   } catch (e: any) {
     formError.value = e.message || 'Failed to start analysis'
     showLookaheadStatus('error', 'Analysis failed')
@@ -179,9 +179,9 @@ async function pollJob(id: string) {
   for (let i = 0; i < 300; i++) {
     await new Promise(r => setTimeout(r, 1000))
     try {
-      const { data } = await rpcApi.get('/api/lookahead_analysis/' + id)
+      const { data } = await rpcApi.get<LookaheadAnalysisResponse>('/api/lookahead_analysis/' + id)
       if (data.status === 'ended') {
-        result.value = data.result
+        result.value = data.result || null
         showLookaheadStatus('success', 'Analysis complete')
         return
       }

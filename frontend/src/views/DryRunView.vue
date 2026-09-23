@@ -143,7 +143,7 @@ async function loadDropdowns() {
   } catch (e) { strategyOptions.value = [] }
   try {
     const { data } = await api.get('/api/configs')
-    configOptions.value = (data && data.configs) || []
+    configOptions.value = ((data as any) && (data as any).configs) || []
   } catch (e) { configOptions.value = [] }
 }
 
@@ -151,7 +151,7 @@ async function loadLog() {
   logText.value = 'Loading...'
   try {
     const { data } = await api.get('/api/dryrun/log')
-    logText.value = data || ''
+    logText.value = (data as string) || ''
   } catch (e: any) {
     if (e?.response?.status === 404 && e?.response?.data?.detail?.includes('no active dry run')) {
       logText.value = 'No active dry run — start one to see logs.'

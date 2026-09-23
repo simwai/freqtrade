@@ -19,6 +19,7 @@ export interface RecursiveAnalysisResponse {
   status: 'running' | 'ended' | 'error'
   running: boolean
   status_msg: string
+  job_id?: string
   result?: RecursiveAnalysisResult
 }
 
@@ -65,6 +66,7 @@ export interface LookaheadAnalysisResponse {
   status: 'running' | 'ended' | 'error'
   running: boolean
   status_msg: string
+  job_id?: string
   result?: LookaheadAnalysisResult
 }
 
