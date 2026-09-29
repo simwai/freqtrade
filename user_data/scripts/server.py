@@ -1789,7 +1789,7 @@ class LabHandler(BaseHTTPRequestHandler):
         return {"pair": pair, "timeframe": tf, "effective_timeframe": tf_eff, "candles": candles}
 
     # ---- indicator overlays computed from the user's own library ----
-    # The list is discovered from ft_pandas_ta instead of a hardcoded
+    # The list is discovered from pandas_ta instead of a hardcoded
     # registry: every public function whose required parameters map to OHLCV
     # columns is offered. Functions taking a DataFrame (pattern detectors) are
     # excluded because the overlay API serves plain series.
@@ -1825,11 +1825,11 @@ class LabHandler(BaseHTTPRequestHandler):
     _INDICATOR_PRICE_SCALE = {"ehlers_super_smoother"}
 
     def _indicator_specs(self) -> dict[str, dict]:
-        """Public indicator functions of ft_pandas_ta -> {name: spec}."""
+        """Public indicator functions of pandas_ta -> {name: spec}."""
         global _INDICATOR_MODULE
         if _INDICATOR_MODULE is None:
             sys.path.insert(0, str(USER_DATA / "strategies" / "components"))
-            import ft_pandas_ta as _mod
+            import pandas_ta as _mod
 
             _INDICATOR_MODULE = _mod
         specs: dict[str, dict] = {}
@@ -1934,7 +1934,7 @@ class LabHandler(BaseHTTPRequestHandler):
         return {"found": False, "name": name, "roi": {}}
 
     def _indicator_payload(self, qs: dict) -> dict:
-        """Compute one indicator from ft_pandas_ta over candle data."""
+        """Compute one indicator from pandas_ta over candle data."""
         import pandas as pd
 
         name = qs.get("name", [None])[0]
