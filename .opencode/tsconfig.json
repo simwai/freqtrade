@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "outDir": ".cache"
+    "isolatedModules": true
   },
-  "include": ["plugins/**/*.ts"],
+  "include": ["plugins/**/*.ts", "lib/**/*.ts"],
   "exclude": ["node_modules", ".cache"]
 }

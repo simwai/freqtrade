@@ -35,7 +35,7 @@ Patch rules:
 - Never include any token from the forbidden list.
 - For partial scope: only the scoped items are patched; pending review items remain untouched and unblocked.
 
-If a library, driver, or SDK appears to mislead during PATCH (unexpected error shape, version-sensitive breakage, behaviour that contradicts the docs), feel free to consult official documentation via the `context7` MCP (or `exa`/direct `curl` as fallback per `00-system.md ## MCP tool selection`) before inventing a workaround. This is a permission, not a requirement, and is bounded by the same rules as the DOCS phase: one targeted lookup per evidence gap, distinct fingerprint, never re-invoke an identical lookup, and a PATCH-specific deep-dive budget (up to 3 lookups per dependency per PATCH, separate from the DOCS phase budget).
+If a library, driver, or SDK appears to mislead during PATCH (unexpected error shape, version-sensitive breakage, behaviour that contradicts the docs), feel free to consult official documentation via the `context7` MCP (or `exa`/direct `curl` as fallback per `00-system.md ## MCP tool selection`) before inventing a workaround. This is a permission, not a requirement, and is bounded by the same rules as the DOCS phase: one targeted lookup per evidence gap, never re-invoke an identical lookup, and a PATCH-specific deep-dive budget (up to 3 lookups per dependency per PATCH, separate from the DOCS phase budget).
 
 ### Per-edit lint gate
 

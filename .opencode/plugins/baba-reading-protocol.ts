@@ -3,7 +3,7 @@
  *
  * Enforces complete reading before analysis output:
  * - Computes dependency closure (depth 3) when session target is set
- * - Tracks actual read tool fingerprints in a ledger
+ * - Tracks file read status in Reading Plan
  * - Blocks analysis output when Reading Plan is incomplete
  *
  * Hooks:
@@ -30,7 +30,6 @@ interface ReadingPlan {
 interface ReadingState {
   sessionId: string;
   plan: ReadingPlan | null;
-  readFingerprints: Set<string>;
   blocked: boolean;
   lastUnreadFiles: string[];
 }
@@ -43,7 +42,6 @@ function getOrCreateState(sessionId: string): ReadingState {
     state = {
       sessionId,
       plan: null,
-      readFingerprints: new Set<string>(),
       blocked: false,
       lastUnreadFiles: [],
     };
@@ -182,7 +180,6 @@ export default async ({ client, $, project, directory, worktree }: {
 
       if (event.type === "session.created") {
         state.plan = null;
-        state.readFingerprints = new Set<string>();
         state.blocked = false;
         state.lastUnreadFiles = [];
         console.log(`[reading-protocol] Session created: ${sessionId}`);
@@ -225,15 +222,11 @@ export default async ({ client, $, project, directory, worktree }: {
 
         if (info?.metadata?.edited_files && Array.isArray(info.metadata.edited_files)) {
           for (const edited of info.metadata.edited_files) {
-            const fingerprint = `read:${edited}`;
-            if (!state.readFingerprints.has(fingerprint)) {
-              state.readFingerprints.add(fingerprint);
-              if (state.plan) {
-                const fileEntry = state.plan.files.find((f) => f.path === edited);
-                if (fileEntry && fileEntry.status === "pending") {
-                  fileEntry.status = "complete";
-                  console.log(`[reading-protocol] Marked complete: ${edited}`);
-                }
+            if (state.plan) {
+              const fileEntry = state.plan.files.find((f) => f.path === edited);
+              if (fileEntry && fileEntry.status === "pending") {
+                fileEntry.status = "complete";
+                console.log(`[reading-protocol] Marked complete: ${edited}`);
               }
             }
           }

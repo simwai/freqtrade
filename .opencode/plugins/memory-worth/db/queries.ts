@@ -5,6 +5,8 @@ import { DEFAULT_TUNING_PARAMS } from "../core/governance.js";
 import { asNumber, asText } from "./decode.js";
 import { epochInt, epochNow } from "./epoch.js";
 
+type PreviewResult = { ok: true; previous: string } | { ok: false; error: string };
+
 function asRowId(value: bigint | number | undefined): number {
   if (typeof value === "bigint") return Number(value);
   if (typeof value === "number") return value;

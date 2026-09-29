@@ -14,7 +14,6 @@ Before you do anything else, you MUST:
 
 The system will not function correctly if you skip this step. The STARTUP phase in 00-system.md requires you to:
 - Read prompt-system/00-system.md in full (no chunking)
-- Emit the bootstrap fingerprint
 - Load every file in the load order in full (no chunking)
 - Record completion in the session state file
 

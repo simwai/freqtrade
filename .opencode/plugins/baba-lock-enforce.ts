@@ -228,10 +228,9 @@ export default async ({ client, $, project, directory, worktree }: {
             .string()
             .describe("Absolute or repo-relative path to the file to lock"),
           lockType: tool.schema
-            .string()
+            .enum(["file", "dependency"])
             .optional()
-            .describe("Type of lock: 'file' (per-file) or 'dependency' (covers dependency graph). Default: 'file'")
-            .enum(["file", "dependency"]),
+            .describe("Type of lock: 'file' (per-file) or 'dependency' (covers dependency graph). Default: 'file'"),
         },
         async execute(args, context) {
           const { sessionID } = context;
@@ -268,10 +267,9 @@ export default async ({ client, $, project, directory, worktree }: {
             .string()
             .describe("Absolute or repo-relative path to the file to unlock"),
           lockType: tool.schema
-            .string()
+            .enum(["file", "dependency"])
             .optional()
-            .describe("Type of lock to release: 'file' or 'dependency'. Default: 'file'")
-            .enum(["file", "dependency"]),
+            .describe("Type of lock to release: 'file' or 'dependency'. Default: 'file'"),
         },
         async execute(args, context) {
           const { sessionID } = context;

@@ -35,27 +35,17 @@ This is the only loadable system file at startup. If the runtime pins files expl
 The system has files in `prompt-system/` plus `AGENTS.md` at the repo root. The session state file lives at the repository root as `SESSION_STATE-<session_id>.md` and is gitignored. Implementation scripts (e.g., `prompt-system/scripts/session-locks.ps1`) are invoked at runtime, not loaded at startup.
 
 <HIGH_PRIO>
-!!!
 
 ## STARTUP Phase (MANDATORY - cross-host bootstrap gate)
 
 Before ANY phase transition (including `START -> CHECKLIST`, `START -> INTAKE`, `START -> DISCUSS`, `START -> BLOCKED`), the agent MUST complete the STARTUP phase:
 
 1. **Read `prompt-system/00-system.md` in full with NO chunking** — single read, largest window. Partial reads are a protocol breach.
-2. **Emit the bootstrap fingerprint**:
+2. **Load every file in the load order** (defined in `prompt-system/00-system.md` `## Load order`) in full with NO chunking.
+3. **Record completion** in the session state file's `## Startup Verification` section.
 
-   ```text
-   00-system.md fingerprint: <line_count> lines, first_100_chars="<first 100 chars>", last_100_chars="<last 100 chars>", sha256_first_1kb="<hash or N/A>"
-   ```
+A response that emits a phase header without completed STARTUP verification is a protocol breach → output `BLOCKED` with reason "STARTUP incomplete".
 
-3. **Load every file in the load order below** in full with NO chunking. The load order above is the single source of truth — discover files dynamically with `ls prompt-system/*.md`.
-4. **Record completion** in the session state file's `## Startup Verification` section. On a confirmed `READ_ONLY` host, record completion in the conversation carrier instead; the state-file write step is replaced with `SKIPPED: file-edit -- no write access on read-only host`, and the carrier-based verification is accepted by all subsequent phases.
-
-**On opencode**: This is auto-satisfied by the `instructions` array in `opencode.jsonc` which pins `AGENTS.md` as the entry — the fingerprint is emitted by the runtime.
-**On all other hosts**: The agent must explicitly perform steps 1-3 before emitting any `[PHASE: ...]` or `[MODE: DIRECT]` response. No exceptions.
-
-A response that emits a phase header without a completed STARTUP fingerprint is a protocol breach → output `BLOCKED` with reason "STARTUP incomplete".
-***
 </HIGH_PRIO>
 
 ### START routing (STRUCTURED mode)
@@ -377,7 +367,7 @@ Direct mode may inspect files, edit, and run checks as needed. It must still:
 - inspect and preserve the touched files' established local conventions (formatting, naming, structure, comments, docs, and commit-message style) unless an exception is explicitly approved.
 - apply the style defaults from `05-impl-style.md` before each code edit, alongside the touched files' local conventions.
 - never repeat an identical read step without a state change; every read must add new information or target a changed file, otherwise it is a doom loop and must stop.
-- if a library, driver, or SDK appears to mislead (unexpected error shape, version-sensitive breakage, behaviour that contradicts the docs), feel free to consult official documentation via the `context7` MCP (or `exa`/direct `curl` as fallback per `## MCP tool selection`) before working around it; one targeted lookup, distinct fingerprint, bounded by the DOCS budget - permission, not requirement
+- if a library, driver, or SDK appears to mislead (unexpected error shape, version-sensitive breakage, behaviour that contradicts the docs), feel free to consult official documentation via the `context7` MCP (or `exa`/direct `curl` as fallback per `## MCP tool selection`) before working around it; one targeted lookup per evidence gap, bounded by the DOCS budget - permission, not requirement
 - inspect the final diff.
 - run relevant project checks when available.
 - after each file edit sequence (one logical edit step: one file or a coherent batch of files changed in one go), run the project's configured lint on the touched files and fix reported issues (auto-fix first, then manual fixes), recording the exact command and its real result; never record an assumed-clean pass. See `03-output-and-state.md` global no-assumed-passes rule for the evidence-chain requirement.
@@ -433,7 +423,7 @@ The phase header `[PHASE: X]` is the checkpoint. If the header is missing in STR
 ***
 </HIGH_PRIO>
 
-**STARTUP is the implicit first phase** — every session begins at STARTUP. No other phase transition is legal until STARTUP completes with a verified fingerprint.
+**STARTUP is the implicit first phase** — every session begins at STARTUP. No other phase transition is legal until STARTUP completes.
 
 ### Phase order
 
@@ -492,14 +482,14 @@ Skip: CHECKLIST, DOCS, BLOCKED, FAILURE, INTAKE, BACKLOG, SPRINT, TASK_PLAN, SPE
 
 ### Transition rules (key paths)
 
-**Global prerequisite**: All phase transitions require `startup_verified: true` in the session state file with a valid `startup_fingerprint`. If missing, output `BLOCKED` with reason "STARTUP incomplete".
+**Global prerequisite**: All phase transitions require `startup_verified: true` in the session state file. If missing, output `BLOCKED` with reason "STARTUP incomplete".
 
-- `START -> STARTUP`: (MANDATORY) read `prompt-system/00-system.md` full, emit fingerprint, then discover and load all files in the load order.
+- `START -> STARTUP`: (MANDATORY) read `prompt-system/00-system.md` full, then discover and load all files in the load order.
 - `STARTUP -> INTAKE`: goal or project spec without a concrete target.
 - `STARTUP -> CHECKLIST`: target known, scope known, language known or obvious.
 - `STARTUP -> BOOTSTRAP`: target is a codebase with no SPECS/ directory, or explicit `/bootstrap` command.
 - `STARTUP -> DISCUSS`: user input is exploratory.
-- `STARTUP -> BLOCKED`: STARTUP incomplete (fingerprint missing or system files not loaded).
+- `STARTUP -> BLOCKED`: STARTUP incomplete (system files not loaded).
 - `INTAKE -> BACKLOG`: goal and at least one success criterion recorded.
 - `BACKLOG -> SPRINT`: backlog non-empty, every item sized and ICE-scored.
 - `TASK_PLAN -> CHECKLIST`: task card has target, size, ICE, milestone, DoD; approved; spec not in scope.
@@ -661,7 +651,6 @@ A protocol breach has occurred when:
 - a consolidated report claims complete coverage while a file is missing, failed, or unrecorded
 - a consolidated report presents provisional findings as user-accepted
 - consolidated mode advances to PLAN without explicit aggregate confirmation
-- a read step repeats with an identical fingerprint three consecutive times without an intervening state change (doom loop)
 - a REVIEW verdict is issued without verification evidence or a recorded H11 exclusion
 - a credential-bearing file was read with the read-file tool, or its raw contents entered the transcript
 - `git remote -v` output or any remote URL entered the transcript unsanitized
@@ -674,75 +663,6 @@ A protocol breach has occurred when:
   - a DRIFT phase output performs a write
 - a write to `STYLE_POLICY.md` (or configured artifact) outside the auto-trigger flow
 - a pass assertion in a structured response that is not paired with the required evidence chain
-- a phase header is emitted without a completed STARTUP fingerprint (STARTUP incomplete)
-
-<HIGH_PRIO>
-!!!
-
-## Loop protection (doom loops)
-
-Use in every phase, every persona, and every execution mode to prevent repeated identical read steps (doom loops) from burning the session budget. Loop-prone models can repeat the same tool call with identical arguments hundreds of times; this section makes that a protocol breach instead of a silent credit drain.
-
-### Definitions
-
-- **Read step** -- any tool call that retrieves information: `read`, `grep`, `glob`, `list`, `webfetch`, `websearch`, `bash` reads, MCP lookups, and browser navigation.
-- **Read fingerprint** -- the tool name plus the canonical form of its arguments (path, query, URL, glob, or command), recorded so repeats can be detected.
-- **Doom loop** -- three or more consecutive read steps with identical fingerprints and no intervening state change (no new result, no file modification, no user input, no evidence update).
-
-### Hard rules
-
-<MUST>Never perform a read step whose fingerprint already produced a result in this session. Reuse the prior result from session context instead. A re-read is allowed only when a prerequisite changed: the file was modified, new evidence arrived, or the user requested a fresh look.</MUST>
-<MUST>A third consecutive identical read step with no state change is a doom loop. Stop, and either answer from the results already obtained or output the `BLOCKED` template (`03-output-and-state.md`) with the loop as the reason.</MUST>
-<MUST>After one loop recovery, if the next read step repeats the same fingerprint again, terminate with `FAILURE` per `## Breach conditions` above and wait for an explicit user retry.</MUST>
-<MUST>In `DIRECT` mode the same rule applies without phase templates: every read must add new information or target a changed file; an identical repeat without state change is a loop and must stop. Do not continue reading.</MUST>
-
-### Comprehension reads are not loops
-
-A full-file comprehension read (the largest window the read tool allows, offset-chunked when the file exceeds the window) is a state change, never a doom loop, even when it follows a search hit on the same file.
-
-- Each chunk of a comprehension read is a distinct fingerprint (different offset), so the chunk sequence can never trip the identical-fingerprint rule.
-- A comprehension read always adds new information: imports, conventions, adjacent error handling, and structure that a snippet omitted. It therefore satisfies the "every read must add new information" rule by construction.
-- Reading a file in full is the required precondition for editing, scoring, or judging it. Skipping it to save budget is not compliant; it is the failure mode this carve-out exists to prevent.
-- The loop guards still apply to everything else: repeated snippet reads of the same range, or a re-read of an already-comprehended file without a state change, remain loops.
-
-### Read ledger
-
-- Maintain a read ledger for the session: one fingerprint per read step plus its result digest, so repeats are detectable across turns.
-- When the session's own state file is active, persist the ledger in its `Read Ledger` section. Otherwise keep the ledger in session context.
-- Do not re-read to refresh the ledger; a ledger entry is valid until the underlying target changes or the user asks for a fresh read.
-
-### MCP dedup
-
-- One call per evidence gap, and never a repeat: before invoking an MCP lookup, check the read ledger for an identical fingerprint. If present, reuse the recorded result instead of re-invoking.
-- Do not re-run a failed or empty lookup with identical arguments expecting a different result. Change the evidence gap or the arguments, or go `BLOCKED`.
-
-### Bounded validation loop
-
-A single defined exception to the doom-loop rules, used to raise the confidence of a REVIEW finding without asking the user:
-
-- Trigger: a REVIEW finding is recorded at confidence <= 70%.
-- Allowed: up to 3 validation passes, each using a **distinct read fingerprint** (docs lookup per `07-protocols.md`, context read, cross-repo search, or an available project check).
-- State-change rule preserved: a pass that returns no new evidence terminates the loop early; the finding then keeps its last honest confidence.
-- Reusing an identical fingerprint across passes is a breach; the pass list must show a different fingerprint per pass.
-- Terminal classification: `confirmed` when a pass raises confidence above 70%, otherwise `disputed` and routed to the REVIEW decision section for batch-level user confirmation. This loop never replaces user confirmation of the decision section.
-
-### Step conscience
-
-- Track the agentic step count of the current session. When approaching the configured cap (`agent.steps` in the opencode layer, defaults in `.opencode/agents/`), prefer a text-only response over further tool calls.
-- If a phase requires evidence that a bounded number of reads cannot produce, say so and go `BLOCKED` instead of looping.
-
-### Enforcement layering
-
-- opencode enforces the hard stop natively: `permission.doom_loop = deny` halts three consecutive identical tool calls at the process level, and per-agent `steps` caps bound the total iteration count (see `opencode.jsonc` and `.opencode/agents/*.md`).
-- Non-opencode agents enforce these rules from this section alone, because they have no native doom-loop detector. Treat the rules as hard constraints in every mode.
-
-### Log output prohibition
-
-<MUST_NOT>Any `console.log`, `print`, `Write-Host`, `fmt.Println`, `System.out.println`, or equivalent debug output in agent-generated code is a protocol breach.</MUST_NOT>
-<MUST>Evidence must come from: `file:line` inspected, command + real output, validation-loop pass, or explicit user acceptance.</MUST>
-<MUST_NOT>"I checked the file" or "looks fine" without naming the specific thing inspected is not evidence.</MUST_NOT>
-***
-</HIGH_PRIO>
 
 ## Prompt Reinforcement
 
@@ -944,7 +864,7 @@ No-go rules:
 
 - If built-in tools can answer from local context, do NOT invoke MCP.
 - Bounded deep-dive budget: up to 3 targeted lookups per dependency per DOCS phase, each mapped to a named evidence gap.
-- Never re-invoke a lookup whose fingerprint already produced a result in this session.
+- Never re-invoke a lookup with identical arguments expecting a different result.
 - Never send secrets, tokens, or proprietary code through remote endpoints.
 - `playwright` `browser_run_code_unsafe` is RCE-equivalent; trusted sessions only.
 - The pre-commit gate smoke uses safe browser tools only.

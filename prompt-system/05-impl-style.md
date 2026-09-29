@@ -773,19 +773,35 @@ docs/
 ├── GLOSSARY.md              # Terminology reference
 ├── ARCHITECTURE.md          # System architecture overview
 ├── QUICKSTART.md            # Getting started guide
+├── DOCUMENTATION_STYLE.md   # This file
 ├── PROJECT_MANAGEMENT/      # Project management docs (UPPER_SNAKE_CASE)
-│   ├── TRELLO_INTEGRATION.md
+│   ├── CONFIG.md
+│   ├── README.md
 │   ├── ROADMAPS.md
-│   └── SPRINTS.md
+│   ├── ROADMAP_2026_09.md
+│   ├── SPRINTS.md
+│   ├── SPRINT_001.md
+│   └── TRELLO_INTEGRATION.md
 ├── REFERENCE/               # Reference docs (manually maintained)
+│   ├── AGENTS_USAGE.md
+│   ├── CONFORMANCE_CHECKLIST.md
+│   ├── FUTURE_ENHANCEMENTS.md
+│   ├── IMPLEMENTATION_STYLE.md
+│   ├── PATCH_PROTOCOL.md
+│   ├── PLAN_ACTUAL_GATE.md
+│   ├── PROTOCOLS.md
 │   ├── RULES.md
 │   ├── RUBRICS.md
-│   └── PROTOCOLS.md
-├── USER_GUIDE/              # User guides
-│   ├── GETTING_STARTED.md
-│   ├── PHASES.md
-│   └── PERSONAS.md
-└── DOCUMENTATION_STYLE.md   # This file
+│   ├── SYSTEM_OVERVIEW.md
+│   ├── TEST.md
+│   └── SESSION_STATE.md
+└── USER_GUIDE/              # User guides
+    ├── EXECUTION_MODES.md
+    ├── GETTING_STARTED.md
+    ├── OPENCODE.md
+    ├── PERSONAS.md
+    ├── PHASES.md
+    └── TROUBLESHOOTING.md
 ```
 
 > 📝 **Note**: `STYLE_POLICY.md` carries the machine-readable frontmatter fields (`doc_naming`, `doc_toc`, `doc_glossary`, `doc_mermaid_theme`, `doc_svg_style`) that the agent reads on every PATCH. This section is the human-readable reference.

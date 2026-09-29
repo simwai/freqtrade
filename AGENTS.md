@@ -154,11 +154,7 @@ AGENTS.md is the sole entry point. The system lives in `prompt-system/`.
 2. Discover all system files: `ls prompt-system/*.md`.
 3. Read `prompt-system/00-system.md` — it contains the authoritative `## Load order`.
 4. Load every file in that load order in full with NO chunking.
-5. **Emit the bootstrap fingerprint**:
-   ```
-   AGENTS.md fingerprint: <line_count> lines, first_100_chars="<first 100 chars>", last_100_chars="<last 100 chars>", sha256_first_1kb="<hash or N/A>"
-   ```
-6. **Record completion** in session state `## Startup Verification` (or conversation carrier on READ_ONLY).
+5. **Record completion** in session state `## Startup Verification` (or conversation carrier on READ_ONLY).
 
 **All files must be read in full before ANY other action.** This is not optional, not conditional. Skipping any file is a protocol breach. If loading is incomplete, the agent must not proceed — output `BLOCKED` with reason "STARTUP incomplete".
 ***

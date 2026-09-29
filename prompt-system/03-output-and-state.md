@@ -430,7 +430,7 @@ Confirmed-looking violations (provisional until the decision section is confirme
 
 Validation loop (run when any finding is at confidence <= 70%):
 - Trigger: [criterion id] -- [confidence]%
-- Passes run: [fingerprint 1] -> [result] / [fingerprint 2] -> [result] / [fingerprint 3] -> [result] (or "terminated early: no new evidence at pass N")
+- Passes run: [pass 1] -> [result] / [pass 2] -> [result] / [pass 3] -> [result] (or "terminated early: no new evidence at pass N")
 - Final confidence: [X]%
 - Terminal classification: [confirmed | disputed]
 
@@ -528,7 +528,7 @@ Consolidated mode: inspect every file and batch in order, recording coverage and
 
 When all files are reviewed in either mode, the final REVIEW output must contain the aggregate violations and the REVIEW decision section before transitioning to PLAN.
 
-A finding recorded at confidence <= 70% must first pass the bounded validation loop: up to 3 distinct-fingerprint validation passes, run without user input. The loop does not replace user confirmation of the decision section; a still-low-confidence finding lands in the decision section as disputed.
+A finding recorded at confidence <= 70% must first pass the bounded validation loop: up to 3 validation passes with distinct tool calls, run without user input. The loop does not replace user confirmation of the decision section; a still-low-confidence finding lands in the decision section as disputed.
 
 ## `PLAN` template
 
@@ -887,12 +887,6 @@ style_policy: [preserve-local|upgrade-house-style]
 style_policy_source: [STYLE_POLICY.md artifact|INTAKE Stack/Style field|SKIPPED: file-edit -- no write access; policy recorded in conversation carrier|auto-trigger pending]
 style_policy_resolved: [yes|no]
 startup_verified: [true|false]
-startup_fingerprint:
-  line_count: [number]
-  first_100_chars: "[string]"
-  last_100_chars: "[string]"
-  sha256_first_1kb: "[hash or N/A]"
-  verified_at: [ISO-8601 UTC]
 
 reading_plan:
   scope: [target path or n/a]
@@ -905,7 +899,7 @@ reading_plan:
 ## Startup Verification
 
 AGENTS.md: [cited rule] — entry point, sole entry path
-00-system.md: [cited rule] — fingerprint: <line_count> lines, first_100_chars="<first 100 chars>", last_100_chars="<last 100 chars>", sha256_first_1kb="<hash or N/A>"
+00-system.md: [cited rule] — STARTUP verified via loader plugin
 02-decision-prompts.md: [cited rule]
 01-personas.md: [cited rule]
 03-output-and-state.md: [cited rule]
@@ -960,11 +954,7 @@ plan_actual_history: [list of (timestamp, items, verdict) tuples]
 
 <!-- Per-item records consumed by the Plan-Versus-Actual Gate. -->
 
-- format: pass|fail|exit:N|regex:<pat>|contains:<s>|silent
-
-## Read Ledger
-
-- [fingerprint] -- [result digest]
+- format: pass|fail|exit:N|regex:<pat>|contains:|silent
 
 ## Plan-Actual History
 
@@ -1008,8 +998,8 @@ phase_status: {sensei: [phase|n/a], tester: [phase|n/a], dev: [phase|n/a], merge
 ## Discovery Evidence
 
 - search_terms: [term1, term2, ...]
-- candidate_searches: [ {fingerprint, hit_count, top_hits: [file:line...]} ]
-- entry_traces: [ {fingerprint, entry_point, path_to_candidate} ]
+- candidate_searches: [ {hit_count, top_hits: [file:line...]} ]
+- entry_traces: [ {entry_point, path_to_candidate} ]
 - scored_candidates: [ {file, keyword_match, entry_distance, layer_fit, test_proximity, recency, total} ]
 - inventory_source: discovery|manual|task-card
 ```

@@ -22,7 +22,7 @@ Each rule has:
 **Detection:**
 
 - Before any analysis output, the system checks the Reading Plan in session state
-- If any file in the Reading Plan closure is missing a read fingerprint in the read ledger, the plan is incomplete
+- If any file in the Reading Plan closure is missing a read record in the session state, the plan is incomplete
 - The plugin injects `[PHASE: BLOCKED]` with the specific unread file list
 
 **Enforcement:** Block analysis output when Reading Plan is incomplete. The only exits are: complete all pending reads, or obtain explicit user approval for partial scope.

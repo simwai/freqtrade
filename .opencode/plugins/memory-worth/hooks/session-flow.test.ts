@@ -67,14 +67,14 @@ describe("session-flow", () => {
     assert.ok(typeof body["id"] === "number");
 
     await hooks["tool.execute.after"]?.(
-      { sessionID: SESSION, callID: "flow-c1", tool: "memory_write", args: {} },
-      { title: "", output: "no outcome words here", metadata: {} },
+      { sessionID: SESSION },
+      { output: "no outcome words here", metadata: {} },
     );
     const open = await episodeCount(dir, false);
     assert.ok(open >= 0);
     await hooks["tool.execute.after"]?.(
-      { sessionID: SESSION, callID: "flow-c2", tool: "memory_write", args: {} },
-      { title: "", output: "all fixed and verified", metadata: {} },
+      { sessionID: SESSION },
+      { output: "all fixed and verified", metadata: {} },
     );
     await hooks.event?.(eventPosted("session.idle", SESSION) as never);
   });

@@ -33,24 +33,22 @@
   // opencode fires doom_loop detection on 3+ consecutive identical calls and
   // would default to "ask"; denying it halts the loop at the process level
   // instead of auto-approving under permissive setups. Guards credit burn on
-  // loop-prone models (Grok-class). See prompt-system/00-system.md ## Loop protection.
+  // loop-prone models (Grok-class). Native opencode protection only.
   "permission": {
     "doom_loop": "deny"
   },
 
-  // opencode plugins. @latest is fine for personal/dev use; pin a version
-  // when reproducibility matters.
+// opencode plugins. @latest is fine for personal/dev use; pin a version
+// when reproducibility matters.
 "plugin": [
     "opencode-vibeguard@latest",
     "opencode-adaptive-thinking@latest",
     "opencode-pty",
-    ".opencode/plugins/baba-startup-gate.ts",
     ".opencode/plugins/baba-reading-protocol.ts",
     ".opencode/plugins/baba-protocol-enforce.ts",
     ".opencode/plugins/baba-prompt-system-loader.ts",
     ".opencode/plugins/baba-convention-review.ts",
     ".opencode/plugins/memory-worth",
-    ".opencode/plugins/baba-subtask.ts",
     ".opencode/plugins/baba-goal-detect.ts",
     ".opencode/plugins/baba-bootstrap.ts",
     ".opencode/plugins/baba-drift.ts",

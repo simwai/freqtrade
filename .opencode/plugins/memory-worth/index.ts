@@ -6,6 +6,9 @@ import { resolveSessionOutcome } from "./hooks/tool-execute-after.js";
 import { buildSystemPrompt } from "./prompt.js";
 import { IS_BUN } from "./runtime/detect.js";
 import { fromAsync, isErr, isRecord } from "./core/result.js";
+import type { Event } from "@opencode-ai/sdk";
+
+interface SessionEvent { type: string; properties?: { sessionID?: string } }
 import {
   memoryDeleteTool,
   memoryGetTool,
@@ -29,7 +32,7 @@ function readSessionId(properties: unknown): string | undefined {
 
 const injectedSessions = new Set<string>();
 
-const MemoryWorthPlugin = async ({ client, directory }) => {
+const MemoryWorthPlugin = async ({ client, directory }: { client: any; directory: string }) => {
   const db = await createConnection(directory);
   const runtime = IS_BUN ? "bun" : "node";
   const logged = await fromAsync(() =>
@@ -46,8 +49,8 @@ const MemoryWorthPlugin = async ({ client, directory }) => {
   }
 
   return {
-    event: async ({ event }) => {
-      const evt = event as unknown as { type: string; properties?: unknown };
+    event: async ({ event }: { event: Event }) => {
+      const evt = event as SessionEvent;
       if (evt.type === "session.created") {
         await handleSessionCreated(db);
         return;
@@ -68,7 +71,7 @@ const MemoryWorthPlugin = async ({ client, directory }) => {
       }
     },
 
-    "chat.message": async (input, output) => {
+    "chat.message": async (input: { sessionID?: string; messageID?: string }, output: { parts: any[] }) => {
       const sessionId = input.sessionID;
       if (!sessionId) return;
       const isFirst = !injectedSessions.has(sessionId);
@@ -87,12 +90,12 @@ const MemoryWorthPlugin = async ({ client, directory }) => {
       output.parts.push(systemPart, ...memoryParts);
     },
 
-    "tool.execute.after": async (input, output) => {
+    "tool.execute.after": async (input: { sessionID: string }, output: { output: unknown; title?: string; metadata?: unknown }) => {
       const text = typeof output.output === "string" ? output.output : "";
       await resolveSessionOutcome(db, input.sessionID, text);
     },
 
-    "experimental.session.compacting": async (input, output) => {
+    "experimental.session.compacting": async (input: { sessionID: string }, output: { context: string[] }) => {
       const lines = await buildCompactionContext(db, input.sessionID);
       for (const line of lines) {
         output.context.push(line);
