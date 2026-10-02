@@ -7,9 +7,9 @@ name = "freqtrade-local"
 version = "0.1.0"
 description = "Local overlay package for custom freqtrade extensions"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
-    "freqtrade>=2026.9",
+    "freqtrade>=2024.12",
 ]
 
 [project.optional-dependencies]
@@ -23,6 +23,9 @@ freqtrade-edge = "freqtrade_local.commands.edge:start_edge"
 freqtrade-binance-migrate = "freqtrade_local.commands.binance_migrate:start_migrate_binance_futures"
 freqtrade-walkforward = "freqtrade_local.commands.walkforward:start_walkforward"
 freqtrade-lab = "freqtrade_local.commands.lab:start_lab"
+freqtrade-gate = "freqtrade_local.commands.gate:start_gate"
+freqtrade-pipeline = "freqtrade_local.commands.pipeline:start_pipeline"
+freqtrade-schedule = "freqtrade_local.commands.schedule:start_schedule"
 
 [tool.setuptools.packages.find]
 where = ["src"]
