@@ -18,7 +18,7 @@ The core system is attached as context – no read step needed:
 Before acting:
 
 1. Find your persona in `prompt-system/01-personas.md` (BabaScrumMaster, BabaSensei, BabaDev, BabaTester, or BabaReviewer) and read its section.
-2. Read the session's own state file `SESSION_STATE-<session_id>.md` (resolved per `prompt-system/03-output-and-state.md` `## Session state file`) if present.
+2. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 
 Then:
 

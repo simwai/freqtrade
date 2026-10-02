@@ -94,11 +94,6 @@ Required:
 - target, accepted_violations, excluded_violations, preserve_constraints
 - logical_violations, approved_plan, rewrite_contract, teaching_note
 - task_card, task_size, ice_score, milestone, definition_of_done (if from Scrum)
-- spec_version, drift_findings (n/a if not applicable)
 
-## Protocol Enforcement (Automatic)
-
-The `protocol-enforce` plugin runs at phase transitions. You MUST update session metadata:
-- At phase entry: set `metadata.phase = "CHECKLIST" | "DOCS" | "REVIEW" | "PLAN" | etc.`
 - At REVIEW: set `metadata.edited_files = [files under review]`
 - The plugin will block phase entry if protocol checks fail (artifact, pre-commit, locks, api-design)

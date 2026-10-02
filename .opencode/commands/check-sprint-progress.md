@@ -7,7 +7,7 @@ Check sprint progress. `$ARGUMENTS` optionally specifies a sprint ID/name; omit 
 Before acting:
 
 1. Read `prompt-system/00-system.md` (orchestrator + routing + execution modes).
-2. Read the session's own state file `SESSION_STATE-<session_id>.md` if present.
+2. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 3. Read `project-management/config.md` to determine the active backend.
 
 Then:
@@ -52,4 +52,4 @@ Sprint Progress Report
 
 - If no sprints match the query, emit `[PHASE: BLOCKED]` with: "sprint not found."
 - Include blocker details in the output if any are found -- flag them prominently.
-- Record the check in the session state file under `## Project Management`.
+- Record the check in the session context (conversation carrier) under `## Project Management`.

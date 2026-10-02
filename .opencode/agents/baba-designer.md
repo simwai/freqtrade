@@ -104,8 +104,6 @@ Required fields:
 - target, design_plan, preserve_constraints
 - Approved design plan → HANDOFF → BabaDev enters PATCH
 
-## Protocol Enforcement (Automatic)
+## Protocol Compliance
 
-The `protocol-enforce` plugin runs at phase transitions. You MUST update session metadata:
-- At phase entry: set `metadata.phase = "DESIGN_PLAN" | etc.`
-- The plugin will block phase entry if protocol checks fail (artifact, pre-commit, locks)
+Follow `00-system.md` phase transitions and `06-misc.md` PATCH protocol. No runtime enforcement plugin.

@@ -7,7 +7,7 @@ Create a sprint phase plan from a roadmap. `$ARGUMENTS` specifies the roadmap ID
 Before acting:
 
 1. Read `prompt-system/00-system.md` (orchestrator + routing + execution modes).
-2. Read the session's own state file `SESSION_STATE-<session_id>.md` if present.
+2. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 3. Read `project-management/config.md` to determine the active backend.
 4. Read `prompt-system/07-protocols.md` `## Scrum planning` for sprint conventions (ICE scoring, size bands, milestones, task-card enrichment).
 
@@ -101,5 +101,5 @@ Each story in the sprint file must include these fields:
 - If `$ARGUMENTS` is empty, emit `[PHASE: BLOCKED]` with: "sprint name and roadmap ID are required".
 - Follow scrum conventions from `prompt-system/07-protocols.md`: ICE scoring, size bands (XS/S/M/L), milestones, task-card enrichment rules.
 - Apply task-card enrichment: stories sharing a `Story` id belong to one user story; tasks ordered MVP-first (core before supporting); test-first flag as a plan-level ordering signal.
-- Record the sprint ID in the session state file under `## Project Management`.
+- Record the sprint ID in the session context (conversation carrier) under `## Project Management`.
 - Populate stories from the roadmap's phases/items, then score each story's ICE before finalizing.

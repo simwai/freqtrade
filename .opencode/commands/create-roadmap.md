@@ -7,7 +7,7 @@ Create a new roadmap. `$ARGUMENTS` is the roadmap title and optional description
 Before acting:
 
 1. Read `prompt-system/00-system.md` (orchestrator + routing + execution modes).
-2. Read the session's own state file `SESSION_STATE-<session_id>.md` (resolved per `prompt-system/03-output-and-state.md` `## Session state file`) if present.
+2. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 3. Read `project-management/config.md` to determine the active backend (`file` or `trello`).
 
 Then:
@@ -57,5 +57,5 @@ phases:
 
 ## Common
 
-- Record the created roadmap ID in the session state file under `## Project Management`.
+- Record the created roadmap ID in the session context (conversation carrier) under `## Project Management`.
 - If `$ARGUMENTS` is empty, emit `[PHASE: BLOCKED]` with reason: "roadmap title is required".

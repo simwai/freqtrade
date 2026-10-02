@@ -2,7 +2,7 @@
 description: Switch REVIEW cadence to consolidated mode for auto-aggregated findings.
 ---
 
-Set `review_mode` to `consolidated` in the session state file, then enter REVIEW phase.
+Set `review_mode` to `consolidated` in the session context (conversation carrier), then enter REVIEW phase.
 
 In `consolidated` mode, the agent reviews all files and batches internally,
 then emits one final REVIEW response with `Batch: AGGREGATE -- all files

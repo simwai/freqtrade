@@ -7,7 +7,7 @@ Edit an existing roadmap. `$ARGUMENTS` specifies the roadmap ID or title and the
 Before acting:
 
 1. Read `prompt-system/00-system.md` (orchestrator + routing + execution modes).
-2. Read the session's own state file `SESSION_STATE-<session_id>.md` if present.
+2. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 3. Read `project-management/config.md` to determine the active backend.
 
 Then:
@@ -40,4 +40,4 @@ Then:
 ## Common
 
 - If `$ARGUMENTS` is empty or doesn't specify a roadmap, emit `[PHASE: BLOCKED]` with: "roadmap ID/title is required".
-- Record the updated roadmap ID in the session state file.
+- Record the updated roadmap ID in the session context (conversation carrier).

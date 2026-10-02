@@ -2,7 +2,7 @@
 description: Switch REVIEW cadence to interactive mode for per-batch confirmation.
 ---
 
-Set `review_mode` to `interactive` in the session state file, then enter REVIEW phase.
+Set `review_mode` to `interactive` in the session context (conversation carrier), then enter REVIEW phase.
 
 In `interactive` mode, the agent emits one batch per response and waits for
 user confirmation before advancing to the next batch.

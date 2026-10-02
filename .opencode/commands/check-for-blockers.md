@@ -7,7 +7,7 @@ Check for blockers across all sprints. Scans every sprint for blocked or stalled
 Before acting:
 
 1. Read `prompt-system/00-system.md` (orchestrator + routing + execution modes).
-2. Read the session's own state file `SESSION_STATE-<session_id>.md` if present.
+2. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 3. Read `project-management/config.md` to determine the active backend.
 4. Read `prompt-system/07-protocols.md` `## Scrum planning` for blocker and risk conventions.
 
@@ -66,5 +66,5 @@ Blocker Report
 ## Common
 
 - If `$ARGUMENTS` includes a specific sprint name/ID, limit the check to that sprint only.
-- Record the blocker check results in the session state file under `## Project Management`.
+- Record the blocker check results in the session context (conversation carrier) under `## Project Management`.
 - If any blocking blockers are found, note them as `[cross-team]` if they affect another team/service, per `prompt-system/07-protocols.md` `## Cross-team requirements`.

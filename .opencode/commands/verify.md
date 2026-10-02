@@ -1,5 +1,5 @@
 ---
-description: Verify an approved patch using the mutation-capable Build agent; record verification in the session state file.
+description: Verify an approved patch using the mutation-capable Build agent; record verification in the session context.
 agent: build
 ---
 
@@ -7,7 +7,7 @@ Run BabaDev verification after a patch or before finishing implementation work. 
 
 Before acting:
 
-1. Read the session's own state file `SESSION_STATE-<session_id>.md` (resolved per `prompt-system/03-output-and-state.md` `## Session state file`) if present.
+1. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 2. Inspect `git status` and `git diff`.
 3. Detect available project checks from package scripts, Makefile, pyproject, or docs (lint, typecheck, test).
 
@@ -20,5 +20,5 @@ Then:
   check set before the commit/push gate; a failed smoke is a hard-gate failure.
 - If no checks exist, say so explicitly.
 - When the session made file edits, apply the commit/push gate (`prompt-system/06-misc.md` `## Commit/push gate`) before finishing.
-- Update the session's own state file Verification fields.
+- Update the session context (conversation carrier) Verification fields.
 - Emit results under the current phase header (usually PATCH) using the Verification section from `prompt-system/03-output-and-state.md`.

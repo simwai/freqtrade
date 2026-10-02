@@ -1,23 +1,26 @@
 ---
-description: Resume the prior Baba phase from the session state file after DISCUSS or interruption.
+description: Resume the prior Baba phase from TASKS.md and SPEC.md after interruption.
 ---
 
-Resume the prior execution mode from durable session state.
+Resume the prior execution mode from the frozen spec and task list.
 
 Before acting:
 
-1. Resolve the session's own state file `SESSION_STATE-<session_id>.md` per `prompt-system/03-output-and-state.md` `## Session state file`. If it is missing, emit `[PHASE: BLOCKED]` and ask for the prior phase or a fresh start.
-2. Read `prompt-system/06-misc.md` `## Discuss mode` and `prompt-system/00-system.md` `## Execution modes` when relevant.
+1. Read `SPEC.md` at repo root — verify `status: frozen` and note `version`.
+2. Read `TASKS.md` at repo root — find the first unchecked task (`[ ]`) or the task marked in-progress.
+3. Read `prompt-system/00-system.md` `## Execution modes` and `## Phase order`.
 
 Then:
 
-- Verify that the saved target, scope, and session_id match the task being
-  resumed. If any do not match, remain blocked and request a fresh session
-  instead of restoring old approval or rewrite-contract data. A legacy file
-  (no `session_id`) is always a mismatch for approval purposes.
-- If `execution_mode` is `DIRECT`, declare `[MODE: DIRECT]` and continue the
-  direct task. Otherwise declare `[PHASE: <prior_phase>]` from session state,
-  or CHECKLIST if prior_phase is NONE.
-- Restore open findings, questions, preservation constraints, review decision, plan approval, rewrite contract, and commit/push gate state.
-- Announce: `Resuming from <prior_phase>. Open items restored.`
-- Continue only with that phase's template.
+- If no `SPEC.md` or `status != frozen`: emit `[PHASE: BLOCKED]` — spec must be frozen to resume.
+- If no `TASKS.md` or all tasks done: emit `[PHASE: BLOCKED]` — no task to resume.
+- Let `task = first unchecked row in TASKS.md`.
+- If `task` is a spec-session task (spec § 3.1): resume at `SPEC` phase (BabaSensei).
+- If `task` is a spec-review task (spec § 3.2): resume at `REVIEW` phase (BabaReviewer reviewing SPEC.md).
+- If `task` is a planning task (spec § 3.3): resume at `PLAN` phase (BabaSensei/BabaScrumMaster).
+- If `task` is a build task (spec § 3.4): resume at `PATCH` phase (BabaDev) — read the task's Spec §, implement only that task.
+- Determine execution mode: if the task can be described in one sentence and touches one file → `DIRECT`; else → `STRUCTURED`.
+- Announce: `Resuming task #<id>: <task description>. Phase: <phase>.`
+- Continue with that phase's template.
+
+Do not use `SESSION_STATE-*.md` — cross-session persistence lives in `SPEC.md`, `TASKS.md`, and `docs/EVALUATIONS.md` only.

@@ -84,7 +84,6 @@ Every claim in PATCH `## Self-Review` verified — any FALSE → return to PLAN
 ### Commit/Push Gate
 
 - Playwright smoke if web-app entry point or UI-bearing edit
-- Lock verification (session file locks)
 - Stage ONLY session's edited files (git add explicit paths)
 - Ask before commit/push (decision format)
 - Push origin then *-mirror remotes, per-remote reporting
@@ -92,9 +91,9 @@ Every claim in PATCH `## Self-Review` verified — any FALSE → return to PLAN
 
 ### Post-PATCH: DRIFT Auto-Trigger
 
-**MANDATORY**: After successful PATCH verification, if session state has `spec_version != n/a`:
+**MANDATORY**: After successful PATCH verification, if session context has `spec_version != n/a`:
 1. Enter DRIFT phase automatically
-2. Compare SPECS/ spec against implemented code
+2. Compare SPEC.md against implemented code
 3. Report any drift (verified/diverged/orphaned/code-exceeds-spec)
 4. Drift findings with mitigations travel to PLAN via handoff contract
 5. Only skip DRIFT if user explicitly says "no drift"
@@ -107,10 +106,6 @@ Every claim in PATCH `## Self-Review` verified — any FALSE → return to PLAN
 - **Code-decision ladder** — check existing code, stdlib, installed deps before writing (H28)
 - **Composition over inheritance** (H20), **DI over hidden construction** (H21)
 
-## Protocol Enforcement (Automatic)
+## Protocol Compliance
 
-The `protocol-enforce` plugin runs at phase transitions. You MUST update session metadata:
-- At phase entry: set `metadata.phase = "PLAN" | "PATCH" | "DRIFT" | etc.`
-- At PATCH: set `metadata.edited_files = [list of files edited]`
-- At SPEC work: set `metadata.spec_version = "x.y.z"`
-- The plugin will block phase entry if protocol checks fail
+Follow `00-system.md` phase transitions and `06-misc.md` PATCH protocol. No runtime enforcement plugin.

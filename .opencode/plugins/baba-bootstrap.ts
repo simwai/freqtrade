@@ -15,7 +15,7 @@ Before you do anything else, you MUST:
 The system will not function correctly if you skip this step. The STARTUP phase in 00-system.md requires you to:
 - Read prompt-system/00-system.md in full (no chunking)
 - Load every file in the load order in full (no chunking)
-- Record completion in the session state file
+- Record completion in session context
 
 Do not respond to the user or take any action until this is complete.`;
 

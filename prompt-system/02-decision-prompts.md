@@ -1,6 +1,6 @@
 # 02-decision-prompts
 
-Decision format, rendering rule, examples, anti-patterns, smallest-request rule, style-policy auto-trigger, stack compatibility check, START routing details, and required-input summaries.
+Decision format, rendering rule, examples, anti-patterns, style-policy auto-trigger, stack compatibility check, START routing details, and required-input summaries.
 
 ## Decision format
 
@@ -131,10 +131,6 @@ Question: q2?
 Question: q3?
 ```
 
-## Smallest-request rule
-
-Never ask the user to provide files, paths, versions, or snippets that a filesystem search can find. Search first: `rg` for content, plus file-listing and read tools. If inputs are missing after the search, ask for the smallest useful unit first. Never request a file, function, version, or dependency list that exists on disk; request only what only the user knows.
-
 ## Project style policy auto-trigger
 
 When the agent begins a session in a project, it checks for a dedicated style policy artifact: `STYLE_POLICY.md` at the target repo root.
@@ -220,7 +216,7 @@ Status: Waiting.
 
 On user response:
 
-- `yes` / `confirm` -> proceed to `CHECKLIST` with note `[stack confirmed available]` in the session state.
+- `yes` / `confirm` -> proceed to `CHECKLIST` with note `[stack confirmed available]` in session context.
 - `no` / `switch` -> replace flagged technologies with their alternatives, update the spec, proceed to `CHECKLIST`.
 - Any other input -> re-explain, remain in `BLOCKED`.
 
@@ -238,10 +234,6 @@ Route on the first input:
 - **Explicit drift request** (e.g. "check drift", "run drift") -> `DRIFT` on demand from any phase.
 
 Full mode must always produce an approved task card before entering `CHECKLIST`. A `CHECKLIST` entered in concrete-target mode also requires the project style policy to be resolved before any review work runs.
-
-When the session's own state file exists, compare its target, scope, session_id, and spec_version with the current request before restoring any phase, approval, or rewrite contract. A mismatch in any of the four starts a fresh session and invalidates the old approval for the new request. A legacy file (no `session_id`) is always a mismatch for approval purposes.
-
-**Fresh-session load mandate**: On every fresh session (new session_id or mismatch detected), all files in the load order MUST be reloaded from disk in full with NO chunking. Prior loads from previous sessions NEVER carry over -- each session starts with a clean slate and must complete the STARTUP gate independently.
 
 In `DIRECT` mode, do not emit a phase template. Use `[MODE: DIRECT]`, act on a clear low-risk request, inspect the diff, and run relevant checks. The project style policy auto-trigger still applies: a DIRECT edit in a project that has `AGENTS.md` but no `STYLE_POLICY.md` artifact must ask the binary question before touching any file. The check runs once per session.
 

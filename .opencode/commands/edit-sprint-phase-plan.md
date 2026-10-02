@@ -7,7 +7,7 @@ Edit an existing sprint phase plan. `$ARGUMENTS` specifies the sprint ID or name
 Before acting:
 
 1. Read `prompt-system/00-system.md` (orchestrator + routing + execution modes).
-2. Read the session's own state file `SESSION_STATE-<session_id>.md` if present.
+2. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 3. Read `project-management/config.md` to determine the active backend.
 4. Read `prompt-system/07-protocols.md` `## Scrum planning` for sprint conventions (ICE scoring, size bands, milestones, task-card enrichment).
 
@@ -47,4 +47,4 @@ Then:
 - Follow scrum conventions: ICE scoring (ICE = Impact *Confidence* Ease), size bands (XS/S/M/L), milestones, DoD, task-card enrichment (MVP-first ordering).
 - Ties broken by size (smaller first), then by milestone target date.
 - Recalculate ICE after any edit that changes impact, confidence, or size.
-- Record the updated sprint ID in the session state file.
+- Record the updated sprint ID in the session context (conversation carrier).

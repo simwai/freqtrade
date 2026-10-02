@@ -1,7 +1,7 @@
 /**
  * Baba Drift Detection Plugin for opencode
  *
- * Runs drift detection: compares SPECS/ against code.
+ * Runs drift detection: compares SPEC.md against code.
  * Read-only. Finds verified/diverged/orphaned/exceeds-spec claims.
  * HALTs on version drift per 08-plan-actual-gate.md.
  */
@@ -19,9 +19,9 @@ export default async ({ client, $, project, directory, worktree }: {
     tool: {
       drift: tool({
         description:
-          "Run drift detection: compare SPECS/ against code. Read-only. Finds verified/diverged/orphaned/exceeds-spec claims. HALTs on version drift.",
+          "Run drift detection: compare SPEC.md against code. Read-only. Finds verified/diverged/orphaned/exceeds-spec claims. HALTs on version drift.",
         args: {
-          spec: tool.schema.string().optional().describe("Specific spec file (e.g., SPECS/001-user-registration/spec.md). If omitted, checks all specs."),
+          spec: tool.schema.string().optional().describe("Specific spec file (e.g., SPEC.md). If omitted, checks all specs."),
           freshEyes: tool.schema.boolean().optional().describe("Run fresh-eyes review (cold read by subagent)"),
         },
         async execute(args, context) {
@@ -59,21 +59,21 @@ export default async ({ client, $, project, directory, worktree }: {
             }
           }
 
-          // Helper: list SPECS/
-          async function listSpecs(): Promise<string[]> {
-            try {
-              const result = await (client as any).tool.execute({
-                body: {
-                  tool: "glob",
-                  callID: `drift-glob-${Date.now()}`,
-                  args: { pattern: "SPECS/*/spec.md" },
-                },
-              });
-              return (result.output || "").trim().split("\n").filter(Boolean);
-            } catch {
-              return [];
-            }
-          }
+// Helper: list SPEC.md
+           async function listSpecs(): Promise<string[]> {
+             try {
+               const result = await (client as any).tool.execute({
+                 body: {
+                   tool: "glob",
+                   callID: `drift-glob-${Date.now()}`,
+                   args: { pattern: "SPEC.md" },
+                 },
+               });
+               return (result.output || "").trim().split("\n").filter(Boolean);
+             } catch {
+               return [];
+             }
+           }
 
           // Parse spec for claims (GWT, FR-###, SC-###)
           function parseClaims(specContent: string): { id: string; text: string; type: "gwt" | "fr" | "sc"; line: number }[] {
@@ -130,34 +130,31 @@ export default async ({ client, $, project, directory, worktree }: {
               return !file.includes("node_modules") && 
                      !file.includes(".git") && 
                      !file.includes("dist/") && 
-                     !file.includes("build/") &&
-                     !file.includes("SPECS/") &&
-                     !file.includes(".session-locks/");
+                     !file.includes("build/");
             }).slice(0, 10);
           }
 
-          // Check version drift: spec header Version vs SPECS/index.md registry
-          async function checkVersionDrift(specPath: string, specContent: string): Promise<{ drift: boolean; specVersion: string; registryVersion: string } | null> {
-            // Extract version from spec header
-            const versionMatch = specContent.match(/^Version:\s*([\d.]+)/m);
-            const specVersion = versionMatch?.[1];
-            if (!specVersion) return null;
-            
-            // Read registry
-            const registryContent = await readFile(`${directory}/SPECS/index.md`);
-            const escapedPath = specPath.replace(/[/\\]/g, "\\\\");
-            const registryMatch = registryContent.match(new RegExp(`\\|\\s*${escapedPath}\\s*\\|\\s*([\\d.]+)\\s*\\|`));
-            const registryVersion = registryMatch?.[1];
-            if (!registryVersion) return null;
-            
-            return { drift: specVersion !== registryVersion, specVersion, registryVersion };
-          }
+// Check version drift: spec header Version vs SPEC.md frontmatter version
+           async function checkVersionDrift(specPath: string, specContent: string): Promise<{ drift: boolean; specVersion: string; registryVersion: string } | null> {
+             // Extract version from spec header
+             const versionMatch = specContent.match(/^version:\s*([\d.]+)/mi);
+             const specVersion = versionMatch?.[1];
+             if (!specVersion) return null;
+             
+             // Read SPEC.md frontmatter for version
+             const specFileContent = await readFile(`${directory}/SPEC.md`);
+             const frontmatterVersionMatch = specFileContent.match(/^version:\s*([\d.]+)/mi);
+             const registryVersion = frontmatterVersionMatch?.[1];
+             if (!registryVersion) return null;
+             
+             return { drift: specVersion !== registryVersion, specVersion, registryVersion };
+           }
 
           // Main drift logic
           const specFiles = args.spec ? [args.spec] : await listSpecs();
           
           if (specFiles.length === 0) {
-            return "No SPECS/ found. Drift detection requires specs.";
+            return "No SPEC.md found. Drift detection requires SPEC.md at repo root.";
           }
 
           let report = "# Drift Report\n\n";

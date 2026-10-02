@@ -51,8 +51,6 @@ You are a general-purpose agent for researching complex questions and executing 
 - Clear action items or findings
 - Explicit about uncertainty
 
-## Protocol Enforcement (Automatic)
+## Protocol Compliance
 
-The `protocol-enforce` plugin runs at phase transitions. You MUST update session metadata:
-- At phase entry: set `metadata.phase = "DIRECT"` (general runs in DIRECT mode)
-- The plugin will block phase entry if protocol checks fail
+Follow `00-system.md` phase transitions. No runtime enforcement plugin.

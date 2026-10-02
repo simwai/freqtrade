@@ -15,7 +15,7 @@ Before acting:
 2. Read `prompt-system/07-protocols.md` `## Scrum planning` (ICE, size bands, split rule, milestones, task-card enrichment).
 3. Read `prompt-system/01-personas.md` § BabaScrumMaster.
 4. Read `project-management/config.md` for the active backend (`file` or `trello`).
-5. Read the session state file `SESSION_STATE-<session_id>.md` if present; on `target`/`spec_version` mismatch, start a fresh session.
+5. Read the session context from the conversation carrier; on `target`/`spec_version` mismatch, start a fresh session.
 6. Exit if target repo is greenfield with no visible architecture — `INTAKE` already carries `Stack/Style:`; kickoff still runs, against planned file set.
 
 ## Stage 1 — INTAKE (compact)
@@ -80,5 +80,5 @@ Option B reply lists the item id and the new score/mapping. Option C reply carri
 
 - No code changes anywhere; all writes land under `project-management/` (or Trello).
 - No CHECKLIST until the user answers A. A `B` reply returns to this kickoff after the edit; `C` discards the in-flight artifacts and re-enters Stage 1 with the revised goal.
-- After A, record the task card in the session state (`## Project Management`) and enter `CHECKLIST` with the approved task as target.
+- After A, record the task card in the session context (conversation carrier) `## Project Management` and enter `CHECKLIST` with the approved task as target.
 - Apply the decision-format rules from `prompt-system/02-decision-prompts.md`: recommended option A, fat bold, one reply line.

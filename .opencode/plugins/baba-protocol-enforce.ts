@@ -4,7 +4,6 @@
  * Enforces cross-cutting protocols at phase transitions:
  * - Artifact handling (gitignore, .gitattributes)
  * - Pre-commit behavior
- * - Session file locks
  * - Cross-team requirements
  * - Library selection
  * - Spec lifecycle / DRIFT
@@ -39,9 +38,9 @@ interface ProtocolState {
 const protocolStates = new Map<string, ProtocolState>();
 
 const PHASE_TRANSITIONS = {
-  REVIEW: ["artifact-handling", "pre-commit", "locks", "api-design", "code-decision-ladder", "library-first"],
-  PLAN: ["review-complete", "locks", "cross-team", "library-selection"],
-  PATCH: ["plan-approved", "rewrite-contract", "locks", "code-decision-ladder", "library-first"],
+  REVIEW: ["artifact-handling", "pre-commit", "api-design", "code-decision-ladder", "library-first"],
+  PLAN: ["review-complete", "cross-team", "library-selection"],
+  PATCH: ["plan-approved", "rewrite-contract", "code-decision-ladder", "library-first"],
   DRIFT: ["spec-fileExists"],
   CHECKLIST: ["discovery", "artifact-handling"],
 };
@@ -55,7 +54,7 @@ const PROTOCOL_CHECKS = {
       checks.push({ protocol: "artifact-handling", passed: false, message: ".gitignore missing" });
     } else {
       const content = await readFile(gitignorePath, "utf-8");
-      const required = [".session-locks/", ".playwright-mcp/"];
+      const required = [".playwright-mcp/"];
       for (const req of required) {
         if (!content.includes(req)) {
           checks.push({ protocol: "artifact-handling", passed: false, message: `gitignore missing: ${req}` });
@@ -87,24 +86,6 @@ const PROTOCOL_CHECKS = {
             checks.push({ protocol: "pre-commit", passed: false, message: `Pre-commit may lack ${req} hook` });
           }
         }
-      }
-    }
-    return checks;
-  },
-
-  "locks": async (_directory: string, editedFiles: string[], _state: any) => {
-    const checks = [];
-    const lockDir = ".session-locks";
-    const hasLockDir = await fileExists(lockDir);
-    if (!hasLockDir && editedFiles.length > 0) {
-      checks.push({ protocol: "locks", passed: false, message: "No .session-locks directory but files were edited" });
-    }
-    for (const file of editedFiles) {
-      const flatName = file.replace(/[\\/]/g, "--");
-      const lockPath = `${lockDir}/${flatName}.lock`;
-      const hasLock = await fileExists(lockPath);
-      if (!hasLock) {
-        checks.push({ protocol: "locks", passed: false, message: `No lock for edited file: ${file}` });
       }
     }
     return checks;
@@ -151,11 +132,11 @@ const PROTOCOL_CHECKS = {
 
   "spec-fileExists": async (_directory: string, _editedFiles: string[], state: any) => {
     const checks = [];
-    const specsDir = "SPECS";
-    const hasSpecs = await fileExists(specsDir);
+    const specFile = "SPEC.md";
+    const hasSpec = await fileExists(specFile);
     const specVersion = state.specVersion;
-    if (!hasSpecs || !specVersion) {
-      checks.push({ protocol: "spec", passed: false, message: "No SPECS/ directory or spec_version not set - DRIFT not applicable" });
+    if (!hasSpec || !specVersion) {
+      checks.push({ protocol: "spec", passed: false, message: "No SPEC.md or spec_version not set - DRIFT not applicable" });
     }
     return checks;
   },

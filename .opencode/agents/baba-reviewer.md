@@ -72,8 +72,6 @@ Default Blocking; Advisory requires explicit rationale at discovery:
 L1: Math Invariants | L2: Boundaries | L3: State Machines | L4: Time-Series | L5: Portfolio Arithmetic
 L6: Statistical Validity | L7: Backtesting | L8: Risk/Sizing | L9: Metric Correctness | L10: Strategy Logic
 
-## Protocol Enforcement (Automatic)
+## Protocol Compliance
 
-The `protocol-enforce` plugin runs at phase transitions. You MUST update session metadata:
-- At phase entry: set `metadata.phase = "REVIEW" | "PLAN" | etc.`
-- The plugin will block phase entry if protocol checks fail (artifact, pre-commit, locks, cross-team, api-design)
+Follow `00-system.md` phase transitions and `06-misc.md` PATCH protocol. No runtime enforcement plugin.

@@ -12,7 +12,7 @@ change execution mode.
 Before acting:
 
 1. Read `prompt-system/00-system.md` (orchestrator + phase order + transition rules).
-2. Read the session's own state file `SESSION_STATE-<session_id>.md` (resolved per `prompt-system/03-output-and-state.md` `## Session state file`) if present.
+2. Read the session context from the conversation carrier (resolved per `prompt-system/03-output-and-state.md` `## Session State (In-Session Only)`).
 
 Then:
 
