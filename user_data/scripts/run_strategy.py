@@ -44,6 +44,7 @@ DEFAULT_DB = USER_DATA / "analysis" / "results.db"
 
 from ft_metrics import (  # noqa: E402
     find_strategy_file,
+    freqtrade_python,
     record_run_artifact,
     snapshot_strategy,
     store_config_text,
@@ -67,7 +68,7 @@ DEFAULT_SPACES = ["buy", "sell", "roi", "stoploss", "trailing"]
 
 
 def freqtrade_cmd() -> str:
-    return f"{sys.executable} -m freqtrade" if sys.executable else "freqtrade"
+    return f"{freqtrade_python()} -m freqtrade"
 
 
 def list_strategies(conn: sqlite3.Connection) -> list[str]:

@@ -126,9 +126,37 @@ def run_walkforward(strategy: str, config: Path, timerange: str, timeframe: str,
         "--train-days", str(args.train_days),
         "--test-days", str(args.test_days),
         "--step-days", str(args.step_days),
-        "--epochs", str(args.epochs),
-        "--loss", args.loss,
     ]
+    if args.epochs is not None:
+        cmd += ["--epochs", str(args.epochs)]
+    if args.loss:
+        cmd += ["--loss", args.loss]
+    if args.spaces:
+        cmd += ["--spaces", *args.spaces]
+    if args.jobs is not None:
+        cmd += ["--jobs", str(args.jobs)]
+    if args.random_state is not None:
+        cmd += ["--random-state", str(args.random_state)]
+    proc = subprocess.run(cmd, capture_output=True, text=True, cwd=str(REPO_ROOT),
+                          check=False)
+    return proc.returncode
+
+
+def run_hyperopt(strategy: str, config: Path, timerange: str, timeframe: str,
+                 args) -> int:
+    """Run one shared-config hyperopt via run_strategy.py."""
+    cmd = [
+        sys.executable, str(Path(__file__).resolve().parent / "run_strategy.py"),
+        "hyperopt",
+        "--strategy", strategy,
+        "--config", str(config),
+        "--timerange", timerange,
+        "--timeframe", timeframe,
+    ]
+    if args.epochs is not None:
+        cmd += ["--epochs", str(args.epochs)]
+    if args.loss:
+        cmd += ["--loss", args.loss]
     if args.spaces:
         cmd += ["--spaces", *args.spaces]
     if args.jobs is not None:
@@ -160,7 +188,7 @@ def bench_walkforward(args, strategies: list[str], config: Path) -> int:
     print(f"Benchmark walk-forward: {len(strategies)} strategies, "
           f"config={config.name}, timerange={args.timerange}, tf={args.timeframe}, "
           f"train={args.train_days}d test={args.test_days}d step={args.step_days}d, "
-          f"{args.epochs} epochs")
+          f"epochs={args.epochs or 'default'}, loss={args.loss or 'default'}")
     ok, skip = 0, 0
     for s in strategies:
         try:
@@ -180,6 +208,30 @@ def bench_walkforward(args, strategies: list[str], config: Path) -> int:
     return 0 if ok else 1
 
 
+def bench_hyperopt(args, strategies: list[str], config: Path) -> int:
+    """Shared-config hyperopt per strategy; ingest picks up results."""
+    print(f"Benchmark hyperopt: {len(strategies)} strategies, "
+          f"config={config.name}, timerange={args.timerange}, tf={args.timeframe}, "
+          f"epochs={args.epochs or 'default'}, loss={args.loss or 'default'}")
+    ok, skip = 0, 0
+    for s in strategies:
+        try:
+            code = run_hyperopt(s, config, args.timerange, args.timeframe, args)
+        except OSError as e:
+            print(f"  SKIP {s}: {e}")
+            skip += 1
+            continue
+        if code != 0:
+            print(f"  SKIP {s}: hyperopt exited with code {code}")
+            skip += 1
+        else:
+            print(f"  OK   {s}")
+            ok += 1
+    print(f"\n{ok} hyperopt benchmark runs finished ({skip} skipped).")
+    print("Refresh the report (ingest + rebuild) to pick up results.")
+    return 0 if ok else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--strategies", nargs="*", help="Strategy names (default: all in db)")
@@ -188,17 +240,18 @@ def main() -> int:
     ap.add_argument("--db", default=str(DEFAULT_DB))
     ap.add_argument("--timerange", default="20230101-20240101")
     ap.add_argument("--timeframe", default="5m")
-    ap.add_argument("--mode", choices=["backtest", "walkforward"],
+    ap.add_argument("--mode", choices=["backtest", "hyperopt", "walkforward"],
                     default="backtest", help="Benchmark mode")
     ap.add_argument("--train-days", type=int, default=90)
     ap.add_argument("--test-days", type=int, default=7)
     ap.add_argument("--step-days", type=int, default=7)
-    ap.add_argument("--epochs", type=int, default=50)
-    ap.add_argument("--loss", default="SharpeHyperOptLossDaily")
+    ap.add_argument("--epochs", type=int, default=None)
+    ap.add_argument("--loss", default=None)
     ap.add_argument("--spaces", nargs="*", default=None)
     ap.add_argument("--jobs", "-j", type=int, default=None)
     ap.add_argument("--random-state", type=int, default=None)
-    default_ft = f"{sys.executable} -m freqtrade" if sys.executable else "freqtrade"
+    from ft_metrics import freqtrade_python
+    default_ft = f"{freqtrade_python()} -m freqtrade"
     ap.add_argument("--freqtrade", default=default_ft, help="freqtrade command (default: current python -m freqtrade)")
     ap.add_argument("--keep-results", action="store_true",
                     help="Don't delete the intermediate bench_results.json")
@@ -231,6 +284,9 @@ def main() -> int:
     if args.mode == "walkforward":
         conn.close()
         return bench_walkforward(args, strategies, config)
+    if args.mode == "hyperopt":
+        conn.close()
+        return bench_hyperopt(args, strategies, config)
     return bench_backtest(args, strategies, conn, config)
 
 

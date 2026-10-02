@@ -538,3 +538,14 @@ def stamp_legacy_code_hashes(conn: sqlite3.Connection, user_data: Path) -> int:
                 continue
     conn.commit()
     return n
+
+
+def freqtrade_python() -> str:
+    """Interpreter for freqtrade invocations (py>=3.11 required)."""
+    import sys
+    root = Path(__file__).resolve().parents[2]
+    name = "Scripts/python.exe" if sys.platform == "win32" else "bin/python"
+    cand = root / ".venv" / name
+    if cand.is_file():
+        return str(cand)
+    return sys.executable or "python"

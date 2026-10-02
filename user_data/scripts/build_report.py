@@ -4511,6 +4511,18 @@ function labBench() {
     body.test_days = Number($('benchTest').value) || 7;
     body.step_days = Number($('benchStep').value) || 7;
   }
+  if (body.mode === 'hyperopt') {
+    const epochs = Number($('benchEpochs').value);
+    if (!isNaN(epochs)) body.epochs = epochs;
+    const loss = $('benchLoss').value.trim();
+    if (loss) body.loss = loss;
+    const spaces = $('benchSpaces').value.split(/\s+/).map(s=>s.trim()).filter(Boolean);
+    if (spaces.length) body.spaces = spaces;
+    const jobs = Number($('benchJobs').value);
+    if (!isNaN(jobs)) body.jobs = jobs;
+    const seed = Number($('benchSeed').value);
+    if (!isNaN(seed)) body.random_state = seed;
+  }
   fetch('/api/bench', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
     .then(r=>r.json()).then(() => { ensureJobPolling(); });
 }
@@ -4645,15 +4657,38 @@ function loadConfigs() {
     if (hint) hint.textContent = 'Auto config: user_data/config_<strategy>.json if it exists, else config_benchmark.json. Config dropdown needs the lab server.';
   });
 }
+function resolveLabConfigFile(strategy, override) {
+  if (override) return override;
+  const low = p => (p || '').toLowerCase();
+  const paths = (window._labConfigs || []).map(c => low(c.path));
+  const per = 'config_' + low(strategy || '') + '.json';
+  if (paths.includes(per)) return per;
+  if (paths.includes('config_benchmark.json')) return 'config_benchmark.json';
+  return '';
+}
 function resolveLabConfig(strategy, override) {
   if (override) return override + ' (explicit)';
-  const base = p => (p || '').split('/').pop().toLowerCase();
-  const cfgs = window._labConfigs || [];
-  const per = 'config_' + (strategy || '').toLowerCase() + '.json';
-  if (cfgs.some(c => base(c.path) === per)) return per + ' (per-strategy)';
-  if (cfgs.some(c => base(c.path) === 'config_benchmark.json'))
-    return 'config_benchmark.json (shared fallback)';
-  return 'no config found — pick one explicitly';
+  const f = resolveLabConfigFile(strategy, '');
+  if (!f) return 'no config found — pick one explicitly';
+  if (f.toLowerCase().endsWith('config_benchmark.json'))
+    return f + ' (shared fallback)';
+  return f + ' (per-strategy)';
+}
+async function previewResolvedConfig(strategy, override, preId) {
+  const pre = $(preId);
+  if (!pre) return;
+  const file = resolveLabConfigFile(strategy, override);
+  if (!strategy || !file) {
+    pre.textContent = ''; pre.classList.add('hidden'); return;
+  }
+  let d;
+  try {
+    const r = await fetch('/api/config?path=' + encodeURIComponent(file));
+    d = await r.json();
+    if (!r.ok || d.error || !d.config) throw new Error(d.error || r.status);
+  } catch (e) { pre.textContent = ''; pre.classList.add('hidden'); return; }
+  pre.textContent = JSON.stringify(d.config, null, 2);
+  pre.classList.remove('hidden');
 }
 function appendStrategyOptions(sel, list) {
   list.forEach(s => {
@@ -4668,6 +4703,7 @@ function updateRunConfigHint() {
   const s = $('runStrategy').value;
   if (!s) { el.textContent = ''; return; }
   el.textContent = 'Will run with: ' + resolveLabConfig(s, $('runConfig').value.trim());
+  previewResolvedConfig(s, $('runConfig').value.trim(), 'runConfigPreview');
 }
 function updateDryConfigHint() {
   const el = $('dryConfigHint');
@@ -4675,6 +4711,7 @@ function updateDryConfigHint() {
   const s = $('dryStrategy').value;
   if (!s) { el.textContent = ''; return; }
   el.textContent = 'Will run with: ' + resolveLabConfig(s, $('dryConfig').value.trim());
+  previewResolvedConfig(s, $('dryConfig').value.trim(), 'dryConfigPreview');
 }
 function validateWfTimerange() {
   const start = ($('runStart').value || '').replace(/-/g, '');
@@ -5394,6 +5431,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <button class="btn" onclick="labRefresh()">↻ Refresh data &amp; rebuild report</button>
         </div>
         <div id="runConfigHint" class="hint"></div>
+        <pre id="runConfigPreview" class="mb-0 hidden"
+          style="max-height:300px;overflow:auto;font-size:12px;line-height:1.5;"></pre>
         <div id="runHint" class="hint"></div>
       </div>
       <!-- Backtest Config Panel - shows the config used for the selected strategy -->
@@ -5429,6 +5468,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
         <div id="dryHint" class="hint"></div>
         <div id="dryConfigHint" class="hint"></div>
+        <pre id="dryConfigPreview" class="mb-0 hidden"
+          style="max-height:300px;overflow:auto;font-size:12px;line-height:1.5;"></pre>
         <pre id="dryLog" class="mb-0 hidden"
           style="max-height:300px;overflow:auto;font-size:12px;line-height:1.5;"></pre>
       </div>
@@ -5449,6 +5490,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <label>Mode:
             <select id="benchMode" onchange="updateBenchFields()">
               <option value="backtest">Backtest</option>
+              <option value="hyperopt">Hyperopt</option>
               <option value="walkforward">Walk-Forward</option>
             </select>
           </label>
@@ -5458,6 +5500,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <input id="benchTest" type="number" value="7" style="width:70px"></label>
           <label data-benchfield="walkforward" class="hidden">Step d:
             <input id="benchStep" type="number" value="7" style="width:70px"></label>
+          <label data-benchfield="hyperopt walkforward" class="hidden">Epochs:
+            <input id="benchEpochs" type="number" placeholder="auto" style="width:80px"></label>
+          <label data-benchfield="hyperopt walkforward" class="hidden">Loss:
+            <input id="benchLoss" type="text" placeholder="SharpeHyperOptLossDaily"
+              style="min-width:180px"></label>
+          <label data-benchfield="hyperopt walkforward" class="hidden">Spaces:
+            <input id="benchSpaces" type="text" placeholder="buy sell roi stoploss trailing"
+              style="min-width:180px"></label>
+          <label data-benchfield="hyperopt walkforward" class="hidden">Jobs:
+            <input id="benchJobs" type="number" placeholder="-1" style="width:70px"></label>
+          <label data-benchfield="hyperopt walkforward" class="hidden">Seed:
+            <input id="benchSeed" type="number" placeholder="auto" style="width:90px"></label>
         </div>
       </div>
     </section>

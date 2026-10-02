@@ -9,6 +9,7 @@ the browser instead of the CLI:
     POST  /api/strategies          -> set status / notes  {name, status, notes}
     GET   /api/data                -> dashboard payload (LAB)
     GET   /api/losses              -> available hyperopt loss functions (autodiscovered)
+    GET   /api/config              -> parsed config for preview {path} (secrets redacted)
     POST  /api/refresh             -> ingest + rebuild report
     POST  /api/report              -> rebuild report only
     POST  /api/bench               -> run benchmark  {strategies[], timerange, timeframe}
@@ -994,6 +995,29 @@ def list_configs() -> list[dict]:  # noqa: C901
     return out
 
 
+def config_content(rel: str) -> dict:
+    """Parsed config for the Lab preview. Read-only; secrets redacted."""
+    rel = (rel or "").strip().replace("\\", "/")
+    if not rel or rel not in {c["path"] for c in list_configs()}:
+        raise ValueError("unknown config; pick one from the Lab dropdown")
+    try:
+        data = json.loads((USER_DATA / rel).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        raise ValueError(f"cannot read config: {e}") from e
+    if not isinstance(data, dict):
+        raise TypeError("config is not a JSON object")
+    redacted = json.loads(json.dumps(data))
+    exch = redacted.get("exchange")
+    if isinstance(exch, dict):
+        for k in ("key", "secret", "password"):
+            if exch.get(k):
+                exch[k] = "REDACTED"
+    tg = redacted.get("telegram")
+    if isinstance(tg, dict) and tg.get("token"):
+        tg.update({"token": "REDACTED"})
+    return {"path": rel, "name": Path(rel).name, "config": redacted}
+
+
 _LOSSES_CACHE: list[str] | None = None
 
 
@@ -1285,6 +1309,14 @@ class LabHandler(BaseHTTPRequestHandler):
         if path == "/api/configs":
             try:
                 self._send_json({"configs": list_configs()})
+            except Exception as e:  # noqa: BLE001
+                self._send_server_error(e)
+            return
+        if path == "/api/config":
+            try:
+                self._send_json(config_content(qs.get("path", [""])[0] or ""))
+            except (ValueError, TypeError) as e:
+                self._send_json({"error": str(e)}, 400)
             except Exception as e:  # noqa: BLE001
                 self._send_server_error(e)
             return
