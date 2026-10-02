@@ -8,6 +8,11 @@ Usage:
     python user_data/scripts/benchmark_runner.py --strategies BigZ08 MfiEmaWaveTrend OctopusNestStrategy
     python user_data/scripts/benchmark_runner.py --strategies BigZ08 --timerange 20220101-20240101 --timeframe 5m
     python user_data/scripts/benchmark_runner.py --list
+    python user_data/scripts/benchmark_runner.py --mode walkforward --strategies BigZ08
+
+With --mode walkforward each strategy runs freqtrade walk-forward on the same
+config instead; rows land in the walkforward table through the normal ingest
+path (refresh afterwards), keyed to the shared bench config.
 
 Requires freqtrade on PATH or --freqtrade to point at the executable.
 """
@@ -108,6 +113,33 @@ def run_backtest(strategy: str, config: Path, timerange: str, timeframe: str,
     return str(zips[-1])
 
 
+def run_walkforward(strategy: str, config: Path, timerange: str, timeframe: str,
+                    args) -> int:
+    """Run one shared-config walk-forward via run_strategy.py."""
+    cmd = [
+        sys.executable, str(Path(__file__).resolve().parent / "run_strategy.py"),
+        "walkforward",
+        "--strategy", strategy,
+        "--config", str(config),
+        "--timerange", timerange,
+        "--timeframe", timeframe,
+        "--train-days", str(args.train_days),
+        "--test-days", str(args.test_days),
+        "--step-days", str(args.step_days),
+        "--epochs", str(args.epochs),
+        "--loss", args.loss,
+    ]
+    if args.spaces:
+        cmd += ["--spaces", *args.spaces]
+    if args.jobs is not None:
+        cmd += ["--jobs", str(args.jobs)]
+    if args.random_state is not None:
+        cmd += ["--random-state", str(args.random_state)]
+    proc = subprocess.run(cmd, capture_output=True, text=True, cwd=str(REPO_ROOT),
+                          check=False)
+    return proc.returncode
+
+
 def read_result(path: str) -> dict | None:
     """Return the metrics dict for the single strategy in a bench result zip."""
     import zipfile
@@ -123,6 +155,31 @@ def read_result(path: str) -> dict | None:
     return next(iter(strategies.values()))
 
 
+def bench_walkforward(args, strategies: list[str], config: Path) -> int:
+    """Shared-config walk-forward per strategy; ingest picks up results."""
+    print(f"Benchmark walk-forward: {len(strategies)} strategies, "
+          f"config={config.name}, timerange={args.timerange}, tf={args.timeframe}, "
+          f"train={args.train_days}d test={args.test_days}d step={args.step_days}d, "
+          f"{args.epochs} epochs")
+    ok, skip = 0, 0
+    for s in strategies:
+        try:
+            code = run_walkforward(s, config, args.timerange, args.timeframe, args)
+        except OSError as e:
+            print(f"  SKIP {s}: {e}")
+            skip += 1
+            continue
+        if code != 0:
+            print(f"  SKIP {s}: walk-forward exited with code {code}")
+            skip += 1
+        else:
+            print(f"  OK   {s}")
+            ok += 1
+    print(f"\n{ok} walk-forward benchmark runs finished ({skip} skipped).")
+    print("Refresh the report (ingest + rebuild) to pick up results.")
+    return 0 if ok else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--strategies", nargs="*", help="Strategy names (default: all in db)")
@@ -131,6 +188,16 @@ def main() -> int:
     ap.add_argument("--db", default=str(DEFAULT_DB))
     ap.add_argument("--timerange", default="20230101-20240101")
     ap.add_argument("--timeframe", default="5m")
+    ap.add_argument("--mode", choices=["backtest", "walkforward"],
+                    default="backtest", help="Benchmark mode")
+    ap.add_argument("--train-days", type=int, default=90)
+    ap.add_argument("--test-days", type=int, default=7)
+    ap.add_argument("--step-days", type=int, default=7)
+    ap.add_argument("--epochs", type=int, default=50)
+    ap.add_argument("--loss", default="SharpeHyperOptLossDaily")
+    ap.add_argument("--spaces", nargs="*", default=None)
+    ap.add_argument("--jobs", "-j", type=int, default=None)
+    ap.add_argument("--random-state", type=int, default=None)
     default_ft = f"{sys.executable} -m freqtrade" if sys.executable else "freqtrade"
     ap.add_argument("--freqtrade", default=default_ft, help="freqtrade command (default: current python -m freqtrade)")
     ap.add_argument("--keep-results", action="store_true",
@@ -161,6 +228,15 @@ def main() -> int:
 
     print(f"Benchmark: {len(strategies)} strategies, config={config.name}, "
           f"timerange={args.timerange}, tf={args.timeframe}")
+    if args.mode == "walkforward":
+        conn.close()
+        return bench_walkforward(args, strategies, config)
+    return bench_backtest(args, strategies, conn, config)
+
+
+def bench_backtest(args, strategies: list[str], conn: sqlite3.Connection,
+                   config: Path) -> int:
+    """Shared-config backtest per strategy; rows go to the benchmarks table."""
     bench_config_hash = None
     try:
         bench_config_hash = store_config_text(conn, config.read_text(encoding="utf-8"), path=str(config))

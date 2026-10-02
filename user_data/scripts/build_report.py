@@ -1421,7 +1421,7 @@ details.paramsBlock[open] summary { margin-bottom: 8px; }
   .controls input, .controls select, .btn { width: 100%; }
   .controls label { width: 100%; display: flex; flex-direction: column; gap: 4px; }
   #histSelect { min-width: 0 !important; width: 100%; }
-  #benchStrategies, #benchRange, #benchTf { min-width: 0 !important; width: 100%; }
+  #benchStrategies, #benchFrom, #benchTo, #benchTf { min-width: 0 !important; width: 100%; }
   #runStrategy, #runMode, #runTf, #runEpochs, #runLoss, #runSpaces,
   #runJobs, #runRandomState, #runMinTrades, #runAnalyzePerEpoch, #runDisableExport, #runPrintAll,
   #runTrain, #runTest, #runStep, #runWfMinTrades, #runWfMaxDD, #runConfig { min-width: 0 !important; width: 100%; }
@@ -2147,6 +2147,10 @@ function openStrategy(name, fromHash) {
         setTimeout(() => {
           if (window._detailEquityChart) window._detailEquityChart.resize();
           if (window._detailHistChart) window._detailHistChart.resize();
+          if (_tmDetail && _tmDetail.chart) _tmDetail.chart.resize();
+          ((_tmDetail && _tmDetail.inds) || []).forEach(e => {
+            if (e.paneEl && e.chart) e.chart.resize();
+          });
         }, 30);
       });
     };
@@ -3199,7 +3203,7 @@ function tlSyncSelects() {
 // Instances expose no paint() wrapper; tlPaint is the entry point and needs
 // loaded candles.
 function tlRepaintAll() {
-  _tlInstances.forEach(i => { if (i.candles.length) tlPaint(i); });
+  TradeMap.getAll().forEach(i => { if (i.candles.length) tlPaint(i); });
 }
 function tlCandleSet(v) {
   if (TL_CANDLE_PRESETS[v]) { try { localStorage.setItem('tlCandlePreset', v); } catch (e) {} }
@@ -3482,6 +3486,9 @@ class TradeMap {
       tooltip: { trigger: 'axis', confine: true, formatter: tmTooltipFormatter(this) },
       series: tmBaseSeries(),
     });
+    // the map mounts while its tab is hidden (zero width) - same second
+    // chance as the equity/profit charts or the canvas stays invisible
+    if (this.chart.getWidth() < 50) setTimeout(() => this.chart.resize(), 50);
   }
   
   _bindEvents() {
@@ -4063,9 +4070,8 @@ function tlFetchRoi(name, cb) {
     .then(d => { _roiCache[name] = (d && d.roi) || {}; cb(_roiCache[name]); })
     .catch(() => { _roiCache[name] = {}; cb({}); });
 }
-const _tlInstances = [];
 const _tlFetchCache = {};
-function tlUpdate() { _tlInstances.forEach(i => { if (i.trades) tlRender(i); }); }
+function tlUpdate() { TradeMap.getAll().forEach(i => { if (i.trades) tlRender(i); }); }
 function renderTradeTable(data, wrapEl) {
   const trades = data.trades || [];
   const rows = trades.slice(0, 500);
@@ -4496,9 +4502,70 @@ function labRefresh() {
 }
 function labBench() {
   const strategies = $('benchStrategies').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const body = { timerange: $('benchRange').value, timeframe: $('benchTf').value, strategies };
+  const from = ($('benchFrom').value || '').replace(/-/g, '');
+  const to = ($('benchTo').value || '').replace(/-/g, '');
+  const body = { timerange: (from && to) ? from + '-' + to : '20230101-20240101',
+    timeframe: $('benchTf').value, strategies, mode: $('benchMode').value };
+  if (body.mode === 'walkforward') {
+    body.train_days = Number($('benchTrain').value) || 90;
+    body.test_days = Number($('benchTest').value) || 7;
+    body.step_days = Number($('benchStep').value) || 7;
+  }
   fetch('/api/bench', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
     .then(r=>r.json()).then(() => { ensureJobPolling(); });
+}
+function updateBenchFields() {
+  const mode = $('benchMode').value;
+  document.querySelectorAll('[data-benchfield]').forEach(el => {
+    el.classList.toggle('hidden', !el.dataset.benchfield.split(' ').includes(mode));
+  });
+}
+async function labDryStart() {
+  const strategy = $('dryStrategy').value;
+  if (!strategy) { alert('Pick a strategy first.'); return; }
+  const body = { strategy, config: $('dryConfig').value.trim(),
+    verbosity: $('dryVerbose').checked ? 3 : 1 };
+  let d;
+  try {
+    const r = await fetch('/api/dryrun', {method:'POST',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    d = await r.json();
+    if (!r.ok || d.error) {
+      $('dryHint').textContent = `Start rejected: ${d.error || r.status}`;
+      return;
+    }
+  } catch (e) { $('dryHint').textContent = 'Start failed: ' + e; return; }
+  $('dryHint').textContent = `Dry run started: ${d.dryrun_id} (${strategy}).`;
+  labDryRefresh();
+}
+async function labDryStop() {
+  let d;
+  try {
+    const r = await fetch('/api/dryrun/stop', {method:'POST',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({})});
+    d = await r.json();
+    $('dryHint').textContent = d.ok ? `Stopped ${d.dryrun_id}.`
+      : `Stop failed: ${d.msg || d.error || r.status}`;
+  } catch (e) { $('dryHint').textContent = 'Stop failed: ' + e; return; }
+  labDryRefresh();
+}
+async function labDryRefresh() {
+  const hint = $('dryHint'), pre = $('dryLog');
+  let d;
+  try {
+    const r = await fetch('/api/dryrun');
+    d = await r.json();
+  } catch (e) { hint.textContent = 'Status failed: ' + e; return; }
+  const m = d.dryrun;
+  if (!m) {
+    hint.textContent = 'No dry run registered.';
+    pre.textContent = ''; pre.classList.add('hidden'); return;
+  }
+  const when = m.started_at ? new Date(m.started_at * 1000).toLocaleString() : '—';
+  hint.textContent = `${m.alive ? 'Active' : 'Inactive'}: ${m.strategy || '—'}`
+    + ` (pid ${m.pid}, started ${when}).`;
+  pre.textContent = m.log_tail || '';
+  pre.classList.toggle('hidden', !pre.textContent);
 }
 function updateRunFields() {
   const mode = $('runMode').value;
@@ -4557,18 +4624,57 @@ function loadConfigs() {
     const sel = $('runConfig');
     if (!sel) return;
     const cfgs = d.configs || [];
+    window._labConfigs = cfgs;
     sel.innerHTML = '<option value="">auto (optional)</option>' + cfgs.map(c =>
       `<option value="${escAttr(c.path)}">${esc(c.name + (c.hint ? ' (' + c.hint + ')' : ''))}</option>`
     ).join('');
+    const dsel = $('dryConfig');
+    if (dsel) {
+      dsel.innerHTML = '<option value="">auto (optional)</option>';
+      cfgs.forEach(c => { const o = document.createElement('option');
+        o.value = c.path; o.textContent = c.name; dsel.appendChild(o); });
+    }
     const hint = $('runHint');
     if (hint) {
       if (!cfgs.length) hint.textContent = 'No configs found — check user_data/config*.json';
       else hint.textContent = 'Auto: user_data/config_<strategy>.json or config_benchmark.json, or pick one from the dropdown.';
     }
+    updateRunConfigHint(); updateDryConfigHint();
   }).catch(() => {
     const hint = $('runHint');
     if (hint) hint.textContent = 'Auto config: user_data/config_<strategy>.json if it exists, else config_benchmark.json. Config dropdown needs the lab server.';
   });
+}
+function resolveLabConfig(strategy, override) {
+  if (override) return override + ' (explicit)';
+  const base = p => (p || '').split('/').pop().toLowerCase();
+  const cfgs = window._labConfigs || [];
+  const per = 'config_' + (strategy || '').toLowerCase() + '.json';
+  if (cfgs.some(c => base(c.path) === per)) return per + ' (per-strategy)';
+  if (cfgs.some(c => base(c.path) === 'config_benchmark.json'))
+    return 'config_benchmark.json (shared fallback)';
+  return 'no config found — pick one explicitly';
+}
+function appendStrategyOptions(sel, list) {
+  list.forEach(s => {
+    if ((s.status || 'active') === 'retired') return;
+    const o = document.createElement('option');
+    o.value = s.name; o.textContent = s.name; sel.appendChild(o);
+  });
+}
+function updateRunConfigHint() {
+  const el = $('runConfigHint');
+  if (!el) return;
+  const s = $('runStrategy').value;
+  if (!s) { el.textContent = ''; return; }
+  el.textContent = 'Will run with: ' + resolveLabConfig(s, $('runConfig').value.trim());
+}
+function updateDryConfigHint() {
+  const el = $('dryConfigHint');
+  if (!el) return;
+  const s = $('dryStrategy').value;
+  if (!s) { el.textContent = ''; return; }
+  el.textContent = 'Will run with: ' + resolveLabConfig(s, $('dryConfig').value.trim());
 }
 function validateWfTimerange() {
   const start = ($('runStart').value || '').replace(/-/g, '');
@@ -4786,12 +4892,18 @@ function renderLab() {
     }
     const sel = $('runStrategy');
     sel.innerHTML = '<option value="">(choose…)</option>';
-    list.forEach(s => { const o = document.createElement('option'); o.value = s.name; o.textContent = s.name; sel.appendChild(o); });
+    appendStrategyOptions(sel, list);
+    const dsel = $('dryStrategy');
+    if (dsel) {
+      dsel.innerHTML = '<option value="">(choose…)</option>';
+      appendStrategyOptions(dsel, list);
+    }
     // A1: pre-select a known-resolvable strategy so the Lab form has a sane default.
     if (!sel.value && list.some(s => s.name === 'ScreenerDpoEveningStar')) {
       sel.value = 'ScreenerDpoEveningStar';
       showConfigForStrategy(sel.value);
     }
+    updateRunConfigHint();
     // hint is populated by loadConfigs() (dropdown-aware text); keep a fallback here for offline mode
     if (!$('runHint').textContent) $('runHint').textContent = 'Auto: user_data/config_<strategy>.json or config_benchmark.json. Pick from dropdown or type a path.';
     const wrap = $('strategyEditor');
@@ -4814,7 +4926,9 @@ function renderLab() {
     const stratSel = $('runStrategy');
     if (stratSel && !stratSel._configBound) {
       stratSel._configBound = true;
-      stratSel.addEventListener('change', () => showConfigForStrategy(stratSel.value));
+      stratSel.addEventListener('change', () => {
+        showConfigForStrategy(stratSel.value); updateRunConfigHint();
+      });
     }
   }).catch(e => { strategyListError(String(e)); });
 }
@@ -4886,7 +5000,7 @@ function init() {
         if (window[k]) window[k].resize();
       });
       (window._histCharts || []).forEach(c => c.resize());
-      _tlInstances.forEach(i => {
+      TradeMap.getAll().forEach(i => {
         if (i.chart) i.chart.resize();
         (i.inds || []).forEach(e => { if (e.paneEl && e.chart) e.chart.resize(); });
       });
@@ -5271,7 +5385,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <label data-runfield="walkforward" class="hidden">WF maxDD:
             <input id="runWfMaxDD" type="number" step="0.01" placeholder="0.25" style="width:80px"></label>
           <label>Config:
-            <select id="runConfig" style="min-width:220px">
+            <select id="runConfig" style="min-width:220px" onchange="updateRunConfigHint()">
               <option value="">auto (optional)</option>
             </select>
           </label>
@@ -5279,6 +5393,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <button class="btn primary" onclick="labRun()">▶ Run</button>
           <button class="btn" onclick="labRefresh()">↻ Refresh data &amp; rebuild report</button>
         </div>
+        <div id="runConfigHint" class="hint"></div>
         <div id="runHint" class="hint"></div>
       </div>
       <!-- Backtest Config Panel - shows the config used for the selected strategy -->
@@ -5293,14 +5408,56 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       </div>
     </section>
     <section>
+      <div class="section-head"><h2>Dry run</h2>
+        <span class="hint">live paper trading — at most one active;
+          needs lab.py serve</span></div>
+      <div class="card">
+        <div class="controls">
+          <label>Strategy:
+            <select id="dryStrategy" onchange="updateDryConfigHint()">
+              <option value="">(choose…)</option></select>
+          </label>
+          <label>Config:
+            <select id="dryConfig" style="min-width:220px" onchange="updateDryConfigHint()">
+              <option value="">auto (optional)</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="dryVerbose"> Verbose (-vvv)</label>
+          <button class="btn primary" onclick="labDryStart()">▶ Start dry run</button>
+          <button class="btn" onclick="labDryStop()">■ Stop</button>
+          <button class="btn" onclick="labDryRefresh()">↻ Status</button>
+        </div>
+        <div id="dryHint" class="hint"></div>
+        <div id="dryConfigHint" class="hint"></div>
+        <pre id="dryLog" class="mb-0 hidden"
+          style="max-height:300px;overflow:auto;font-size:12px;line-height:1.5;"></pre>
+      </div>
+    </section>
+    <section>
       <div class="section-head"><h2>Benchmark</h2>
         <span class="hint">run every strategy on the shared config and compare distributions</span></div>
       <div class="card">
         <div class="controls">
           <button class="btn" onclick="labBench()">Run benchmark</button>
           <label>Strategies: <input id="benchStrategies" type="text" placeholder="comma separated (empty = all)" style="min-width:220px"></label>
-          <label>Range: <input id="benchRange" type="text" value="20230101-20240101" style="width:150px"></label>
+          <div class="daterange">
+            <label>From: <input id="benchFrom" type="date" value="2023-01-01"></label>
+            <span class="dr-sep" aria-hidden="true">→</span>
+            <label>To: <input id="benchTo" type="date" value="2024-01-01"></label>
+          </div>
           <label>TF: <input id="benchTf" type="text" value="5m" style="width:70px"></label>
+          <label>Mode:
+            <select id="benchMode" onchange="updateBenchFields()">
+              <option value="backtest">Backtest</option>
+              <option value="walkforward">Walk-Forward</option>
+            </select>
+          </label>
+          <label data-benchfield="walkforward" class="hidden">Train d:
+            <input id="benchTrain" type="number" value="90" style="width:80px"></label>
+          <label data-benchfield="walkforward" class="hidden">Test d:
+            <input id="benchTest" type="number" value="7" style="width:70px"></label>
+          <label data-benchfield="walkforward" class="hidden">Step d:
+            <input id="benchStep" type="number" value="7" style="width:70px"></label>
         </div>
       </div>
     </section>

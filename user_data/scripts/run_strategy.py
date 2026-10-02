@@ -13,11 +13,13 @@ ingest_results.py picks everything up:
     backtest        -> user_data/backtest_results/backtest-result-<ts>.json
     hyperopt        -> user_data/hyperopt_results/strategy_<strategy>_<ts>.fthypt
     walk-forward    -> user_data/walk_forward/<strategy>/<run_id>/walk_forward.json
+    trade (dry run) -> user_data/logs/dryrun-<id>.log + dryrun-<id>.pid
 
 Usage:
     python user_data/scripts/run_strategy.py backtest --timerange 20230101-20240101
     python user_data/scripts/run_strategy.py hyperopt --strategy BigZ08 --epochs 100
     python user_data/scripts/run_strategy.py walkforward --strategy BigZ08 --train-days 90
+    python user_data/scripts/run_strategy.py trade --strategy BigZ08 --dryrun-id <id>
     python user_data/scripts/run_strategy.py --list
 """
 
@@ -318,6 +320,61 @@ def cmd_hyperopt(args) -> int:
     return code
 
 
+def cmd_trade(args) -> int:
+    """Start a detached freqtrade trade process for a dry run."""
+    if find_strategy_file(USER_DATA, args.strategy) is None:
+        print(f"  error: strategy '{args.strategy}' has no .py file")
+        return 1
+    config = resolve_config(args.strategy, args.config)
+    db_conn = open_results_db()
+    capture_provenance(args.strategy, config, db_conn)
+    if db_conn:
+        db_conn.close()
+    dryrun_id = str(args.dryrun_id)
+    logs_dir = USER_DATA / "logs"
+    try:
+        logs_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        print(f"  error: cannot create logs dir: {e}")
+        return 1
+    pid_path = logs_dir / f"dryrun-{dryrun_id}.pid"
+    log_path = logs_dir / f"dryrun-{dryrun_id}.log"
+    if pid_path.exists():
+        print(f"  error: pid file already exists: {pid_path}")
+        return 1
+    cmd = [
+        *freqtrade_cmd().split(), "trade",
+        "-c", str(config),
+        "--strategy", args.strategy,
+    ]
+    if args.verbose:
+        cmd.append("-" + "v" * min(args.verbose, 3))
+    try:
+        with log_path.open("ab") as log_fh:
+            if sys.platform == "win32":
+                flags = getattr(subprocess, "DETACHED_PROCESS", 0)
+                flags |= getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+                proc = subprocess.Popen(
+                    cmd, stdout=log_fh, stderr=subprocess.STDOUT,
+                    stdin=subprocess.DEVNULL, cwd=str(REPO_ROOT),
+                    creationflags=flags, close_fds=True)
+            else:
+                proc = subprocess.Popen(
+                    cmd, stdout=log_fh, stderr=subprocess.STDOUT,
+                    stdin=subprocess.DEVNULL, cwd=str(REPO_ROOT),
+                    start_new_session=True, close_fds=True)
+    except OSError as e:
+        print(f"  error: cannot start dry run: {e}")
+        return 1
+    try:
+        pid_path.write_text(str(proc.pid), encoding="utf-8")
+    except OSError as e:
+        print(f"  warning: could not write pid file: {e}")
+    print(f"pid: {proc.pid}")
+    print(f"Dry run {args.strategy} started (id={dryrun_id}, pid={proc.pid})")
+    return 0
+
+
 def cmd_walkforward(args) -> int:
     config = resolve_config(args.strategy, args.config)
     started_at = time.time()
@@ -419,6 +476,14 @@ def main() -> int:
     p.add_argument("--wf-min-trades", type=int, default=None, help="Reject live WF params with fewer trades")
     p.add_argument("--wf-max-drawdown", type=float, default=None, help="Reject live WF params above DD ratio")
     p.set_defaults(func=cmd_walkforward)
+
+    p = sub.add_parser("trade", parents=[common],
+                       help="Start a detached dry-run trade process")
+    p.add_argument("--dryrun-id", required=True,
+                   help="Dry-run id (pid/log files derive from it)")
+    p.add_argument("-v", "--verbose", action="count", default=0,
+                   help="Verbosity (-vvv max)")
+    p.set_defaults(func=cmd_trade)
 
     p = sub.add_parser("losses", help="List known hyperopt loss functions")
     p.set_defaults(func=lambda a: print("\n".join(KNOWN_LOSSES)) or 0)
