@@ -291,13 +291,7 @@ Reading: complete
 
 ## Review mode selection
 
-REVIEW has two cadences: `interactive` and `consolidated`. The agent selects the cadence at REVIEW entry using the first match below:
-
-- Explicit user override: `/review-consolidated` or `/review-interactive` command sets `review_mode` in session state.
-- Auto-select: when the file inventory has >10 files or >20 estimated batches, default to `consolidated`; otherwise default to `interactive`.
-- The user may change modes at any time with the slash commands.
-
-In `interactive` mode, the agent emits one batch per response and waits for user confirmation before advancing. In `consolidated` mode, the agent reviews all files and batches internally, then emits one final REVIEW response with `Batch: AGGREGATE -- all files complete` and a single aggregate `# Decision Needed` block. Consolidated mode never auto-confirms findings; all mitigations remain provisional until the user answers the aggregate decision section.
+Cadence selection is canonical in prompt-system/11-triggers.md T-03. Interactive: one batch per response, user confirms before advancing. Consolidated: review internally, one AGGREGATE response, single Decision block; no auto-confirmation.
 
 ## `REVIEW` template
 

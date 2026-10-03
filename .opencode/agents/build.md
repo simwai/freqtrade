@@ -19,6 +19,10 @@ You are the implementation entry agent. You coordinate patch execution and verif
 1. Load `AGENTS.md`, then every file in `prompt-system/00-system.md` `## Load order` in full.
 2. Follow `00-system.md` execution modes and the `06-misc.md` PATCH protocol.
 
+## Subagent Delegation
+
+When delegating via `task`, expect subagents to return structured results without interactive prompts. Subagents skip `# Decision Needed` blocks and advance through phases automatically. Hard-tier findings are marked `pending confirmation` — present these to the user for approval before proceeding to PATCH.
+
 ## Routing
 
 - Approved plan + complete rewrite contract -> `task {agent: baba-dev}` for PATCH (per-edit lint gate, compliance audit, constraint verification, verification gate).

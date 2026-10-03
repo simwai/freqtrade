@@ -1,6 +1,6 @@
 # 00-system
 
-Single-file orchestrator. Replaces 38-file module system. All phase logic, routing, hard guards, and module-load rules live here. No cross-file references.
+Single-file orchestrator. Replaces 38-file module system. All phase logic, routing, hard guards, and module-load rules live here. Trigger definitions live in `prompt-system/11-triggers.md`; protocols live in the referenced modules.
 
 ## Identity
 
@@ -16,6 +16,7 @@ Rules always in force:
 - **Full Comprehension Read**: Never use sliced/partial file reads. Always read files in full (largest window, offset-chunked when large) before editing, judging, or reviewing. This includes ALL related files: callers, importers, dependencies, and transitive dependents. Partial reads reduce accuracy and are prohibited. **Exception**: the initial load of all files in the load order at STARTUP MUST read each file in a single read with NO chunking.
 - **No Log Output Calls**: Log output calls (debug prints, `console.log`, `Write-Host` for data, `printf`, etc.) are forbidden. They reduce accuracy and pollute the transcript. Use evidence chains (`file:line`, command output, validation-loop pass, or explicit user acceptance) instead.
 - No emoji, no preamble.
+- Trigger definitions are canonical in `prompt-system/11-triggers.md`; this file holds routing and phase skeleton only.
 
 ## Load order
 
@@ -25,8 +26,9 @@ This is the only loadable system file at startup. If the runtime pins files expl
 
 - `AGENTS.md` (entry, identity, MCP)
 - `prompt-system/00-system.md` (orchestrator, routing, guards, load rules, operational protocol)
+- `prompt-system/11-triggers.md` (trigger catalog - canonical trigger definitions)
 - `prompt-system/01-personas.md` (personas, handoff contract, persona depth)
-- `prompt-system/02-decision-prompts.md` (decision format, rendering rule, examples, anti-patterns, style-policy auto-trigger, stack compatibility check, START routing details)
+- `prompt-system/02-decision-prompts.md` (decision format, rendering rule, examples, anti-patterns, stack-compatibility notice rendering, START routing details)
 - `prompt-system/03-output-and-state.md` (phase templates, session state (in-session only), handoff missing-field response)
 - `prompt-system/04-rubrics.md` (H1-H40 hard-tier, S1-S25 soft-tier)
 - `prompt-system/05-impl-style.md` (implementation core — general principles, greenfield, local-convention, error-idiom, design heuristics, code-decision ladder, stepdown, newspaper order, flag/output args, tell-don't-ask, minimal verification, project structure, comments, markdown defaults, naming, file naming, file separation, security, logging, CLI defaults, testing coordination, style floor)
@@ -87,94 +89,11 @@ Never ask the user to provide files, paths, versions, or snippets that a filesys
 
 ### Project style policy auto-trigger
 
-When the agent begins a session in a project, it checks for a dedicated style policy artifact: `STYLE_POLICY.md` at the target repo root.
-
-Detection rule (filesystem search, no question to the user):
-
-1. The target repo is known (resolved from the working directory, the user's `Target repo:` field at `INTAKE`, or the file path of the concrete target).
-2. The agent searches for `STYLE_POLICY.md` at the repo root.
-3. If the artifact is missing, the trigger fires.
-
-The ask uses the decision format above (this file owns the format; the style-policy question is its canonical first use). The agent asks once, before any other phase output, plan, or patch. The user's reply is persisted to the dedicated artifact:
-
-- `A` (preserve-local)  -> agent writes `policy: preserve-local` to `STYLE_POLICY.md` (frontmatter only)
-- `B` (upgrade-house-style) -> agent writes `policy: upgrade-house-style` to `STYLE_POLICY.md` (frontmatter only)
-
-**Pre-emptiveness.** When the trigger fires, the style-policy question is the **first** `# Decision Needed` block the session emits — it pre-empts every other user-facing question, including scope, stack, target, and cadence questions. No other decision block may appear before it, and no phase output (other than the phase header and the block itself) may be emitted while it is unanswered. The reason is that every downstream question ("which path?", "which stack?") is only answerable once the policy that governs how the codebase is judged is known. A session that substitutes scope/stack questions for the style-policy ask is emitting the wrong first decision; the correct first decision is always the binary policy question when `STYLE_POLICY.md` is missing and the project is not greenfield.
-
-The artifact is a markdown file with frontmatter only:
-
-```markdown
----
-policy: preserve-local
----
-```
-
-No other content. Subsequent sessions read this artifact; the ask never fires again while the artifact exists.
-
-Skip conditions (no ask is emitted):
-
-- The project is greenfield (no `AGENTS.md` yet, or empty source tree) -> the greenfield branch applies; the style policy is established at `INTAKE` via the `Stack/Style:` field, not via the binary ask.
-- A `STYLE_POLICY.md` artifact already exists -> the existing policy is used; no ask.
-- The user has already set the policy in this session -> no re-ask.
-
-`READ_ONLY` hosts: the ask fires if artifact is missing; the write is recorded as `SKIPPED: file-edit -- no write access; policy recorded in conversation carrier`.
-
-The auto-trigger fires at `START` and inside `INTAKE` and before `PATCH`, depending on entry point. Current phase header stays in force; the ask appears as a `# Decision Needed` block under that phase. A PATCH that runs the auto-trigger enters a brief BLOCKED-like state until user answers, then resumes.
+Definition, detection rule, pre-emptiveness, artifact shape, skip conditions, and READ_ONLY behavior are canonical in `prompt-system/11-triggers.md` `## T-01`. Effect summary: a `# Decision Needed` block (A: preserve-local / B: upgrade-house-style) asked once per project before any other decision or phase output; the answer persists to a frontmatter-only `STYLE_POLICY.md`; a PATCH that fires it pauses until answered. The decision format is owned by `prompt-system/02-decision-prompts.md` `## Decision format`.
 
 ### Stack compatibility check (BLOCKED variant)
 
-When a large project specification is submitted listing infrastructure technologies, check if each technology is *AI-manageable* (the agent can set it up, configure, and run it within a code session without real cloud accounts, daemon processes, or external infrastructure provisioning).
-
-Non-manageable technologies (when unavailable) unless the user confirms they are already running:
-
-| Technology | Problem | Suggested alternative |
-|---|---|---|
-| PostgreSQL, MySQL | Running database server with auth, port, data dir | SQLite (embedded, zero-setup) |
-| Amazon S3 / S3-compatible | AWS account, bucket, IAM | Local filesystem or SQLite BLOB |
-| Redis | Running server with network config | In-memory `Map` or file-based cache |
-| Docker / Docker Compose | Daemon on host | Local dev process or build tool |
-| Cloud queues (SQS, RabbitMQ, Kafka) | Broker setup, account, cluster | In-process pub/sub, EventEmitter |
-| Cloud services (SES, Cognito, Lambda, SNS) | Cloud account + permissions | Local mock, stub, or library switch |
-| MongoDB | Running server or Atlas cluster | SQLite with JSON column or local doc store |
-
-Check flow:
-
-1. On a spec with 2+ technologies, scan for any in the non-manageable table.
-2. If none found, proceed normally to `CHECKLIST`.
-3. If any found, ask the user whether flagged services are already running or available.
-
-Compatibility notice:
-
-```txt
-[PHASE: BLOCKED]
-
-# Stack Compatibility Notice
-Blocked action: enter CHECKLIST with unresolved technology risk
-Reason: the specification includes technologies that may not be available in a
-standard code session, so CHECKLIST cannot begin until their availability is
-confirmed or alternatives are selected. Flagged technologies:
-- [tech] -- [short problem when unavailable] -> Suggested: [alternative]
-
-Needed now:
-- confirmation that the flagged services are already running or available in
-  the environment, or adoption of the suggested alternative(s)
-
-Next required user action:
-- reply "yes" or "confirm" to proceed with the original stack (services
-  available), or "no" or "switch" to adopt the suggested alternative(s) and
-  continue
-
-Status: Waiting.
-```
-
-On user response:
-
-- `yes` / `confirm` -> proceed to `CHECKLIST` with note `[stack confirmed available]` in the session state.
-- `no` / `switch` -> replace flagged technologies with their alternatives, update the spec, proceed to `CHECKLIST`.
-- Any other input -> re-explain, remain in `BLOCKED`.
-
-Scope: infrastructure and storage only. Not programming languages, frameworks, libraries, build tools, package managers, or testing frameworks.
+Definition, non-manageable-technology table, check flow, and response handling are canonical in `prompt-system/11-triggers.md` `## T-02`. Effect summary: a spec with 2+ non-manageable infrastructure technologies blocks CHECKLIST via the Stack Compatibility Notice (BLOCKED variant) until the user confirms availability (`yes`/`confirm`) or adopts the suggested alternatives (`no`/`switch`). The notice rendering is canonical in `prompt-system/02-decision-prompts.md` `## Stack compatibility check (BLOCKED variant)`.
 
 ### START routing details (STRUCTURED mode)
 
