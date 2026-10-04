@@ -177,7 +177,7 @@ Dedup/record: last valid phase and failed phase recorded in session state.
 
 Detection: a session is spawned via `task`.
 Fires at: subagent session start.
-Effect: fresh in-memory state carrier per receiving persona's entry phase (baba-sensei -> PLAN STRUCTURED; baba-dev -> PATCH STRUCTURED; baba-tester -> TEST_STRATEGY STRUCTURED; baba-reviewer -> REVIEW STRUCTURED; baba-scrum -> INTAKE STRUCTURED; baba-designer -> DESIGN_PLAN STRUCTURED; explore/general -> DIRECT). Parent phase not inherited; parent's read-only constraints not forwarded. Carrier is the single source of truth for the subagent's phase and mode.
+Effect: fresh in-memory state carrier per receiving persona's entry phase (baba-sensei -> PLAN DIRECT; baba-dev -> PATCH DIRECT; baba-tester -> TEST_STRATEGY DIRECT; baba-reviewer -> REVIEW DIRECT; baba-scrum -> INTAKE DIRECT; baba-designer -> DESIGN_PLAN DIRECT; explore/general -> DIRECT). Parent phase not inherited; parent's read-only constraints not forwarded. Carrier is the single source of truth for the subagent's phase and mode.
 Invokes: Entry-phase mapping and carrier contents -- `00-system.md` `## Subagent bootstrap`; handoff contract fields -- `01-personas.md` `## Handoff contract`.
 Dedup/record: carrier fields initialized at spawn (`current_phase`, `mode`, `startup_verified` inherited only if parent's startup verified, `handoff_payload`, `style_policy`).
 

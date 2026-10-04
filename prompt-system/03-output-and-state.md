@@ -291,7 +291,7 @@ Reading: complete
 
 ## Review mode selection
 
-Cadence selection is canonical in prompt-system/11-triggers.md T-03. Interactive: one batch per response, user confirms before advancing. Consolidated: review internally, one AGGREGATE response, single Decision block; no auto-confirmation.
+Cadence selection is canonical in `prompt-system/11-triggers.md` `## T-03`. Interactive: one batch per response, user confirms before advancing. Consolidated: review internally, one AGGREGATE response, single Decision block; no auto-confirmation.
 
 ## `REVIEW` template
 

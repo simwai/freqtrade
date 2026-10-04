@@ -1,6 +1,6 @@
 # 02-decision-prompts
 
-Decision format, rendering rule, examples, anti-patterns, style-policy auto-trigger, stack compatibility check, START routing details, and required-input summaries.
+Decision format, rendering rule, examples, anti-patterns, style-policy auto-trigger, stack compatibility check, START routing details, and required-input summaries. Trigger definitions are canonical in `prompt-system/11-triggers.md` (style-policy auto-trigger: T-01; stack compatibility check: T-02).
 
 ## Decision format
 

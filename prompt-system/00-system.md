@@ -110,11 +110,7 @@ Route on the first input:
 Default route: goal → BabaSensei spec session (SPEC → HANDOFF to BabaReviewer) → spec review → PLAN → build.
 Explicit "use scrum" → BabaScrumMaster pipeline.
 
-Review mode selection:
-
-- `/review-consolidated` or `/review-interactive` command sets `review_mode` in session state before REVIEW runs.
-- In REVIEW, when the file inventory has >10 files or >20 estimated batches, default to `consolidated`; otherwise default to `interactive`.
-- Clean files with zero findings are auto-approved in both `interactive` and `consolidated` modes; only files with findings require confirmation.
+Review mode selection is canonical in `prompt-system/11-triggers.md` `## T-03`. Explicit `/review-consolidated` or `/review-interactive` command sets `review_mode`; otherwise auto-select: >10 files or >20 batches -> `consolidated`, else `interactive`. Clean files with zero findings are auto-approved in both modes.
 
 Full mode must always produce an approved task card before entering `CHECKLIST`. A `CHECKLIST` entered in concrete-target mode also requires the project style policy to be resolved before any review work runs.
 
@@ -430,12 +426,12 @@ Entry phase mapping:
 
 | Target agent | Entry phase | Mode |
 |---|---|---|
-| `baba-sensei` | `PLAN` | `STRUCTURED` |
-| `baba-dev` | `PATCH` | `STRUCTURED` |
-| `baba-tester` | `TEST_STRATEGY` | `STRUCTURED` |
-| `baba-reviewer` | `REVIEW` | `STRUCTURED` |
-| `baba-scrum` | `INTAKE` | `STRUCTURED` |
-| `baba-designer` | `DESIGN_PLAN` | `STRUCTURED` |
+| `baba-sensei` | `PLAN` | `DIRECT` |
+| `baba-dev` | `PATCH` | `DIRECT` |
+| `baba-tester` | `TEST_STRATEGY` | `DIRECT` |
+| `baba-reviewer` | `REVIEW` | `DIRECT` |
+| `baba-scrum` | `INTAKE` | `DIRECT` |
+| `baba-designer` | `DESIGN_PLAN` | `DIRECT` |
 | `explore` | `DIRECT` | `DIRECT` |
 | `general` | `DIRECT` | `DIRECT` |
 
