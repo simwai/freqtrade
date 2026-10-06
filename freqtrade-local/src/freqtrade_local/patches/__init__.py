@@ -6,6 +6,8 @@ import logging
 import threading
 from typing import Any
 
+from freqtrade_local.patches.hyperopt_pickle_patch import apply_hyperopt_pickle_patch
+
 logger = logging.getLogger(__name__)
 
 
@@ -106,4 +108,5 @@ def apply_config_schema_patch() -> None:
 def apply_all(config: dict[str, Any]) -> None:
     """Apply all runtime patches."""
     apply_config_schema_patch()
+    apply_hyperopt_pickle_patch()
     apply_backtest_heartbeat(config)
