@@ -127,6 +127,17 @@ docker-compose-*.yml
 # Session state files
 SESSION_STATE-*.md
 
+# Browser state files
+browser-state-*.json
+browser-state-*.fingerprint.json
+
+# Test / search / reload scripts (local development)
+find_reload.bat
+search_*.py
+search_reload*.bat
+search_reload*.py
+smoke_test*.py
+smoke_test*.json
 
 # Frontend
 frontend/node_modules/

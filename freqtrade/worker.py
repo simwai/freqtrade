@@ -13,7 +13,7 @@ import sdnotify
 
 from freqtrade import __version__
 from freqtrade.configuration import Configuration
-from freqtrade.constants import PROCESS_THROTTLE_SECS, RETRY_TIMEOUT, Config
+from freqtrade.constants import PROCESS_THROTTLE_SECS, RETRY_TIMEOUT, RELOAD_TIMEOUT, Config
 from freqtrade.enums import RPCMessageType, State
 from freqtrade.exceptions import OperationalException, TemporaryError
 from freqtrade.exchange import timeframe_to_next_date
@@ -211,22 +211,54 @@ class Worker:
             logger.exception("OperationalException. Stopping trader ...")
             self.freqtrade.state = State.STOPPED
 
+    def _wait_for_open_trades(self, timeout: int = 300) -> bool:
+        """
+        Wait for all open trades to close.
+        Returns True if all trades closed, False if timeout reached.
+        """
+        start_time = time.time()
+        while True:
+            open_trades = self.freqtrade.get_open_trades()
+            if not open_trades:
+                logger.info("All open trades closed. Proceeding with config reload.")
+                return True
+            
+            elapsed = time.time() - start_time
+            if elapsed >= timeout:
+                logger.warning(
+                    f"Timeout ({timeout}s) reached waiting for {len(open_trades)} open trades to close. "
+                    f"Proceeding with config reload anyway."
+                )
+                return False
+            
+            remaining = int(timeout - elapsed)
+            logger.info(
+                f"Waiting for {len(open_trades)} open trades to close... "
+                f"({remaining}s remaining until timeout)"
+            )
+            time.sleep(10)  # Check every 10 seconds
+    
     def _reconfigure(self) -> None:
         """
         Cleans up current freqtradebot instance, reloads the configuration and
-        replaces it with the new instance
+        replaces it with the new instance.
+        Waits for open trades to close before reconfiguring (up to RELOAD_TIMEOUT seconds).
         """
         # Tell systemd that we initiated reconfiguration
         self._notify("RELOADING=1")
-
+        
+        # Wait for open trades to close before reconfiguring
+        logger.info("Waiting for open trades to close before reconfiguring...")
+        self._wait_for_open_trades(timeout=RELOAD_TIMEOUT)
+        
         # Clean up current freqtrade modules
         self.freqtrade.cleanup()
-
+        
         # Load and validate config and create new instance of the bot
         self._init(True)
-
+        
         self.freqtrade.notify_status(f"{State(self.freqtrade.state)} after config reloaded")
-
+        
         # Tell systemd that we completed reconfiguration
         self._notify("READY=1")
 

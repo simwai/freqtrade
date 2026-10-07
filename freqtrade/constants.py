@@ -17,6 +17,7 @@ DEFAULT_CONFIG = "config.json"
 PROCESS_THROTTLE_SECS = 5  # sec
 HYPEROPT_EPOCH = 100  # epochs
 RETRY_TIMEOUT = 30  # sec
+RELOAD_TIMEOUT = 300  # sec
 TIMEOUT_UNITS = ["minutes", "seconds"]
 EXPORT_OPTIONS = ["none", "trades", "signals"]
 DEFAULT_DB_PROD_URL = "sqlite:///tradesv3.sqlite"

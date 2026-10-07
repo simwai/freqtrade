@@ -1,12 +1,55 @@
-{
-    "mcpServers": {
-    "context7": {
-        "type": "http",
-        "url": "https://mcp.context7.com/mcp"
-    },
-    "playwright": {
-        "command": "npx",
-        "args": ["-y", "@playwright/mcp@0.0.80"]
-    }
-    }
+﻿{
+    "mcpServers":  {
+                       "trello":  {
+                                      "url":  "https://mcp.trello.com/v1",
+                                      "type":  "http",
+                                      "oauth":  {
+
+                                                }
+                                  },
+                       "exa":  {
+                                   "url":  "https://mcp.exa.ai/mcp",
+                                   "headers":  {
+                                                   "x-api-key":  "{env:EXA_API_KEY}"
+                                               },
+                                   "type":  "http"
+                               },
+                       "g-search":  {
+                                        "args":  [
+                                                     "-y",
+                                                     "g-search-mcp"
+                                                 ],
+                                        "command":  "npx",
+                                        "type":  "stdio"
+                                    },
+                       "arxiv":  {
+                                     "args":  [
+                                                  "arxiv-mcp-server"
+                                              ],
+                                     "command":  "uvx",
+                                     "type":  "stdio"
+                                 },
+                       "playwright":  {
+                                          "args":  [
+                                                       "-y",
+                                                       "@playwright/mcp@0.0.80"
+                                                   ],
+                                          "command":  "npx",
+                                          "timeout":  30000,
+                                          "type":  "stdio"
+                                      },
+                       "playwright-headless":  {
+                                                   "args":  [
+                                                                "-y",
+                                                                "@playwright/mcp@0.0.80",
+                                                                "--headless"
+                                                            ],
+                                                   "command":  "npx",
+                                                   "type":  "stdio"
+                                               },
+                       "context7":  {
+                                        "type":  "http",
+                                        "url":  "https://mcp.context7.com/mcp"
+                                    }
+                   }
 }

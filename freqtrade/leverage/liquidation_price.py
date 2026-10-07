@@ -1,6 +1,6 @@
 import logging
 
-from freqtrade.enums import MarginMode
+from freqtrade.enums import MarginMode, OPTIMIZE_MODES
 from freqtrade.exceptions import DependencyException
 from freqtrade.exchange import Exchange
 from freqtrade.persistence import LocalTrade, Trade
@@ -66,4 +66,7 @@ def update_liquidation_prices(
                 "Trade object is required for updating liquidation price in isolated margin mode."
             )
     except DependencyException:
-        logger.warning("Unable to calculate liquidation price")
+        if exchange._config.get("runmode") in OPTIMIZE_MODES:
+            logger.debug("Unable to calculate liquidation price in optimize mode")
+        else:
+            logger.warning("Unable to calculate liquidation price")

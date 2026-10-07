@@ -314,6 +314,31 @@ class Exchange:
         """
         self.close()
 
+    def __getstate__(self) -> dict[str, Any]:
+        state = self.__dict__.copy()
+        state["_had_ws"] = self._ws_async is not None
+        for attr in ("_api", "_api_async", "_ws_async", "_exchange_ws", "loop", "_loop_lock"):
+            state.pop(attr, None)
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self._loop_lock = Lock()
+        self.loop = self._init_async_loop()
+        exchange_conf = self._config.get("exchange", {})
+        ccxt_config = self._ccxt_config
+        ccxt_config = deep_merge_dicts(exchange_conf.get("ccxt_config", {}), ccxt_config)
+        ccxt_config = deep_merge_dicts(exchange_conf.get("ccxt_sync_config", {}), ccxt_config)
+        self._api = self._init_ccxt(exchange_conf, True, ccxt_config)
+        ccxt_async_config = self._ccxt_config
+        ccxt_async_config = deep_merge_dicts(exchange_conf.get("ccxt_config", {}), ccxt_async_config)
+        ccxt_async_config = deep_merge_dicts(exchange_conf.get("ccxt_async_config", {}), ccxt_async_config)
+        self._api_async = self._init_ccxt(exchange_conf, False, ccxt_async_config)
+        if self._had_ws:
+            self._ws_async = self._init_ccxt(exchange_conf, False, ccxt_async_config)
+            self._exchange_ws = ExchangeWS(self._config, self._ws_async)
+        self._restored_from_pickle = True
+
     def _close_async_ccxt(self, ccxt_object: ccxt_pro.Exchange | None, name: str) -> None:
         """
         Release the aiohttp sessions of an async ccxt object.
@@ -447,6 +472,8 @@ class Exchange:
     @property
     def name(self) -> str:
         """exchange Name (from ccxt)"""
+        if self._api is None:
+            return self._config.get("exchange", {}).get("name", "unknown")
         return self._api.name if not self._is_demo_trading else f"{self._api.name} (Demo)"
 
     @property
@@ -764,13 +791,12 @@ class Exchange:
             # Reload async markets, then assign them to sync api
             retrier(self._load_async_markets, retries=retries)(reload=True)
             self._markets = self._api_async.markets
-            self._api.set_markets_from_exchange(self._api_async)
+            self._api.set_markets(self._api_async.markets)
             # Assign options array, as it contains some temporary information from the exchange.
-            # ccxt does not implicitly copy options over in set_markets_from_exchange
             self._api.options = self._api_async.options
             if self._exchange_ws:
                 # Set markets to avoid reloading on websocket api
-                self._ws_async.set_markets_from_exchange(self._api_async)
+                self._ws_async.set_markets(self._api_async.markets)
                 self._ws_async.options = self._api.options
             self._last_markets_refresh = dt_ts()
 
@@ -1048,7 +1074,10 @@ class Exchange:
         """
         if endpoint in self._ft_has.get("exchange_has_overrides", {}):
             return self._ft_has["exchange_has_overrides"][endpoint]
-        return endpoint in self._api_async.has and self._api_async.has[endpoint]
+        api = self._api_async or self._api
+        if api is None:
+            return False
+        return endpoint in api.has and api.has[endpoint]
 
     def features(
         self, market_type: Literal["spot", "futures"], endpoint, attribute, default: T
