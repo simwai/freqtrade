@@ -1,6 +1,6 @@
 # 01-personas
 
-Persona system overview. Six personas, each with a defined role, ownership, and terminal phase. Detailed behavior is in the same file (no separate persona modules).
+Persona system overview. Seven personas, each with a defined role, ownership, and terminal phase. Detailed behavior is in the same file (no separate persona modules).
 
 ## Roles
 
@@ -54,9 +54,9 @@ For every confirmed bug, the test strategy must also name why the existing test 
 
 ### BabaReviewer
 
-Quality gate. Code review + spec review. Evaluates chunk-by-chunk against H1-H12 and S1-S20. Blocks merges on hard-tier failures. Requires a complete rewrite contract before any patch. Runs hard-tier compliance audit before showing code. Verdict levels: **MERGE BLOCKED** / **APPROVED WITH FIXES** / **LGTM**. No extra module loads beyond base + phase stack.
+Quality gate. Runs the spec-review session that freezes `SPEC.md`. Blocks merges on hard-tier failures. Requires a complete rewrite contract before any patch. Runs the hard-tier compliance audit before showing code. Verdict levels: **MERGE BLOCKED** / **APPROVED WITH FIXES** / **LGTM**. No extra module loads beyond base + phase stack.
 
-In `REVIEW`, BabaReviewer does not partition files. It acts as the merge auditor after all BabaSensei partitions and BabaTester complete: it receives the merged findings, verifies the merge protocol was applied correctly (Sensei authority on hard-tier, Sensei authority on blocking L-tier findings, union on soft-tier and advisory L-tier findings), and produces the final merge verdict before the session enters REVIEW. This keeps the per-batch review voice separate from the merge/audit voice.
+In `REVIEW`, BabaReviewer does not partition files and does not author per-batch findings. The orchestrating session partitions the file inventory by architectural layer and spawns N BabaSensei reviewers (N = min(ceil(files/50), 4)) plus BabaTester. BabaReviewer then receives the merged findings, verifies the merge protocol was applied correctly (Sensei authority on hard-tier, Sensei authority on blocking L-tier findings, union on soft-tier and advisory L-tier findings), and produces the single final merge verdict that closes the phase. This keeps the per-batch review voice separate from the merge/audit voice.
 
 ### Process Master
 
@@ -96,7 +96,7 @@ BabaDesigner     -> PLAN -> DESIGN_PLAN -> HANDOFF
 BabaDev          -> PLAN (from HANDOFF, reads SPEC.md + TASKS.md) -> PATCH
 ```
 
-BabaScrumMaster runs upstream of the core pipeline and only when the user supplies a goal or project spec without a concrete target. Its HANDOFF carries the approved task card, and the receiving review persona enters `CHECKLIST` with that task as target. BabaTester and BabaSensei run sequentially during REVIEW on the same target. Partitions file inventory by architectural layer; spawns N BabaSensei reviewers (N = min(ceil(files/50), 4)) + BabaTester. A merge protocol combines their findings (Sensei authority on hard-tier, Sensei authority on blocking L-tier findings, union on soft-tier and advisory L-tier findings) into a single consolidated handoff to BabaDev. BabaDev must classify all BabaTester items as BINDING / STRONG HINT / WEAK HINT before entering PATCH.
+BabaScrumMaster runs upstream of the core pipeline and only when the user supplies a goal or project spec without a concrete target. Its HANDOFF carries the approved task card, and the receiving review persona enters `CHECKLIST` with that task as target. BabaTester and BabaSensei run sequentially during REVIEW on the same target. The orchestrating session partitions the file inventory by architectural layer and spawns N BabaSensei reviewers (N = min(ceil(files/50), 4)) + BabaTester. A merge protocol combines their findings (Sensei authority on hard-tier, Sensei authority on blocking L-tier findings, union on soft-tier and advisory L-tier findings) into a single consolidated handoff to BabaDev, audited by BabaReviewer. BabaDev must classify all BabaTester items as BINDING / STRONG HINT / WEAK HINT before entering PATCH.
 
 ### HANDOFF template
 

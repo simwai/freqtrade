@@ -35,7 +35,7 @@ Add `## Reading Protocol` section before `## Discovery Protocol`:
 
 Add hard guard:
 
-```
+```text
 <MUST>No analysis output in any phase without Reading Verification showing 100% reading completion. Incomplete Reading Plan -> output BLOCKED with specific unread file list. The only exits are: complete all pending reads, or obtain explicit user approval for partial scope.</MUST>
 ```
 
@@ -43,7 +43,7 @@ Add hard guard:
 
 Add H13:
 
-```
+```text
 **H13 -- Incomplete reading: analysis output emitted without completing the Reading Plan for the current scope.**
 Applies to any analysis output in any phase. The Reading Verification section must show 100% completion. An incomplete Reading Plan produces a BLOCKED response, not analysis.
 ```

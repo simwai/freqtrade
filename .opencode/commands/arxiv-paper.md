@@ -23,7 +23,7 @@ Use these files:
 
 - `README.md`
 - `CHANGELOG.md`
-- `docs/*.md`
+- `*.md`
 - `package.json`
 
 ## 2) Reference paper mode

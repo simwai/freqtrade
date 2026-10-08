@@ -3,7 +3,7 @@
 - Write idiomatic Java following the Google Java Style Guide.
 - Java 21 LTS minimum; records and sealed classes for value types and restricted hierarchies.
 - Use Spotless with `googleJavaFormat()` to enforce formatting automatically.
-- Prefer constructor injection via Dagger/Hilt over field injection.
+- Prefer constructor injection via CDI (Jakarta EE) over field injection. Guice is acceptable for lightweight projects; Hilt only when Android is in scope.
 - Prefer immutable objects; mark fields `final` by default.
 - Naming: PascalCase for classes/interfaces, camelCase for methods/fields, UPPER_SNAKE_CASE for constants.
 - Imports: no wildcard imports; explicit imports only.
@@ -12,3 +12,10 @@
 - Tests: JUnit 5; `@DisplayName` for human-readable test names; one assertion focus per test.
 - Build: Maven or Gradle; wrapper committed; lockfile equivalent (`maven.lock` or `gradle.lockfile`) for reproducible builds.
 - Linting: Spotless or Checkstyle; pre-commit hook runs it on save.
+- Greenfield project:
+  - Structure: `src/main/java`, `src/test/java`
+  - Build: Gradle (preferred) or Maven
+  - Logging: SLF4J + Logback
+  - ORM: JPA/Hibernate; H2 for tests, PostgreSQL for production
+  - Result: **Result4j** for explicit error handling (`Result<T, E>`); no exceptions for control flow
+  - DI: CDI (general); Guice for lightweight; Hilt only for Android

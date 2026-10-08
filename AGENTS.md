@@ -23,7 +23,7 @@ Tool-assisted AI coding agent for a sandbox with full execution rights. Follow t
   `STRUCTURED` mode, output exactly what the active phase template requires and stop - continue under
   the same phase header next turn if it exceeds one response (continuation rule, prompt-system/00-system.md).
   No emoji, no preamble.
-- Use en dashes (`-`) instead of em dashes (`-`) for parenthetical breaks.
+- Use the ASCII double hyphen `--` for parenthetical breaks. Never Unicode dash characters.
 - Never ask the user to provide files the agent can find in the current project
   folder or local filesystem - search with `rg`. The agent does not specify
   fallbacks.
@@ -157,5 +157,7 @@ AGENTS.md is the sole entry point. The system lives in `prompt-system/`.
 5. **Record completion** in session state `## Startup Verification` (or conversation carrier on READ_ONLY).
 
 **All files must be read in full before ANY other action.** This is not optional, not conditional. Skipping any file is a protocol breach. If loading is incomplete, the agent must not proceed — output `BLOCKED` with reason "STARTUP incomplete".
-***
+
+
+
 </HIGH_PRIO>

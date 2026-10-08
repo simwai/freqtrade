@@ -1,4 +1,4 @@
-# Stack: Frontend (Vue / Svelte / general)
+# Stack: Frontend (Vue / general)
 
 - Use semantic HTML5.
 - Prefer utility-first class naming in kebab-case.
@@ -6,19 +6,8 @@
 - Prefer gap and padding over margin for layout spacing.
 - For interactive elements in app UIs, prefer stable `data-testid` values in kebab-case when the project uses Playwright or similar tooling.
 - Vue 3 composition API with `<script setup lang="ts">`; props typed via `defineProps<{ ... }>()`; emits typed via `defineEmits<{ ... }>()`.
-- Svelte 5 runes (`$state`, `$derived`, `$effect`); props typed via `let { x }: { x: number } = $props()`.
 - CSS: scoped styles; CSS custom properties for theming; no inline styles except for dynamic values.
-- State: Pinia (Vue) or stores (Svelte); never component-to-component mutation through props drilling more than one level.
+- State: Pinia (Vue); never component-to-component mutation through props drilling more than one level.
+- HTTP client: **got** (typed, modern).
 - Accessibility: ARIA only when semantic HTML cannot express the relationship; keyboard navigation for every interactive element; `prefers-reduced-motion` respected.
-- Accessibility defaults:
-  - Use semantic HTML5 elements (`<nav>`, `<main>`, `<article>`, `<button>`, `<label>`) over generic `<div>` soup
-  - Every interactive element must be keyboard-accessible (Tab, Enter, Escape, Arrow keys as appropriate)
-  - Color is never the sole indicator of state; pair with icons, text, or ARIA attributes
-  - Images and icons require `alt` text or `aria-hidden` when decorative
-  - Forms require associated `<label>` elements or `aria-label`
-- SEO defaults:
-  - Every page requires a unique `<title>` and `<meta name="description">`
-  - Heading hierarchy is sequential (`<h1>` -> `<h2>` -> `<h3>`, no skipping)
-  - Structured data (JSON-LD) for pages representing entities (products, articles, events, organizations)
-  - Canonical URL tag on every indexable page
-  - Open Graph and Twitter Card meta tags on shareable content pages
+- SEO: See `09-design-guidelines.md` and rubrics S21-S24.

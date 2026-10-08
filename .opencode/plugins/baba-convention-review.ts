@@ -35,7 +35,7 @@ function buildArchitecturePrompt(evidence: any): string | null {
 
   if (!items.length) return null;
 
-  return `[PHASE: PLAN]\n\n# Decision Needed\nQuestion: Architecture flags detected -- how to handle?\nRecommended: **A** -- Follow H16/H17 routing through owner modules.\n\n- **A**. Route through identified owner modules (H16/H17)\n  - Pros: single source of truth, respects layer boundaries\n  - Cons: may require refactoring caller sites\n- B. Allow local implementation\n  - Pros: faster initial change\n  - Cons: violates H16/H17, creates duplication\n\nReply with: A or B.`;
+  return `[PHASE: PLAN]\n\n# Decision Needed\nQuestion: Architecture flags detected -- how to handle?\nRecommended: **A** -- Follow H16 Ownership Routing and H17 Layer Discipline through the identified owner modules.\n\n- **A**. Route through the identified owner modules (H16 ownership routing, H17 layer boundaries)\n  - Pros: single source of truth, respects architectural layer boundaries\n  - Cons: may require refactoring caller sites\n- B. Allow a local implementation that bypasses the architectural owner\n  - Pros: faster initial change\n  - Cons: violates H16 ownership routing, creates duplication\n\nReply with: A or B.`;
 }
 
 function buildApiDefaultsPrompt(evidence: any, editedFiles: string[]): string | null {

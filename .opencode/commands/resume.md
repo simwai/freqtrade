@@ -23,4 +23,4 @@ Then:
 - Announce: `Resuming task #<id>: <task description>. Phase: <phase>.`
 - Continue with that phase's template.
 
-Do not use `SESSION_STATE-*.md` — cross-session persistence lives in `SPEC.md`, `TASKS.md`, and `docs/EVALUATIONS.md` only.
+Cross-session persistence lives in `SPEC.md`, `TASKS.md`, and `EVALUATIONS.md` only.

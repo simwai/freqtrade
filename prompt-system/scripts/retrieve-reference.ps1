@@ -16,6 +16,11 @@ $script:POOL_ROOT = if ($env:USERPROFILE) {
 }
 
 $script:MANIFEST_PATH = Join-Path $script:POOL_ROOT 'manifest.yaml'
+$script:MANIFEST_IO = Join-Path $PSScriptRoot 'manifest-io.ps1'
+if (-not (Test-Path -LiteralPath $script:MANIFEST_IO -PathType Leaf)) {
+    throw "manifest-io.ps1 not found at $script:MANIFEST_IO -- it ships beside this script in prompt-system/scripts/."
+}
+. $script:MANIFEST_IO
 
 $script:SCORE_PRIMARY = 1.0
 $script:SCORE_SECONDARY = 0.7
@@ -31,167 +36,6 @@ function Test-PoolInitialized {
     }
 }
 
-function Read-Manifest {
-    param([string]$Path)
-    
-    $content = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
-    if (-not $content) { return @{ schema_version = ''; pool = @(); entries = @() } }
-    
-    # Minimal YAML parser for our specific schema. Supports:
-    # - Top-level scalar: key: "value"
-    # - List of scalars: key: [a, b, c]
-    # - List of mappings: key: [ { k: v }, { k: v } ]
-    # - Nested mappings with 2-space indent
-    # Does NOT support multi-line strings, anchors, or complex YAML.
-    
-    $lines = $content -split "`n"
-    $result = @{ schema_version = ''; pool = @(); entries = @() }
-    $currentSection = ''
-    $inList = $false
-    $listItems = @()
-    $currentItem = @{}
-    $listKey = ''
-    $nestDepth = 0
-    $nestKey = ''
-    $listKeys = @('pool', 'entries')
-    
-    foreach ($line in $lines) {
-        if ($line -match '^\s*#') { continue }
-        if ($line -match '^\s*$') { continue }
-        
-        # Top-level section: key: value or key: [items]
-        if ($line -match '^([a-z_]+):\s*(.*)$') {
-            $key = $matches[1]
-            $value = $matches[2].Trim()
-            
-            if ($currentSection -and $inList -and $currentItem.Count -gt 0) {
-                if ($listKey -eq 'pool') { $result.pool += $currentItem }
-                elseif ($listKey -eq 'entries') { $result.entries += $currentItem }
-                $currentItem = @{}
-            }
-            $inList = $false
-            $nestDepth = 0
-            
-            if ($value -eq '[' -or $value -match '^\[.*\]$') {
-                # Inline list (single line)
-                if ($value -match '^\[(.+)\]$') {
-                    $inner = $matches[1]
-                    $items = $inner -split ',\s*' | ForEach-Object { $_.Trim().Trim('"', "'") }
-                    if ($key -eq 'languages' -or $key -eq 'domains' -or $key -eq 'primary_tags' -or $key -eq 'secondary_tags') {
-                        $currentItem[$key] = $items
-                    } elseif ($key -eq 'synonym_map') {
-                        # skip inline synonym_map; handled below in block mode
-                    } else {
-                        $result[$key] = $items
-                    }
-                } else {
-                    # Start of multi-line list
-                    $inList = $true
-                    $listKey = $key
-                    $currentSection = $key
-                }
-            } elseif ($value -match '^-') {
-                # Start of list item
-                $inList = $true
-                $listKey = $key
-                $currentSection = $key
-                $itemValue = $value.TrimStart('-').Trim()
-                if ($itemValue) {
-                    $currentItem = @{ $key = $itemValue }
-                } else {
-                    $currentItem = @{}
-                }
-            } elseif ($value -eq '' -and $listKeys -contains $key) {
-                # Empty value for a known list key = start of multi-line list
-                $inList = $true
-                $listKey = $key
-                $currentSection = $key
-                $currentItem = @{}
-            } else {
-                $result[$key] = $value.Trim('"', "'")
-                if ($key -eq 'schema_version') { $result.schema_version = $result[$key] }
-                $currentSection = $key
-            }
-            continue
-        }
-        
-        # List item continuation: - value
-        if ($line -match '^\s*-\s+(.+)$' -and $inList) {
-            $itemValue = $matches[1].Trim()
-            if ($itemValue -match '^([a-z_]+):\s*(.*)$') {
-                $k = $matches[1]
-                $v = $matches[2].Trim().Trim('"', "'")
-                if ($v -eq '[') {
-                    $nestDepth = 1
-                    $nestKey = $k
-                    $currentItem[$k] = @()
-                } elseif ($v -match '^\d+$') {
-                    $currentItem[$k] = [int]$v
-                } else {
-                    $currentItem[$k] = $v
-                }
-            } else {
-                $currentItem[$currentSection] = $itemValue
-            }
-            continue
-        }
-        
-        # Nested list item:   - key: value
-        if ($line -match '^\s+-\s+([a-z_]+):\s*(.*)$' -and $nestDepth -gt 0) {
-            $k = $matches[1]
-            $v = $matches[2].Trim().Trim('"', "'")
-            if ($currentItem.ContainsKey($nestKey)) {
-                $currentItem[$nestKey] += @{ $k = $v }
-            }
-            continue
-        }
-        
-        # Indented key: value inside list item
-        if ($line -match '^\s+([a-z_]+):\s*(.*)$' -and $inList) {
-            $k = $matches[1]
-            $v = $matches[2].Trim()
-            
-            if ($v -eq '[') {
-                $nestDepth = 1
-                $nestKey = $k
-                $currentItem[$k] = @()
-            } elseif ($v -match '^\[(.+)\]$') {
-                $items = $matches[1] -split ',\s*' | ForEach-Object { $_.Trim().Trim('"', "'") }
-                $currentItem[$k] = $items
-                $nestDepth = 0
-                $nestKey = ''
-            } elseif ($v -match '^-') {
-                $currentItem[$k] = $v.TrimStart('-').Trim().Trim('"', "'")
-            } else {
-                $currentItem[$k] = $v.Trim('"', "'")
-            }
-            continue
-        }
-        
-        # Nested list continuation inside synonym_map:   - key: [a, b]
-        if ($line -match '^\s+-\s+([a-z_]+):\s*\[(.+)\]$' -and $inList) {
-            $k = $matches[1]
-            $items = $matches[2] -split ',\s*' | ForEach-Object { $_.Trim().Trim('"', "'") }
-            if ($currentItem.ContainsKey($k)) {
-                if ($currentItem[$k] -isnot [System.Collections.IList]) {
-                    $currentItem[$k] = @($currentItem[$k])
-                }
-                $currentItem[$k] += $items
-            } else {
-                $currentItem[$k] = $items
-            }
-            continue
-        }
-    }
-    
-    # Flush last item
-    if ($currentSection -and $inList -and $currentItem.Count -gt 0) {
-        if ($listKey -eq 'pool') { $result.pool += $currentItem }
-        elseif ($listKey -eq 'entries') { $result.entries += $currentItem }
-    }
-    
-    return $result
-}
 
 function Expand-Synonyms {
     param(

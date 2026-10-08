@@ -1,8 +1,8 @@
 # Stack: Pine Script
 
-- Pine v6 or later; `indicator()` or `strategy()` declaration at the top of the script.
+- Pine Script v5+ (`//@version=5` or newer); keep the version directive on line 1.
 - Target Pine Script v5+ (`//@version=5` or newer); keep the version directive on line 1.
-- Write every statement on a single physical line.
+- Keep statements on one line; break only inside indented blocks (`if`/`else`/`for`/`while`/function bodies) or at Pine continuation points (after `,`, `(`).
 - Never break a line inside a ternary chain (`a ? b : c`) or inside a function call's argument list (`plot(`, `request.security(`, `label.new(`, ...) - Pine's continuation rules are fragile at those break points and produce `end of line without line continuation` compile errors.
 - Break lines only where Pine requires them: indented block bodies for `if`, `else`, `for`, `while`, and user-defined functions (Pine is indentation-scoped like Python; use 4 spaces consistently, never mix tabs and spaces).
 - When a single line grows unwieldy, refactor instead of wrapping: extract intermediate variables, or replace a long ternary with an `if`/`else` block.
@@ -10,7 +10,7 @@
 - Existing multi-line Pine code keeps its local convention unless reformatting is explicitly approved.
 - Naming: PascalCase for functions and types, camelCase for variables, UPPER_SNAKE_CASE for constants.
 - Inputs: `input.int`, `input.float`, `input.bool`, `input.string`, `input.color`, `input.timeframe` with explicit `title=` and `tooltip=`.
-- Plots: `plot` only after `indicator()`; `plotshape` for markers; `bgcolor` for context bands.
+- Plots: `plot`/`plotshape`/`bgcolor` after `indicator()` or `strategy()` declaration.
 - Errors: `runtime.error()` for unrecoverable conditions; `assert` only for invariant checks; never swallow `runtime.error`.
 - Performance: no `for` loops over `bar_index` ranges; use built-in functions (`ta.crossover`, `ta.highest`) for O(1) equivalents.
 - Testing: TradingView's built-in strategy tester for backtests; manual visual inspection for indicator behavior.

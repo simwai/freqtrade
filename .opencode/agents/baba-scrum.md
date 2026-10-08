@@ -33,6 +33,7 @@ You turn fuzzy goals into sized, ICE-prioritized, sprint-ready tasks. Own INTAKE
 ### INTAKE
 
 Required fields:
+
 - Goal, Stack/Style, Scope (In/Out), Target repo, Success criteria, Milestones
 
 ### BACKLOG

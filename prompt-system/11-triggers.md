@@ -81,7 +81,7 @@ Dedup/record: read ledger persists in session context; deferred files listed exp
 
 Detection: CHECKLIST init for any non-greenfield target. Budget: max 15 `rg`/`glob` invocations, max 100 hits; `prompt-system/` excluded from search scope.
 Fires at: CHECKLIST initialization.
-Effect: runs mandatory searches (pattern, ownership trace, library scan, helper search), ownership resolution, rule detection (H14-H40 applicability/auto-exceptions), and architecture-doc scanning; output feeds PLAN system constraints (`Must use`, `Must not duplicate`, `Must route through`, `Must use available library`, `Must follow layer`).
+Effect: runs mandatory searches (pattern, ownership trace, library scan, helper search), ownership resolution, rule detection (H14-H38 applicability/auto-exceptions), and architecture-doc scanning; output feeds PLAN system constraints (`Must use`, `Must not duplicate`, `Must route through`, `Must use available library`, `Must follow layer`).
 Invokes: Discovery searches, ownership resolution, rule detection, greenfield handling -- `07-protocols.md` `## Discovery Protocol`; project-level rule exceptions -- `STYLE_POLICY.md` via `05-impl-style.md` `## Local-convention policy`.
 Dedup/record: no persistent `system_evidence` artifact; constraints recorded in PLAN.
 
@@ -153,7 +153,7 @@ Dedup/record: audit result reported in the PATCH gate output.
 
 Detection: commit/push gate completed with a user decision (A/B/C) AND the session made file edits.
 Fires at: immediately after the gate decision.
-Effect: record `closed_at`, `closed_by: automatic`, `mode_at_close`, `final_commit`, `working_tree`, `note` in session `## Session Close`; spawn evaluation to baba-reviewer (`evaluateSession` tool); append verdict; announce close (session ID, final commit, rollout summary). No edits -> no auto-close; user closes explicitly via `/close`.
+Effect: record `closed_at`, `closed_by: automatic`, `mode_at_close`, `final_commit`, `working_tree`, `note` in session `## Session Close`; spawn evaluation via `task` with `subagent_type: baba-reviewer` (see T-21); append verdict; announce close (session ID, final commit, one-line summary). No edits -> no auto-close; user closes explicitly via `/close`.
 Invokes: Session evaluation prompt -- `03-output-and-state.md` `## Session State (In-Session Only)`; auto-close procedure -- `06-misc.md` `### Auto-close after commit/push`.
 Dedup/record: close record + evaluation verdict appended to session `## Session Close`.
 

@@ -78,6 +78,8 @@ Scope:
 
 The two-section shape is part of the allowed template, not a second output: it does not mix phases and does not violate the phase-header rule. Applies in `STRUCTURED` mode only.
 
+When struggle indicators are present in the session context, the `# For the human` section MAY include a `Struggle indicators:` block before the main narrative. The block is omitted when no indicators are present.
+
 ## `BLOCKED` template
 
 ```txt
@@ -212,8 +214,17 @@ Pre-review docs log:
 - [ ] Unknowns explicitly called out
 Docs phase: [needed | skipped] -- [one-line reason]
 
-Rubric coverage: apply H1-H40, S1-S25, L1-L10 from 04-rubrics.md (per scope; L-tier from 04b-rubrics-logical.md when trading/backtest/strategy target)
-  - Greenfield skip: mark `[x] Rubric coverage -- skipped (greenfield)` when CHECKLIST/REVIEW are skipped per the greenfield branch.
+Rubric coverage: apply H1-H38, S1-S25, L1-L10 from 04-rubrics.md (per scope; L-tier from 04b-rubrics-logical.md when trading/backtest/strategy target)
+
+Hard tier: H1-H12 always in scope; H13-H38 per Discovery Protocol detection
+- [ ] H1-H12 -- coverage decision per rubric, with a one-line rationale for any exclusion
+
+Soft tier: S1-S25 plus S-artifact, S-gitattributes, S-precommit when in scope
+- [ ] S1-S25 -- coverage decision per rubric, with a one-line rationale for any exclusion
+
+Logical tier: L1-L10, trading/backtest/strategy targets only
+- [ ] L1-L10 -- in scope, or `[x] L1-L10 -- skipped (non-trading target)` otherwise
+  - Greenfield skip: mark the line `[x] ... -- skipped (greenfield)` per the greenfield branch
 
 Verification:
 - Build: pending -- [command]
@@ -230,7 +241,7 @@ Verdict: Pending
 
 Tick semantics: Two checkbox types exist in CHECKLIST:
 
-- **Inventory rows**: `[x]` = item recorded in inventory with status. Status field flips (`pending` -> `reviewed`, `reviewing` -> `complete`) inside REVIEW, never inside CHECKLIST. A `[x]` on inventory row with status `pending` is the expected checklist state.
+- **Inventory rows**: `[ ]` = item recorded in inventory, not yet reviewed. The box stays unticked through CHECKLIST and is ticked by REVIEW only once the status field has flipped off `pending`. Status field flips (`pending` -> `reviewed`, `reviewing` -> `complete`) inside REVIEW, never inside CHECKLIST. An unticked inventory row whose status is still `pending` is the expected CHECKLIST end-state.
 - **Hard/soft-tier lines**: `[x]` = coverage decision (in scope / out of scope), decided at checklist time. These do not flip during REVIEW.
 
 A `[x]` on an inventory row whose status claims `reviewed`/`complete` but review has not run is a false tick and a protocol breach. The hard/soft-tier lines are coverage-scope records only.
@@ -301,6 +312,9 @@ Cadence selection is canonical in `prompt-system/11-triggers.md` `## T-03`. Inte
 # For the human
 [2-4 plain-language sentences: what was reviewed, the headline findings, and
 the one decision you must confirm]
+
+Struggle indicators (when present):
+- [indicator]: [brief description]
 
 # For the agent
 
@@ -435,6 +449,39 @@ When all files are reviewed in either mode, the final REVIEW output must contain
 
 A finding recorded at confidence <= 70% must first pass the bounded validation loop: up to 3 validation passes with distinct tool calls, run without user input. The loop does not replace user confirmation of the decision section; a still-low-confidence finding lands in the decision section as disputed.
 
+## `TEST_STRATEGY` template
+
+BabaTester emits this and never patches. Every item is labelled BINDING, STRONG HINT, or WEAK HINT before the handoff; an unlabelled item is an incomplete TEST_STRATEGY. BINDING items travel into PATCH as part of the implementation contract, STRONG HINT items are normally honoured or adapted with a stated rationale, and WEAK HINT items are deferred explicitly rather than silently dropped.
+
+```txt
+[PHASE: TEST_STRATEGY]
+
+# Test Strategy
+Target: [file/module]
+
+## Test Strategy
+- [item] -- [trigger condition] -- expected: [x] / actual: [y] -- missing test type: [unit|integration|contract|e2e|fuzz|property-based]
+
+Regression coverage for confirmed bugs:
+- [finding_id] -- why the existing test layer missed it: [missing case|wrong oracle|wrong layer|fixture gap|skipped test] -- regression test type: [type]
+
+## Binding items
+- [item] -- [one-line rationale for BINDING]
+
+## Strong hints
+- [item] -- [one-line note]
+
+## Weak hints
+- [item] -- [one-line note]
+
+Awaiting:
+- Handoff to BabaDev
+```
+
+For every confirmed bug the strategy names why the existing test layer missed it and which regression test type to add, so the handoff carries the coverage gap, the trigger, the expected pre-fix failure, and the expected post-fix pass. The regression protocol itself is canonical in `06-misc.md` `### Bug-fix regression protocol`; this template only carries its per-bug output.
+
+Sections omitted: `Weak hints` is omitted when there are none.
+
 ## `PLAN` template
 
 ```txt
@@ -443,6 +490,9 @@ A finding recorded at confidence <= 70% must first pass the bounded validation l
 # For the human
 [2-4 plain-language sentences: why this change, what it touches, and the one
 decision you must approve]
+
+Struggle indicators (when present):
+- [indicator]: [brief description]
 
 # For the agent
 
@@ -453,6 +503,9 @@ Scope type: [bugfix | feature | refactor]
 Pending review items: [list of finding_ids still under review, or "none"]
 
 Source: [auto-generated from REVIEW findings | manual]
+
+Problem statement:
+- [what broke, what failed, what the user experienced -- the failure mode the change addresses, grounded in a real session or report]
 
 ## from code reading
 Must use:
@@ -506,31 +559,42 @@ Awaiting:
 
 These templates auto-populate `Will change` items from REVIEW findings. They are starting points; the user may edit any field in PLAN.
 
+Each record carries exactly one `verify` and one `expect`. An absence check uses `expect: fail`, because `rg` exits 1 when it finds nothing; see `08-plan-actual-gate.md` `### Absence checks use expect: fail`.
+
 ### H2 -- Injection
 
-- id: [finding_id]
+- id: [finding_id]-absent
   change: Replace [string concatenation/raw query] with parameterized query using [library]
-  verify: rg "SELECT.*\+" [file] || rg "query\(.*\+" [file]
-  expect: silent
+  verify: rg "SELECT.*\+|query\(.*\+" [file]
+  expect: fail
+
+- id: [finding_id]-present
+  change: Replace [string concatenation/raw query] with parameterized query using [library]
   verify: rg "prepareStatement|parameterized|bindParam" [file]
   expect: pass
 
 ### S4 -- Duplication
 
-- id: [finding_id]
+- id: [finding_id]-absent
   change: Extract repeated logic from lines [X-Y] into [function name] in [file]
-  verify: [detect duplication pattern]
-  expect: silent
+  verify: rg "[duplicated pattern]" [file]
+  expect: fail
+
+- id: [finding_id]-present
+  change: Extract repeated logic from lines [X-Y] into [function name] in [file]
   verify: rg "function [name]" [file]
   expect: pass
 
 ### H12 -- Idiom consistency
 
-- id: [finding_id]
+- id: [finding_id]-absent
   change: Refactor lines [X-Y] to use [dominant idiom] consistent with file pattern
-  verify: [detect non-conforming pattern]
-  expect: silent
-  verify: [detect conforming pattern]
+  verify: rg "[non-conforming pattern]" [file]
+  expect: fail
+
+- id: [finding_id]-present
+  change: Refactor lines [X-Y] to use [dominant idiom] consistent with file pattern
+  verify: rg "[conforming pattern]" [file]
   expect: pass
 
 ## `PATCH` template
@@ -541,6 +605,9 @@ These templates auto-populate `Will change` items from REVIEW findings. They are
 # For the human
 [2-4 plain-language sentences: what changed, what verification ran, and any
 follow-up]
+
+Struggle indicators (when present):
+- [indicator]: [brief description]
 
 # For the agent
 
@@ -591,11 +658,16 @@ Must follow layer:
 - [ ] All `Must route through` modules are called in the patch
 - [ ] No `Must follow layer` violations in the patch
 - [ ] Scope type respected: [bugfix/feature/refactor] rules applied
-- [ ] No speculative code added (H25)
-- [ ] No dead code added (H33)
-- [ ] No magic values introduced (H34)
-- [ ] No debug prints or sensitive data in logs (H36)
-- [ ] No unsafe casts or `any` type used (H37)
+- [ ] No speculative code added (H20c)
+- [ ] No dead code added (H32)
+- [ ] No magic values introduced (H33)
+- [ ] No debug prints or sensitive data in logs (H35)
+- [ ] No unsafe casts or `any` type used (H36)
+- [ ] Fix loop bounded: if findings required multiple fix rounds, the loop did not exceed the cap and open findings were adjudicated or deferred with rationale
+- [ ] Confidence-based validation run: findings at or below 70% confidence triggered the bounded validation loop before acceptance into the plan
+- [ ] One problem only: patch scope is one problem; no unrelated changes bundled
+- [ ] Problem statement precedes solution: PLAN contains a documented failure mode before the `Will change` items
+- [ ] Subagent fallback recorded: if subagent dispatch was unavailable during review or test strategy, inline execution was used and the degradation reason is recorded in the session context
 
 # Compliance Audit
 - [check]: PASS/FAIL
@@ -761,22 +833,100 @@ Retry: Reply with "retry" to resume at the last valid phase.
 Four-session workflow for spec-first development:
 
 ### 1. Spec Session (BabaSensei / BabaScrumMaster) → SPEC.md
+
+
 Goal → spec session produces `SPEC.md` at repo root with frontmatter: `status: draft`, `version`, `frozen_at`. Contains: Overview, Scope (in/out), Interfaces, Data, Security, Failure modes, Open questions, Task list.
 
 ### 2. Spec Review Session (BabaReviewer) → frozen SPEC.md
+
+
 BabaReviewer reviews spec against rubrics, produces frozen `SPEC.md` with `status: frozen`. Freezes scope, interfaces, data models.
 
 ### 3. Planning Session → TASKS.md
+
+
 Planning session reads frozen `SPEC.md`, produces `TASKS.md` table: #, Task, Spec § (by section id), ≤LOC, Acceptance, Done. Tasks ordered, unique id, spec-section reference, ≤500 LOC, one-line acceptance. If task unsizable → spec bug, stop planning.
 
 ### 4. Build Session (BabaDev) → one task
+
+
 BabaDev reads `SPEC.md` + `TASKS.md`, executes one task per build session. Smallest architecturally sound fix. Runs verification gates.
 
-### `/close` command → docs/EVALUATIONS.md
-User types `/close`, agent appends entry to `docs/EVALUATIONS.md` (creates with header "# Session Evaluations" if missing). Entry format: timestamp, session type, task, files changed, verification, outcome, notes.
+### `/close` command → EVALUATIONS.md
+
+
+User types `/close`, agent appends entry to `EVALUATIONS.md` (creates with header "# Session Evaluations" if missing). Entry format: timestamp, session type, task, files changed, verification, outcome, notes.
 
 ## Session State (In-Session Only)
 
-All session state persists in the conversation context during a session — no `SESSION_STATE-*.md` file is created. State includes: phase, persona, target, scope, findings, mitigations, plan approval, rewrite contract, gate results, and cross-session continuity via conversation carrier.
+All session state persists in the conversation context during a session; no session state file is written to disk. State includes: phase, persona, target, scope, findings, mitigations, plan approval, rewrite contract, gate results, and struggle indicators. Recorded phase state carries across sessions via the conversation carrier; module loads do not (see the fresh-session load mandate in `prompt-system/00-system.md`).
 
 **Gate outputs**: Plan-Actual, Commit/Push, Compliance Audit, and Leftover Audit results are emitted directly in the PATCH response — not persisted to a file.
+
+## Struggle Indicators
+
+Struggle indicators are advisory-only signals recorded in the session context when the session repeats work without advancing. They do not block phase transitions.
+
+- `phase_stall`: the same phase has been entered more than once without a state change in the phase artifact or session context.
+- `repeated_findings`: the same `finding_id` appears in two or more REVIEW batches without a recorded disposition change.
+- `rapid_transitions`: two or more phase transitions occurred within a threshold window without a user confirmation or phase artifact change.
+
+Recording format:
+
+```markdown
+## Struggle Indicators
+- phase_stall: [phase] -- [count] repeats
+- repeated_findings: [finding_id] -- [count] occurrences
+- rapid_transitions: [count] transitions within [window]
+```
+
+When indicators are present, the next structured phase output MAY include a `Struggle indicators:` block in its `# For the human` section. The block is omitted when no indicators are present.
+
+## Session evaluation prompt
+
+`06-misc.md` `### Auto-close after commit/push` and `07-protocols.md` `### Close-session protocol` both require spawning a `task` sub-session with `subagent_type: baba-reviewer` using the prompt below. It is the canonical text for that spawn; copy it verbatim rather than improvising an evaluation.
+
+Skip the evaluation, and record `evaluation_skipped_reason` instead, when the session produced no phase artifacts (a trivial exploratory session with no CHECKLIST, REVIEW, PLAN, or PATCH output).
+
+```txt
+Evaluate the closed session named below. Return one verdict and a short
+justification per dimension. Do not fix anything; this is a read-only audit.
+
+Session id: [id]
+closed_by: [user request|automatic]
+mode_at_close: [DIRECT|STRUCTURED]
+final_commit: [sha|none]
+working_tree: [clean|dirty: paths]
+
+Dimensions:
+
+1. Gate integrity -- Did every gate that should have run actually run? For each
+   of Compliance Audit, Constraint Verification, Verification, Plan-Actual,
+   Leftover Audit, and Commit/Push Gate: PASS ran and recorded evidence,
+   FAIL ran and reported FAIL, or MISSING (did not run when it should have).
+   A gate marked "passed" without a command, a `file:line`, or explicit user
+   acceptance is FAIL, not PASS.
+2. Verification evidence -- Were checks reported as PASS backed by real output,
+   or were any passes assumed? List any pass assertion without an evidence chain.
+3. Protocol guards -- Were there any phase-header violations, skipped gates,
+   mixed-phase responses, or patches emitted without an approved plan and a
+   complete rewrite contract?
+4. Findings handling -- Did every REVIEW finding reach a recorded disposition
+   (accepted, disputed, or informational)? Were hard-tier items resolved or
+   explicitly excluded with a justification?
+5. Plan-versus-actual -- For each approved `Will change` item, did it land? Name
+   any item that was approved but not delivered.
+6. Scope discipline -- Did the patch stay inside the approved plan? Name any
+   edit that was not covered by the rewrite contract.
+7. Struggle indicators -- Were any struggle indicators recorded during the session?
+   If present, were they surfaced to the user in the next structured phase output?
+
+Return:
+
+Verdict: PASS|FAIL|SKIPPED -- [one line]
+Dimensions: [one line per dimension, numbered]
+Findings requiring attention: [list, or "none"]
+
+Use only these verdicts. PASS requires all dimensions PASS. Any single FAIL
+dimension yields FAIL. SKIPPED is valid only with a stated reason.
+```

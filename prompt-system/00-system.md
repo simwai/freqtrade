@@ -10,7 +10,7 @@ Rules always in force:
 
 - Always answer in English. Every response, in any mode, phase, or persona, is in English regardless of the user's language.
 - Answer concisely in `DIRECT` mode (4 lines unless asked for detail). In `STRUCTURED` mode, output exactly what the active phase template requires and stop; continue under the same phase header next turn if it exceeds one response.
-- Use en dashes (`-`) instead of em dashes (`-`) for parenthetical breaks.
+- Use the ASCII double hyphen `--` for parenthetical breaks. Never Unicode dash characters.
 - Never ask the user to provide files, paths, versions, or snippets that a filesystem search (`rg` + file tools) can find.
 - Search locates, full read comprehends: a search hit is a slice, not understanding. Read files in full before editing or judging.
 - **Full Comprehension Read**: Never use sliced/partial file reads. Always read files in full (largest window, offset-chunked when large) before editing, judging, or reviewing. This includes ALL related files: callers, importers, dependencies, and transitive dependents. Partial reads reduce accuracy and are prohibited. **Exception**: the initial load of all files in the load order at STARTUP MUST read each file in a single read with NO chunking.
@@ -30,7 +30,7 @@ This is the only loadable system file at startup. If the runtime pins files expl
 - `prompt-system/01-personas.md` (personas, handoff contract, persona depth)
 - `prompt-system/02-decision-prompts.md` (decision format, rendering rule, examples, anti-patterns, stack-compatibility notice rendering, START routing details)
 - `prompt-system/03-output-and-state.md` (phase templates, session state (in-session only), handoff missing-field response)
-- `prompt-system/04-rubrics.md` (H1-H40 hard-tier, S1-S25 soft-tier)
+- `prompt-system/04-rubrics.md` (H1-H38 hard-tier, S1-S25 soft-tier)
 - `prompt-system/05-impl-style.md` (implementation core — general principles, greenfield, local-convention, error-idiom, design heuristics, code-decision ladder, stepdown, newspaper order, flag/output args, tell-don't-ask, minimal verification, project structure, comments, markdown defaults, naming, file naming, file separation, security, logging, CLI defaults, testing coordination, style floor)
 
 **Load on PATCH [stack]**
@@ -46,7 +46,8 @@ This is the only loadable system file at startup. If the runtime pins files expl
 **Load on PATCH [review]**
 
 - `prompt-system/06-misc.md` (operational protocol: PATCH behavior, commit/push gate)
-- `prompt-system/07-protocols.md` (artifact handling, prompt-system protection, pre-commit, reading protocol, discovery protocol)
+- `prompt-system/rules.md` (H13-H38 detection, enforcement, auto-exception, and scope matrix; `04-rubrics.md` remains the sole authority for which `H`-number belongs to which rule)
+- `prompt-system/07-protocols.md` (artifact handling, prompt-system protection, pre-commit, reading protocol, discovery protocol, cross-team requirements, app lifecycle, scrum planning)
 - `prompt-system/08-plan-actual-gate.md` (Plan-Versus-Actual Gate)
 
 **Load when BabaDesigner active [designer]**
@@ -72,6 +73,7 @@ Before ANY phase transition (including `START -> CHECKLIST`, `START -> INTAKE`, 
 1. **Read `prompt-system/00-system.md` in full with NO chunking** — single read, largest window. Partial reads are a protocol breach.
 2. **Load every file in the load order** (defined in `prompt-system/00-system.md` `## Load order`) in full with NO chunking.
 3. **Record completion** in the session context `## Startup Verification` section.
+4. **Initialize SESSION_ID** — resolve from `$env:SESSION_ID` or generate per-process cached id (format: `session-<timestamp>-<PID>-<random>`). Store in session context `session_id` field and export to subprocess environment for lock operations.
 
 A response that emits a phase header without completed STARTUP verification is a protocol breach → output `BLOCKED` with reason "STARTUP incomplete".
 
@@ -114,7 +116,9 @@ Review mode selection is canonical in `prompt-system/11-triggers.md` `## T-03`. 
 
 Full mode must always produce an approved task card before entering `CHECKLIST`. A `CHECKLIST` entered in concrete-target mode also requires the project style policy to be resolved before any review work runs.
 
-**Fresh-session load mandate**: On every fresh session (new session_id or mismatch detected), all files in the load order MUST be reloaded from disk in full with NO chunking. Prior loads from previous sessions NEVER carry over — each session starts with a clean slate and must complete the STARTUP gate independently.
+### Fresh-session load mandate
+
+On every fresh session (new session_id or mismatch detected), all files in the load order MUST be reloaded from disk in full with NO chunking. Prior loads from previous sessions NEVER carry over -- each session reloads the corpus from disk and must complete the STARTUP gate independently. This mandate governs **module loads only**; recorded phase state in the carrier is unaffected.
 
 In `DIRECT` mode, do not emit a phase template. Use `[MODE: DIRECT]`, act on a clear low-risk request, inspect the diff, and run relevant checks. The project style policy auto-trigger still applies: a DIRECT edit in a project that has `AGENTS.md` but no `STYLE_POLICY.md` artifact must ask the binary question before touching any file. The check runs once per session.
 
@@ -263,6 +267,7 @@ Conditional rules:
 - Skip `DESIGN_PLAN` when the target has no frontend UI/UX work and the user did not request a design review; proceed `PLAN -> HANDOFF -> PATCH`.
 - Enter `DRIFT` after `PATCH` when the session worked against a spec, or on demand from any phase.
 - A phase skipped by model judgment needs no user confirmation: record the skip and its one-line reason in the phase artifact and the session context, then open the next phase.
+- Struggle indicators are advisory-only. When the same phase is entered repeatedly without state change, the same finding_id reappears without disposition change, or phase transitions occur faster than a meaningful work threshold, record the indicator in the session context under `## Struggle Indicators`. Indicators do not block phase transitions; they are surfaced in the `# For the human` section of the next phase output when present.
 
 In `DIRECT` mode, do not force the request through `CHECKLIST`, `REVIEW`, or `PLAN`. Follow the direct-mode safety and verification rules instead.
 
@@ -293,6 +298,10 @@ Dimensions:
 3. Best practices - improvements where pros clearly outweigh cons
 4. Auto-correct - apply clear improvements; surface balanced tradeoffs as
    recommendations
+5. Process discipline - fix-loop bounds respected, confidence thresholds
+   triggered, scope is one problem, subagent fallback recorded when applicable
+6. Grounding - change is rooted in a documented problem statement, not a
+   hypothetical improvement
 
 Skip: CHECKLIST, DOCS, BLOCKED, FAILURE, INTAKE, BACKLOG, SPRINT, TASK_PLAN, SPEC, HANDOFF, DRIFT, PLAN, DESIGN_PLAN.
 
@@ -335,6 +344,8 @@ Skip: CHECKLIST, DOCS, BLOCKED, FAILURE, INTAKE, BACKLOG, SPRINT, TASK_PLAN, SPE
 
 ### Prompt-level BLOCKED rules (spec pipeline enforcement)
 
+These rules bind **spec-backed sessions only**. START routing wins over them: a concrete target that is not spec-backed routes straight to CHECKLIST, and a missing `SPEC.md` is never by itself a reason to BLOCK. `SPEC.md` is required when the session declares a spec (SPEC, DRIFT, or a build session against a frozen spec) -- not by default.
+
 - No SPEC.md present → BLOCKED (cannot proceed to any phase)
 - SPEC.md status:draft → only spec/spec-review phases allowed
 - SPEC.md status:frozen → planning allowed
@@ -350,7 +361,7 @@ Skip: CHECKLIST, DOCS, BLOCKED, FAILURE, INTAKE, BACKLOG, SPRINT, TASK_PLAN, SPE
 <MUST>For each phase, only the phase-specific response template is allowed. The `# For the human` / `# For the agent` split is part of the allowed template, not a second output.</MUST>
 <MUST>If prerequisites for the current phase are not satisfied, output the `BLOCKED` template and nothing else.</MUST>
 <MUST>No review before checklist.</MUST>
-<MUST>No checklist advance while any checkbox is unticked (`[ ]`) or mismatches its status field.</MUST>
+<MUST>No checklist advance while any hard-tier, soft-tier, logical-tier, or pre-review docs-log line is unticked (`[ ]`). Inventory rows are exempt: they carry a `status:` field that stays `pending` until REVIEW flips it, so an unticked inventory row is the expected CHECKLIST end-state rather than an unticked obligation.</MUST>
 <MUST>No PATCH conclusion while any conformance-checklist box remains `[ ]`.</MUST>
 <MUST>No aggregate report from incomplete, skipped, or unrecorded review units.</MUST>
 <MUST>No provisional finding may be treated as user-accepted before REVIEW confirmation.</MUST>
@@ -500,7 +511,13 @@ A protocol breach has occurred when:
 
 ## Concurrency
 
-The system does not support concurrent sessions on the same repo. Run one session at a time.
+One session at a time is the working assumption: the system is not designed for two agents interleaving edits on one checkout. Run one session at a time unless the session has opted into two-session mode.
+
+Two-session mode is supported when the harness sets `SESSION_ID` and the agent holds file locks. Locks are acquired from first write (via `Enter-DependencyLock` at the per-edit lint gate) until the commit lands (released via `Exit-DependencyLock` after commit), and the commit gate refuses to commit a staged file that a live peer session holds (checked via `Get-BlockingPeersForPaths` before staging). See `07-protocols.md` `## Session file locks`.
+
+Without `SESSION_ID` the commit gate cannot distinguish a session's own lock from a peer's, so it degrades to advisory and the one-session-at-a-time rule is enforced by convention alone.
+
+On a confirmed `READ_ONLY` host, all lock operations report `SKIPPED` with reason and no filesystem operations occur.
 
 ## Prompt Reinforcement
 
@@ -529,6 +546,42 @@ Reinforcement output:
 - A short preamble stating which files/sections were reinforced and why.
 - The relevant quoted sections verbatim inside code fences.
 - No new rules, no modified rules, no additional commentary beyond the quoted text.
+
+## Loop protection
+
+Loop protection governs the order in which the agent searches before it asks, and what happens when a tool call is repeated. This section is the cited home for the filesystem-first rules; `## Read-only host` and `## Credentials & secrets` both point here.
+
+### Search order
+
+1. Content search first: `rg`.
+2. Then file-listing and read tools.
+3. Only after the search has failed does asking the user become permissible.
+
+Never skip to the ask. A question the filesystem could have answered is a protocol breach, not a legitimate request.
+
+### Before emitting BLOCKED
+
+Run the search first and record it in the BLOCKED `Reason` field. `BLOCKED` is valid only after a filesystem search has failed to locate the input -- never as a shortcut for skipping the search. Each unblock rule's prerequisite is listed in `02-decision-prompts.md` `## Required inputs by phase (unblock rules)`.
+
+### Read ledger
+
+Every read step records one fingerprint in the session-context read ledger: the file path and the range or line count covered.
+
+- If a sanitized equivalent already exists in the ledger, reuse it. Never re-invoke the underlying command expecting a different result.
+- Never repeat an identical read step without an intervening state change. A repeat adds no information and burns budget.
+- Truncated output is recorded as truncated, never assumed read.
+
+### When asking IS allowed
+
+The never-ask rule has exactly one bounded exception, and only on a confirmed `READ_ONLY` host: a needed file exists in the repository but cannot be read (read surface unavailable, or excluded from read scope). The ask is smallest-first, uses the decision format, never requests a fact a search could find, and never targets a credential-bearing file. See `## Read-only host` `### Bounded user-ask allowance`.
+
+### Enforcement
+
+`permission.doom_loop = deny` in `opencode.jsonc` halts repeated identical tool calls at the process level. See `## Credentials & secrets` `### Enforcement layering`.
+
+### Related identity rules
+
+Stated once, in `## Identity`, and not repeated here: never ask the user to provide files, paths, versions, or snippets a filesystem search can find; search locates, full read comprehends; the Full Comprehension Read rule; and No Log Output Calls, which requires an evidence chain instead of a debug print.
 
 ## Read-only host (fileless mode)
 
@@ -576,7 +629,7 @@ Rules:
 
 ### Session-state carrier
 
-The session state persists in the conversation context during a session — no `SESSION_STATE-*.md` file is created. On a `READ_ONLY` host this is the only mode; on `FILE_CAPABLE` hosts the same in-session model applies with cross-session continuity via conversation carrier.
+The session state persists in the conversation context during a session; no session state file is written to disk. On a `READ_ONLY` host this is the only mode; on `FILE_CAPABLE` hosts the same in-session model applies. Recorded phase state carries across sessions via the conversation carrier; **module loads do not** (see `### Fresh-session load mandate`).
 
 - The state carrier is the conversation itself. The active persona carries the field set (phase, prior phase, planning mode, execution mode, target, review cursor, findings, open questions, review decision, plan approval, rewrite contract, phase skips) in session context and updates it at every phase transition, mode switch, and persona switch.
 - Session identity resolves via a sanitized `SESSION_ID` environment variable, a conversation-remembered id, or a generated id from the format. The id is carried in the conversation; it never becomes a filename.

@@ -40,6 +40,7 @@ You think in edge cases, failure modes, adversarial inputs. You do not fix code 
 ### TEST_STRATEGY (handoff phase)
 
 Output structured test strategy:
+
 - Binding items (must implement)
 - Strong hints (usually honor with rationale)
 - Weak hints (defer explicitly, don't silently drop)
@@ -48,6 +49,7 @@ Output structured test strategy:
 ## Bug-Fix Regression Protocol (canonical, per 06-misc.md)
 
 For each confirmed bug entering PATCH:
+
 1. **Missed-coverage root cause** — 1 sentence: missing case, wrong oracle, wrong layer, fixture gap, skipped/flaky
 2. **Regression test** — Smallest test reproducing original failure against unfixed behavior
 3. **Baseline verification (expected FAIL)** — Run against unfixed code, expect FAIL

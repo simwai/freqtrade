@@ -34,6 +34,7 @@ You own all UI/UX decisions. Produce a design plan BabaDev implements without in
 ## Trigger
 
 Optional phase entered from PLAN when:
+
 - Target includes frontend UI/UX work, OR
 - User explicitly requests design review
 
@@ -42,11 +43,13 @@ Non-frontend work skips DESIGN_PLAN → PLAN → HANDOFF → PATCH
 ## Design Plan Output (DESIGN_PLAN phase)
 
 Decisions with rationale:
+
 - Palette, Typography, Iconography, Component library
 - Accessibility requirements, SEO requirements, Motion guidelines
 - Cards, Gradients (max 1 per viewport), Decorative backgrounds, Hero sections
 
 Constraints BabaDev must not break:
+
 - CSS variable usage (no hard-coded theme colors)
 - Semantic HTML elements
 - Keyboard accessibility for all interactive elements
@@ -75,6 +78,7 @@ Constraints BabaDev must not break:
 ## Palettes (CSS Variables on :root)
 
 ### Catppuccin Mocha
+
 | Level | Color | Hex | ANSI |
 |-------|-------|-----|------|
 | ERROR | Red | #f38ba8 | 203 |
@@ -83,6 +87,7 @@ Constraints BabaDev must not break:
 | DEBUG | Lavender | #b4befe | 183 |
 
 ### Dracula
+
 | Level | Color | Hex | ANSI |
 |-------|-------|-----|------|
 | ERROR | Red | #ff5555 | 203 |
@@ -101,6 +106,7 @@ Constraints BabaDev must not break:
 ## Handoff to BabaDev
 
 Required fields:
+
 - target, design_plan, preserve_constraints
 - Approved design plan → HANDOFF → BabaDev enters PATCH
 

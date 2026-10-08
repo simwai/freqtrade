@@ -27,6 +27,22 @@ The `expect` field on each `Will change` item is one of:
 
 Any `expect` field that does not match one of the six shapes is recorded as `FAIL -- malformed expect: <field>` and the gate is RED. The plan author cannot pass garbage.
 
+One `Will change` record carries exactly one `verify` and one `expect` pair. A change that needs both an absence check and a presence check is expressed as two records that share the finding id with distinct suffixes (for example `[finding_id]-absent` and `[finding_id]-present`), not as two pairs inside one record.
+
+### Absence checks use `expect: fail`
+
+`silent` is the narrowest value in the vocabulary: it demands exit 0 **and** empty stdout **and** empty stderr. It describes a command that ran successfully and produced nothing, which is not what a search does when it finds nothing.
+
+`rg` exits 0 when it finds a match and exits 1 when it finds none. So `verify: rg "pattern" [file]` with `expect: silent` fails in both states: a match gives exit 0 with non-empty stdout, and no match gives exit 1. An absence check is therefore `expect: fail`:
+
+| Intent                                | verify           | expect        |
+| ------------------------------------- | ---------------- | ------------- |
+| The bad pattern is gone               | `rg "pattern" f` | `fail`        |
+| The good pattern is present            | `rg "good" f`    | `pass`        |
+| The command emits nothing but succeeds | any zero-exit    | `silent`      |
+
+Verify commands must also stay portable across the project's shells. `||` is not a valid operator in Windows PowerShell 5.1, which is the shell this repository's tooling runs under; express alternation inside a single `rg` pattern (`rg "a|b" [file]`) rather than chaining commands.
+
 ### Run semantics
 
 - Run all items in declared order on the working tree (post-staging, pre-commit).
@@ -95,7 +111,7 @@ Record `SKIPPED: plan-actual -- <reason>`, never silently pass:
 
 A `Will change` item is structurally a tautology when its `verify` command exits 0 only when the change has NOT landed, or the `expect` field is the inverse of what the command actually probes. Examples:
 
-- `verify: rg "TODO" newfile -- expect: silent` for a change that adds a TODO literal (exits 1 when landed, 0 when absent; `silent` is a lie).
-- `verify: rg "fix-me" file -- expect: pass` for a change that removes a `fix-me` marker (exits 1 when correctly removed).
+- `verify: rg "TODO" newfile -- expect: silent` for a change that adds a TODO literal. `rg` exits 0 with output once the TODO landed and exits 1 with no output while it is absent; `silent` demands exit 0 *and* no output, so it fails in both states and proves nothing. Use `expect: pass`.
+- `verify: rg "fix-me" file -- expect: pass` for a change that removes a `fix-me` marker (exits 1 when correctly removed, so `pass` can never be reached). Use `expect: fail`.
 
 The gate cannot statically prove a tautology. The PATCH `## Plan-Actual` block makes the digest visible; the retry loop exposes the inversion within 2 cycles; the audit log (`## Plan-Actual History`) gives the user a paper trail.

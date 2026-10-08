@@ -13,3 +13,8 @@
 - Output: `Write-Host` for user-facing messages, `Write-Output` (or implicit) for pipeline data, `Write-Verbose` for diagnostics. Never `Write-Host` for data the caller needs to consume.
 - Modules: `Export-ModuleMember` for explicit public surface; `using module` (not `Import-Module` inline) when the module is a class library.
 - Tests: Pester with `Describe`/`Context`/`It`; `Should -Be` / `Should -Throw` / `Should -Invoke`; mock with `Mock`.
+- Project structure:
+  - `.psd1` manifest + `.psm1` module; `public/` for exported functions, `private/` for helpers
+  - `param()` blocks at the top; `begin`/`process`/`end` for pipeline input
+  - `[CmdletBinding(SupportsShouldProcess)]` + `$PSCmdlet.ShouldProcess()` for state-changing cmdlets
+  - Comment-based help `<# .SYNOPSIS ... #>` for public functions

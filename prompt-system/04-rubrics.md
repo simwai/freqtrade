@@ -1,8 +1,8 @@
 # 04-rubrics
 
-Hard-tier (H1-H12 and H13-H40) and soft-tier (S1-S20) review rubrics. Hard-tier items block the PLAN phase until accepted or excluded with justification in the REVIEW decision section. Soft-tier items are quality concerns; flag and discuss, do not hard-block.
+Hard-tier (H1-H12 and H13-H38) and soft-tier (S1-S25) review rubrics. Hard-tier items block the PLAN phase until accepted or excluded with justification in the REVIEW decision section. Soft-tier items are quality concerns; flag and discuss, do not hard-block.
 
-## Hard tier (H1-H12 and H13-H40) <HIGH_PRIO>
+## Hard tier (H1-H12 and H13-H38) <HIGH_PRIO>
 
 **H1 -- Security: credentials, tokens, secrets in code or logs.** A credential-bearing file (`.env`, `.env.*`, `secrets/`, `*.pem`, `*.key`) read with the read tool, or its raw contents in the transcript, is a confirmed H1 breach.
 
@@ -24,67 +24,68 @@ Hard-tier (H1-H12 and H13-H40) and soft-tier (S1-S20) review rubrics. Hard-tier 
 
 **H10 -- Python type safety (Python only): missing type annotations on function signatures.** Applies to parameters and return type. `Any` requires inline `# pyrefly: ignore` with reason.
 
-**H11 -- Runnable artifact (verdict-gate criterion).** The project must build/compile, start (smoke: boot, or library import/entry-point load), pass the existing functional test suite, and pass a Playwright e2e smoke (navigate to the deployed/preview URL, click through 1-2 critical user flows). Applies once per session/aggregate at verdict time, not per chunk. SKIPPED allowed only with justification recorded in the REVIEW decision section (e.g., no test suite exists, execution environment unavailable, or suite failing on a pre-existing baseline). Do not invent commands. If none exist, record SKIPPED with reason.
+**H11 -- Runnable artifact (verdict-gate criterion).** The project must build/compile, start (smoke: boot, or library import/entry-point load), pass the existing functional test suite, and pass a Playwright e2e smoke (navigate to the deployed/preview URL, click through 1-2 critical user flows). Applies once per aggregate at REVIEW verdict time, not per chunk, and again at the commit gate (T-14) when the session made UI-bearing edits. SKIPPED allowed only with justification recorded in the REVIEW decision section (e.g., no test suite exists, execution environment unavailable, or suite failing on a pre-existing baseline). Do not invent commands. If none exist, record SKIPPED with reason.
 
 **H12 -- Idiom consistency: a change introduces an error-handling or style idiom that conflicts with the dominating pattern of the file or codebase** (e.g., `try/catch` in an exit-code-guard script, Result-wrapping in an exception-style codebase, a new failure idiom for an operation the file already handles). Confirmed when the file's established idiom is evident from uniform usage or an in-code comment. When the imported idiom cannot detect the failure it claims to handle, H9 applies alongside.
 
 **H13 -- Incomplete reading: analysis output emitted without completing the Reading Plan for the current scope.** Applies to any analysis output in any phase (REVIEW findings, PLAN proposals, DOCS judgments, DISCUSS conclusions). The Reading Verification section must show 100% completion. An incomplete Reading Plan produces a BLOCKED response, not analysis. Partial scope requires explicit user approval recorded in the session state before analysis may proceed.
 
-**H14 -- No Duplication: fix introduces logic duplicated from an existing utility/helper/validator.** See `docs/REFERENCE/RULES.md` H14 for detection, auto-exception, and scope. System-triggered: fires when `system_evidence.existing_utilities` contains a utility matching the new code pattern.
+**H14 -- No Duplication: fix introduces logic duplicated from an existing utility/helper/validator.** See `prompt-system/rules.md` H14 for detection, auto-exception, and scope. System-triggered: fires when `system_evidence.existing_utilities` contains a utility matching the new code pattern.
 
-**H15 -- Library-First: fix hand-rolls logic that a maintained library already solves.** See `docs/REFERENCE/RULES.md` H15 for detection, auto-exception, and scope. System-triggered: fires when `system_evidence.available_libraries` contains a library for the problem domain and the hand-rolled code exceeds the threshold.
+**H15 -- Library-First: fix hand-rolls logic that a maintained library already solves.** See `prompt-system/rules.md` H15 for detection, auto-exception, and scope. System-triggered: fires when `system_evidence.available_libraries` contains a library for the problem domain and the hand-rolled code exceeds the threshold.
 
-**H16 -- Ownership Routing: fix bypasses the architectural owner of the concern.** See `docs/REFERENCE/RULES.md` H16 for detection, auto-exception, and scope. System-triggered: fires when the patch does not call the module identified as `pattern_owner` in `system_evidence`.
+**H16 -- Ownership Routing: fix bypasses the architectural owner of the concern.** See `prompt-system/rules.md` H16 for detection, auto-exception, and scope. System-triggered: fires when the patch does not call the module identified as `pattern_owner` in `system_evidence`.
 
-**H17 -- Layer Discipline: fix violates architectural layer boundaries.** See `docs/REFERENCE/RULES.md` H17 for detection, auto-exception, and scope. System-triggered: fires when the target file's layer classification identifies a forbidden pattern in the new code.
+**H17 -- Layer Discipline: fix violates architectural layer boundaries.** See `prompt-system/rules.md` H17 for detection, auto-exception, and scope. System-triggered: fires when the target file's layer classification identifies a forbidden pattern in the new code.
 
-**H18 -- No Single-Use Abstraction: fix creates a new function/class/module with <=1 caller.** See `docs/REFERENCE/RULES.md` H18 for detection, auto-exception, and scope. System-triggered: fires when a new symbol added by the fix has <=1 caller outside its defining file.
+**H18 -- No Single-Use Abstraction: fix creates a new function/class/module with <=1 caller.** See `prompt-system/rules.md` H18 for detection, auto-exception, and scope. System-triggered: fires when a new symbol added by the fix has <=1 caller outside its defining file.
 
-**H19 -- Dominant Idiom Enforcement: fix introduces a new pattern when a dominant pattern exists with high confidence.** See `docs/REFERENCE/RULES.md` H19 for detection, auto-exception, and scope. System-triggered: fires when `system_evidence.dominant_idiom` exists with high confidence and the fix's idiom differs.
+**H19 -- Dominant Idiom Enforcement: fix introduces a new pattern when a dominant pattern exists with high confidence.** See `prompt-system/rules.md` H19 for detection, auto-exception, and scope. System-triggered: fires when `system_evidence.dominant_idiom` exists with high confidence and the fix's idiom differs.
 
-**H20 -- No Over-Engineering: fix creates unnecessary abstraction layers, wrappers, speculative code, or unrequested genericity.** See `docs/REFERENCE/RULES.md` H20 for detection, auto-exception, and scope. System-triggered with sub-checks:
+**H20 -- No Over-Engineering: fix creates unnecessary abstraction layers, wrappers, speculative code, or unrequested genericity.** See `prompt-system/rules.md` H20 for detection, auto-exception, and scope. System-triggered with sub-checks:
+
 - H20a (abstraction layers): abstraction layers added > 1 AND callers < 3
 - H20b (unnecessary wrapper): new wrapper/adapter/delegator with <=1 caller
 - H20c (speculative code): new code contains TODOs without owner, unused parameters, or unreachable branches
 - H20d (unrequested genericity): interface with one implementation, factory for one product, config for values that never change, new dependencies when existing one covers the need
 
-**H21 -- Composition Over Inheritance: fix uses class inheritance when composition is dominant in the layer.** See `docs/REFERENCE/RULES.md` H21 for detection, auto-exception, and scope. System-triggered: fires when composition usage > 60% in the layer AND fix uses `extends`.
+**H21 -- Composition Over Inheritance: fix uses class inheritance when composition is dominant in the layer.** See `prompt-system/rules.md` H21 for detection, auto-exception, and scope. System-triggered: fires when composition usage > 60% in the layer AND fix uses `extends`.
 
-**H22 -- Dependency Injection: fix uses `new` or direct instantiation outside the composition root.** See `docs/REFERENCE/RULES.md` H22 for detection, auto-exception, and scope. System-triggered: fires when target is not the composition root AND contains `new`.
+**H22 -- Dependency Injection: fix uses `new` or direct instantiation outside the composition root.** See `prompt-system/rules.md` H22 for detection, auto-exception, and scope. System-triggered: fires when target is not the composition root AND contains `new`.
 
-**H23 -- Single Source of Truth: fix duplicates config/data that exists in a single source.** See `docs/REFERENCE/RULES.md` H23 for detection, auto-exception, and scope. System-triggered: fires when new code contains literals matching existing config/constant entries.
+**H23 -- Single Source of Truth: fix duplicates config/data that exists in a single source.** See `prompt-system/rules.md` H23 for detection, auto-exception, and scope. System-triggered: fires when new code contains literals matching existing config/constant entries.
 
-**H24 -- Early Returns: fix introduces deep nesting (>3 levels) without early returns.** See `docs/REFERENCE/RULES.md` H24 for detection, auto-exception, and scope. System-triggered: fires when nesting depth > 3 AND no early return exists in the function.
+**H24 -- Early Returns: fix introduces deep nesting (>3 levels) without early returns.** See `prompt-system/rules.md` H24 for detection, auto-exception, and scope. System-triggered: fires when nesting depth > 3 AND no early return exists in the function.
 
-**H25 -- No Manual-Sync Registries: fix creates a registry/mapping that requires manual sync.** See `docs/REFERENCE/RULES.md` H25 for detection, auto-exception, and scope. System-triggered: fires when registry entries do not match discovered items.
+**H25 -- No Manual-Sync Registries: fix creates a registry/mapping that requires manual sync.** See `prompt-system/rules.md` H25 for detection, auto-exception, and scope. System-triggered: fires when registry entries do not match discovered items.
 
-**H26 -- No Over-Engineered Discovery: fix uses dynamic discovery when explicit list is simpler.** See `docs/REFERENCE/RULES.md` H26 for detection, auto-exception, and scope. System-triggered: fires when explicit list has <10 items AND discovery mechanism is >3 lines.
+**H26 -- No Over-Engineered Discovery: fix uses dynamic discovery when explicit list is simpler.** See `prompt-system/rules.md` H26 for detection, auto-exception, and scope. System-triggered: fires when explicit list has <10 items AND discovery mechanism is >3 lines.
 
-**H27 -- Code-Decision Ladder Compliance: fix adds new code when existing utility/library/standard lib already solves it.** See `docs/REFERENCE/RULES.md` H27 for detection, auto-exception, and scope. System-triggered: fires when existing solution with >80% similarity is found.
+**H27 -- Code-Decision Ladder Compliance: fix adds new code when existing utility/library/standard lib already solves it.** See `prompt-system/rules.md` H27 for detection, auto-exception, and scope. System-triggered: fires when existing solution with >80% similarity is found.
 
-**H28 -- Stepdown Rule: fix mixes high-level orchestration with low-level operations without named intermediate.** See `docs/REFERENCE/RULES.md` H28 for detection, auto-exception, and scope. Advisory only.
+**H28 -- Stepdown Rule: fix mixes high-level orchestration with low-level operations without named intermediate.** See `prompt-system/rules.md` H28 for detection, auto-exception, and scope. Advisory only.
 
-**H29 -- Newspaper Order: fix places public function below private helper it calls.** See `docs/REFERENCE/RULES.md` H29 for detection, auto-exception, and scope. Advisory only.
+**H29 -- Newspaper Order: fix places public function below private helper it calls.** See `prompt-system/rules.md` H29 for detection, auto-exception, and scope. Advisory only.
 
-**H30 -- No Flag/Output Arguments: fix introduces boolean flag arguments or mutates output arguments.** See `docs/REFERENCE/RULES.md` H30 for detection, auto-exception, and scope. System-triggered: fires when new function signature contains boolean flag or output argument pattern.
+**H30 -- No Flag/Output Arguments: fix introduces boolean flag arguments or mutates output arguments.** See `prompt-system/rules.md` H30 for detection, auto-exception, and scope. System-triggered: fires when new function signature contains boolean flag or output argument pattern.
 
-**H31 -- Law of Demeter: fix introduces train-wreck chains (a.b.c.d) longer than 1 dot.** See `docs/REFERENCE/RULES.md` H31 for detection, auto-exception, and scope. Advisory only.
+**H31 -- Law of Demeter: fix introduces train-wreck chains (a.b.c.d) longer than 1 dot.** See `prompt-system/rules.md` H31 for detection, auto-exception, and scope. Advisory only.
 
-**H32 -- No Dead Code: fix adds unreachable code or unused exports.** See `docs/REFERENCE/RULES.md` H32 for detection, auto-exception, and scope. System-triggered: fires when new code contains unreachable paths or unused exports.
+**H32 -- No Dead Code: fix adds unreachable code or unused exports.** See `prompt-system/rules.md` H32 for detection, auto-exception, and scope. System-triggered: fires when new code contains unreachable paths or unused exports.
 
-**H33 -- No Magic Values: fix introduces unexplained literals that should be named constants.** See `docs/REFERENCE/RULES.md` H33 for detection, auto-exception, and scope. Advisory only.
+**H33 -- No Magic Values: fix introduces unexplained literals that should be named constants.** See `prompt-system/rules.md` H33 for detection, auto-exception, and scope. Advisory only.
 
-**H34 -- Error Handling Quality: fix swallows exceptions or loses error context.** See `docs/REFERENCE/RULES.md` H34 for detection, auto-exception, and scope. System-triggered: fires when catch block is empty or lacks context.
+**H34 -- Error Handling Quality: fix swallows exceptions or loses error context.** See `prompt-system/rules.md` H34 for detection, auto-exception, and scope. System-triggered: fires when catch block is empty or lacks context.
 
-**H35 -- Logging Quality: fix adds debug prints or exposes sensitive data in logs.** See `docs/REFERENCE/RULES.md` H35 for detection, auto-exception, and scope. System-triggered: fires when debug prints or sensitive data patterns are found in new code.
+**H35 -- Logging Quality: fix adds debug prints or exposes sensitive data in logs.** See `prompt-system/rules.md` H35 for detection, auto-exception, and scope. System-triggered: fires when debug prints or sensitive data patterns are found in new code.
 
-**H36 -- Type Safety (Non-Python): fix uses unsafe casts, `any` type, or `as` without type guard.** See `docs/REFERENCE/RULES.md` H36 for detection, auto-exception, and scope. System-triggered: fires when `any` or unsafe cast patterns are found in new code.
+**H36 -- Type Safety (Non-Python): fix uses unsafe casts, `any` type, or `as` without type guard.** See `prompt-system/rules.md` H36 for detection, auto-exception, and scope. System-triggered: fires when `any` or unsafe cast patterns are found in new code.
 
-**H37 -- No Obvious Performance Issues: fix introduces O(n2) scans, nested loops over same data, or synchronous blocking in async context.** See `docs/REFERENCE/RULES.md` H37 for detection, auto-exception, and scope. Advisory only.
+**H37 -- No Obvious Performance Issues: fix introduces O(n2) scans, nested loops over same data, or synchronous blocking in async context.** See `prompt-system/rules.md` H37 for detection, auto-exception, and scope. Advisory only.
 
-**H38 -- No Multi-Concept Files: fix combines multiple classes, errors, types, interfaces, or schemas into a single file.** See `docs/REFERENCE/RULES.md` H38 for detection, auto-exception, and scope. System-triggered: fires when a file contains multiple distinct concept types.
+**H38 -- No Multi-Concept Files: fix combines multiple classes, errors, types, interfaces, or schemas into a single file.** See `prompt-system/rules.md` H38 for detection, auto-exception, and scope. System-triggered: fires when a file contains multiple distinct concept types.
 
-## Soft tier (S1-S20)
+## Soft tier (S1-S25)
 
 **S1 -- Naming: unclear, misleading, or inconsistent identifiers.**
 
@@ -109,6 +110,8 @@ Hard-tier (H1-H12 and H13-H40) and soft-tier (S1-S20) review rubrics. Hard-tier 
 **S11 -- Type safety: missing type annotations or unsafe casts.** Note: in Python code, S11 is upgraded to H10 for missing type annotations on function signatures (parameters and return types).
 
 **S12 -- Performance: obvious inefficiencies with measurable impact.**
+
+**S13 -- Over-engineering: unrequested abstractions or speculative genericity beyond what the change needs;** includes an interface with one implementation, a factory for one product, config for values that never change, and new dependencies when an existing one covers the need. (See H20 for over-engineering with sub-checks H20a-H20d)
 
 **S14 -- Stepdown rule: a function's body mixes high-level orchestration with low-level operations.** Functions read top-to-bottom and call functions one level of abstraction below them. A function whose first line is a high-level call (`fetchUser()`) and whose next line is a low-level call (`parseJwt(token)`) without a named intermediate is a stepdown violation (Martin, *Clean Code* ch. 3 "One Level of Abstraction per Function" / ch. 11 "The Stepdown Rule").
 

@@ -2,7 +2,7 @@
 
 Detailed rubrics for L1-L10 (Logical Correctness Tier). Loaded when CHECKLIST file inventory contains trading/strategy/backtest/risk/signal modules. Mark L1-L10 as in-scope (`[ ]`) or out-of-scope (`[x] skip`) at checklist time.
 
-## L1 — Mathematical/Financial Invariants
+## L1 -- Mathematical/Financial Invariants
 
 **Violation:** Code violates a mathematical or financial invariant that must always hold.
 
@@ -27,7 +27,7 @@ label = ret.gt(min_ret) & risk.lt(max_mae) & (rr.gt(min_reward_risk) | risk.eq(0
 
 ---
 
-## L2 — Boundary Condition Handling
+## L2 -- Boundary Condition Handling
 
 **Violation:** Missing or incorrect handling of zero, negative, NaN, inf, or empty inputs at domain boundaries.
 
@@ -41,7 +41,7 @@ label = ret.gt(min_ret) & risk.lt(max_mae) & (rr.gt(min_reward_risk) | risk.eq(0
 
 ---
 
-## L3 — State Machine / Protocol Validity
+## L3 -- State Machine / Protocol Validity
 
 **Violation:** Invalid state transitions in order lifecycle, position management, or strategy states.
 
@@ -53,7 +53,7 @@ label = ret.gt(min_ret) & risk.lt(max_mae) & (rr.gt(min_reward_risk) | risk.eq(0
 
 ---
 
-## L4 — Time-Series Integrity
+## L4 -- Time-Series Integrity
 
 **Violation:** Look-ahead bias, survivorship bias, or temporal leakage.
 
@@ -66,7 +66,7 @@ label = ret.gt(min_ret) & risk.lt(max_mae) & (rr.gt(min_reward_risk) | risk.eq(0
 
 ---
 
-## L5 — Position / Portfolio Arithmetic
+## L5 -- Position / Portfolio Arithmetic
 
 **Violation:** Arithmetic that doesn't conserve value or violates accounting identity.
 
@@ -78,7 +78,7 @@ label = ret.gt(min_ret) & risk.lt(max_mae) & (rr.gt(min_reward_risk) | risk.eq(0
 
 ---
 
-## L6 — Statistical Validity
+## L6 -- Statistical Validity
 
 **Violation:** Statistical method applied incorrectly or assumption violated.
 
@@ -95,7 +95,7 @@ label = ret.gt(min_ret) & risk.lt(max_mae) & (rr.gt(min_reward_risk) | risk.eq(0
 
 ---
 
-## L7 — Backtesting Integrity
+## L7 -- Backtesting Integrity
 
 **Violation:** Backtest result not reproducible or inflated by leakage.
 
@@ -111,7 +111,7 @@ label = ret.gt(min_ret) & risk.lt(max_mae) & (rr.gt(min_reward_risk) | risk.eq(0
 
 ---
 
-## L8 — Risk / Position Sizing Logic
+## L8 -- Risk / Position Sizing Logic
 
 **Violation:** Sizing or risk math doesn't conserve capital or violates Kelly/optimal-f.
 
@@ -125,22 +125,22 @@ label = ret.gt(min_ret) & risk.lt(max_mae) & (rr.gt(min_reward_risk) | risk.eq(0
 
 ---
 
-## L9 — Performance Metric Correctness
+## L9 -- Performance Metric Correctness
 
 **Violation:** Metric computed wrong or interpreted incorrectly.
 
 | Metric | Common Bug |
 |---|---|
-| **Sharpe** | `mean(daily_ret) / std(daily_ret) * √252` — but `std` uses `ddof=0` (population) not `ddof=1` (sample) |
+| **Sharpe** | `mean(daily_ret) / std(daily_ret) * √252` -- but `std` uses `ddof=0` (population) not `ddof=1` (sample) |
 | **Sortino** | Downside deviation uses `min(ret, 0)` not `min(ret - MAR, 0)` |
 | **Calmar** | `max_drawdown` computed on equity curve with `expanding().max()` but reset not handled |
-| **Win rate** | `winning_trades / total_trades` — but breakeven trades counted as losers |
-| **Profit factor** | `Σ wins / Σ losses` — but `losses = 0` → `inf` not handled |
+| **Win rate** | `winning_trades / total_trades` -- but breakeven trades counted as losers |
+| **Profit factor** | `Σ wins / Σ losses` -- but `losses = 0` → `inf` not handled |
 | **Annualized return** | `(1 + total_ret)^(252/n) - 1` but `n` = trading days not calendar days |
 
 ---
 
-## L10 — Strategy Logic / State Machine
+## L10 -- Strategy Logic / State Machine
 
 **Violation:** Strategy enters invalid state or generates contradictory signals.
 

@@ -40,10 +40,12 @@ You deliver the smallest architecturally sound fix. Strong defaults, explicit ex
 ### PATCH (execution)
 
 Prerequisites verified:
+
 - Explicit user plan approval
 - Complete rewrite contract (target, preserve, eliminate, forbidden, must-use, must-route, etc.)
 
 Patch rules:
+
 - Complete, runnable patch — no partial rewrites unless scope limited
 - No changes outside approved plan
 - Preserve all must-preserve items exactly
@@ -62,6 +64,7 @@ Patch rules:
 ### Bug-Fix Regression Protocol (per 06-misc.md)
 
 For each confirmed bug:
+
 1. Record missed-coverage root cause (1 sentence)
 2. Add regression test (asserts corrected outcome, not execution alone)
 3. Baseline: run test against unfixed → expect FAIL
@@ -92,6 +95,7 @@ Every claim in PATCH `## Self-Review` verified — any FALSE → return to PLAN
 ### Post-PATCH: DRIFT Auto-Trigger
 
 **MANDATORY**: After successful PATCH verification, if session context has `spec_version != n/a`:
+
 1. Enter DRIFT phase automatically
 2. Compare SPEC.md against implemented code
 3. Report any drift (verified/diverged/orphaned/code-exceeds-spec)

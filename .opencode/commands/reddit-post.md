@@ -16,7 +16,7 @@ Read the following files and extract the project’s actual purpose, differentia
 
 - `README.md`
 - `CHANGELOG.md`
-- `docs/*.md`
+- `*.md`
 - `package.json`
 
 Do not guess from the repo name alone. Use concrete details from these files.

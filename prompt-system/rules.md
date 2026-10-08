@@ -2,6 +2,8 @@
 
 All principles from `05-impl-style.md` (General principles, Design heuristics, Stepdown/Newspaper/Flag args/Law of Demeter) and soft-tier rubrics from `04-rubrics.md`, converted to mechanically enforceable hard-gate rules.
 
+`04-rubrics.md` is the sole authority for rubric identity: the `H`-number and title it assigns to each rule are canonical. This file supplies detection, enforcement, auto-exception, and scope for those same numbers and must never assign a different title to an id. `prompt-system/scripts/test-rubric-id-integrity.ps1` enforces that agreement.
+
 Each rule has:
 
 - **Principle** - the source rule or heuristic
@@ -13,7 +15,7 @@ Each rule has:
 
 ---
 
-## H13 -- Incomplete Reading
+## H13 -- Incomplete reading: analysis output emitted without completing the Reading Plan for the current scope
 
 **Principle:** Analysis must not be emitted without completing the Reading Plan for the current scope.
 
@@ -41,7 +43,7 @@ Each rule has:
 
 ---
 
-## H14 -- No Duplication
+## H14 -- No Duplication: fix introduces logic duplicated from an existing utility/helper/validator
 
 **Principle:** DRY - don't repeat logic that exists elsewhere in the codebase.
 
@@ -70,7 +72,7 @@ Each rule has:
 
 ---
 
-## H15 -- Library-First
+## H15 -- Library-First: fix hand-rolls logic that a maintained library already solves
 
 **Principle:** Use an already-installed dependency before hand-rolling. Code-decision ladder rung 5.
 
@@ -99,7 +101,7 @@ Each rule has:
 
 ---
 
-## H16 -- Ownership Routing
+## H16 -- Ownership Routing: fix bypasses the architectural owner of the concern
 
 **Principle:** Route through the architectural owner of a concern. Don't bypass the module that owns the validation, error handling, or business logic.
 
@@ -129,7 +131,7 @@ Each rule has:
 
 ---
 
-## H17 -- Layer Discipline
+## H17 -- Layer Discipline: fix violates architectural layer boundaries
 
 **Principle:** Respect architectural layer boundaries. Controllers must not contain business logic. Services must not access the database directly.
 
@@ -158,7 +160,7 @@ Each rule has:
 
 ---
 
-## H18 -- No Single-Use Abstraction
+## H18 -- No Single-Use Abstraction: fix creates a new function/class/module with <=1 caller
 
 **Principle:** YAGNI. Don't create abstractions that are used only once. A factory with one product, an interface with one implementation, or a helper called from one place is speculative.
 
@@ -189,7 +191,7 @@ Each rule has:
 
 ---
 
-## H19 -- Dominant Idiom Enforcement
+## H19 -- Dominant Idiom Enforcement: fix introduces a new pattern when a dominant pattern exists with high confidence
 
 **Principle:** Don't introduce a new pattern when a dominant pattern already exists. The fix should follow the established idiom of the file and codebase.
 
@@ -219,7 +221,7 @@ Each rule has:
 
 ---
 
-## H20 -- No Over-Engineering
+## H20 -- No Over-Engineering: fix creates unnecessary abstraction layers, wrappers, speculative code, or unrequested genericity
 
 **Principle:** KISS. Don't create unnecessary abstraction layers. A function that does one thing doesn't need a strategy pattern, a factory, and an interface.
 
@@ -227,11 +229,24 @@ Each rule has:
 
 **Detection:**
 
+Sub-check H20a (abstraction layers):
+
 - System counts abstraction layers added by the fix (new interfaces, base classes, factories, registries)
 - System counts callers of new abstractions
 - If abstraction layers > 1 AND callers < 3: flag
 
-**Enforcement:** Block if fix creates unnecessary abstraction layers. Verification gate checks abstraction depth and caller count; if layers > 1 and callers < 3, gate FAIL.
+Sub-check H20b (unnecessary wrapper):
+
+- System counts callers of new wrapper, adapter, and delegator functions
+- If callers <= 1: flag
+
+Sub-check H20c (speculative code):
+
+- System checks for `TODO` without owner/target
+- System checks for parameters that are never read in the function body
+- System checks for branches that are always false/true (constant conditions)
+
+**Enforcement:** Block if fix creates unnecessary abstraction layers. Verification gate checks abstraction depth and caller count; if layers > 1 and callers < 3, gate FAIL. For H20b, verification gate counts callers; if callers <= 1, gate FAIL. For H20c, verification gate checks for TODOs without owner, unused parameters, and unreachable branches; if found, gate FAIL.
 
 **Auto-exception:**
 
@@ -239,6 +254,10 @@ Each rule has:
 - Abstraction simplifies ≥3 call sites
 - Abstraction is a framework-mandated pattern (e.g., middleware chain)
 - Abstraction is a public API surface with versioning implications
+- Wrapper is a public API surface
+- Wrapper is a test helper
+- Speculative code is marked `TODO` with owner and target
+- Speculative code is a debug log that will be removed before merge (marked `TODO`)
 
 **Scope matrix:**
 
@@ -248,7 +267,7 @@ Each rule has:
 
 ---
 
-## H21 -- Composition Over Inheritance
+## H21 -- Composition Over Inheritance: fix uses class inheritance when composition is dominant in the layer
 
 **Principle:** Prefer composition over class inheritance. Use dependency injection and object composition instead of extending base classes.
 
@@ -277,7 +296,7 @@ Each rule has:
 
 ---
 
-## H22 -- Dependency Injection
+## H22 -- Dependency Injection: fix uses `new` or direct instantiation outside the composition root
 
 **Principle:** Use dependency injection over hidden construction. Don't use `new` outside the composition root.
 
@@ -307,7 +326,7 @@ Each rule has:
 
 ---
 
-## H23 -- Single Source of Truth
+## H23 -- Single Source of Truth: fix duplicates config/data that exists in a single source
 
 **Principle:** Don't duplicate config, constants, or data that exists in a single source. One source of truth; references everywhere else.
 
@@ -336,7 +355,7 @@ Each rule has:
 
 ---
 
-## H24 -- Early Returns
+## H24 -- Early Returns: fix introduces deep nesting (>3 levels) without early returns
 
 **Principle:** Prefer early returns over deep nesting. A function should not have >3 levels of indentation.
 
@@ -365,70 +384,11 @@ Each rule has:
 
 ---
 
-## H25 -- No Unnecessary Abstraction
-
-**Principle:** Don't create abstractions for a single use case. A wrapper that's called once is not an abstraction; it's indirection.
-
-**Hard gate:** H25
-
-**Detection:**
-
-- Overlaps with H17 (single-use abstraction)
-- Specifically targets wrappers, adapters, and delegators with single callers
-- System counts callers of new wrapper/adapter/delegator functions
-
-**Enforcement:** Block if fix creates a wrapper/adapter/delegator with ≤1 caller. Verification gate counts callers; if ≤1, gate FAIL.
-
-**Auto-exception:**
-
-- Wrapper is a public API surface
-- Wrapper simplifies ≥3 call sites
-- Wrapper is a framework-mandated pattern (e.g., React hook wrapper)
-- Wrapper is a test helper
-
-**Scope matrix:**
-
-- bugfix: advisory
-- feature: mandatory
-- refactor: mandatory
-
----
-
-## H26 -- No Speculative Code
-
-**Principle:** Don't include code for concerns not present in the task scope. A parameter that's never read, a branch that's unreachable, or a feature flag for a planned feature is speculative.
-
-**Hard gate:** H26
-
-**Detection:**
-
-- System checks for `TODO` without owner/target
-- System checks for parameters that are never read in the function body
-- System checks for branches that are always false/true (constant conditions)
-- Detection method: `rg` for `TODO` without owner, unreachable code patterns
-
-**Enforcement:** Block if fix includes speculative code. Verification gate checks for TODOs without owner, unused parameters, unreachable branches; if found, gate FAIL.
-
-**Auto-exception:**
-
-- Speculative code is marked `TODO` with owner and target
-- Speculative code is a parameter that enables a planned feature within 30 days
-- Speculative code is a feature flag for A/B testing (documented)
-- Speculative code is a debug log that will be removed before merge (marked `TODO`)
-
-**Scope matrix:**
-
-- bugfix: mandatory
-- feature: mandatory
-- refactor: mandatory
-
----
-
-## H27 -- No Manual-Sync Registries
+## H25 -- No Manual-Sync Registries: fix creates a registry/mapping that requires manual sync
 
 **Principle:** Avoid registries or mappings that require manual sync when dynamic discovery is simpler and safer.
 
-**Hard gate:** H27
+**Hard gate:** H25
 
 **Detection:**
 
@@ -453,11 +413,11 @@ Each rule has:
 
 ---
 
-## H28 -- No Over-Engineered Discovery
+## H26 -- No Over-Engineered Discovery: fix uses dynamic discovery when explicit list is simpler
 
 **Principle:** Keep explicit lists when discovery would add needless complexity or reduce clarity.
 
-**Hard gate:** H28
+**Hard gate:** H26
 
 **Detection:**
 
@@ -472,7 +432,7 @@ Each rule has:
 - Explicit list has >10 items
 - Discovery is a standard library feature
 - Discovery is a framework-mandated pattern
-- Explicit list would require manual sync (H26 takes precedence)
+- Explicit list would require manual sync (H25 takes precedence)
 
 **Scope matrix:**
 
@@ -482,11 +442,11 @@ Each rule has:
 
 ---
 
-## H29 -- Code-Decision Ladder Compliance
+## H27 -- Code-Decision Ladder Compliance: fix adds new code when existing utility/library/standard lib already solves it
 
 **Principle:** Before writing new code, check: does this already exist? Does the standard library do it? Does an installed dependency solve it? Only then write new code.
 
-**Hard gate:** H29
+**Hard gate:** H27
 
 **Detection:**
 
@@ -511,11 +471,11 @@ Each rule has:
 
 ---
 
-## H30 -- Stepdown Rule
+## H28 -- Stepdown Rule: fix mixes high-level orchestration with low-level operations without named intermediate
 
 **Principle:** Functions read top-to-bottom. Each function calls functions one level of abstraction below it. A function whose first line is a high-level call and whose next line is a low-level call without a named intermediate violates the stepdown rule.
 
-**Hard gate:** H30
+**Hard gate:** H28
 
 **Detection:**
 
@@ -541,11 +501,11 @@ Each rule has:
 
 ---
 
-## H31 -- Newspaper Order
+## H29 -- Newspaper Order: fix places public function below private helper it calls
 
 **Principle:** A file reads like a newspaper article: public API first, private details later. A public function should not appear below a private helper it calls.
 
-**Hard gate:** H31
+**Hard gate:** H29
 
 **Detection:**
 
@@ -570,11 +530,11 @@ Each rule has:
 
 ---
 
-## H32 -- No Flag/Output Arguments
+## H30 -- No Flag/Output Arguments: fix introduces boolean flag arguments or mutates output arguments
 
 **Principle:** A function should not take a boolean flag that selects between two behaviors, nor mutate an argument passed by reference instead of returning a value.
 
-**Hard gate:** H32
+**Hard gate:** H30
 
 **Detection:**
 
@@ -599,17 +559,17 @@ Each rule has:
 
 ---
 
-## H33 -- Law of Demeter
+## H31 -- Law of Demeter: fix introduces train-wreck chains (a.b.c.d) longer than 1 dot
 
 **Principle:** A method should not reach through another object to access its parts. A chain of more than one dot (`a.b.c.d`) is a Demeter violation unless it's a fluent builder or DTO.
 
-**Hard gate:** H33
+**Hard gate:** H31
 
 **Detection:**
 
-- System checks new code for dot chains with >2 dots
+- System checks new code for dot chains of two or more dots (`a.b.c`)
 - Exceptions: fluent builder return values, DTO access, standard library chaining
-- Detection method: `rg` for dot chains with >2 dots in new code
+- Detection method: `rg` for dot chains with >=2 dots in new code
 
 **Enforcement:** Block if fix introduces train-wreck method chains. Advisory only - flags in REVIEW, doesn't block.
 
@@ -628,11 +588,11 @@ Each rule has:
 
 ---
 
-## H34 -- No Dead Code
+## H32 -- No Dead Code: fix adds unreachable code or unused exports
 
 **Principle:** Don't add unreachable code or unused exports. Dead code increases maintenance burden and confusion.
 
-**Hard gate:** H34
+**Hard gate:** H32
 
 **Detection:**
 
@@ -658,11 +618,11 @@ Each rule has:
 
 ---
 
-## H35 -- No Magic Values
+## H33 -- No Magic Values: fix introduces unexplained literals that should be named constants
 
 **Principle:** Unexplained literals should be named constants. A magic number like `86400` or a magic string like `"prod"` should have a name.
 
-**Hard gate:** H35
+**Hard gate:** H33
 
 **Detection:**
 
@@ -688,11 +648,11 @@ Each rule has:
 
 ---
 
-## H36 -- Error Handling Quality
+## H34 -- Error Handling Quality: fix swallows exceptions or loses error context
 
 **Principle:** Don't swallow exceptions or lose error context. Every catch block must either re-raise, return a Result, or log with context.
 
-**Hard gate:** H36
+**Hard gate:** H34
 
 **Detection:**
 
@@ -717,11 +677,11 @@ Each rule has:
 
 ---
 
-## H37 -- Logging Quality
+## H35 -- Logging Quality: fix adds debug prints or exposes sensitive data in logs
 
 **Principle:** Don't add debug prints or expose sensitive data in logs. Use semantic logging with appropriate levels.
 
-**Hard gate:** H37
+**Hard gate:** H35
 
 **Detection:**
 
@@ -746,11 +706,11 @@ Each rule has:
 
 ---
 
-## H38 -- Type Safety (Non-Python)
+## H36 -- Type Safety (Non-Python): fix uses unsafe casts, `any` type, or `as` without type guard
 
 **Principle:** Don't use unsafe casts, `any` type, or `as` without type guard. Type safety is a first-class concern.
 
-**Hard gate:** H38
+**Hard gate:** H36
 
 **Detection:**
 
@@ -775,11 +735,11 @@ Each rule has:
 
 ---
 
-## H39 -- No Obvious Performance Issues
+## H37 -- No Obvious Performance Issues: fix introduces O(n2) scans, nested loops over same data, or synchronous blocking in async context
 
 **Principle:** Don't introduce O(n²) scans, nested loops over same data, or synchronous blocking in async context.
 
-**Hard gate:** H39
+**Hard gate:** H37
 
 **Detection:**
 
@@ -806,39 +766,11 @@ Each rule has:
 
 ---
 
-## Rule Reference by Principle
-
-| Principle | Hard Gate | Scope |
-|---|---|---|
-| DRY | H13 | all mandatory |
-| KISS | H19 | feature/refactor mandatory, bugfix advisory |
-| Composition over inheritance | H20 | feature/refactor mandatory, bugfix advisory |
-| Dependency injection | H21 | all mandatory |
-| Single source of truth | H22 | all mandatory |
-| Early returns | H23 | all advisory |
-| YAGNI | H17 | feature/refactor mandatory, bugfix advisory |
-| No manual-sync registries | H26 | refactor mandatory, bugfix/feature advisory |
-| Keep explicit lists when discovery adds complexity | H27 | all advisory |
-| Code-decision ladder | H28 | all mandatory |
-| Stepdown rule | H29 | all advisory |
-| Newspaper order | H30 | all advisory |
-| No flag/output arguments | H31 | all mandatory |
-| Law of Demeter | H32 | all advisory |
-| No dead code | H33 | all mandatory |
-| No magic values | H34 | all advisory |
-| Error handling quality | H35 | all mandatory |
-| Logging quality | H36 | all mandatory |
-| Type safety (non-Python) | H37 | all mandatory |
-| No obvious performance issues | H38 | all advisory |
-| No multi-concept files | H39 | all mandatory |
-
----
-
-## H40 -- No Multi-Concept Files
+## H38 -- No Multi-Concept Files: fix combines multiple classes, errors, types, interfaces, or schemas into a single file
 
 **Principle:** Each distinct concept gets its own file. Do not combine multiple classes, errors, types, interfaces, or schemas into a single file.
 
-**Hard gate:** H40
+**Hard gate:** H38
 
 **Detection:**
 
