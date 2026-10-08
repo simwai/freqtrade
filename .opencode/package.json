@@ -2,10 +2,10 @@
     "dependencies":  {
                          "opencode-vibeguard":  "latest",
                          "@libsql/client":  "^0.4.3",
-                         "memory-worth":  "latest",
+                         "memory-worth":  "file:./plugins/memory-worth",
                          "@opencode-ai/sdk":  "1.18.31",
                          "beautiful-mermaid":  "^1.1.3",
-                         "opencode-pty":  "latest",
+                         "opencode-pty":  "^0.3.6",
                          "@opencode-ai/plugin":  "1.18.31",
                          "opencode-adaptive-thinking":  "latest"
                      },
